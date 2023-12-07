@@ -20,14 +20,23 @@
 # Подготовка
 
 ## Требования
-1. Python 3.12  
+1. **Python 3.12**  
 Убедитесь, что у вас установлена нужная версия Python или активирована в pyenv.
-2. Poetry  
-Зависимости и пакеты управляются через poetry. Убедитесь, что poetry [установлен](https://python-poetry.org/docs/#installing-with-the-official-installer) на вашем компьютере и ознакомьтесь с [документацией](https://python-poetry.org/docs/basic-usage/).
-3. Docker
-4. Файлы requirements  
+
+2. **Poetry**  
+Зависимости и пакеты управляются через poetry. Убедитесь, что poetry [установлен](https://python-poetry.org/docs/#installing-with-the-official-installer) на вашем компьютере и ознакомьтесь с [документацией](https://python-poetry.org/docs/basic-usage/).  
+Установка зависимостей
+```
+poetry install
+```
+Также будет создано виртуальное окружение, если привычнее видеть его в директории проекта, то используйте [настройку](https://python-poetry.org/docs/configuration/#adding-or-updating-a-configuration-setting) `virtualenvs.in-project`  
+
+3. **Docker**
+
+4. **Файлы requirements**  
 Файлы редактировать вручную не нужно. Обновляются через pre-commit хуки (если есть изменение в зависимостях, то список обновится при коммите).
-5. pre-commit хуки  
+
+5. **pre-commit**  
 [Документация](https://pre-commit.com/)  
 При каждом коммите выполняются хуки (автоматизации) перечисленные в .pre-commit-config.yaml. Если не понятно какая ошибка мешает сделать коммит можно запустить хуки вручную и посмотреть ошибки:
 ```shell
