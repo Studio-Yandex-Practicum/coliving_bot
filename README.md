@@ -1,2 +1,73 @@
-# coliving_bot
-Telegram-Бот Коливингов
+# Telegram-Бот Коливингов
+
+# Описание проекта
+
+## Используемый стек
+[![Python][Python-badge]][Python-url]
+[![Django][Django-badge]][Django-url]
+[![DRF][DRF-badge]][DRF-url]
+[![Python-telegram-bot][Python-telegram-bot-badge]][Python-telegram-bot-url]
+[![Postgres][Postgres-badge]][Postgres-url]
+[![Nginx][Nginx-badge]][Nginx-url]
+## Архитектура проекта
+
+| Директория    | Описание                                                |
+|---------------|---------------------------------------------------------|
+| `infra`       | Файлы для запуска с помощью Docker, настройки Nginx     |
+| `src/backend` | Код Django приложения                                   |
+| `src/bot`     | Код бота                                                |
+
+# Подготовка
+
+## Требования
+1. Python 3.12  
+Убедитесь, что у вас установлена нужная версия Python или активирована в pyenv.
+2. Poetry  
+Зависимости и пакеты управляются через poetry. Убедитесь, что poetry [установлен](https://python-poetry.org/docs/#installing-with-the-official-installer) на вашем компьютере и ознакомьтесь с [документацией](https://python-poetry.org/docs/basic-usage/).
+3. Docker
+4. Файлы requirements  
+Файлы редактировать вручную не нужно. Обновляются через pre-commit хуки (если есть изменение в зависимостях, то список обновится при коммите).
+5. pre-commit хуки  
+[Документация](https://pre-commit.com/)  
+При каждом коммите выполняются хуки (автоматизации) перечисленные в .pre-commit-config.yaml. Если не понятно какая ошибка мешает сделать коммит можно запустить хуки вручную и посмотреть ошибки:
+```shell
+pre-commit run --all-files
+```
+
+## Стиль кода
+Придерживаемся [black style](https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html)
+
+## Ветки Git
+1. Создавая новую ветку, наследуйтесь от ветки develop, подхватывайте перед этим последние изменения
+2. Правила именования веток  
+- весь новый функционал — feature/название-функционала  
+- исправление ошибок — fix/название-багфикса
+3. 1 ветка - 1 задача
+
+# Разворачиваем проект локально
+
+<!-- MARKDOWN LINKS & BADGES -->
+
+[Python-url]: https://www.python.org/
+
+[Python-badge]: https://img.shields.io/badge/Python-376f9f?style=for-the-badge&logo=python&logoColor=white
+
+[Django-url]: https://github.com/django/django
+
+[Django-badge]: https://img.shields.io/badge/Django-0c4b33?style=for-the-badge&logo=django&logoColor=white
+
+[DRF-url]: https://github.com/encode/django-rest-framework
+
+[DRF-badge]: https://img.shields.io/badge/DRF-a30000?style=for-the-badge
+
+[Python-telegram-bot-url]: https://github.com/python-telegram-bot/python-telegram-bot
+
+[Python-telegram-bot-badge]: https://img.shields.io/badge/python--telegram--bot-4b8bbe?style=for-the-badge
+
+[Postgres-url]: https://www.postgresql.org/
+
+[Postgres-badge]: https://img.shields.io/badge/postgres-306189?style=for-the-badge&logo=postgresql&logoColor=white
+
+[Nginx-url]: https://nginx.org
+
+[Nginx-badge]: https://img.shields.io/badge/nginx-009900?style=for-the-badge&logo=nginx&logoColor=white
