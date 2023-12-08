@@ -1,6 +1,9 @@
 name: Code style checking
 
-on: pull_request
+on:
+  pull_request:
+    branches:
+      - develop
 
 jobs:
   linter_tests:
