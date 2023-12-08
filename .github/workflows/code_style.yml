@@ -54,7 +54,7 @@ jobs:
       #              run tests
       #----------------------------------------------
       - name: Flake8 checking
-        run: poetry run flake8 --skip-.venv .
+        run: poetry run flake8 .
 
       - name: Isort checking
         run: poetry run isort --check-only --skip-gitignore .
