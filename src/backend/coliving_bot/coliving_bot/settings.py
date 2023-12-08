@@ -1,12 +1,16 @@
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "django-insecure-oog48_ki3y5h9&aock71^ey*p@v7tln)1#=fg4o(#qbbu&bq@u"
+SECRET_KEY = os.getenv("SECRET_KEY")
 
-DEBUG = True
+DEBUG = os.getenv("DEBUG")
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
@@ -51,7 +55,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "coliving_bot.wsgi.application"
 
-USE_SQLITE = True
+USE_SQLITE = os.getenv("USE_SQLITE")
 
 if USE_SQLITE:
     DATABASES = {"default": {
