@@ -1,6 +1,6 @@
 from telegram import Update
 
-from src.bot.bot import create_bot_app
+from bot import create_bot_app
 
 
 def main():
