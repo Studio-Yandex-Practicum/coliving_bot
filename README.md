@@ -55,6 +55,23 @@ pre-commit run --all-files
 
 # Разворачиваем проект локально
 
+Устанавливаем зависимости  
+
+Создаём `.env` файл в корневой директории проекта и заполняем его по образцу `.env.example`  
+
+Переходим в директорию `src/backend/`
+```shell
+cd src/backend/
+```
+Применяем миграции
+```shell
+python manage.py migrate
+```
+Запускаем *development*-сервер *Django*
+```shell
+python manage.py runserver
+```
+
 <!-- MARKDOWN LINKS & BADGES -->
 
 [Python-url]: https://www.python.org/
