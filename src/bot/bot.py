@@ -1,5 +1,4 @@
-from telegram.ext import ApplicationBuilder, Application
-
+from telegram.ext import Application, ApplicationBuilder
 from utils.config import TOKEN
 
 
