@@ -1,7 +1,7 @@
 from telegram import Update
+from utils.logger import configure_logging
 
 from bot import create_bot_app
-from utils.logger import configure_logging
 
 
 def main():
