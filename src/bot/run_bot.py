@@ -1,9 +1,8 @@
 from telegram import Update
-from telegram.ext import ContextTypes, CommandHandler
 
 from bot import create_bot_app
-from utils.logger import configure_logging
 from error_handler.callback_funcs import error_handler
+from utils.logger import configure_logging
 
 
 def main():
