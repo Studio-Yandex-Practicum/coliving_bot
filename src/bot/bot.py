@@ -1,5 +1,6 @@
 from telegram.ext import Application, ApplicationBuilder
-from utils.config import TOKEN
+
+from utils.configs import TOKEN
 
 
 def create_bot_app() -> Application:
