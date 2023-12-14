@@ -1,11 +1,16 @@
 from django.db import models
+from django.core.validators import (
+    MinValueValidator, MaxValueValidator, MaxLengthValidator,
+)
 
-from .constants import NAME_MAX_LEN, ABOUT_MAX_LEN
+from .constants import (
+    IntegerRestrictions, ColivingTypes, GenderRoles, Messages,
+)
 
 
 class UserFromTelegram(models.Model):
     """
-        Объект 'Пользователь'.
+        Объект 'UserFromTelegram'.
     """
 
     telegram_id = models.PositiveIntegerField(
@@ -21,12 +26,18 @@ class UserFromTelegram(models.Model):
 
 class Location(models.Model):
     """
-        Объект 'Местоположение'.
+        Объект 'Location'.
     """
 
     name = models.CharField(
         verbose_name='Имя',
-        max_length=NAME_MAX_LEN,
+        max_length=IntegerRestrictions.LOCATION_NAME,
+        validators=(
+            MaxLengthValidator(
+                IntegerRestrictions.LOCATION_NAME,
+                message=Messages.LOCATION_NAME,
+            ),
+        )
     )
 
     class Meta:
@@ -35,10 +46,13 @@ class Location(models.Model):
         verbose_name_plural = 'Местоположения'
         ordering = ('name',)
 
+    def __str__(self):
+        return self.name
 
-class AbstractProfileColiving(models.Model):
+
+class BaseProfileColiving(models.Model):
     """
-        Общие атрибуты объектов 'Профиль' и 'Коливинг'.
+        Общие атрибуты объектов 'Profile' и 'Coliving'.
     """
 
     location = models.ForeignKey(
@@ -48,7 +62,7 @@ class AbstractProfileColiving(models.Model):
     )
     about = models.TextField(
         verbose_name='Описание',
-        max_length=ABOUT_MAX_LEN,
+        max_length=IntegerRestrictions.ABOUT_TEXT,
     )
     is_visible = models.BooleanField(
         verbose_name='Видимость',
@@ -68,29 +82,72 @@ class AbstractProfileColiving(models.Model):
         default_related_name = '%(class)s'
 
 
-class Profile(AbstractProfileColiving):
+class Profile(BaseProfileColiving):
     """
-        Объект 'Профиль'.
+        Объект 'Profile'.
     """
 
-    class Meta(AbstractProfileColiving.Meta):
+    user = models.OneToOneField(
+        UserFromTelegram,
+        verbose_name='Пользователь Telegram',
+        on_delete=models.CASCADE,
+        related_name='user_profile',
+    )
+    name = models.CharField(
+        verbose_name='Имя пользователя',
+        max_length=IntegerRestrictions.PROFILE_NAME,
+    )
+    sex = models.TextField(
+        verbose_name='Пол',
+        choices=GenderRoles,
+    )
+    age = models.PositiveSmallIntegerField(
+        verbose_name='Возраст',
+        validators=(
+            MinValueValidator(
+                IntegerRestrictions.AGE_MIN,
+                message=Messages.AGE_MIN,
+            ),
+            MaxValueValidator(
+                IntegerRestrictions.AGE_MAX,
+                message=Messages.AGE_MAX,
+            ),
+        )
+    )
+
+    class Meta(BaseProfileColiving.Meta):
 
         verbose_name = 'Профиль'
         verbose_name_plural = 'Профили'
 
 
-class Coliving(AbstractProfileColiving):
+class Coliving(BaseProfileColiving):
     """
-        Объект 'Коливинг'.
+        Объект 'Coliving'.
     """
 
     host = models.ForeignKey(
         UserFromTelegram,
+        verbose_name='Создатель коливинга',
         related_name='colivings',
         on_delete=models.CASCADE,
     )
+    price = models.PositiveIntegerField(
+        verbose_name='Цена',
+        validators=(
+            MinValueValidator(
+                IntegerRestrictions.PRICE_MIN,
+                message=Messages.PRICE_MIN,
+            ),
+        )
+    )
+    room_type = models.TextField(
+        verbose_name='Тип коливинга',
+        choices=ColivingTypes,
+        default=ColivingTypes.DEFAULT,
+    )
 
-    class Meta(AbstractProfileColiving.Meta):
+    class Meta(BaseProfileColiving.Meta):
 
         verbose_name = 'Коливинг'
         verbose_name_plural = 'Коливинги'
