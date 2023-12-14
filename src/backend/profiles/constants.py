@@ -3,24 +3,11 @@ from django.db import models
 
 class ColivingTypes(models.TextChoices):
     """
-        Типы коливинга.
+        Тип коливинга.
     """
 
-    DEFAULT = 'Комната'
-    SLEEPING_PLACE = 'Спальное место'
-
-
-class IntegerRestrictions(models.IntegerChoices):
-    """
-        Числовые ограничения.
-    """
-
-    LOCATION_NAME = 100
-    ABOUT_TEXT = 1000
-    PROFILE_NAME = 30
-    AGE_MIN = 18
-    AGE_MAX = 99
-    PRICE_MIN = 1
+    SEPARATE_ROOM = ('SR', 'Комната')
+    SLEEPING_PLACE = ('SP', 'Спальное место')
 
 
 class GenderRoles(models.TextChoices):
@@ -28,16 +15,20 @@ class GenderRoles(models.TextChoices):
         Гендерная принадлежность.
     """
 
-    MALE = 'Мужчина'
-    FEMALE = 'Женщина'
+    MAN = ('M', 'Мужчина')
+    WOMAN = ('W', 'Женщина')
 
 
-class Messages(models.TextChoices):
+class Restrictions(models.IntegerChoices):
     """
-        Сообщения.
+        Числовые ограничения.
     """
 
-    AGE_MIN = 'Регистрация возможна с 18 лет'
-    AGE_MAX = 'Число не поддерживается'
-    PRICE_MIN = 'Укажите значение больше 0'
-    LOCATION_NAME = 'Имя локации больше 100 символов не поддерживается'
+    LOCATION_NAME_MIN = 2
+    LOCATION_NAME_MAX = 50
+    ABOUT_TEXT = 1000
+    PROFILE_NAME = 30
+    AGE_MIN = 18
+    AGE_MAX = 99
+    PRICE_MIN = 1
+    PRICE_MAX = 100000

@@ -1,11 +1,10 @@
 from django.db import models
 from django.core.validators import (
     MinValueValidator, MaxValueValidator, MaxLengthValidator,
+    MinLengthValidator, RegexValidator,
 )
 
-from .constants import (
-    IntegerRestrictions, ColivingTypes, GenderRoles, Messages,
-)
+from .constants import Restrictions, ColivingTypes, GenderRoles
 
 
 class UserFromTelegram(models.Model):
@@ -21,7 +20,12 @@ class UserFromTelegram(models.Model):
         verbose_name='Соседи',
         on_delete=models.CASCADE,
         related_name='rommates',
+        null=True,
+        blank=True,
     )
+
+    def __str__(self):
+        return str(self.telegram_id)
 
 
 class Location(models.Model):
@@ -29,14 +33,12 @@ class Location(models.Model):
         Объект 'Location'.
     """
 
-    name = models.CharField(
-        verbose_name='Имя',
-        max_length=IntegerRestrictions.LOCATION_NAME,
+    name = models.TextField(
+        verbose_name='Название',
         validators=(
-            MaxLengthValidator(
-                IntegerRestrictions.LOCATION_NAME,
-                message=Messages.LOCATION_NAME,
-            ),
+            MinLengthValidator(Restrictions.LOCATION_NAME_MIN),
+            MaxLengthValidator(Restrictions.LOCATION_NAME_MAX),
+            RegexValidator(regex=r'^[А-Яа-яA-Za-z\s]+$'),
         )
     )
 
@@ -62,7 +64,7 @@ class BaseProfileColiving(models.Model):
     )
     about = models.TextField(
         verbose_name='Описание',
-        max_length=IntegerRestrictions.ABOUT_TEXT,
+        max_length=Restrictions.ABOUT_TEXT,
     )
     is_visible = models.BooleanField(
         verbose_name='Видимость',
@@ -95,7 +97,7 @@ class Profile(BaseProfileColiving):
     )
     name = models.CharField(
         verbose_name='Имя пользователя',
-        max_length=IntegerRestrictions.PROFILE_NAME,
+        max_length=Restrictions.PROFILE_NAME,
     )
     sex = models.TextField(
         verbose_name='Пол',
@@ -104,14 +106,8 @@ class Profile(BaseProfileColiving):
     age = models.PositiveSmallIntegerField(
         verbose_name='Возраст',
         validators=(
-            MinValueValidator(
-                IntegerRestrictions.AGE_MIN,
-                message=Messages.AGE_MIN,
-            ),
-            MaxValueValidator(
-                IntegerRestrictions.AGE_MAX,
-                message=Messages.AGE_MAX,
-            ),
+            MinValueValidator(Restrictions.AGE_MIN),
+            MaxValueValidator(Restrictions.AGE_MAX),
         )
     )
 
@@ -135,16 +131,13 @@ class Coliving(BaseProfileColiving):
     price = models.PositiveIntegerField(
         verbose_name='Цена',
         validators=(
-            MinValueValidator(
-                IntegerRestrictions.PRICE_MIN,
-                message=Messages.PRICE_MIN,
-            ),
+            MinValueValidator(Restrictions.PRICE_MIN),
+            MaxValueValidator(Restrictions.PRICE_MAX),
         )
     )
     room_type = models.TextField(
         verbose_name='Тип коливинга',
         choices=ColivingTypes,
-        default=ColivingTypes.DEFAULT,
     )
 
     class Meta(BaseProfileColiving.Meta):
