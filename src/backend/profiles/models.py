@@ -4,28 +4,9 @@ from django.core.validators import (
     MinLengthValidator, RegexValidator,
 )
 
-from .constants import Restrictions, ColivingTypes, GenderRoles
-
-
-class UserFromTelegram(models.Model):
-    """
-        Объект 'UserFromTelegram'.
-    """
-
-    telegram_id = models.PositiveIntegerField(
-        verbose_name='Идентификатор пользователя Telegram',
-    )
-    residence = models.ForeignKey(
-        'Coliving',
-        verbose_name='Соседи',
-        on_delete=models.CASCADE,
-        related_name='rommates',
-        null=True,
-        blank=True,
-    )
-
-    def __str__(self):
-        return str(self.telegram_id)
+from .constants import (
+    Restrictions, ColivingTypes, GenderRoles, Literals, CityNames,
+)
 
 
 class Location(models.Model):
@@ -35,11 +16,8 @@ class Location(models.Model):
 
     name = models.TextField(
         verbose_name='Название',
-        validators=(
-            MinLengthValidator(Restrictions.LOCATION_NAME_MIN),
-            MaxLengthValidator(Restrictions.LOCATION_NAME_MAX),
-            RegexValidator(regex=r'^[А-Яа-яA-Za-z\s]+$'),
-        )
+        choices=CityNames,
+        unique=True,
     )
 
     class Meta:
@@ -50,6 +28,34 @@ class Location(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class UserFromTelegram(models.Model):
+    """
+        Объект 'UserFromTelegram'.
+    """
+
+    telegram_id = models.PositiveIntegerField(
+        verbose_name='Идентификатор пользователя Telegram',
+        unique=True,
+    )
+    residence = models.ForeignKey(
+        'Coliving',
+        verbose_name='Проживает в коливинге',
+        on_delete=models.SET_NULL,
+        related_name='roommates',
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+        ordering = ('telegram_id',)
+
+    def __str__(self):
+        return str(self.telegram_id)
 
 
 class BaseProfileColiving(models.Model):
@@ -64,14 +70,18 @@ class BaseProfileColiving(models.Model):
     )
     about = models.TextField(
         verbose_name='Описание',
-        max_length=Restrictions.ABOUT_TEXT,
+        max_length=Restrictions.ABOUT_TEST_MAX,
+        blank=True,
+        null=True,
     )
     is_visible = models.BooleanField(
-        verbose_name='Видимость',
+        verbose_name='Отображать при поиске',
+        default=True,
     )
     viewers = models.ManyToManyField(
         UserFromTelegram,
-        verbose_name='Зрители',
+        verbose_name='Просмотры',
+        blank=True,
     )
     created_date = models.DateTimeField(
         verbose_name='Дата создания',
@@ -95,9 +105,16 @@ class Profile(BaseProfileColiving):
         on_delete=models.CASCADE,
         related_name='user_profile',
     )
-    name = models.CharField(
+    name = models.TextField(
         verbose_name='Имя пользователя',
-        max_length=Restrictions.PROFILE_NAME,
+        validators=(
+            MinLengthValidator(Restrictions.PROFILE_NAME_MIN),
+            MaxLengthValidator(Restrictions.PROFILE_NAME_MAX),
+            RegexValidator(
+                regex=Literals.NAME_CHECK,
+                message=Literals.NAME_CHECK_MESSAGE,
+            ),
+        )
     )
     sex = models.TextField(
         verbose_name='Пол',
@@ -115,6 +132,9 @@ class Profile(BaseProfileColiving):
 
         verbose_name = 'Профиль'
         verbose_name_plural = 'Профили'
+
+    def __str__(self):
+        return f'{self.name}, Telegram_id: {self.user}'
 
 
 class Coliving(BaseProfileColiving):
@@ -144,3 +164,6 @@ class Coliving(BaseProfileColiving):
 
         verbose_name = 'Коливинг'
         verbose_name_plural = 'Коливинги'
+
+    def __str__(self):
+        return f'{self.location}, '
