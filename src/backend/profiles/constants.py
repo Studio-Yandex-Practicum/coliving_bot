@@ -36,6 +36,7 @@ class Restrictions(models.IntegerChoices):
     ABOUT_TEST_MAX = 1000
     PROFILE_NAME_MIN = 3
     PROFILE_NAME_MAX = 30
+    PROFILE_NAME_STR = 15
     AGE_MIN = 18
     AGE_MAX = 99
     PRICE_MIN = 1

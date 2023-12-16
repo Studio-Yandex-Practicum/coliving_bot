@@ -137,7 +137,7 @@ class Profile(BaseProfileColiving):
         ordering = ("name", "sex", "location")
 
     def __str__(self):
-        return f"Профиль: {self.name}, {self.user}"
+        return f"Профиль: {self.name[:Restrictions.PROFILE_NAME_STR]}, {self.user}"
 
 
 class Coliving(BaseProfileColiving):
