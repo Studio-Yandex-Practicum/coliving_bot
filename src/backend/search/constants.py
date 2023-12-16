@@ -3,7 +3,7 @@ from django.db import models
 
 class MatchStatuses(models.IntegerChoices):
     """
-    Статусы запросов.
+    Константы (статусы запросов).
     """
 
     is_pending = 0

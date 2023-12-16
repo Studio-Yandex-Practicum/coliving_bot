@@ -36,7 +36,7 @@ class Location(models.Model):
 
 class UserFromTelegram(models.Model):
     """
-    Объект 'UserFromTelegram'.
+    Конфигурация объекта 'UserFromTelegram'.
     """
 
     telegram_id = models.PositiveIntegerField(

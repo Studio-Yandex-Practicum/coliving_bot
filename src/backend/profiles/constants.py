@@ -3,7 +3,7 @@ from django.db import models
 
 class CityNames(models.TextChoices):
     """
-    Возможные локации.
+    Константы (возможные локации).
     """
 
     MSC = ("Москва", "Москва")
@@ -12,7 +12,7 @@ class CityNames(models.TextChoices):
 
 class ColivingTypes(models.TextChoices):
     """
-    Тип коливинга.
+    Константы (тип коливинга).
     """
 
     ROOM = ("Комната", "Комната")
@@ -21,7 +21,7 @@ class ColivingTypes(models.TextChoices):
 
 class GenderRoles(models.TextChoices):
     """
-    Пол.
+    Константы (пол пользователя).
     """
 
     MAN = ("Парень", "Парень")
@@ -30,7 +30,7 @@ class GenderRoles(models.TextChoices):
 
 class Restrictions(models.IntegerChoices):
     """
-    Числовые ограничения.
+    Константы (числовые ограничения).
     """
 
     ABOUT_TEST_MAX = 1000
@@ -45,7 +45,7 @@ class Restrictions(models.IntegerChoices):
 
 class Literals(models.TextChoices):
     """
-    Строковые литералы.
+    Константы (строковые литералы).
     """
 
     NAME_CHECK = r"^[А-Яа-яA-Za-z\s]+$"
