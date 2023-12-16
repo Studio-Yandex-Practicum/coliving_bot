@@ -3,34 +3,34 @@ from django.db import models
 
 class CityNames(models.TextChoices):
     """
-        Возможные локации.
+    Возможные локации.
     """
 
-    MSC = ('Москва', 'Москва')
-    SPB = ('Санкт-Петербург', 'Санкт-Петербург')
+    MSC = ("Москва", "Москва")
+    SPB = ("Санкт-Петербург", "Санкт-Петербург")
 
 
 class ColivingTypes(models.TextChoices):
     """
-        Тип коливинга.
+    Тип коливинга.
     """
 
-    ROOM = ('Комната', 'Комната')
-    PLACE = ('Спальное место', 'Спальное место')
+    ROOM = ("Комната", "Комната")
+    PLACE = ("Спальное место", "Спальное место")
 
 
 class GenderRoles(models.TextChoices):
     """
-        Гендерная принадлежность.
+    Гендерная принадлежность.
     """
 
-    MAN = ('Мужчина', 'Мужчина')
-    WOMAN = ('Женщина', 'Женщина')
+    MAN = ("Мужчина", "Мужчина")
+    WOMAN = ("Женщина", "Женщина")
 
 
 class Restrictions(models.IntegerChoices):
     """
-        Числовые ограничения.
+    Числовые ограничения.
     """
 
     ABOUT_TEST_MAX = 1000
@@ -44,8 +44,8 @@ class Restrictions(models.IntegerChoices):
 
 class Literals(models.TextChoices):
     """
-        Строковые литералы.
+    Строковые литералы.
     """
 
-    NAME_CHECK = r'^[А-Яа-яA-Za-z\s]+$'
-    NAME_CHECK_MESSAGE = 'Числа и спец. символы не поддерживаются'
+    NAME_CHECK = r"^[А-Яа-яA-Za-z\s]+$"
+    NAME_CHECK_MESSAGE = "Числа и спец. символы не поддерживаются"
