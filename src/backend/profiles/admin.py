@@ -40,7 +40,7 @@ class ColivingImagesInline(admin.TabularInline):
 
 class RoommatesInline(admin.TabularInline):
     """
-    Отображение объектов 'UserFromTelegram' на странице коливинга.
+    Отображение объектов 'UserFromTelegram' на странице коливинга (соседи по коливингу).
     """
 
     model = UserFromTelegram
