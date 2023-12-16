@@ -21,11 +21,11 @@ class ColivingTypes(models.TextChoices):
 
 class GenderRoles(models.TextChoices):
     """
-    Гендерная принадлежность.
+    Пол.
     """
 
-    MAN = ("Мужчина", "Мужчина")
-    WOMAN = ("Женщина", "Женщина")
+    MAN = ("Парень", "Парень")
+    WOMAN = ("Девушка", "Девушка")
 
 
 class Restrictions(models.IntegerChoices):
