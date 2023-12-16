@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from .models import Coliving, Profile, Location, UserFromTelegram
+from images.models import ProfileImage, ColivingImage
 
 
 @admin.register(UserFromTelegram)
@@ -21,9 +22,25 @@ class LocationAdmin(admin.ModelAdmin):
     list_display = ('id', 'name')
 
 
+class ProfileImagesInline(admin.TabularInline):
+    """
+        Отображение объектов 'ProfileImage' на странице профиля.
+    """
+
+    model = ProfileImage
+
+
+class ColivingImagesInline(admin.TabularInline):
+    """
+        Отображение объектов 'ColivingImage' на странице коливинга.
+    """
+
+    model = ColivingImage
+
+
 class RoommatesInline(admin.TabularInline):
     """
-        Презентация объектов 'UserFromTelegram' на странице коливинга.
+        Отображение объектов 'UserFromTelegram' на странице коливинга.
     """
 
     model = UserFromTelegram
@@ -39,7 +56,7 @@ class ColivingAdmin(admin.ModelAdmin):
         'id', 'host', 'location', 'price', 'room_type', 'about', 'is_visible',
         'created_date',
     )
-    inlines = (RoommatesInline,)
+    inlines = (RoommatesInline, ColivingImagesInline)
 
 
 @admin.register(Profile)
@@ -52,3 +69,4 @@ class ProfileAdmin(admin.ModelAdmin):
         'id', 'user', 'name', 'sex', 'age', 'location', 'about', 'is_visible',
         'created_date',
     )
+    inlines = (ProfileImagesInline,)

@@ -11,23 +11,22 @@ from .constants import (
 
 class Location(models.Model):
     """
-        Объект 'Location'.
+        Конфигурация объекта 'Location'.
     """
 
     name = models.TextField(
         verbose_name='Название',
         choices=CityNames,
-        unique=True,
     )
 
     class Meta:
 
-        verbose_name = 'Местоположение'
-        verbose_name_plural = 'Местоположения'
+        verbose_name = 'Локация'
+        verbose_name_plural = 'Локации'
         ordering = ('name',)
 
     def __str__(self):
-        return self.name
+        return f'Локация {self.name}'
 
 
 class UserFromTelegram(models.Model):
@@ -38,6 +37,7 @@ class UserFromTelegram(models.Model):
     telegram_id = models.PositiveIntegerField(
         verbose_name='Идентификатор пользователя Telegram',
         unique=True,
+        db_index=True,
     )
     residence = models.ForeignKey(
         'Coliving',
@@ -55,7 +55,7 @@ class UserFromTelegram(models.Model):
         ordering = ('telegram_id',)
 
     def __str__(self):
-        return str(self.telegram_id)
+        return f'Пользователь Telegram id: {self.telegram_id}'
 
 
 class BaseProfileColiving(models.Model):
@@ -96,7 +96,7 @@ class BaseProfileColiving(models.Model):
 
 class Profile(BaseProfileColiving):
     """
-        Объект 'Profile'.
+        Конфигурация объекта 'Profile'.
     """
 
     user = models.OneToOneField(
@@ -134,12 +134,12 @@ class Profile(BaseProfileColiving):
         verbose_name_plural = 'Профили'
 
     def __str__(self):
-        return f'{self.name}, Telegram_id: {self.user}'
+        return f'Профиль пользователя: {self.name}, Telegram_id: {self.user}'
 
 
 class Coliving(BaseProfileColiving):
     """
-        Объект 'Coliving'.
+        Конфигурация объекта 'Coliving'.
     """
 
     host = models.ForeignKey(
@@ -166,4 +166,4 @@ class Coliving(BaseProfileColiving):
         verbose_name_plural = 'Коливинги'
 
     def __str__(self):
-        return f'{self.location}, '
+        return f'Коливинг id: {self.id} из {self.location}'

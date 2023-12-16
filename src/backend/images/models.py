@@ -23,25 +23,25 @@ class BaseImage(models.Model):
 
 class ColivingImage(BaseImage):
     """
-        Объект 'ColivingImage'.
+        Конфигурация объекта 'ColivingImage'.
     """
 
     coliving = models.ForeignKey(Coliving, on_delete=models.CASCADE)
 
     class Meta(BaseImage.Meta):
 
-        verbose_name = 'Изображение коливинга'
-        verbose_name_plural = 'Изображения коливингов'
+        verbose_name = 'Фото коливинга'
+        verbose_name_plural = 'Фото коливингов'
 
 
 class ProfileImage(BaseImage):
     """
-        Объект 'ProfileImage'.
+        Конфигурация объекта 'ProfileImage'.
     """
 
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
 
     class Meta(BaseImage.Meta):
 
-        verbose_name = 'Изображение пользователя'
-        verbose_name_plural = 'Изображения пользователей'
+        verbose_name = 'Фото пользователя'
+        verbose_name_plural = 'Фото пользователей'

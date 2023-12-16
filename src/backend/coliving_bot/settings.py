@@ -21,9 +21,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "profiles",
-    "search",
-    "images",
+    "profiles.apps.ProfilesConfig",
+    "search.apps.SearchConfig",
+    "images.apps.ImagesConfig",
 ]
 
 MIDDLEWARE = [
