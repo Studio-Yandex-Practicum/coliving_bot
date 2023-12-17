@@ -113,8 +113,8 @@ CONFIRM_OR_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
 # Цена
 # Фотография
 
-WHAT_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup(
-    inline_keyboard=[
+WHAT_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
+    button_column=(
         [
             InlineKeyboardButton(
                 text='Заполнить заново',
@@ -133,7 +133,7 @@ WHAT_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup(
                 callback_data='send_photo'
             ),
         ]
-    ]
+    )
 )
 
 # Да, верно

@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from telegram import Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
@@ -6,7 +8,8 @@ from conversations.coliving.keyboards import (CONFIRM_OR_EDIT_PROFILE_KEYBOARD,
                                               LOCATION_KEYBOARD,
                                               ROOM_TYPE_KEYBOARD,
                                               CONFIRMATION_KEYBOARD,
-                                              CANCEL_KEYBOARD)
+                                              CANCEL_KEYBOARD,
+                                              WHAT_EDIT_PROFILE_KEYBOARD,)
 from conversations.coliving.states import ColivingStates as states
 from conversations.coliving.templates import (LOCATION_MOSCOW_BTN_TEXT, LOCATION_SPB_BTN_TEXT,
                                               PRICE_ERR_MSG, PROFILE_DATA)
@@ -150,13 +153,16 @@ async def price(update, context):
 async def photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Сохраняет фото и ."""
     # user = update.message.from_user
+    effective_chat = update.effective_chat
+    path = f'media/{update.effective_chat.id}/photos'
+    Path(path).mkdir(parents=True, exist_ok=True)
     photo_file = await update.message.photo[-1].get_file()
-    await photo_file.download_to_drive('user_photo.jpg')
+    await photo_file.download_to_drive(f'{path}/{effective_chat.first_name}_room_photo.jpg')
     await update.message.reply_text(
         'О, классная квартира. ' '\n'
         'Давай взглянем на то, как выглядит твой коливинг:'
     )
-    await show_coliving_profile(update, context)
+    return await show_coliving_profile(update, context)
 
 
 async def show_coliving_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -177,7 +183,62 @@ async def show_coliving_profile(update: Update, context: ContextTypes.DEFAULT_TY
         parse_mode=ParseMode.HTML,
         reply_markup=CONFIRM_OR_EDIT_PROFILE_KEYBOARD
     )
+    return states.CONFIRMATION
 
+
+async def confirm_or_edit_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Подтверждение или изменение анкеты."""
+    await update.effective_message.edit_reply_markup()
+    call_back = update.callback_query.data
+
+    if call_back == 'edit_profile':
+        await update.effective_message.reply_text(
+        text=f'Ваш ответ: Изменить коливинг профиль'
+    )
+        await update.effective_message.reply_text(
+        text='Что хотите изменить?',
+        reply_markup=WHAT_EDIT_PROFILE_KEYBOARD
+    )
+        return states.EDIT
+
+    if call_back == 'confirm':
+        await update.effective_message.reply_text(
+        text=f'Ваш ответ: Да, подтвердить'
+    )
+        # дописать.
+        # return states.CONFIRMATION
+        pass
+
+
+# async def confirm_or_edit_profile_yes(update: Update, context):
+#     message_text = 'Да, подтвердить'
+#     # context.user_data['room_type'] = message_text
+#     return await _send_yes_or_no(message_text, update)
+
+
+# async def confirm_or_edit_profile_no(update: Update, context):
+#     message_text = 'Изменить коливинг профиль'
+#     # context.user_data['room_type'] = message_text
+#     return await _send_yes_or_no(message_text, update)
+
+
+
+
+# async def _send_yes_or_no(message_text, update):
+#     await update.effective_message.edit_reply_markup()
+#     await update.effective_message.reply_text(
+#         text=f'Ваш ответ: {message_text}'
+#     )
+#     await update.effective_message.reply_text(
+#         text='Что хотите изменить?',
+#         reply_markup=WHAT_EDIT_PROFILE_KEYBOARD,
+#     )
+#     return states.EDIT
+
+
+
+async def what_to_edit(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    pass
 
 
 #     return ConversationHandler.END
