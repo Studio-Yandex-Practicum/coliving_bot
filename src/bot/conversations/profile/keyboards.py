@@ -1,23 +1,22 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-
 from conversations.profile.buttons import (
-    MALE_BUTTON,
+    ABOUT_BUTTON,
+    BACK_BUTTON,
+    EDIT_CANCEL_BUTTON,
+    EDIT_FORM_BUTTON,
+    EDIT_RESUME_BUTTON,
     FEMALE_BUTTON,
+    FILL_AGAIN_BUTTON,
+    HIDE_SEARCH_BUTTON,
+    MALE_BUTTON,
     MSK_BUTTON,
+    NEW_PHOTO_BUTTON,
+    NOT_LOOK_YET_BUTTON,
+    SHOW_SEARCH_BUTTON,
     SPB_BUTTON,
     YES_BUTTON,
-    EDIT_FORM_BUTTON,
     YES_TO_DO_BUTTON,
-    NOT_LOOK_YET_BUTTON,
-    FILL_AGAIN_BUTTON,
-    ABOUT_BUTTON,
-    NEW_PHOTO_BUTTON,
-    EDIT_CANCEL_BUTTON,
-    EDIT_RESUME_BUTTON,
-    SHOW_SEARCH_BUTTON,
-    HIDE_SEARCH_BUTTON,
-    BACK_BUTTON,
 )
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(

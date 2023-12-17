@@ -1,50 +1,46 @@
 import base64
 from copy import deepcopy
-from re import fullmatch
 from pathlib import Path
+from re import fullmatch
 
-from telegram import Update
-from telegram.constants import ParseMode
-from telegram.ext import (
-    ContextTypes,
-    ConversationHandler,
-)
-
-from conversations.profile.states import States
-from internal_requests import mock as api_service
 from conversations.profile import template
-from conversations.profile.template import (
-    AGE_FIELD,
-    SEX_FIELD,
-    NAME_FIELD,
-    LOCATION_FIELD,
-    ABOUT_FIELD,
-    IMAGE_FIELD,
-    IS_VISIBLE_FIELD,
-)
-from conversations.profile.keyboards import (
-    PROFILE_KEYBOARD,
-    LOCATION_KEYBOARD,
-    SEX_KEYBOARD,
-    FORM_SAVED_KEYBOARD,
-    FORM_VISIBLE_KEYBOARD,
-    FORM_EDIT_KEYBOARD,
-    FORM_SAVE_OR_EDIT_KEYBOARD,
-)
 from conversations.profile.buttons import (
+    ABOUT_BUTTON,
+    BACK_BUTTON,
+    EDIT_CANCEL_BUTTON,
+    EDIT_FORM_BUTTON,
+    EDIT_RESUME_BUTTON,
+    FILL_AGAIN_BUTTON,
+    HIDE_SEARCH_BUTTON,
+    NEW_PHOTO_BUTTON,
+    NOT_LOOK_YET_BUTTON,
+    SHOW_SEARCH_BUTTON,
     YES_BUTTON,
     YES_TO_DO_BUTTON,
-    NOT_LOOK_YET_BUTTON,
-    EDIT_FORM_BUTTON,
-    FILL_AGAIN_BUTTON,
-    ABOUT_BUTTON,
-    NEW_PHOTO_BUTTON,
-    EDIT_CANCEL_BUTTON,
-    EDIT_RESUME_BUTTON,
-    SHOW_SEARCH_BUTTON,
-    HIDE_SEARCH_BUTTON,
-    BACK_BUTTON,
 )
+from conversations.profile.keyboards import (
+    FORM_EDIT_KEYBOARD,
+    FORM_SAVE_OR_EDIT_KEYBOARD,
+    FORM_SAVED_KEYBOARD,
+    FORM_VISIBLE_KEYBOARD,
+    LOCATION_KEYBOARD,
+    PROFILE_KEYBOARD,
+    SEX_KEYBOARD,
+)
+from conversations.profile.states import States
+from conversations.profile.template import (
+    ABOUT_FIELD,
+    AGE_FIELD,
+    IMAGE_FIELD,
+    IS_VISIBLE_FIELD,
+    LOCATION_FIELD,
+    NAME_FIELD,
+    SEX_FIELD,
+)
+from internal_requests import mock as api_service
+from telegram import Update
+from telegram.constants import ParseMode
+from telegram.ext import ContextTypes, ConversationHandler
 
 
 async def set_profile_to_context(
