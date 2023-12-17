@@ -3,10 +3,11 @@ from copy import copy
 from pathlib import Path
 from re import fullmatch
 
-from internal_requests import mock as api_service
 from telegram import Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
+
+from internal_requests import mock as api_service
 
 from .buttons import (
     ABOUT_BUTTON,
