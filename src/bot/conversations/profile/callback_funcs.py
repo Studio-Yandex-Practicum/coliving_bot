@@ -2,12 +2,13 @@ import base64
 from copy import copy
 from pathlib import Path
 from re import fullmatch
+
+from internal_requests import mock as api_service
 from telegram import Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
 
-from conversations.profile import template
-from conversations.profile.buttons import (
+from .buttons import (
     ABOUT_BUTTON,
     BACK_BUTTON,
     EDIT_CANCEL_BUTTON,
@@ -21,7 +22,7 @@ from conversations.profile.buttons import (
     YES_BUTTON,
     YES_TO_DO_BUTTON,
 )
-from conversations.profile.keyboards import (
+from .keyboards import (
     FORM_EDIT_KEYBOARD,
     FORM_SAVE_OR_EDIT_KEYBOARD,
     FORM_SAVED_KEYBOARD,
@@ -30,17 +31,48 @@ from conversations.profile.keyboards import (
     PROFILE_KEYBOARD,
     SEX_KEYBOARD,
 )
-from conversations.profile.states import States
-from conversations.profile.template import (
+from .states import States
+from .template import (
     ABOUT_FIELD,
+    ABOUT_MAX_LEN_ERROR_MSG,
     AGE_FIELD,
+    AGE_LENGHT_ERROR_MSG,
+    AGE_TYPE_ERROR_MSG,
+    ASK_ABOUT,
+    ASK_AGE,
+    ASK_AGE_AGAIN,
+    ASK_FORM_VISIBLE,
+    ASK_IS_THAT_RIGHT,
+    ASK_LOCATION,
+    ASK_NAME,
+    ASK_NEW_PHOTO,
+    ASK_PHOTO,
+    ASK_SEX,
+    ASK_WANT_TO_CHANGE,
+    BUTTON_ERROR_MSG,
+    FORM_IS_NOT_VISIBLE,
+    FORM_IS_VISIBLE,
+    FORM_NOT_CHANGED,
+    FORM_SAVED,
     IMAGE_FIELD,
     IS_VISIBLE_FIELD,
     LOCATION_FIELD,
+    LOOK_AT_FORM_FIRST,
+    LOOK_AT_FORM_SECOND,
+    LOOK_AT_FORM_THIRD,
+    MAX_ABOUT_LENGTH,
+    MAX_AGE,
+    MAX_NAME_LENGTH,
+    MIN_AGE,
+    MIN_NAME_LENGTH,
     NAME_FIELD,
+    NAME_LENGHT_ERROR_MSG,
+    NAME_PATTERN,
+    NAME_SYMBOL_ERROR_MSG,
+    PHOTO_ERROR_MESSAGE,
+    PROFILE_DATA,
     SEX_FIELD,
 )
-from internal_requests import mock as api_service
 
 
 async def set_profile_to_context(
@@ -69,7 +101,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         await set_profile_to_context(update, context, profile_info)
         await look_at_profile(update, context, '', PROFILE_KEYBOARD)
         return States.PROFILE
-    await update.effective_message.reply_text(text=template.ASK_AGE)
+    await update.effective_message.reply_text(text=ASK_AGE)
     return States.AGE
 
 
@@ -84,7 +116,7 @@ async def handle_fill_profile(
         callback = update.callback_query.data
     except AttributeError:
         await update.effective_message.reply_text(
-            template.BUTTON_ERROR_MSG,
+            BUTTON_ERROR_MSG,
         )
         return States.PROFILE
     await update.effective_message.reply_text(text=callback)
@@ -92,18 +124,18 @@ async def handle_fill_profile(
     if callback == SHOW_SEARCH_BUTTON:
         context.user_data[IS_VISIBLE_FIELD] = True
         await update.effective_message.reply_text(
-            template.FORM_IS_VISIBLE,
+            FORM_IS_VISIBLE,
         )
         return ConversationHandler.END
     elif callback == HIDE_SEARCH_BUTTON:
         context.user_data[IS_VISIBLE_FIELD] = False
         await update.effective_message.reply_text(
-            template.FORM_IS_NOT_VISIBLE,
+            FORM_IS_NOT_VISIBLE,
         )
         return ConversationHandler.END
     elif callback == EDIT_FORM_BUTTON:
         await update.effective_message.reply_text(
-            template.ASK_WANT_TO_CHANGE,
+            ASK_WANT_TO_CHANGE,
             reply_markup=FORM_EDIT_KEYBOARD,
         )
         return States.EDIT
@@ -123,18 +155,18 @@ async def handle_age(
     try:
         age = int(update.message.text)
     except ValueError:
-        await update.effective_message.reply_text(template.AGE_TYPE_ERROR_MSG)
+        await update.effective_message.reply_text(AGE_TYPE_ERROR_MSG)
         return States.AGE
-    if age < template.MIN_AGE or age > template.MAX_AGE:
+    if age < MIN_AGE or age > MAX_AGE:
         await update.effective_message.reply_text(
-            template.AGE_LENGHT_ERROR_MSG.format(
-                min=template.MIN_AGE, max=template.MAX_AGE
+            AGE_LENGHT_ERROR_MSG.format(
+                min=MIN_AGE, max=MAX_AGE
             )
         )
         return States.AGE
     context.user_data[AGE_FIELD] = age
     await update.effective_message.reply_text(
-        template.ASK_SEX,
+        ASK_SEX,
         reply_markup=SEX_KEYBOARD,
     )
 
@@ -152,14 +184,14 @@ async def handle_sex(
         sex = update.callback_query.data
     except AttributeError:
         await update.effective_message.reply_text(
-            template.BUTTON_ERROR_MSG,
+            BUTTON_ERROR_MSG,
         )
         return States.SEX
     await update.effective_message.reply_text(text=sex)
     await update.effective_message.edit_reply_markup()
     context.user_data[SEX_FIELD] = sex.split()[1].capitalize()
     await update.effective_message.reply_text(
-        template.ASK_NAME,
+        ASK_NAME,
     )
     return States.NAME
 
@@ -172,24 +204,24 @@ async def handle_name(
     Переводит диалог в состояние LOCATION (ввод места проживания).
     """
     name = update.message.text.strip()
-    if not fullmatch(template.NAME_PATTERN, name):
+    if not fullmatch(NAME_PATTERN, name):
         await update.effective_message.reply_text(
-            text=template.NAME_SYMBOL_ERROR_MSG
+            text=NAME_SYMBOL_ERROR_MSG
         )
         return States.NAME
     if (
-        len(name) < template.MIN_NAME_LENGTH
-        or len(name) > template.MAX_NAME_LENGTH
+        len(name) < MIN_NAME_LENGTH
+        or len(name) > MAX_NAME_LENGTH
     ):
         await update.effective_message.reply_text(
-            text=template.NAME_LENGHT_ERROR_MSG.format(
-                min=template.MIN_NAME_LENGTH, max=template.MAX_NAME_LENGTH
+            text=NAME_LENGHT_ERROR_MSG.format(
+                min=MIN_NAME_LENGTH, max=MAX_NAME_LENGTH
             )
         )
         return States.NAME
     context.user_data[NAME_FIELD] = name
     await update.effective_message.reply_text(
-        text=template.ASK_LOCATION,
+        text=ASK_LOCATION,
         reply_markup=LOCATION_KEYBOARD,
     )
     return States.LOCATION
@@ -206,14 +238,14 @@ async def handle_location(
         location = update.callback_query.data
     except AttributeError:
         await update.effective_message.reply_text(
-            template.BUTTON_ERROR_MSG,
+            BUTTON_ERROR_MSG,
         )
         return States.LOCATION
     await update.effective_message.reply_text(text=location)
     await update.effective_message.edit_reply_markup()
     context.user_data[LOCATION_FIELD] = location
     await update.effective_message.reply_text(
-        text=template.ASK_ABOUT,
+        text=ASK_ABOUT,
     )
     return States.ABOUT_YOURSELF
 
@@ -226,15 +258,15 @@ async def handle_about(
     Переводит диалог в состояние PHOTO (фотография пользователя).
     """
     about = update.message.text
-    if len(about) > template.MAX_ABOUT_LENGTH:
+    if len(about) > MAX_ABOUT_LENGTH:
         await update.effective_message.reply_text(
-            text=template.ABOUT_MAX_LEN_ERROR_MSG.format(
-                max=template.MAX_ABOUT_LENGTH
+            text=ABOUT_MAX_LEN_ERROR_MSG.format(
+                max=MAX_ABOUT_LENGTH
             )
         )
         return States.ABOUT_YOURSELF
     context.user_data[ABOUT_FIELD] = about
-    await update.effective_message.reply_text(text=template.ASK_PHOTO)
+    await update.effective_message.reply_text(text=ASK_PHOTO)
 
     return States.PHOTO
 
@@ -258,7 +290,7 @@ async def look_at_profile(
     ask: bool = False,
 ) -> None:
     chat_id = update._effective_chat.id
-    ask_text = copy(template.ASK_IS_THAT_RIGHT)
+    ask_text = copy(ASK_IS_THAT_RIGHT)
     if not ask:
         ask_text = ''
     await context.bot.sendPhoto(
@@ -268,7 +300,7 @@ async def look_at_profile(
         ),
         caption=title
         + '\n'
-        + template.PROFILE_DATA.format(
+        + PROFILE_DATA.format(
             name=context.user_data.get(NAME_FIELD),
             sex=context.user_data.get(SEX_FIELD),
             age=context.user_data.get(AGE_FIELD),
@@ -292,14 +324,14 @@ async def handle_photo(
     """
     if update.message.text:
         await update.effective_message.reply_text(
-            text=template.PHOTO_ERROR_MESSAGE
+            text=PHOTO_ERROR_MESSAGE
         )
         return States.PHOTO
     context.user_data[IMAGE_FIELD] = await encoding_profile_photo(
         update, context, await update.message.photo[-1].get_file()
     )
     await look_at_profile(
-        update, context, template.LOOK_AT_FORM_FIRST, FORM_SAVED_KEYBOARD, True
+        update, context, LOOK_AT_FORM_FIRST, FORM_SAVED_KEYBOARD, True
     )
 
     return States.CONFIRMATION
@@ -316,20 +348,20 @@ async def handle_profile(
         edit = update.callback_query.data
     except AttributeError:
         await update.effective_message.reply_text(
-            template.BUTTON_ERROR_MSG,
+            BUTTON_ERROR_MSG,
         )
         return States.CONFIRMATION
     await update.effective_message.reply_text(text=edit)
     await update.effective_message.edit_reply_markup()
     if edit == EDIT_FORM_BUTTON:
         await update.effective_message.reply_text(
-            text=template.ASK_WANT_TO_CHANGE,
+            text=ASK_WANT_TO_CHANGE,
             reply_markup=FORM_EDIT_KEYBOARD,
         )
         return States.EDIT
     elif edit == YES_BUTTON:
         await update.effective_message.reply_text(
-            text=template.ASK_FORM_VISIBLE,
+            text=ASK_FORM_VISIBLE,
             reply_markup=FORM_VISIBLE_KEYBOARD,
         )
         return States.VISIBLE
@@ -348,7 +380,7 @@ async def handle_visible(
         visible = update.callback_query.data
     except AttributeError:
         await update.effective_message.reply_text(
-            template.BUTTON_ERROR_MSG,
+            BUTTON_ERROR_MSG,
         )
         return States.VISIBLE
     await update.effective_message.reply_text(text=visible)
@@ -373,24 +405,24 @@ async def handle_edit(
         edit = update.callback_query.data
     except AttributeError:
         await update.effective_message.reply_text(
-            template.BUTTON_ERROR_MSG,
+            BUTTON_ERROR_MSG,
         )
         return States.EDIT
     await update.effective_message.reply_text(text=edit)
     await update.effective_message.edit_reply_markup()
     if edit == FILL_AGAIN_BUTTON:
         await update.effective_message.reply_text(
-            text=template.ASK_AGE_AGAIN,
+            text=ASK_AGE_AGAIN,
         )
         return States.AGE
     elif edit == ABOUT_BUTTON:
         await update.effective_message.reply_text(
-            text=template.ASK_ABOUT,
+            text=ASK_ABOUT,
         )
         return States.EDIT_ABOUT_YOURSELF
     elif edit == NEW_PHOTO_BUTTON:
         await update.effective_message.reply_text(
-            text=template.ASK_NEW_PHOTO,
+            text=ASK_NEW_PHOTO,
         )
         return States.EDIT_PHOTO
 
@@ -405,16 +437,16 @@ async def handle_edit_about(
     Переводит диалог в состояние EDIT_CONFIRMATION (анкета верна или нет).
     """
     about = update.message.text
-    if len(about) > template.MAX_ABOUT_LENGTH:
+    if len(about) > MAX_ABOUT_LENGTH:
         await update.effective_message.reply_text(
-            text=template.ABOUT_MAX_LEN_ERROR_MSG
+            text=ABOUT_MAX_LEN_ERROR_MSG
         )
         return States.ABOUT_YOURSELF
     context.user_data[ABOUT_FIELD] = about
     await look_at_profile(
         update,
         context,
-        template.LOOK_AT_FORM_SECOND,
+        LOOK_AT_FORM_SECOND,
         FORM_SAVE_OR_EDIT_KEYBOARD,
         True,
     )
@@ -431,7 +463,7 @@ async def handle_edit_photo(
     """
     if update.message.text:
         await update.effective_message.reply_text(
-            text=template.PHOTO_ERROR_MESSAGE
+            text=PHOTO_ERROR_MESSAGE
         )
         return States.EDIT_PHOTO
     context.user_data[IMAGE_FIELD] = await encoding_profile_photo(
@@ -440,7 +472,7 @@ async def handle_edit_photo(
     await look_at_profile(
         update,
         context,
-        template.LOOK_AT_FORM_THIRD,
+        LOOK_AT_FORM_THIRD,
         FORM_SAVE_OR_EDIT_KEYBOARD,
         True,
     )
@@ -460,7 +492,7 @@ async def handle_edit_confirmation(
         edit = update.callback_query.data
     except AttributeError:
         await update.effective_message.reply_text(
-            template.BUTTON_ERROR_MSG,
+            BUTTON_ERROR_MSG,
         )
         return States.EDIT_CONFIRMATION
     await update.effective_message.reply_text(text=edit)
@@ -470,13 +502,13 @@ async def handle_edit_confirmation(
         return ConversationHandler.END
     elif edit == EDIT_CANCEL_BUTTON:
         await update.effective_message.reply_text(
-            text=template.FORM_NOT_CHANGED,
+            text=FORM_NOT_CHANGED,
         )
         await send_confirmation_request(update, context)
         return ConversationHandler.END
     elif edit == EDIT_RESUME_BUTTON:
         await update.effective_message.reply_text(
-            text=template.ASK_WANT_TO_CHANGE,
+            text=ASK_WANT_TO_CHANGE,
             reply_markup=FORM_EDIT_KEYBOARD,
         )
         return States.EDIT
@@ -492,5 +524,5 @@ async def send_confirmation_request(
     """
     # save to database
     await update.effective_message.reply_text(
-        text=template.FORM_SAVED,
+        text=FORM_SAVED,
     )

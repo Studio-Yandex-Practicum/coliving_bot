@@ -5,7 +5,8 @@ from telegram.ext import (
     MessageHandler,
     filters,
 )
-from conversations.profile.buttons import (
+
+from .buttons import (
     ABOUT_BUTTON,
     BACK_BUTTON,
     EDIT_CANCEL_BUTTON,
@@ -23,7 +24,7 @@ from conversations.profile.buttons import (
     YES_BUTTON,
     YES_TO_DO_BUTTON,
 )
-from conversations.profile.callback_funcs import (
+from .callback_funcs import (
     handle_about,
     handle_age,
     handle_edit,
@@ -39,7 +40,7 @@ from conversations.profile.callback_funcs import (
     handle_visible,
     start,
 )
-from conversations.profile.states import States
+from .states import States
 
 profile_handler: ConversationHandler = ConversationHandler(
     entry_points=[CommandHandler(command='profile', callback=start)],

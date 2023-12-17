@@ -1,5 +1,6 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from conversations.profile.buttons import (
+
+from .buttons import (
     ABOUT_BUTTON,
     BACK_BUTTON,
     EDIT_CANCEL_BUTTON,
