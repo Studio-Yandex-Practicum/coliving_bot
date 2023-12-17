@@ -1,3 +1,4 @@
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from conversations.profile.buttons import (
     ABOUT_BUTTON,
     BACK_BUTTON,
@@ -16,7 +17,6 @@ from conversations.profile.buttons import (
     YES_BUTTON,
     YES_TO_DO_BUTTON,
 )
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(

@@ -1,3 +1,10 @@
+from telegram.ext import (
+    CallbackQueryHandler,
+    CommandHandler,
+    ConversationHandler,
+    MessageHandler,
+    filters,
+)
 from conversations.profile.buttons import (
     ABOUT_BUTTON,
     BACK_BUTTON,
@@ -33,13 +40,6 @@ from conversations.profile.callback_funcs import (
     start,
 )
 from conversations.profile.states import States
-from telegram.ext import (
-    CallbackQueryHandler,
-    CommandHandler,
-    ConversationHandler,
-    MessageHandler,
-    filters,
-)
 
 profile_handler: ConversationHandler = ConversationHandler(
     entry_points=[CommandHandler(command='profile', callback=start)],

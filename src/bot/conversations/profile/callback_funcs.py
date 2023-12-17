@@ -1,7 +1,10 @@
 import base64
-from copy import deepcopy
+from copy import copy
 from pathlib import Path
 from re import fullmatch
+from telegram import Update
+from telegram.constants import ParseMode
+from telegram.ext import ContextTypes, ConversationHandler
 
 from conversations.profile import template
 from conversations.profile.buttons import (
@@ -38,9 +41,6 @@ from conversations.profile.template import (
     SEX_FIELD,
 )
 from internal_requests import mock as api_service
-from telegram import Update
-from telegram.constants import ParseMode
-from telegram.ext import ContextTypes, ConversationHandler
 
 
 async def set_profile_to_context(
@@ -258,7 +258,7 @@ async def look_at_profile(
     ask: bool = False,
 ) -> None:
     chat_id = update._effective_chat.id
-    ask_text = deepcopy(template.ASK_IS_THAT_RIGHT)
+    ask_text = copy(template.ASK_IS_THAT_RIGHT)
     if not ask:
         ask_text = ''
     await context.bot.sendPhoto(
