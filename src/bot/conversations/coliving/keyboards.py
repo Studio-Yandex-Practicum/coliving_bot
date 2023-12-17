@@ -82,26 +82,30 @@ ROOM_TYPE_KEYBOARD = InlineKeyboardMarkup.from_column(
 # Да, верно
 # Изменить коливинг профиль
 
-CONFIRMATION_KEYBOARD = InlineKeyboardMarkup(
-    inline_keyboard=[
+# CONFIRMATION_KEYBOARD = InlineKeyboardMarkup(
+#     inline_keyboard=[
+#         [
+#             InlineKeyboardButton(
+#                 text='Да, верно',
+#                 callback_data='confirm'
+#             ),
+#         ]
+#     ]
+# )
+
+CONFIRM_OR_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
+    button_column=(
         [
             InlineKeyboardButton(
-                text='Да, верно',
+                text='Да, подтвердить',
                 callback_data='confirm'
             ),
-        ]
-    ]
-)
-
-EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
             InlineKeyboardButton(
                 text='Изменить коливинг профиль',
                 callback_data='edit_profile'
             ),
         ]
-    ]
+    )
 )
 
 # Заполнить заново

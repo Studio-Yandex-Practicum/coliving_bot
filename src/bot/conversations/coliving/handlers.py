@@ -1,7 +1,8 @@
 from telegram.ext import (CallbackQueryHandler, CommandHandler,
                           ConversationHandler, filters, MessageHandler)
 
-from .callback_funcs import (select_bed_in_room_type,
+from .callback_funcs import (about_coliving, photo, price,
+                             select_bed_in_room_type,
                              select_moscow_location,
                              select_room_in_apartment_type,
                              select_room_in_house_type,
@@ -39,8 +40,21 @@ acquaintance_handler: ConversationHandler = ConversationHandler(
             ),
         ],
         states.ABOUT_ROOM: [
-
-        ]
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND, about_coliving
+            ),
+        ],
+        states.PRICE: [
+            MessageHandler(
+                #filters.Regex(r'^([0-9]{4})$') & ~filters.COMMAND, price
+                filters.Regex(r'^(\d*)$') & ~filters.COMMAND, price
+            ),
+            MessageHandler(filters.TEXT & ~filters.COMMAND, price),
+        ],
+        states.PHOTO_ROOM: [
+            MessageHandler(
+                filters.PHOTO, photo)
+        ],
     },
     fallbacks=[],
 )
