@@ -1,6 +1,7 @@
 from django.db import models
 from profiles.models import Coliving, Profile
 
+from .utils import images_directory_path
 from .validators import image_size_validator
 
 
@@ -10,12 +11,11 @@ class BaseImage(models.Model):
     """
 
     image = models.ImageField(
-        upload_to="images/", validators=(image_size_validator,)
+        upload_to=images_directory_path, validators=(image_size_validator,)
     )
     file_id = models.TextField(
         null=True,
         blank=True,
-        unique=True,
         db_index=True,
     )
 
@@ -35,6 +35,9 @@ class ColivingImage(BaseImage):
         verbose_name = "Фото коливинга"
         verbose_name_plural = "Фото коливингов"
 
+    def __str__(self):
+        return f"colivings/{self.coliving_id}"
+
 
 class ProfileImage(BaseImage):
     """
@@ -46,3 +49,6 @@ class ProfileImage(BaseImage):
     class Meta(BaseImage.Meta):
         verbose_name = "Фото пользователя"
         verbose_name_plural = "Фото пользователей"
+
+    def __str__(self):
+        return f"profiles/{self.profile_id}"

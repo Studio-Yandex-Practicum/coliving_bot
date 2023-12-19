@@ -7,7 +7,7 @@ from django.core.validators import (
 )
 from django.db import models
 
-from .constants import ColivingTypes, GenderRoles, Literals, Restrictions
+from .constants import ColivingTypes, Literals, Restrictions, Sex
 
 
 class Location(models.Model):
@@ -33,7 +33,7 @@ class UserFromTelegram(models.Model):
     Конфигурация объекта 'UserFromTelegram'.
     """
 
-    telegram_id = models.PositiveIntegerField(
+    telegram_id = models.PositiveBigIntegerField(
         verbose_name="Идентификатор пользователя Telegram",
         unique=True,
         db_index=True,
@@ -64,11 +64,10 @@ class BaseProfileColiving(models.Model):
     location = models.ForeignKey(
         Location,
         verbose_name="Местоположение",
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
     )
     about = models.TextField(
         verbose_name="Описание",
-        max_length=Restrictions.ABOUT_TEST_MAX,
         blank=True,
         null=True,
     )
@@ -115,7 +114,7 @@ class Profile(BaseProfileColiving):
     )
     sex = models.TextField(
         verbose_name="Пол",
-        choices=GenderRoles,
+        choices=Sex,
     )
     age = models.PositiveSmallIntegerField(
         verbose_name="Возраст",

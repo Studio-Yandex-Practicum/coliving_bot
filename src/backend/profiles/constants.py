@@ -10,7 +10,7 @@ class ColivingTypes(models.TextChoices):
     PLACE = ("Спальное место", "Спальное место")
 
 
-class GenderRoles(models.TextChoices):
+class Sex(models.TextChoices):
     """
     Константы (пол пользователя).
     """
@@ -24,7 +24,6 @@ class Restrictions(models.IntegerChoices):
     Константы (числовые ограничения).
     """
 
-    ABOUT_TEST_MAX = 1000
     PROFILE_NAME_MIN = 3
     PROFILE_NAME_MAX = 30
     PROFILE_NAME_STR = 15
