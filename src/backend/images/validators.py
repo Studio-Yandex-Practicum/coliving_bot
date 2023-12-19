@@ -7,6 +7,8 @@ def image_size_validator(value):
     """
     Проверка максимального размера фото.
     """
-    raise ValidationError(
-        Literals.IMAGE_MAX_SIZE_MSG
-    ) if value.size > Restrictions.IMAGE_MAX_SIZE else value
+    if value.size > Restrictions.IMAGE_MAX_SIZE:
+
+        raise ValidationError(Literals.IMAGE_MAX_SIZE_MSG)
+
+    return value
