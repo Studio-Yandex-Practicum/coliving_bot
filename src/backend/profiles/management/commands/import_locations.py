@@ -18,7 +18,7 @@ class Command(BaseCommand):
             path = (
                 os.path.join(settings.BASE_DIR, "fixtures/", "locations.json")
             )
-            locations = json.load(open(path, "r", encoding="windows-1251"))
+            locations = json.load(open(path, "r", encoding="utf8"))
             for location in locations:
                 Location.objects.create(**location['fields'])
             print("Успешно завершено")
