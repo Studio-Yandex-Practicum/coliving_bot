@@ -3,11 +3,10 @@ from copy import copy
 from pathlib import Path
 from re import fullmatch
 
+from internal_requests import mock as api_service
 from telegram import Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
-
-from internal_requests import mock as api_service
 
 from .buttons import (
     ABOUT_BUTTON,
@@ -36,9 +35,8 @@ from .states import States
 from .template import (
     ABOUT_FIELD,
     ABOUT_MAX_LEN_ERROR_MSG,
+    AGE_ERROR_MSG,
     AGE_FIELD,
-    AGE_LENGHT_ERROR_MSG,
-    AGE_TYPE_ERROR_MSG,
     ASK_ABOUT,
     ASK_AGE,
     ASK_AGE_AGAIN,
@@ -74,6 +72,7 @@ from .template import (
     PROFILE_DATA,
     SEX_FIELD,
 )
+from .validators import validate_integer
 
 
 async def set_profile_to_context(
@@ -153,19 +152,17 @@ async def handle_age(
     Обрабатывает введенный пользователем возраст.
     Переводит диалог в состояние SEX (пол пользователя).
     """
-    try:
-        age = int(update.message.text)
-    except ValueError:
-        await update.effective_message.reply_text(AGE_TYPE_ERROR_MSG)
+    age = update.message.text
+    if not await validate_integer(
+        update=update,
+        context=context,
+        value=age,
+        min=MIN_AGE,
+        max=MAX_AGE,
+        message=AGE_ERROR_MSG.format(min=MIN_AGE, max=MAX_AGE),
+    ):
         return States.AGE
-    if age < MIN_AGE or age > MAX_AGE:
-        await update.effective_message.reply_text(
-            AGE_LENGHT_ERROR_MSG.format(
-                min=MIN_AGE, max=MAX_AGE
-            )
-        )
-        return States.AGE
-    context.user_data[AGE_FIELD] = age
+    context.user_data[AGE_FIELD] = int(age)
     await update.effective_message.reply_text(
         ASK_SEX,
         reply_markup=SEX_KEYBOARD,
@@ -206,19 +203,18 @@ async def handle_name(
     """
     name = update.message.text.strip()
     if not fullmatch(NAME_PATTERN, name):
-        await update.effective_message.reply_text(
-            text=NAME_SYMBOL_ERROR_MSG
-        )
+        await update.effective_message.reply_text(text=NAME_SYMBOL_ERROR_MSG)
         return States.NAME
-    if (
-        len(name) < MIN_NAME_LENGTH
-        or len(name) > MAX_NAME_LENGTH
+    if not await validate_integer(
+        update=update,
+        context=context,
+        value=len(name),
+        min=MIN_NAME_LENGTH,
+        max=MAX_NAME_LENGTH,
+        message=NAME_LENGHT_ERROR_MSG.format(
+            min=MIN_NAME_LENGTH, max=MAX_NAME_LENGTH
+        ),
     ):
-        await update.effective_message.reply_text(
-            text=NAME_LENGHT_ERROR_MSG.format(
-                min=MIN_NAME_LENGTH, max=MAX_NAME_LENGTH
-            )
-        )
         return States.NAME
     context.user_data[NAME_FIELD] = name
     await update.effective_message.reply_text(
@@ -259,12 +255,13 @@ async def handle_about(
     Переводит диалог в состояние PHOTO (фотография пользователя).
     """
     about = update.message.text
-    if len(about) > MAX_ABOUT_LENGTH:
-        await update.effective_message.reply_text(
-            text=ABOUT_MAX_LEN_ERROR_MSG.format(
-                max=MAX_ABOUT_LENGTH
-            )
-        )
+    if not await validate_integer(
+        update,
+        context,
+        len(about),
+        max=MAX_ABOUT_LENGTH,
+        message=ABOUT_MAX_LEN_ERROR_MSG.format(max=MAX_ABOUT_LENGTH),
+    ):
         return States.ABOUT_YOURSELF
     context.user_data[ABOUT_FIELD] = about
     await update.effective_message.reply_text(text=ASK_PHOTO)
@@ -324,9 +321,7 @@ async def handle_photo(
     Переводит диалог в состояние CONFIRMATION (анкета верна или нет)
     """
     if update.message.text:
-        await update.effective_message.reply_text(
-            text=PHOTO_ERROR_MESSAGE
-        )
+        await update.effective_message.reply_text(text=PHOTO_ERROR_MESSAGE)
         return States.PHOTO
     context.user_data[IMAGE_FIELD] = await encoding_profile_photo(
         update, context, await update.message.photo[-1].get_file()
@@ -438,10 +433,13 @@ async def handle_edit_about(
     Переводит диалог в состояние EDIT_CONFIRMATION (анкета верна или нет).
     """
     about = update.message.text
-    if len(about) > MAX_ABOUT_LENGTH:
-        await update.effective_message.reply_text(
-            text=ABOUT_MAX_LEN_ERROR_MSG
-        )
+    if not await validate_integer(
+        update,
+        context,
+        len(about),
+        max=MAX_ABOUT_LENGTH,
+        message=ABOUT_MAX_LEN_ERROR_MSG.format(max=MAX_ABOUT_LENGTH),
+    ):
         return States.ABOUT_YOURSELF
     context.user_data[ABOUT_FIELD] = about
     await look_at_profile(
@@ -463,9 +461,7 @@ async def handle_edit_photo(
     Переводит диалог в состояние EDIT_CONFIRMATION (анкета верна или нет).
     """
     if update.message.text:
-        await update.effective_message.reply_text(
-            text=PHOTO_ERROR_MESSAGE
-        )
+        await update.effective_message.reply_text(text=PHOTO_ERROR_MESSAGE)
         return States.EDIT_PHOTO
     context.user_data[IMAGE_FIELD] = await encoding_profile_photo(
         update, context, await update.message.photo[-1].get_file()
