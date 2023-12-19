@@ -1,0 +1,72 @@
+
+photo=(
+    PhotoSize(
+        file_id='AgACAgIAAxkBAAIHLmWAqUyhyqCOwwg1VowY4l2WbOS8AALq1TEb3z4JSPChKGtQfC0gAQADAgADcwADMwQ',
+        file_size=1312,
+        file_unique_id='AQAD6tUxG98-CUh4',
+        height=90,
+        width=90
+    ),
+    PhotoSize(
+        file_id='AgACAgIAAxkBAAIHLmWAqUyhyqCOwwg1VowY4l2WbOS8AALq1TEb3z4JSPChKGtQfC0gAQADAgADbQADMwQ',
+        file_size=9256,
+        file_unique_id='AQAD6tUxG98-CUhy',
+        height=320,
+        width=320
+    ),
+    PhotoSize(
+        file_id='AgACAgIAAxkBAAIHLmWAqUyhyqCOwwg1VowY4l2WbOS8AALq1TEb3z4JSPChKGtQfC0gAQADAgADeAADMwQ',
+        file_size=32052,
+        file_unique_id='AQAD6tUxG98-CUh9',
+        height=800,
+        width=800
+    ),
+    PhotoSize(
+        file_id='AgACAgIAAxkBAAIHLmWAqUyhyqCOwwg1VowY4l2WbOS8AALq1TEb3z4JSPChKGtQfC0gAQADAgADeQADMwQ',
+        file_size=34020,
+        file_unique_id='AQAD6tUxG98-CUh-',
+        height=900,
+        width=900
+    )
+),
+
+
+photo=(
+    PhotoSize(
+        file_id='AgACAgIAAxkBAAIHLWWAqUz7fae_RVa5-2Rp00_bBNaJAALp1TEb3z4JSLG--_Wl52-UAQADAgADcwADMwQ',
+        file_size=1075,
+        file_unique_id='AQAD6dUxG98-CUh4',
+        height=70,
+        width=90
+    ),
+    PhotoSize(
+        file_id='AgACAgIAAxkBAAIHLWWAqUz7fae_RVa5-2Rp00_bBNaJAALp1TEb3z4JSLG--_Wl52-UAQADAgADbQADMwQ',
+        file_size=6588,
+        file_unique_id='AQAD6dUxG98-CUhy',
+        height=248,
+        width=320
+    ),
+    PhotoSize(
+        file_id='AgACAgIAAxkBAAIHLWWAqUz7fae_RVa5-2Rp00_bBNaJAALp1TEb3z4JSLG--_Wl52-UAQADAgADeAADMwQ',
+        file_size=21599,
+        file_unique_id='AQAD6dUxG98-CUh9',
+        height=621,
+        width=800
+    ),
+    PhotoSize(
+    file_id='AgACAgIAAxkBAAIHLWWAqUz7fae_RVa5-2Rp00_bBNaJAALp1TEb3z4JSLG--_Wl52-UAQADAgADeQADMwQ',
+    file_size=21638,
+    file_unique_id='AQAD6dUxG98-CUh-',
+    height=931,
+    width=1200
+    ),
+)
+
+
+
+File(
+    file_id='AgACAgIAAxkBAAIIU2WAuB8g0meQTtiT7VlP38v3zXvYAALq1TEb3z4JSPChKGtQfC0gAQADAgADeQADMwQ',
+    file_path='https://api.telegram.org/file/bot6797097773:AAErxwXr2MNuWwkr6rhPcVmIqTdoPcKXbQk/photos/file_15.jpg',
+    file_size=34020,
+    file_unique_id='AQAD6tUxG98-CUh-'
+)

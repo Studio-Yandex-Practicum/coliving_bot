@@ -38,3 +38,9 @@ async def get_user_coliving_status(telegram_id: int) -> UserProfile:
         is_сoliving=False
         # is_сoliving=True
     )
+
+# async def confirm_mentor_registration(telegram_id: int) -> Response:
+#     """Запрос, подтверждающий учетную запись профдизайнера."""
+#     endpoint_urn = f"mentors/{telegram_id}/confirm/"
+#     response = await _post_request(dict(), endpoint_urn)
+#     return response

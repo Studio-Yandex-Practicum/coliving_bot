@@ -136,6 +136,26 @@ WHAT_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     )
 )
 
+
+
+IS_VISIBLE_OR_NOT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
+    button_column=(
+        [
+            InlineKeyboardButton(
+                text='Показать в поиске',
+                callback_data='show'
+            ),
+            InlineKeyboardButton(
+                text='Скрыть из поиска',
+                callback_data='hide'
+            ),
+        ]
+    )
+)
+
+
+
+
 # Да, верно
 # Отменить редактирование
 # Продолжить редактирование

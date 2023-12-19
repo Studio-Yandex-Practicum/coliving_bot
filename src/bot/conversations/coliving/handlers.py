@@ -3,9 +3,12 @@ from telegram.ext import (CallbackQueryHandler, CommandHandler,
 
 from .callback_funcs import (about_coliving, photo,
                              confirm_or_edit_profile,
+                             is_visible_coliving_profile,
                             #  confirm_or_edit_profile_yes,
                             #  confirm_or_edit_profile_no,
+                             location_not_text,
                              price,
+                             room_type_not_text,
                              select_bed_in_room_type,
                              select_moscow_location,
                              select_room_in_apartment_type,
@@ -28,6 +31,10 @@ acquaintance_handler: ConversationHandler = ConversationHandler(
                 callback=select_spb_location,
                 pattern=r"^spb_city"
             ),
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND,
+                location_not_text,
+            ),
         ],
         states.ROOM_TYPE: [
             CallbackQueryHandler(
@@ -41,6 +48,10 @@ acquaintance_handler: ConversationHandler = ConversationHandler(
             CallbackQueryHandler(
                 callback=select_room_in_house_type,
                 pattern=r"^room_in_house"
+            ),
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND,
+                room_type_not_text,
             ),
         ],
         states.ABOUT_ROOM: [
@@ -62,7 +73,12 @@ acquaintance_handler: ConversationHandler = ConversationHandler(
         ],
         states.PHOTO_ROOM: [
             MessageHandler(
-                filters.PHOTO & ~filters.COMMAND, photo
+                filters.PHOTO & ~filters.COMMAND,
+                photo
+            ),
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND,
+                photo
             ),
         ],
         states.CONFIRMATION: [
@@ -94,6 +110,16 @@ acquaintance_handler: ConversationHandler = ConversationHandler(
             CallbackQueryHandler(
                 callback=what_to_edit,
                 pattern=r'^send_photo'
+            ),
+        ],
+        states.IS_VISIBLE: [
+            CallbackQueryHandler(
+                callback=is_visible_coliving_profile,
+                pattern=r'^show'
+            ),
+            CallbackQueryHandler(
+                callback=is_visible_coliving_profile,
+                pattern=r'^hide'
             ),
         ],
     },
