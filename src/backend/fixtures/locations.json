@@ -1,1 +1,1 @@
-[{"model": "profiles.location", "pk": 1, "fields": {"name": "Москва"}}, {"model": "profiles.location", "pk": 2, "fields": {"name": "Санкт-Петербург"}}]
+[{"model": "profiles.location", "pk": 3, "fields": {"name": "Москва"}}, {"model": "profiles.location", "pk": 4, "fields": {"name": "Санкт-Петербург"}}]
