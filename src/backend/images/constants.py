@@ -14,6 +14,7 @@ class Literals(models.TextChoices):
     Константы (строковые литералы).
     """
 
-    IMAGE_MAX_SIZE_MSG = f"Максимальный размер фото {int(
-        Restrictions.IMAGE_MAX_SIZE / 1024 / 1024
-    )} Мб."
+    IMAGE_MAX_SIZE_MSG = (
+        f"Максимальный размер фото"
+        f" {int(Restrictions.IMAGE_MAX_SIZE / 1024 / 1024)} Мб."
+    )

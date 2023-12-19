@@ -6,12 +6,8 @@ from django.core.validators import (
     RegexValidator,
 )
 from django.db import models
-from profiles.constants import (
-    ColivingTypes,
-    GenderRoles,
-    Literals,
-    Restrictions,
-)
+
+from .constants import ColivingTypes, GenderRoles, Literals, Restrictions
 
 
 class Location(models.Model):
