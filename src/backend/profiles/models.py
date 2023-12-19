@@ -7,7 +7,6 @@ from django.core.validators import (
 )
 from django.db import models
 from profiles.constants import (
-    CityNames,
     ColivingTypes,
     GenderRoles,
     Literals,
@@ -22,7 +21,6 @@ class Location(models.Model):
 
     name = models.TextField(
         verbose_name="Название",
-        choices=CityNames,
     )
 
     class Meta:

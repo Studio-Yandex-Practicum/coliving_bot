@@ -14,14 +14,16 @@ class Migration(migrations.Migration):
             model_name="colivingimage",
             name="image",
             field=models.ImageField(
-                upload_to="images/", validators=[images.validators.image_size_validator]
+                upload_to="images/",
+                validators=[images.validators.image_size_validator],
             ),
         ),
         migrations.AlterField(
             model_name="profileimage",
             name="image",
             field=models.ImageField(
-                upload_to="images/", validators=[images.validators.image_size_validator]
+                upload_to="images/",
+                validators=[images.validators.image_size_validator],
             ),
         ),
     ]

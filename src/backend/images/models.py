@@ -2,6 +2,7 @@ import uuid
 
 from django.db import models
 from profiles.models import Coliving, Profile
+
 from .validators import image_size_validator
 
 
@@ -11,12 +12,11 @@ class BaseImage(models.Model):
     """
 
     image = models.ImageField(
-        upload_to="images/",
-        validators=(image_size_validator,)
+        upload_to="images/", validators=(image_size_validator,)
     )
-    file_id = models.UUIDField(
-        default=uuid.uuid4,
-        editable=False,
+    file_id = models.TextField(
+        null=True,
+        blank=True,
         unique=True,
         db_index=True,
     )

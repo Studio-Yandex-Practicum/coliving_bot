@@ -1,15 +1,6 @@
 from django.db import models
 
 
-class CityNames(models.TextChoices):
-    """
-    Константы (возможные локации).
-    """
-
-    MSC = ("Москва", "Москва")
-    SPB = ("Санкт-Петербург", "Санкт-Петербург")
-
-
 class ColivingTypes(models.TextChoices):
     """
     Константы (тип коливинга).
