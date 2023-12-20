@@ -17,9 +17,14 @@ class Command(BaseCommand):
             path = os.path.join(
                 settings.BASE_DIR, "fixtures/", "locations.json"
             )
-            locations = json.load(open(path, "r", encoding="utf8"))
-            for location in locations:
-                Location.objects.create(**location["fields"])
+            data = json.load(open(path, "r", encoding="utf8"))
+            Location.objects.bulk_create(
+                [
+                    Location(**field)
+                    for field in [data["fields"] for data in data]
+                ],
+                ignore_conflicts=True,
+            )
             print("Успешно завершено")
         except FileNotFoundError:
             print("Файл не найден")
