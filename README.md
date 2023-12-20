@@ -67,6 +67,10 @@ cd src/backend/
 ```shell
 python manage.py migrate
 ```
+Загружаем фикстуры (локации)
+```shell
+python manage.py import_locations
+```
 Запускаем *development*-сервер *Django*
 ```shell
 python manage.py runserver
