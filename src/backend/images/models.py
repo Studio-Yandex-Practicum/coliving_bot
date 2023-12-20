@@ -1,4 +1,5 @@
 from django.db import models
+
 from profiles.models import Coliving, Profile
 
 from .utils import images_directory_path
