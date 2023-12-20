@@ -3,11 +3,11 @@ from copy import copy
 from pathlib import Path
 from re import fullmatch
 
+from general.validators import value_is_in_range_validator
+from internal_requests import mock as api_service
 from telegram import Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
-
-from internal_requests import mock as api_service
 
 from .buttons import (
     ABOUT_BUTTON,
@@ -63,6 +63,7 @@ from .template import (
     MAX_ABOUT_LENGTH,
     MAX_AGE,
     MAX_NAME_LENGTH,
+    MIN_ABOUT_LENGTH,
     MIN_AGE,
     MIN_NAME_LENGTH,
     NAME_FIELD,
@@ -73,7 +74,6 @@ from .template import (
     PROFILE_DATA,
     SEX_FIELD,
 )
-from .validators import validate_integer
 
 
 async def set_profile_to_context(
@@ -100,9 +100,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             update.effective_chat.id
         )
         await set_profile_to_context(update, context, profile_info)
-        await look_at_profile(update, context, '', PROFILE_KEYBOARD)
+        await look_at_profile(update, context, "", PROFILE_KEYBOARD)
         return States.PROFILE
     await update.effective_message.reply_text(text=ASK_AGE)
+
     return States.AGE
 
 
@@ -154,7 +155,7 @@ async def handle_age(
     Переводит диалог в состояние SEX (пол пользователя).
     """
     age = update.message.text
-    if not await validate_integer(
+    if not await value_is_in_range_validator(
         update=update,
         context=context,
         value=age,
@@ -192,6 +193,7 @@ async def handle_sex(
     await update.effective_message.reply_text(
         ASK_NAME,
     )
+
     return States.NAME
 
 
@@ -206,7 +208,7 @@ async def handle_name(
     if not fullmatch(NAME_PATTERN, name):
         await update.effective_message.reply_text(text=NAME_SYMBOL_ERROR_MSG)
         return States.NAME
-    if not await validate_integer(
+    if not await value_is_in_range_validator(
         update=update,
         context=context,
         value=len(name),
@@ -222,6 +224,7 @@ async def handle_name(
         text=ASK_LOCATION,
         reply_markup=LOCATION_KEYBOARD,
     )
+
     return States.LOCATION
 
 
@@ -245,6 +248,7 @@ async def handle_location(
     await update.effective_message.reply_text(
         text=ASK_ABOUT,
     )
+
     return States.ABOUT_YOURSELF
 
 
@@ -256,10 +260,11 @@ async def handle_about(
     Переводит диалог в состояние PHOTO (фотография пользователя).
     """
     about = update.message.text
-    if not await validate_integer(
+    if not await value_is_in_range_validator(
         update,
         context,
         len(about),
+        min=MIN_ABOUT_LENGTH,
         max=MAX_ABOUT_LENGTH,
         message=ABOUT_MAX_LEN_ERROR_MSG.format(max=MAX_ABOUT_LENGTH),
     ):
@@ -274,10 +279,10 @@ async def encoding_profile_photo(
     update: Update, context: ContextTypes.DEFAULT_TYPE, photo
 ) -> str:
     user = update.message.from_user
-    path = f'files/{update._effective_chat.id}/photos'
+    path = f"files/{update._effective_chat.id}/photos"
     Path(path).mkdir(parents=True, exist_ok=True)
-    await photo.download_to_drive(f'{path}/{user.full_name}_photo.jpg')
-    with open(f'{path}/{user.full_name}_photo.jpg', 'rb') as image:
+    await photo.download_to_drive(f"{path}/{user.full_name}_photo.jpg")
+    with open(f"{path}/{user.full_name}_photo.jpg", "rb") as image:
         return base64.b64encode(image.read())
 
 
@@ -291,14 +296,14 @@ async def look_at_profile(
     chat_id = update._effective_chat.id
     ask_text = copy(ASK_IS_THAT_RIGHT)
     if not ask:
-        ask_text = ''
+        ask_text = ""
     await context.bot.sendPhoto(
         chat_id=chat_id,
         photo=(
-            f'files/{chat_id}/photos/{update.message.from_user.full_name}_photo.jpg'
+            f"files/{chat_id}/photos/{update.message.from_user.full_name}_photo.jpg"
         ),
         caption=title
-        + '\n'
+        + "\n"
         + PROFILE_DATA.format(
             name=context.user_data.get(NAME_FIELD),
             sex=context.user_data.get(SEX_FIELD),
@@ -307,7 +312,7 @@ async def look_at_profile(
             about=context.user_data.get(ABOUT_FIELD),
             is_visible=False,
         )
-        + '\n'
+        + "\n"
         + ask_text,
         parse_mode=ParseMode.HTML,
         reply_markup=keyboard,
@@ -434,10 +439,11 @@ async def handle_edit_about(
     Переводит диалог в состояние EDIT_CONFIRMATION (анкета верна или нет).
     """
     about = update.message.text
-    if not await validate_integer(
+    if not await value_is_in_range_validator(
         update,
         context,
         len(about),
+        min=MIN_ABOUT_LENGTH,
         max=MAX_ABOUT_LENGTH,
         message=ABOUT_MAX_LEN_ERROR_MSG.format(max=MAX_ABOUT_LENGTH),
     ):

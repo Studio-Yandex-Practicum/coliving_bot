@@ -1,20 +1,21 @@
 from math import inf
+from typing import Union
 
 from telegram import Update
 from telegram.ext import ContextTypes
 
+from conversations.profile.template import DEFAULT_ERROR_MESSAGE
 
-async def validate_integer(
+
+async def value_is_in_range_validator(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
-    value: str,
+    value: Union[int, str],
     min: float = -inf,
     max: float = inf,
-    message: str = None,
+    message: str = DEFAULT_ERROR_MESSAGE,
 ) -> bool:
-    if isinstance(value, int) or (
-        value.isdigit() and not value.startswith('0')
-    ):
+    if isinstance(value, int) or value.isdigit():
         int_value = int(value)
         if min <= int_value <= max:
             return True

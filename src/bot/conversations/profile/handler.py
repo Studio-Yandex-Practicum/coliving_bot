@@ -43,7 +43,7 @@ from .callback_funcs import (
 from .states import States
 
 profile_handler: ConversationHandler = ConversationHandler(
-    entry_points=[CommandHandler(command='profile', callback=start)],
+    entry_points=[CommandHandler(command="profile", callback=start)],
     states={
         States.PROFILE: [
             CallbackQueryHandler(
@@ -64,7 +64,7 @@ profile_handler: ConversationHandler = ConversationHandler(
         ],
         States.AGE: [
             MessageHandler(
-                filters.Regex(r'^([0-9]{3})$') & ~filters.COMMAND, handle_age
+                filters.Regex(r"^([0-9]{3})$") & ~filters.COMMAND, handle_age
             ),
             MessageHandler(filters.TEXT & ~filters.COMMAND, handle_age),
         ],
