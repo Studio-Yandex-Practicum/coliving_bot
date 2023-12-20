@@ -4,6 +4,7 @@ from telegram.ext import (CallbackQueryHandler, CommandHandler,
 from .callback_funcs import (about_coliving, photo,
                              confirm_or_edit_profile,
                              edit_about_coliving,
+                             edit_photo_room,
                              edit_price,
                              edit_profile_confirmation,
                              edit_select_room_type,
@@ -168,6 +169,16 @@ acquaintance_handler: ConversationHandler = ConversationHandler(
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
                 edit_price,
+            ),
+        ],
+        states.EDIT_PHOTO_ROOM: [
+            MessageHandler(
+                filters.PHOTO & ~filters.COMMAND,
+                edit_photo_room,
+            ),
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND,
+                edit_photo_room,
             ),
         ],
         states.EDIT_CONFIRMATION: [

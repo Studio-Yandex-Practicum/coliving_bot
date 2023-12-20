@@ -520,7 +520,7 @@ async def what_to_edit(
             text=('Теперь можете отправить фото, квартиры. ' '\n'
                   'Пожалуйста, загрузите до 5 фотографий'),
         )
-        return states.EDIT_PHOTO
+        return states.EDIT_PHOTO_ROOM
 
 
 
@@ -562,7 +562,11 @@ async def edit_select_room_type(
     await update.effective_message.reply_text(
             text=f'Ваш ответ: {message_text}'
         )
-    await show_coliving_profile(update, context, EDIT_CONFIRMATION_KEYBOARD)
+    await show_coliving_profile(
+        update,
+        context,
+        EDIT_CONFIRMATION_KEYBOARD
+    )
     return states.EDIT_CONFIRMATION
 
 
@@ -577,10 +581,14 @@ async def edit_about_coliving(
     await update.effective_message.reply_text(
         text=f'Ваш ответ: {message_text}'
     )
-    await show_coliving_profile(update, context, EDIT_CONFIRMATION_KEYBOARD)
+    await show_coliving_profile(
+        update,
+        context,
+        EDIT_CONFIRMATION_KEYBOARD
+    )
     return states.EDIT_CONFIRMATION
 
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#########################!!!!!!!!!!!!!!!!!!!
+
 async def edit_price(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE
@@ -598,59 +606,44 @@ async def edit_price(
     await update.effective_message.reply_text(
         text=f'Ваш ответ: {message_text}'
     )
-    await show_coliving_profile(update, context, EDIT_CONFIRMATION_KEYBOARD)
+    await show_coliving_profile(
+        update,
+        context,
+        EDIT_CONFIRMATION_KEYBOARD
+    )
     return states.EDIT_CONFIRMATION
 
 
+async def edit_photo_room(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
+    """Редактирование фото помещения."""
 
+    if update.message.text:
+        await update.effective_message.reply_text(
+            text='Пожалуйста, отправьте 5 фотографий'
+        )
+        return states.EDIT_PHOTO_ROOM
 
-
-# async def show_updated_coliving_profile(
-#     update: Update,
-#     context: ContextTypes.DEFAULT_TYPE
-# ):
-#     """Просмотр профиля и переводит на подтверждение профиля CONFIRMATION."""
-
-#     # if update.message.text:
-#     #     await update.effective_message.reply_text(
-#     #         text='Пожалуйста, выберите вариант из предложенных.',
-#     #         reply_markup=EDIT_CONFIRMATION_KEYBOARD
-#     #     )
-#     #     return show_updated_coliving_profile(update, context)
-
-#     effective_chat = update.effective_chat
-#     ask_to_confirm = 'Всё верно?'
-#     await update.effective_message.reply_text(
-#             text=('Супер, теперь твой коливинг выглядит так. ' '\n'
-#                   '\n'),
-#     )
-#     await context.bot.sendPhoto(
-#     # await context.bot.send_message(
-#         chat_id=update.effective_chat.id,
-#         photo=(
-#             f'media/{update.effective_chat.id}/photos/{effective_chat.first_name}_room_photo.jpg'
-#         ),
-#         caption='Твоя профиль: ' '\n'
-#         # text='Твоя анкета: ' '\n'
-#         + '\n'
-#         + PROFILE_DATA.format(
-#             location=context.user_data.get(LOCATION_FIELD),
-#             room_type=context.user_data.get(ROOM_TYPE_FIELD),
-#             about=context.user_data.get(ABOUT_FIELD),
-#             price=context.user_data.get(PRICE_FIELD),
-#             is_visible=context.user_data.get(IS_VISIBLE_FIELD),
-#         )
-#         + '\n'
-#         + ask_to_confirm,
-#         parse_mode=ParseMode.HTML,
-#         reply_markup=EDIT_CONFIRMATION_KEYBOARD
-#     )
-#     return states.EDIT_CONFIRMATION
+    effective_chat = update.effective_chat
+    path = f'media/{update.effective_chat.id}/photos'
+    Path(path).mkdir(parents=True, exist_ok=True)
+    photo_file = await update.message.photo[-1].get_file()
+    await photo_file.download_to_drive(
+        f'{path}/{effective_chat.first_name}_room_photo.jpg'
+    )
+    await show_coliving_profile(
+        update,
+        context,
+        EDIT_CONFIRMATION_KEYBOARD
+    )
+    return states.EDIT_CONFIRMATION
 
 
 async def edit_profile_confirmation(
     update: Update,
-    context: ContextTypes.DEFAULT_TYPE
+    context: ContextTypes.DEFAULT_TYPE,
 ):
     """
     Подтверждение измененной анкеты,
@@ -661,16 +654,51 @@ async def edit_profile_confirmation(
     await update.effective_message.edit_reply_markup()
     call_back = update.callback_query.data
 
-    if call_back == 'confirm':
-        await update.effective_message.reply_text(
-            text=f'Ваш ответ: Да, подтвердить'
-        )
+    # if call_back == 'confirm':
+    #     await update.effective_message.reply_text(
+    #         text=f'Ваш ответ: Да, подтвердить'
+    #     )
 
+    #     return await save_coliving_info_to_db(update, context)
+
+    # elif call_back == 'cancel':
+    #     await update.effective_message.reply_text(
+    #         text=f'Ваш ответ: Отменить редактирование'
+    #     )
+    #     await update.effective_message.reply_text(
+    #         text='Хорошо, анкета не изменилась.',
+    #     )
+    #     context.user_data.clear()
+    #     ########################################
+    #     # Куда отправить?
+    #     await update.effective_message.reply_text(
+    #         text='Для создания профиля введите /coliving.',
+    #     )
+    #     ########################################
+    #     return ConversationHandler.END
+
+    # elif call_back == 'continue_editing':
+    #     await update.effective_message.reply_text(
+    #         text=f'Ваш ответ: Продолжить редактирование'
+    #     )
+    #     await update.effective_message.reply_text(
+    #         text='Что хотите изменить?',
+    #         reply_markup=WHAT_EDIT_PROFILE_KEYBOARD
+    #     )
+    #     return states.EDIT
+
+
+    if call_back == 'confirm':
+        message = 'Да, подтвердить'
+        await update.effective_message.reply_text(
+            text=f'Ваш ответ: {message}'
+        )
         return await save_coliving_info_to_db(update, context)
 
     elif call_back == 'cancel':
+        message = 'Отменить редактирование'
         await update.effective_message.reply_text(
-            text=f'Ваш ответ: Отменить редактирование'
+            text=f'Ваш ответ: {message}'
         )
         await update.effective_message.reply_text(
             text='Хорошо, анкета не изменилась.',
@@ -685,8 +713,9 @@ async def edit_profile_confirmation(
         return ConversationHandler.END
 
     elif call_back == 'continue_editing':
+        message = 'Продолжить редактирование'
         await update.effective_message.reply_text(
-            text=f'Ваш ответ: Продолжить редактирование'
+            text=f'Ваш ответ: {message}'
         )
         await update.effective_message.reply_text(
             text='Что хотите изменить?',
@@ -695,19 +724,9 @@ async def edit_profile_confirmation(
         return states.EDIT
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+#####
+# решить что лучше выше.!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#####
 
 async def save_coliving_info_to_db(
         update: Update,

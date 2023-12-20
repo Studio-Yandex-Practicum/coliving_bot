@@ -1,7 +1,6 @@
 from telegram import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
-    KeyboardButton,
 )
 
 
@@ -69,17 +68,6 @@ ROOM_TYPE_KEYBOARD = InlineKeyboardMarkup.from_column(
 
 # Да, верно
 # Изменить коливинг профиль
-
-# CONFIRMATION_KEYBOARD = InlineKeyboardMarkup(
-#     inline_keyboard=[
-#         [
-#             InlineKeyboardButton(
-#                 text='Да, верно',
-#                 callback_data='confirm'
-#             ),
-#         ]
-#     ]
-# )
 
 EDIT_PROFILE_KEYBOARD = InlineKeyboardButton(
         text='Изменить коливинг профиль',
