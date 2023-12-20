@@ -3,6 +3,8 @@ from telegram.ext import (CallbackQueryHandler, CommandHandler,
 
 from .callback_funcs import (about_coliving, photo,
                              confirm_or_edit_profile,
+                             edit_about_coliving,
+                             edit_price,
                              edit_profile_confirmation,
                              edit_select_room_type,
                              is_visible_coliving_profile,
@@ -149,6 +151,23 @@ acquaintance_handler: ConversationHandler = ConversationHandler(
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
                 room_type_not_text,
+            ),
+        ],
+        states.EDIT_ABOUT_ROOM: [
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND,
+                edit_about_coliving,
+            ),
+        ],
+        states.EDIT_PRICE: [
+            MessageHandler(
+                #filters.Regex(r'^([0-9]{4})$') & ~filters.COMMAND, price
+                filters.Regex(r'^(\d*)$') & ~filters.COMMAND,
+                edit_price,
+            ),
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND,
+                edit_price,
             ),
         ],
         states.EDIT_CONFIRMATION: [
