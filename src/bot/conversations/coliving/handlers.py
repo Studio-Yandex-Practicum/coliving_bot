@@ -3,9 +3,9 @@ from telegram.ext import (CallbackQueryHandler, CommandHandler,
 
 from .callback_funcs import (about_coliving, photo,
                              confirm_or_edit_profile,
+                             edit_profile_confirmation,
+                             edit_select_room_type,
                              is_visible_coliving_profile,
-                            #  confirm_or_edit_profile_yes,
-                            #  confirm_or_edit_profile_no,
                              location_not_text,
                              price,
                              room_type_not_text,
@@ -14,7 +14,9 @@ from .callback_funcs import (about_coliving, photo,
                              select_room_in_apartment_type,
                              select_room_in_house_type,
                              select_spb_location,
-                             start, what_to_edit)
+                             show_coliving_profile,
+                             start,
+                             what_to_edit)
 from .states import ColivingStates as states
 from .templates import COLIVING, LOCATION_MOSCOW_BTN_TEXT, LOCATION_SPB_BTN_TEXT
 
@@ -84,32 +86,41 @@ acquaintance_handler: ConversationHandler = ConversationHandler(
         states.CONFIRMATION: [
             CallbackQueryHandler(
                 callback=confirm_or_edit_profile,
-                # callback=confirm_or_edit_profile_yes,
                 pattern=r'^confirm'
             ),
             CallbackQueryHandler(
                 callback=confirm_or_edit_profile,
-                # callback=confirm_or_edit_profile_no,
-                pattern=r"^edit_profile"
+                pattern=r'^edit_profile'
             ),
-            # MessageHandler(filters.TEXT & ~filters.COMMAND, handle_profile),
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND,
+                show_coliving_profile
+            ),
         ],
         states.EDIT: [
             CallbackQueryHandler(
                 callback=what_to_edit,
-                pattern=r'^fill_again'
+                pattern=r'^edit_fill_again'
             ),
             CallbackQueryHandler(
                 callback=what_to_edit,
-                pattern=r'^description'
+                pattern=r'^edit_room_type'
             ),
             CallbackQueryHandler(
                 callback=what_to_edit,
-                pattern=r'^price'
+                pattern=r'^edit_description'
             ),
             CallbackQueryHandler(
                 callback=what_to_edit,
-                pattern=r'^send_photo'
+                pattern=r'^edit_price'
+            ),
+            CallbackQueryHandler(
+                callback=what_to_edit,
+                pattern=r'^edit_send_photo'
+            ),
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND,
+                what_to_edit
             ),
         ],
         states.IS_VISIBLE: [
@@ -122,6 +133,44 @@ acquaintance_handler: ConversationHandler = ConversationHandler(
                 pattern=r'^hide'
             ),
         ],
+        states.EDIT_ROOM_TYPE: [
+            CallbackQueryHandler(
+                callback=edit_select_room_type,
+                pattern=r'^bed_in_room'
+            ),
+            CallbackQueryHandler(
+                callback=edit_select_room_type,
+                pattern=r'^room_in_apartment'
+            ),
+            CallbackQueryHandler(
+                callback=edit_select_room_type,
+                pattern=r'^room_in_house'
+            ),
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND,
+                room_type_not_text,
+            ),
+        ],
+        states.EDIT_CONFIRMATION: [
+            CallbackQueryHandler(
+                callback=edit_profile_confirmation,
+                pattern=r'^confirm'
+            ),
+            CallbackQueryHandler(
+                callback=edit_profile_confirmation,
+                pattern=r'^edit_profile'
+            ),
+            CallbackQueryHandler(
+                callback=edit_profile_confirmation,
+                pattern=r'^cancel'
+            ),
+            CallbackQueryHandler(
+                callback=edit_profile_confirmation,
+                pattern=r'^continue_editing'
+            ),
+            # MessageHandler(filters.TEXT & ~filters.COMMAND, show_coliving_profile),
+        ],
+
     },
     fallbacks=[],
 )

@@ -9,6 +9,7 @@ from telegram.ext import ContextTypes, ConversationHandler
 
 from conversations.coliving.keyboards import (
     CONFIRM_OR_EDIT_PROFILE_KEYBOARD,
+    EDIT_CONFIRMATION_KEYBOARD,
     IS_VISIBLE_OR_NOT_PROFILE_KEYBOARD,
     LOCATION_KEYBOARD,
     ROOM_TYPE_KEYBOARD,
@@ -20,14 +21,17 @@ from conversations.coliving.states import ColivingStates as states
 from conversations.coliving.templates import (LOCATION_MOSCOW_BTN_TEXT, LOCATION_SPB_BTN_TEXT,
                                               PRICE_ERR_MSG, PROFILE_DATA)
 from internal_requests import mock as api_service
-# from internal_requests.entities import ColivingProfile
+from internal_requests.service import create_coliving
+from internal_requests.entities import ColivingProfile
 
+
+IS_EDIT = 0
 
 LOCATION_FIELD = 'location'
 ROOM_TYPE_FIELD = 'room_type'
 ABOUT_FIELD = 'about'
 PRICE_FIELD = 'price'
-IS_VISIBLE = 'is_visible'
+IS_VISIBLE_FIELD = 'is_visible'
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -123,7 +127,7 @@ async def room_type_not_text(update: Update, context):
             text='Пожалуйста, выберите вариант из предложенных.'
         )
         await update.effective_message.reply_text(
-            text='Укажите тип помещения ?',
+            text='Выберите тип помещения:',
             reply_markup=ROOM_TYPE_KEYBOARD
         )
         return states.ROOM_TYPE
@@ -162,9 +166,18 @@ async def _send_answer_room_type(message_text, update):
     )
     await update.effective_message.reply_text(
         text=('Расскажи о своей квартире.' '\n'
-              'краткое описание коливинга и его жильцов ?'),
+              'Краткое описание коливинга и его жильцов ?'),
     )
     return states.ABOUT_ROOM
+    ##################
+
+    # if IS_EDIT == 0:
+    #     return states.ABOUT_ROOM
+
+    # if IS_EDIT == 1:
+    #     IS_EDIT = 0
+    #     return states.EDIT_CONFIRMATION
+
 
 
 async def about_coliving(update, context):
@@ -199,7 +212,7 @@ async def price(update, context):
     await update.effective_message.reply_text(
         text=('Теперь можете отправить фото, квартиры. ' '\n'
               'Пожалуйста, загрузите до 5 фотографий'),
-        )
+    )
 
     return states.PHOTO_ROOM
     # return ConversationHandler.END
@@ -230,7 +243,7 @@ async def price(update, context):
 
 async def photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Сохраняет фото."""
-
+    # пока сохраняем одну фотку.
     if update.message.text:
         await update.effective_message.reply_text(
             text='Пожалуйста, отправьте 5 фотографий'
@@ -247,7 +260,7 @@ async def photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     ######################################################
     # Так загрузит 6 фоток и 6 раз ответит
-    #
+
     # await photo_file.download_to_drive(
     #     f'{path}/{effective_chat.first_name}_{photo_file.file_unique_id}.jpg'
     # )
@@ -257,7 +270,7 @@ async def photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     #     f'{path}/{effective_chat.first_name}_{photo_file.file_unique_id}.jpg', 'w', encoding='utf-8'
     # ) as image:
     #     image.write(file)
-        # return base64.b64encode(image.write(""))
+
 
     # await update.message.reply_text(
     #     'О, классная квартира. ' '\n'
@@ -302,6 +315,7 @@ async def show_coliving_profile(
             room_type=context.user_data.get(ROOM_TYPE_FIELD),
             about=context.user_data.get(ABOUT_FIELD),
             price=context.user_data.get(PRICE_FIELD),
+            is_visible=False,
         )
         + '\n'
         + ask_to_confirm,
@@ -320,30 +334,40 @@ async def confirm_or_edit_profile(
     Отправка на изменение EDIT или
     на уставновку флажка поиска IS_VISIBLE.
     """
+    #################################################################
+    # Как здесь проверить чтоб был не ввод текста,
+    # а выбор кнопки?
+    #################################################################
+    # if update.message.text:
+    #     await update.effective_message.reply_text(
+    #         text='Пожалуйста, выберите вариант из предложенных.',
+    #         reply_markup=CONFIRM_OR_EDIT_PROFILE_KEYBOARD
+    #     )
+    #     return await show_coliving_profile(update, context)
+    #################################################################
 
     await update.effective_message.edit_reply_markup()
     call_back = update.callback_query.data
 
     if call_back == 'edit_profile':
         await update.effective_message.reply_text(
-        text=f'Ваш ответ: Изменить коливинг профиль'
-    )
+            text=f'Ваш ответ: Изменить коливинг профиль'
+        )
         await update.effective_message.reply_text(
-        text='Что хотите изменить?',
-        reply_markup=WHAT_EDIT_PROFILE_KEYBOARD
-    )
+            text='Что хотите изменить?',
+            reply_markup=WHAT_EDIT_PROFILE_KEYBOARD
+        )
         return states.EDIT
 
-    if call_back == 'confirm':
+    elif call_back == 'confirm':
         await update.effective_message.reply_text(
-        text=f'Ваш ответ: Да, подтвердить'
-    )
+            text=f'Ваш ответ: Да, подтвердить'
+        )
         await update.effective_message.reply_text(
-        text=('Сделать профиль доступным для поиска? ' '\n'
-              'Этот параметр можно установить позже.'
-        ),
-        reply_markup=IS_VISIBLE_OR_NOT_PROFILE_KEYBOARD
-    )
+            text=('Сделать профиль доступным для поиска? ' '\n'
+                  'Этот параметр можно установить позже.'),
+            reply_markup=IS_VISIBLE_OR_NOT_PROFILE_KEYBOARD
+        )
         return states.IS_VISIBLE
 
 
@@ -362,93 +386,300 @@ async def is_visible_coliving_profile(
     if call_back == 'hide':
         context.user_data['is_visible'] = False
         await update.effective_message.reply_text(
-        text=('Ваш ответ: Скрыть из поиска' '\n'
-              '\n'
-              'Анкета скрыта из поиска. '
-              'Не забудьте установить этот параметр позже, '
-              'чтобы найти соседей. ')
+            text=('Ваш ответ: Скрыть из поиска' '\n'
+                  '\n'
+                  'Анкета скрыта из поиска. '
+                  'Не забудьте установить этот параметр позже, '
+                  'чтобы найти соседей. ')
         )
-        return await registration_confirmation(update, context)
+        return await save_coliving_info_to_db(update, context)
 
     elif call_back == 'show':
         context.user_data['is_visible'] = True
         await update.effective_message.reply_text(
-        text=('Ваш ответ: Показать в поиске' '\n'
-              '\n'
-              'Анкета доступна для поиска.')
+            text=('Ваш ответ: Показать в поиске' '\n'
+                  '\n'
+                  'Анкета доступна для поиска.')
         )
-        return await registration_confirmation(update, context)
+        return await save_coliving_info_to_db(update, context)
+
 
     # context.user_data.clear()
     # return ConversationHandler.END
-
-
-
-
-# async def confirm_or_edit_profile_yes(update: Update, context):
-#     message_text = 'Да, подтвердить'
-#     # context.user_data['room_type'] = message_text
-#     return await _send_yes_or_no(message_text, update)
-
-
-# async def confirm_or_edit_profile_no(update: Update, context):
-#     message_text = 'Изменить коливинг профиль'
-#     # context.user_data['room_type'] = message_text
-#     return await _send_yes_or_no(message_text, update)
-
-
-
-
-# async def _send_yes_or_no(message_text, update):
-#     await update.effective_message.edit_reply_markup()
-#     await update.effective_message.reply_text(
-#         text=f'Ваш ответ: {message_text}'
-#     )
-#     await update.effective_message.reply_text(
-#         text='Что хотите изменить?',
-#         reply_markup=WHAT_EDIT_PROFILE_KEYBOARD,
-#     )
-#     return states.EDIT
-
 
 
 async def what_to_edit(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE
 ):
-    pass
+    """Выбор редактируемого поля."""
+
+    #################################################################
+    # if update.message.text:
+    #   ^^^^^^^^^^^^^^^^^^^
+    # AttributeError: 'NoneType' object has no attribute 'text'
+    #################################################################
+
+    # if update.message.text:
+    #     await update.effective_message.reply_text(
+    #         text='Пожалуйста, выберите вариант из предложенных.'
+    #     )
+    #     await update.effective_message.reply_text(
+    #         text='Что хотите изменить?',
+    #         reply_markup=WHAT_EDIT_PROFILE_KEYBOARD
+    #     )
+    #     return states.EDIT
+
+    await update.effective_message.edit_reply_markup()
+    call_back = update.callback_query.data
+
+    if call_back == 'edit_fill_again':
+        await update.effective_message.reply_text(
+            text=f'Ваш ответ: Заполнить заново'
+        )
+        context.user_data.clear()
+        await update.effective_chat.send_message(
+            text='Где организован коливинг? ',
+            reply_markup=LOCATION_KEYBOARD,
+        )
+        return states.LOCATION
+
+    elif call_back == 'edit_room_type':
+        # global IS_EDIT
+        # IS_EDIT = 1
+        await update.effective_message.reply_text(
+            text=f'Ваш ответ: Тип помещения'
+        )
+        await update.effective_chat.send_message(
+            text='Выберите тип помещения:',
+            reply_markup=ROOM_TYPE_KEYBOARD
+        )
+        return states.EDIT_ROOM_TYPE
+
+    elif call_back == 'edit_description':
+        await update.effective_message.reply_text(
+            text=f'Ваш ответ: Описание'
+        )
+        await update.effective_message.reply_text(
+            text=('Расскажи о своей квартире.' '\n'
+                  'Краткое описание коливинга и его жильцов ?'),
+        )
+        return states.EDIT_ABOUT_ROOM
+
+    elif call_back == 'edit_price':
+        await update.effective_message.reply_text(
+            text=f'Ваш ответ: Описание'
+        )
+        await update.effective_message.reply_text(
+            text=('Укажите цену спального места за сутки?'),
+        )
+        return states.EDIT_PRICE
+
+    elif call_back == 'edit_send_photo':
+        await update.effective_message.reply_text(
+            text=f'Ваш ответ: Фото квартиры'
+        )
+        await update.effective_message.reply_text(
+            text=('Теперь можете отправить фото, квартиры. ' '\n'
+                  'Пожалуйста, загрузите до 5 фотографий'),
+        )
+        return states.EDIT_PHOTO
 
 
-#     return ConversationHandler.END
 
-
-
-
-
-
-async def registration_confirmation(
+async def edit_select_room_type(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE
-) -> None:
-    #########################################################
-    #
-    # нужна помощь
-    #
-    #########################################################
+):
+    """Редактирование типа помещения."""
+
+    #################################################################
+    # if update.message.text:
+    #   ^^^^^^^^^^^^^^^^^^^
+    # AttributeError: 'NoneType' object has no attribute 'text'
+    #################################################################
+
+    # if update.message.text:
+    #     await update.effective_message.reply_text(
+    #         text='Пожалуйста, выберите вариант из предложенных.'
+    #     )
+    #     await update.effective_message.reply_text(
+    #         text='Выберите тип помещения:',
+    #         reply_markup=ROOM_TYPE_KEYBOARD
+    #     )
+    #     return states.EDIT_ROOM_TYPE
+
+    await update.effective_message.edit_reply_markup()
+    call_back = update.callback_query.data
+
+    if call_back == 'bed_in_room':
+        message_text = 'Спальное место в комнате'
+        context.user_data['room_type'] = message_text
+        await update.effective_message.reply_text(
+            text=f'Ваш ответ: {message_text}'
+        )
+        return await show_updated_coliving_profile(update, context)
+
+    elif call_back == 'room_in_apartment':
+        message_text = 'Комната в квартире'
+        context.user_data['room_type'] = message_text
+        await update.effective_message.reply_text(
+            text=f'Ваш ответ: {message_text}'
+        )
+        return await show_updated_coliving_profile(update, context)
+
+    elif call_back == 'room_in_house':
+        message_text = 'Комната в доме'
+        context.user_data['room_type'] = message_text
+        await update.effective_message.reply_text(
+            text=f'Ваш ответ: {message_text}'
+        )
+        return await show_updated_coliving_profile(update, context)
+
+    # return show_updated_coliving_profile(update, context)
+    # return save_coliving_info_to_db(update, context)
+
+
+
+
+
+
+
+
+
+
+
+
+
+async def show_updated_coliving_profile(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
+    """Просмотр профиля и переводит на подтверждение профиля CONFIRMATION."""
+
+    # if update.message.text:
+    #     await update.effective_message.reply_text(
+    #         text='Пожалуйста, выберите вариант из предложенных.',
+    #         reply_markup=EDIT_CONFIRMATION_KEYBOARD
+    #     )
+    #     return show_updated_coliving_profile(update, context)
+
+    effective_chat = update.effective_chat
+    ask_to_confirm = 'Всё верно?'
+    await update.effective_message.reply_text(
+            text=('Супер, теперь твой коливинг выглядит так. ' '\n'
+                  '\n'),
+    )
+    await context.bot.sendPhoto(
+    # await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        photo=(
+            f'media/{update.effective_chat.id}/photos/{effective_chat.first_name}_room_photo.jpg'
+        ),
+        caption='Твоя анкета: ' '\n'
+        # text='Твоя анкета: ' '\n'
+        + '\n'
+        + PROFILE_DATA.format(
+            location=context.user_data.get(LOCATION_FIELD),
+            room_type=context.user_data.get(ROOM_TYPE_FIELD),
+            about=context.user_data.get(ABOUT_FIELD),
+            price=context.user_data.get(PRICE_FIELD),
+            is_visible=context.user_data.get(IS_VISIBLE_FIELD),
+        )
+        + '\n'
+        + ask_to_confirm,
+        parse_mode=ParseMode.HTML,
+        reply_markup=EDIT_CONFIRMATION_KEYBOARD
+    )
+    return states.EDIT_CONFIRMATION
+
+
+async def edit_profile_confirmation(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
+    """
+    Подтверждение измененной анкеты,
+    Продолжение редактирования,
+    Отмена редактирования.
+    """
+
+    await update.effective_message.edit_reply_markup()
+    call_back = update.callback_query.data
+
+    if call_back == 'confirm':
+        await update.effective_message.reply_text(
+            text=f'Ваш ответ: Да, подтвердить'
+        )
+
+        return await save_coliving_info_to_db(update, context)
+
+    elif call_back == 'cancel':
+        await update.effective_message.reply_text(
+            text=f'Ваш ответ: Отменить редактирование'
+        )
+        await update.effective_message.reply_text(
+            text='Хорошо, анкета не изменилась.',
+        )
+        context.user_data.clear()
+        ########################################
+        # Куда отправить?
+        await update.effective_message.reply_text(
+            text='Для создания профиля введите /coliving.',
+        )
+        ########################################
+        return ConversationHandler.END
+
+    elif call_back == 'continue_editing':
+        await update.effective_message.reply_text(
+            text=f'Ваш ответ: Продолжить редактирование'
+        )
+        await update.effective_message.reply_text(
+            text='Что хотите изменить?',
+            reply_markup=WHAT_EDIT_PROFILE_KEYBOARD
+        )
+        return states.EDIT
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+async def save_coliving_info_to_db(
+        update: Update,
+        context: ContextTypes.DEFAULT_TYPE
+) -> ColivingProfile:
     """
     Сохраняет в БД - запрос к API.
     Отправляет сообщение о завершении регистрации.
     """
-    pass
-    # try:
 
-    # except:
+    coliving_info = ColivingProfile(
+        location=context.user_data.get(LOCATION_FIELD),
+        room_type=context.user_data.get(ROOM_TYPE_FIELD),
+        about=context.user_data.get(ABOUT_FIELD),
+        price=context.user_data.get(PRICE_FIELD),
+        is_visible=context.user_data.get(IS_VISIBLE_FIELD),
+        roommates=None,
+        viewers=None,
+        created_date=None,
 
-    # await update.callback_query.answer()
-    # await update.callback_query.edit_message_reply_markup()
-    # picked_choice = update.callback_query.data
-    # command, id_to_confirm = picked_choice.split(".")
-    # id_to_confirm = int(id_to_confirm)
-    # if command == REGISTRATION_CONFIRM:
-    #     await api_service.confirm_mentor_registration(id_to_confirm)
-    #     await update.effective_message.reply_text(CONFIRMED)
+        # images=
+    )
+    await create_coliving(coliving=coliving_info)
+    # await api_service.create_coliving(user=user_info)
+    await update.effective_message.reply_text(
+            text='Профиль успешно сохранен!'
+        )
+    context.user_data.clear()
+    return ConversationHandler.END

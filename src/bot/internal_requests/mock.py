@@ -7,7 +7,7 @@ async def get_user_coliving_info_by_tg_id(telegram_id: int) -> ColivingProfile:
     """Получает данные о telegram-пользователе."""
 
 
-    # return ColivingProfile(
+    # return TestColivingProfile(
     #     roommates='Сосед Иван',
     #     location='Москва',
     #     price=5500,
@@ -30,6 +30,21 @@ async def get_user_coliving_info_by_tg_id(telegram_id: int) -> ColivingProfile:
         )
 
 
+# async def get_user_coliving_info_by_tg_id(telegram_id: int) -> TestColivingProfile:
+#     """Получает данные о telegram-пользователе."""
+
+#     return TestColivingProfile(
+#             roommates='Сосед Иван',
+#             location='Москва',
+#             price=5500,
+#             room_type='Комната в квартире',
+#             about='Ну очень уютно',
+#             is_visible=True,
+#             viewers=True,
+#             created_date=datetime.now()
+#         )
+
+
 async def get_user_coliving_status(telegram_id: int) -> UserProfile:
     """Получает данные о telegram-пользователе."""
 
@@ -38,9 +53,3 @@ async def get_user_coliving_status(telegram_id: int) -> UserProfile:
         is_сoliving=False
         # is_сoliving=True
     )
-
-# async def confirm_mentor_registration(telegram_id: int) -> Response:
-#     """Запрос, подтверждающий учетную запись профдизайнера."""
-#     endpoint_urn = f"mentors/{telegram_id}/confirm/"
-#     response = await _post_request(dict(), endpoint_urn)
-#     return response

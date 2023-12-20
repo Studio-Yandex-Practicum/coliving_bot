@@ -16,6 +16,16 @@ HELLO_KEYBOARD = InlineKeyboardMarkup(
     ],
 )
 
+CONFIRMATION_KEYBOARD = InlineKeyboardButton(
+    text='Да, подтвердить',
+    callback_data='confirm'
+)
+
+CANCEL_KEYBOARD = InlineKeyboardButton(
+    text='Отменить',
+    callback_data='cancel'
+)
+
 # Москва
 # Санкт-Петербург
 
@@ -33,28 +43,6 @@ LOCATION_KEYBOARD = InlineKeyboardMarkup.from_column(
         ]
     )
 )
-
-# LOCATION_MOSCOW_KEYBOARD = InlineKeyboardMarkup(
-#     inline_keyboard=[
-#         [
-#             InlineKeyboardButton(
-#                 text='Москва',
-#                 callback_data='moscow_city'
-#             ),
-#         ]
-#     ]
-# )
-
-# LOCATION_SPB_KEYBOARD = InlineKeyboardMarkup(
-#     inline_keyboard=[
-#         [
-#             InlineKeyboardButton(
-#                 text='Санкт-Петербург',
-#                 callback_data='spb_city'
-#             ),
-#         ]
-#     ]
-# )
 
 # Спальное место в комнате
 # Комната в квартире
@@ -93,18 +81,15 @@ ROOM_TYPE_KEYBOARD = InlineKeyboardMarkup.from_column(
 #     ]
 # )
 
+EDIT_PROFILE_KEYBOARD = InlineKeyboardButton(
+        text='Изменить коливинг профиль',
+        callback_data='edit_profile'
+)
+
 CONFIRM_OR_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
-        [
-            InlineKeyboardButton(
-                text='Да, подтвердить',
-                callback_data='confirm'
-            ),
-            InlineKeyboardButton(
-                text='Изменить коливинг профиль',
-                callback_data='edit_profile'
-            ),
-        ]
+        CONFIRMATION_KEYBOARD,
+        EDIT_PROFILE_KEYBOARD,
     )
 )
 
@@ -118,79 +103,63 @@ WHAT_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
         [
             InlineKeyboardButton(
                 text='Заполнить заново',
-                callback_data='fill_again'
+                callback_data='edit_fill_again'
+            ),
+            InlineKeyboardButton(
+                text='Тип помещения',
+                callback_data='edit_room_type'
             ),
             InlineKeyboardButton(
                 text='Описание',
-                callback_data='description'
+                callback_data='edit_description'
             ),
             InlineKeyboardButton(
                 text='Цена',
-                callback_data='price'
+                callback_data='edit_price'
             ),
             InlineKeyboardButton(
-                text='Фотография',
-                callback_data='send_photo'
+                text='Фото квартиры',
+                callback_data='edit_send_photo'
             ),
         ]
     )
 )
 
+# Скрыть из поиска |  Показать в поиске
 
+SHOW_SEARCH_KEYBOARD = InlineKeyboardButton(
+    text='Показать в поиске',
+    callback_data='show',
+)
+
+HIDE_SEARCH_KEYBOARD = InlineKeyboardButton(
+    text='Скрыть из поиска',
+    callback_data='hide',
+)
 
 IS_VISIBLE_OR_NOT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
-        [
-            InlineKeyboardButton(
-                text='Показать в поиске',
-                callback_data='show'
-            ),
-            InlineKeyboardButton(
-                text='Скрыть из поиска',
-                callback_data='hide'
-            ),
-        ]
+        SHOW_SEARCH_KEYBOARD,
+        HIDE_SEARCH_KEYBOARD,
     )
 )
-
-
-
 
 # Да, верно
 # Отменить редактирование
 # Продолжить редактирование
 
-CONFIRMATION_KEYBOARD = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(
-                text='Да, подтвердить',
-                callback_data='confirm'
-            ),
-        ]
-    ]
-)
-
-CANCEL_KEYBOARD = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(
-                text='Отменить редактирование',
-                callback_data='cancel'
-            ),
-        ]
-    ]
-)
-
-CONTINUE_EDIT_KEYBOARD = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(
-                text='Продолжить редактирование',
-                callback_data='continue_editing'
-            ),
-        ]
-    ]
+EDIT_CONFIRMATION_KEYBOARD = InlineKeyboardMarkup.from_column(
+    button_column=(
+    CONFIRMATION_KEYBOARD,
+    InlineKeyboardButton(
+        text='Отменить редактирование',
+        callback_data='cancel'
+    ),
+    InlineKeyboardButton(
+        text='Продолжить редактирование',
+        callback_data='continue_editing'
+    ),
+    )
 )
 
 # Изменить коливинг профиль
@@ -227,92 +196,68 @@ COLIVING_PROFILE_KEYBOARD = InlineKeyboardMarkup(
     ]
 )
 
-# Скрыть из поиска |  Показать в поиске
-
-SHOW_SEARCH_KEYBOARD = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-
-            InlineKeyboardButton(
-                text='Показать в поиске',
-                callback_data='show'
-            ),
-        ]
-    ]
-)
-
-HIDE_SEARCH_KEYBOARD = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-
-            InlineKeyboardButton(
-                text='Скрыть из поиска',
-                callback_data='hide'
-            ),
-        ]
-    ]
-)
-
 # Выбор
 
-CHOOSE_ROOMMATES_PROFILE_KEYBOARD = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
+# CHOOSE_ROOMMATES_PROFILE_KEYBOARD = InlineKeyboardMarkup(
+#     inline_keyboard=[
+#         [
 
-            InlineKeyboardButton(
-                text='Скрыть из поиска',
-                callback_data='confirm'
-            ),
-        ]
-    ]
-)
+#             InlineKeyboardButton(
+#                 text='Выбран',
+#                 callback_data='confirm'
+#             ),
+#         ]
+#     ]
+# )
 
 # Пригласить в коливинг | Удалить из коливинга
 # Пожаловаться на пользователя
 
-INVITE_ROOMMATES_PROFILE_KEYBOARD = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-
-            InlineKeyboardButton(
-                text='Пригласить в коливинг',
-                callback_data='invite_roommate'
-            ),
-        ]
-    ]
+INVITE_ROOMMATES_PROFILE_KEYBOARD = InlineKeyboardButton(
+    text='Пригласить в коливинг',
+    callback_data='invite_roommate'
 )
 
-DELETE_ROOMMATES_PROFILE_KEYBOARD = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-
-            InlineKeyboardButton(
-                text='Удалить из коливинга',
-                callback_data='delete_roommate'
-            ),
-        ]
-    ]
+DELETE_ROOMMATES_PROFILE_KEYBOARD = InlineKeyboardButton(
+    text='Удалить из коливинга',
+    callback_data='delete_roommate'
 )
 
-REPORT_ROOMMATES_PROFILE_KEYBOARD = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-
-            InlineKeyboardButton(
-                text='Пожаловаться на пользователя',
-                callback_data='report_to'
-            ),
-        ]
-    ]
+REPORT_ROOMMATES_PROFILE_KEYBOARD = InlineKeyboardButton(
+    text='Пожаловаться на пользователя',
+    callback_data='report_to'
 )
 
-CONFIRMATION_PROFILE_KEYBOARD = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(
-                text='Да, удалить',
-                callback_data='confirm'
-            ),
-        ]
-    ]
+CONFIRMATION_DELETE_KEYBOARD = InlineKeyboardButton(
+    text='Да, удалить',
+    callback_data='confirm'
+)
+
+ROOMMATES_INVITE_REPORT_KEYBOARD = InlineKeyboardMarkup.from_column(
+    button_column=(
+        INVITE_ROOMMATES_PROFILE_KEYBOARD,
+        REPORT_ROOMMATES_PROFILE_KEYBOARD,
+    )
+)
+
+ROOMMATES_INVITE_REPORT_KEYBOARD = InlineKeyboardMarkup.from_column(
+    button_column=(
+        DELETE_ROOMMATES_PROFILE_KEYBOARD,
+        REPORT_ROOMMATES_PROFILE_KEYBOARD,
+    )
+)
+
+
+CONFIRM_ROOMMATES_INVITE_KEYBOARD = InlineKeyboardMarkup.from_column(
+    button_column=(
+        CONFIRMATION_KEYBOARD,
+        CANCEL_KEYBOARD,
+    )
+)
+
+REPORT_OR_CANCEL_ROOMMATES_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
+    button_column=(
+        REPORT_ROOMMATES_PROFILE_KEYBOARD,
+        CANCEL_KEYBOARD,
+    )
 )

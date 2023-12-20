@@ -14,4 +14,6 @@ PROFILE_DATA = (
     '<b>Тип спального места:</b> {room_type}\n'
     '<b>Описание коливинга:</b> {about}\n'
     '<b>Цена:</b> {price}\n'
+    '<b>Видимость:</b> {is_visible}\n'
+
 )
