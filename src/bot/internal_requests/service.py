@@ -1,15 +1,14 @@
-
 import os
 from dataclasses import asdict
 from urllib.parse import urljoin
 
 from httpx import AsyncClient, Response
 
-from .entities import ColivingProfile, UserProfile
+from .entities import ColivingProfile
 
-
-INTERNAL_API_URL = os.getenv("INTERNAL_API_URL", "http://127.0.0.1:8000/api/v1/")
-
+INTERNAL_API_URL = os.getenv(
+    "INTERNAL_API_URL", "http://127.0.0.1:8000/api/v1/"
+)
 
 
 async def create_coliving(coliving: ColivingProfile) -> Response:
@@ -27,7 +26,9 @@ async def update_coliving_info(telegram_id: int, data: dict):
     return user_info_updated
 
 
-async def _parse_api_response_to_coliving_info(response: Response) -> ColivingProfile:
+async def _parse_api_response_to_coliving_info(
+    response: Response,
+) -> ColivingProfile:
     """Парсит полученный json из Response в датакласс ColivingProfile."""
     return ColivingProfile(**response.json())
 

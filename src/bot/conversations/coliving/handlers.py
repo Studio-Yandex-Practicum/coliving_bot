@@ -1,41 +1,46 @@
-from telegram.ext import (CallbackQueryHandler, CommandHandler,
-                          ConversationHandler, filters, MessageHandler)
+from telegram.ext import (
+    CallbackQueryHandler,
+    CommandHandler,
+    ConversationHandler,
+    MessageHandler,
+    filters,
+)
 
-from .callback_funcs import (about_coliving, photo,
-                             confirm_or_edit_profile,
-                             edit_about_coliving,
-                             edit_photo_room,
-                             edit_price,
-                             edit_profile_confirmation,
-                             edit_select_room_type,
-                             handle_coliving,
-                             is_visible_coliving_profile,
-                             location_not_text,
-                             price,
-                             room_type_not_text,
-                             select_bed_in_room_type,
-                             select_moscow_location,
-                             select_room_in_apartment_type,
-                             select_room_in_house_type,
-                             select_spb_location,
-                             show_coliving_profile,
-                             start,
-                             what_to_edit)
+from .callback_funcs import (
+    about_coliving,
+    confirm_or_edit_profile,
+    edit_about_coliving,
+    edit_photo_room,
+    edit_price,
+    edit_profile_confirmation,
+    edit_select_room_type,
+    handle_coliving,
+    is_visible_coliving_profile,
+    location_not_text,
+    photo,
+    price,
+    room_type_not_text,
+    select_bed_in_room_type,
+    select_moscow_location,
+    select_room_in_apartment_type,
+    select_room_in_house_type,
+    select_spb_location,
+    show_coliving_profile,
+    start,
+    what_to_edit,
+)
 from .states import ColivingStates as states
 from .templates import COLIVING_START
-
 
 acquaintance_handler: ConversationHandler = ConversationHandler(
     entry_points=[CommandHandler(COLIVING_START, start)],
     states={
         states.LOCATION: [
             CallbackQueryHandler(
-                callback=select_moscow_location,
-                pattern=r"^moscow_city"
+                callback=select_moscow_location, pattern=r"^moscow_city"
             ),
             CallbackQueryHandler(
-                callback=select_spb_location,
-                pattern=r"^spb_city"
+                callback=select_spb_location, pattern=r"^spb_city"
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -44,16 +49,14 @@ acquaintance_handler: ConversationHandler = ConversationHandler(
         ],
         states.ROOM_TYPE: [
             CallbackQueryHandler(
-                callback=select_bed_in_room_type,
-                pattern=r"^bed_in_room"
+                callback=select_bed_in_room_type, pattern=r"^bed_in_room"
             ),
             CallbackQueryHandler(
                 callback=select_room_in_apartment_type,
-                pattern=r"^room_in_apartment"
+                pattern=r"^room_in_apartment",
             ),
             CallbackQueryHandler(
-                callback=select_room_in_house_type,
-                pattern=r"^room_in_house"
+                callback=select_room_in_house_type, pattern=r"^room_in_house"
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -61,94 +64,66 @@ acquaintance_handler: ConversationHandler = ConversationHandler(
             ),
         ],
         states.ABOUT_ROOM: [
-            MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
-                about_coliving
-            ),
+            MessageHandler(filters.TEXT & ~filters.COMMAND, about_coliving),
         ],
         states.PRICE: [
             MessageHandler(
-                #filters.Regex(r'^([0-9]{4})$') & ~filters.COMMAND, price
-                filters.Regex(r'^(\d*)$') & ~filters.COMMAND,
-                price
+                # filters.Regex(r'^([0-9]{4})$') & ~filters.COMMAND, price
+                filters.Regex(r"^(\d*)$") & ~filters.COMMAND,
+                price,
             ),
-            MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
-                price
-            ),
+            MessageHandler(filters.TEXT & ~filters.COMMAND, price),
         ],
         states.PHOTO_ROOM: [
-            MessageHandler(
-                filters.PHOTO & ~filters.COMMAND,
-                photo
-            ),
-            MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
-                photo
-            ),
+            MessageHandler(filters.PHOTO & ~filters.COMMAND, photo),
+            MessageHandler(filters.TEXT & ~filters.COMMAND, photo),
         ],
         states.CONFIRMATION: [
             CallbackQueryHandler(
-                callback=confirm_or_edit_profile,
-                pattern=r'^confirm'
+                callback=confirm_or_edit_profile, pattern=r"^confirm"
             ),
             CallbackQueryHandler(
-                callback=confirm_or_edit_profile,
-                pattern=r'^edit_profile'
+                callback=confirm_or_edit_profile, pattern=r"^edit_profile"
             ),
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
-                show_coliving_profile
+                filters.TEXT & ~filters.COMMAND, show_coliving_profile
             ),
         ],
         states.EDIT: [
             CallbackQueryHandler(
-                callback=what_to_edit,
-                pattern=r'^edit_fill_again'
+                callback=what_to_edit, pattern=r"^edit_fill_again"
             ),
             CallbackQueryHandler(
-                callback=what_to_edit,
-                pattern=r'^edit_room_type'
+                callback=what_to_edit, pattern=r"^edit_room_type"
             ),
             CallbackQueryHandler(
-                callback=what_to_edit,
-                pattern=r'^edit_about'
+                callback=what_to_edit, pattern=r"^edit_about"
             ),
             CallbackQueryHandler(
-                callback=what_to_edit,
-                pattern=r'^edit_price'
+                callback=what_to_edit, pattern=r"^edit_price"
             ),
             CallbackQueryHandler(
-                callback=what_to_edit,
-                pattern=r'^edit_send_photo'
+                callback=what_to_edit, pattern=r"^edit_send_photo"
             ),
-            MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
-                what_to_edit
-            ),
+            MessageHandler(filters.TEXT & ~filters.COMMAND, what_to_edit),
         ],
         states.IS_VISIBLE: [
             CallbackQueryHandler(
-                callback=is_visible_coliving_profile,
-                pattern=r'^show'
+                callback=is_visible_coliving_profile, pattern=r"^show"
             ),
             CallbackQueryHandler(
-                callback=is_visible_coliving_profile,
-                pattern=r'^hide'
+                callback=is_visible_coliving_profile, pattern=r"^hide"
             ),
         ],
         states.EDIT_ROOM_TYPE: [
             CallbackQueryHandler(
-                callback=edit_select_room_type,
-                pattern=r'^bed_in_room'
+                callback=edit_select_room_type, pattern=r"^bed_in_room"
             ),
             CallbackQueryHandler(
-                callback=edit_select_room_type,
-                pattern=r'^room_in_apartment'
+                callback=edit_select_room_type, pattern=r"^room_in_apartment"
             ),
             CallbackQueryHandler(
-                callback=edit_select_room_type,
-                pattern=r'^room_in_house'
+                callback=edit_select_room_type, pattern=r"^room_in_house"
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -163,8 +138,8 @@ acquaintance_handler: ConversationHandler = ConversationHandler(
         ],
         states.EDIT_PRICE: [
             MessageHandler(
-                #filters.Regex(r'^([0-9]{4})$') & ~filters.COMMAND, price
-                filters.Regex(r'^(\d*)$') & ~filters.COMMAND,
+                # filters.Regex(r'^([0-9]{4})$') & ~filters.COMMAND, price
+                filters.Regex(r"^(\d*)$") & ~filters.COMMAND,
                 edit_price,
             ),
             MessageHandler(
@@ -184,59 +159,37 @@ acquaintance_handler: ConversationHandler = ConversationHandler(
         ],
         states.EDIT_CONFIRMATION: [
             CallbackQueryHandler(
-                callback=edit_profile_confirmation,
-                pattern=r'^confirm'
+                callback=edit_profile_confirmation, pattern=r"^confirm"
+            ),
+            CallbackQueryHandler(
+                callback=edit_profile_confirmation, pattern=r"^edit_profile"
+            ),
+            CallbackQueryHandler(
+                callback=edit_profile_confirmation, pattern=r"^cancel"
             ),
             CallbackQueryHandler(
                 callback=edit_profile_confirmation,
-                pattern=r'^edit_profile'
-            ),
-            CallbackQueryHandler(
-                callback=edit_profile_confirmation,
-                pattern=r'^cancel'
-            ),
-            CallbackQueryHandler(
-                callback=edit_profile_confirmation,
-                pattern=r'^continue_editing'
+                pattern=r"^continue_editing",
             ),
             # MessageHandler(filters.TEXT & ~filters.COMMAND, show_coliving_profile),
         ],
         states.COLIVING: [
             CallbackQueryHandler(
-                callback=handle_coliving,
-                pattern=r'^edit_profile'
+                callback=handle_coliving, pattern=r"^edit_profile"
+            ),
+            CallbackQueryHandler(callback=handle_coliving, pattern=r"^show"),
+            CallbackQueryHandler(callback=handle_coliving, pattern=r"^hide"),
+            CallbackQueryHandler(
+                callback=handle_coliving, pattern=r"^roommates_profiles"
+            ),
+            CallbackQueryHandler(callback=handle_coliving, pattern=r"^views"),
+            CallbackQueryHandler(
+                callback=handle_coliving, pattern=r"^transfer_to"
             ),
             CallbackQueryHandler(
-                callback=handle_coliving,
-                pattern=r'^show'
+                callback=handle_coliving, pattern=r"^go_to_menu"
             ),
-            CallbackQueryHandler(
-                callback=handle_coliving,
-                pattern=r'^hide'
-            ),
-            CallbackQueryHandler(
-                callback=handle_coliving,
-                pattern=r'^roommates_profiles'
-            ),
-            CallbackQueryHandler(
-                callback=handle_coliving,
-                pattern=r'^views'
-            ),
-            CallbackQueryHandler(
-                callback=handle_coliving,
-                pattern=r'^transfer_to'
-            ),
-            CallbackQueryHandler(
-                callback=handle_coliving,
-                pattern=r'^go_to_menu'
-            ),
-        ]
-
+        ],
     },
     fallbacks=[],
 )
-
-
-# entry_point_to_coliving_handler = CommandHandler(
-#     "coliving", coliving
-# )
