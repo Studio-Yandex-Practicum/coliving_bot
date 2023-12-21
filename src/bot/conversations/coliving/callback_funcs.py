@@ -341,7 +341,9 @@ async def handle_room_type(
     return states.ABOUT_ROOM
 
 
-async def handle_about_coliving(update, context):
+async def handle_about_coliving(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
     """Сохранение контекста about. Перевод на ввод PRICE."""
 
     about_coliving = update.message.text
@@ -368,7 +370,9 @@ async def handle_about_coliving(update, context):
     return states.PRICE
 
 
-async def handle_price(update, context):
+async def handle_price(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
     """Сохранение контекста price. Перевод на выбор PHOTO."""
 
     try:
@@ -410,7 +414,7 @@ async def handle_price(update, context):
 
 async def handle_photo_room(
     update: Update, context: ContextTypes.DEFAULT_TYPE
-):
+) -> int:
     """Сохраняет фото."""
     # пока сохраняем одну фотку.
     if update.message.text:
@@ -448,7 +452,9 @@ async def handle_photo_room(
     return await send_photo_reply(update, context)
 
 
-async def send_photo_reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def send_photo_reply(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
     """Сообщение перед просмотром профиля."""
 
     await update.message.reply_text(REPLY_MSG_PHOTO)
@@ -463,7 +469,7 @@ async def show_coliving_profile(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
     keyboard: str,
-):
+) -> None:
     """Просмотр профиля и переводит на подтверждение профиля CONFIRMATION."""
 
     effective_chat = update.effective_chat
@@ -492,7 +498,7 @@ async def show_coliving_profile(
 
 async def handle_confirm_or_edit_profile(
     update: Update, context: ContextTypes.DEFAULT_TYPE
-):
+) -> int:
     """
     Подтверждение или изменение профиля.
     Отправка на изменение EDIT или
@@ -536,7 +542,7 @@ async def handle_confirm_or_edit_profile(
 
 async def handle_is_visible_coliving_profile(
     update: Update, context: ContextTypes.DEFAULT_TYPE
-):
+) -> int:
     """
     Показать или скрыть профиль в поиске и
     перевод на стадию сохранения в БД.
@@ -573,7 +579,7 @@ async def handle_is_visible_coliving_profile(
 
 async def handle_what_to_edit(
     update: Update, context: ContextTypes.DEFAULT_TYPE
-):
+) -> int:
     """Выбор редактируемого поля."""
 
     try:
@@ -677,7 +683,7 @@ async def handle_edit_location(
 
 async def handle_edit_select_room_type(
     update: Update, context: ContextTypes.DEFAULT_TYPE
-):
+) -> int:
     """Редактирование типа помещения."""
 
     try:
@@ -711,7 +717,7 @@ async def handle_edit_select_room_type(
 
 async def handle_edit_about_coliving(
     update: Update, context: ContextTypes.DEFAULT_TYPE
-):
+) -> int:
     """Редактирование описания коливинга."""
 
     about_coliving = update.message.text
@@ -739,7 +745,7 @@ async def handle_edit_about_coliving(
 
 async def handle_edit_price(
     update: Update, context: ContextTypes.DEFAULT_TYPE
-):
+) -> int:
     """Редактирование цены коливинга."""
 
     try:
@@ -757,7 +763,7 @@ async def handle_edit_price(
 
 async def handle_edit_photo_room(
     update: Update, context: ContextTypes.DEFAULT_TYPE
-):
+) -> int:
     """Редактирование фото помещения."""
 
     if update.message.text:
@@ -778,7 +784,7 @@ async def handle_edit_photo_room(
 async def handle_edit_profile_confirmation(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
-):
+) -> int:
     """
     Подтверждение измененной анкеты,
     Продолжение редактирования,
