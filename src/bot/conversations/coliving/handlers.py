@@ -22,7 +22,7 @@ from .callback_funcs import (about_coliving, photo,
                              start,
                              what_to_edit)
 from .states import ColivingStates as states
-from .templates import COLIVING_START, LOCATION_MOSCOW_BTN_TEXT, LOCATION_SPB_BTN_TEXT
+from .templates import COLIVING_START
 
 
 acquaintance_handler: ConversationHandler = ConversationHandler(
@@ -112,7 +112,7 @@ acquaintance_handler: ConversationHandler = ConversationHandler(
             ),
             CallbackQueryHandler(
                 callback=what_to_edit,
-                pattern=r'^edit_description'
+                pattern=r'^edit_about'
             ),
             CallbackQueryHandler(
                 callback=what_to_edit,

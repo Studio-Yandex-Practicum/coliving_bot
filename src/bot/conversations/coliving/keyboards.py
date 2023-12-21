@@ -3,26 +3,68 @@ from telegram import (
     InlineKeyboardMarkup,
 )
 
-
-HELLO_KEYBOARD = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(
-                text='Начать',
-                callback_data='hello',
-            )
-        ],
-    ],
+from conversations.coliving.templates import (
+    BTN_EDIT_PROFILE,
+    BTN_LABEL_EDIT_PROFILE_KEYBOARD,
+    BTN_GO_TO_MENU,
+    BTN_LABEL_GO_TO_MENU,
+    BTN_HIDE,
+    BTN_LABEL_HIDE_SEARCH_KEYBOARD,
+    BTN_MOSCOW,
+    BTN_LABEL_MOSCOW,
+    BTN_ROOMMATES,
+    BTN_LABEL_ROOMMATES,
+    BTN_SHOW,
+    BTN_LABEL_SHOW,
+    BTN_TRANSFER_TO,
+    BTN_LABEL_TRANSFER_TO,
+    BTN_VIEWS,
+    BTN_LABEL_VIEWS,
+    BTN_SPB,
+    BTN_LABEL_SPB,
+    BTN_LABEL_BED_IN_ROOM,
+    BTN_LABEL_ROOM_IN_APPARTMENT,
+    BTN_LABEL_ROOM_IN_HOUSE,
+    BTN_ROOM_IN_HOUSE,
+    BTN_ROOM_IN_APPARTMENT,
+    BTN_BED_IN_ROOM,
+    BTN_CONFIRM,
+    BTN_LABEL_CONFIRM,
+    BTN_CANCEL,
+    BTN_CANCEL_EDIT,
+    BTN_LABEL_CANCEL,
+    BTN_LABEL_CANCEL_EDIT,
+    BTN_FILL_AGAIN,
+    BTN_LABEL_FILL_AGAIN,
+    BTN_EDIT_ROOM_TYPE,
+    BTN_LABEL_EDIT_ROOM_TYPE,
+    BTN_EDIT_ABOUT_ROOM,
+    BTN_LABEL_EDIT_ABOUT_ROOM,
+    BTN_EDIT_PRICE,
+    BTN_LABEL_EDIT_PRICE,
+    BTN_EDIT_PHOTO,
+    BTN_LABEL_EDIT_PHOTO,
+    BTN_EDIT_CONTINUE,
+    BTN_LABEL_EDIT_CONTINUE,
+    BTN_INVITE_ROOMMATES,
+    BTN_LABEL_INVITE_ROOMMATES,
+    BTN_DELETE_ROOMMATES,
+    BTN_LABEL_DELETE_ROOMMATES,
+    BTN_REPORT_ROOMMATES,
+    BTN_LABEL_REPORT_ROOMMATES,
+    BTN_DELETE_CONFIRM,
+    BTN_LABEL_DELETE_CONFIRM,
 )
 
+
 CONFIRMATION_KEYBOARD = InlineKeyboardButton(
-    text='Да, подтвердить',
-    callback_data='confirm'
+    text=BTN_LABEL_CONFIRM,
+    callback_data=BTN_CONFIRM
 )
 
 CANCEL_KEYBOARD = InlineKeyboardButton(
-    text='Отменить',
-    callback_data='cancel'
+    text=BTN_LABEL_CANCEL,
+    callback_data=BTN_CANCEL
 )
 
 # Москва
@@ -32,12 +74,12 @@ LOCATION_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         [
             InlineKeyboardButton(
-                text='Москва',
-                callback_data='moscow_city'
+                text=BTN_LABEL_MOSCOW,
+                callback_data=BTN_MOSCOW
             ),
             InlineKeyboardButton(
-                text='Санкт-Петербург',
-                callback_data='spb_city'
+                text=BTN_LABEL_SPB,
+                callback_data=BTN_SPB
             ),
         ]
     )
@@ -51,16 +93,16 @@ ROOM_TYPE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         [
             InlineKeyboardButton(
-                text='Спальное место в комнате',
-                callback_data='bed_in_room'
+                text=BTN_LABEL_BED_IN_ROOM,
+                callback_data=BTN_BED_IN_ROOM
             ),
             InlineKeyboardButton(
-                text='Комната в квартире',
-                callback_data='room_in_apartment'
+                text=BTN_LABEL_ROOM_IN_APPARTMENT,
+                callback_data=BTN_ROOM_IN_APPARTMENT
             ),
             InlineKeyboardButton(
-                text='Комната в доме',
-                callback_data='room_in_house'
+                text=BTN_LABEL_ROOM_IN_HOUSE,
+                callback_data=BTN_ROOM_IN_HOUSE
             ),
         ]
     )
@@ -70,8 +112,8 @@ ROOM_TYPE_KEYBOARD = InlineKeyboardMarkup.from_column(
 # Изменить коливинг профиль
 
 EDIT_PROFILE_KEYBOARD = InlineKeyboardButton(
-        text='Изменить коливинг профиль',
-        callback_data='edit_profile'
+        text=BTN_LABEL_EDIT_PROFILE_KEYBOARD,
+        callback_data=BTN_EDIT_PROFILE
 )
 
 CONFIRM_OR_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
@@ -81,33 +123,28 @@ CONFIRM_OR_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     )
 )
 
-# Заполнить заново
-# Описание
-# Цена
-# Фотография
-
 WHAT_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         [
             InlineKeyboardButton(
-                text='Заполнить заново',
-                callback_data='edit_fill_again'
+                text=BTN_LABEL_FILL_AGAIN,
+                callback_data=BTN_FILL_AGAIN
             ),
             InlineKeyboardButton(
-                text='Тип помещения',
-                callback_data='edit_room_type'
+                text=BTN_LABEL_EDIT_ROOM_TYPE,
+                callback_data=BTN_EDIT_ROOM_TYPE
             ),
             InlineKeyboardButton(
-                text='Описание',
-                callback_data='edit_description'
+                text=BTN_LABEL_EDIT_ABOUT_ROOM,
+                callback_data=BTN_EDIT_ABOUT_ROOM
             ),
             InlineKeyboardButton(
-                text='Цена',
-                callback_data='edit_price'
+                text=BTN_LABEL_EDIT_PRICE,
+                callback_data=BTN_EDIT_PRICE
             ),
             InlineKeyboardButton(
-                text='Фото квартиры',
-                callback_data='edit_send_photo'
+                text=BTN_LABEL_EDIT_PHOTO,
+                callback_data=BTN_EDIT_PHOTO
             ),
         ]
     )
@@ -116,13 +153,13 @@ WHAT_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
 # Скрыть из поиска |  Показать в поиске
 
 SHOW_SEARCH_KEYBOARD = InlineKeyboardButton(
-    text='Показать в поиске',
-    callback_data='show',
+    text=BTN_LABEL_SHOW,
+    callback_data=BTN_SHOW,
 )
 
 HIDE_SEARCH_KEYBOARD = InlineKeyboardButton(
-    text='Скрыть из поиска',
-    callback_data='hide',
+    text=BTN_LABEL_HIDE_SEARCH_KEYBOARD,
+    callback_data=BTN_HIDE,
 )
 
 IS_VISIBLE_OR_NOT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
@@ -132,20 +169,16 @@ IS_VISIBLE_OR_NOT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     )
 )
 
-# Да, верно
-# Отменить редактирование
-# Продолжить редактирование
-
 EDIT_CONFIRMATION_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         CONFIRMATION_KEYBOARD,
         InlineKeyboardButton(
-            text='Отменить редактирование',
-            callback_data='cancel'
+            text=BTN_LABEL_CANCEL_EDIT,
+            callback_data=BTN_CANCEL_EDIT
         ),
         InlineKeyboardButton(
-            text='Продолжить редактирование',
-            callback_data='continue_editing'
+            text=BTN_LABEL_EDIT_CONTINUE,
+            callback_data=BTN_EDIT_CONTINUE
         ),
     )
 )
@@ -157,20 +190,20 @@ COLIVING_PROFILE_KEYBOARD_VISIBLE = InlineKeyboardMarkup.from_column(
         EDIT_PROFILE_KEYBOARD,
         HIDE_SEARCH_KEYBOARD,
         InlineKeyboardButton(
-            text='Посмотреть анкеты соседей',
-            callback_data='roommates_profiles'
+            text=BTN_LABEL_ROOMMATES,
+            callback_data=BTN_ROOMMATES
         ),
         InlineKeyboardButton(
-            text='Просмотры',
-            callback_data='views'
+            text=BTN_LABEL_VIEWS,
+            callback_data=BTN_VIEWS
         ),
         InlineKeyboardButton(
-            text='Передача коливинга',
-            callback_data='transfer_to'
+            text=BTN_LABEL_TRANSFER_TO,
+            callback_data=BTN_TRANSFER_TO
         ),
         InlineKeyboardButton(
-            text='Вернуться в меню',
-            callback_data='go_to_menu'
+            text=BTN_LABEL_GO_TO_MENU,
+            callback_data=BTN_GO_TO_MENU
         ),
     )
 )
@@ -182,20 +215,20 @@ COLIVING_PROFILE_KEYBOARD_NOT_VISIBLE = InlineKeyboardMarkup.from_column(
         EDIT_PROFILE_KEYBOARD,
         SHOW_SEARCH_KEYBOARD,
         InlineKeyboardButton(
-            text='Посмотреть анкеты соседей',
-            callback_data='roommates_profiles'
+            text=BTN_LABEL_ROOMMATES,
+            callback_data=BTN_ROOMMATES
         ),
         InlineKeyboardButton(
-            text='Просмотры',
-            callback_data='views'
+            text=BTN_LABEL_VIEWS,
+            callback_data=BTN_VIEWS
         ),
         InlineKeyboardButton(
-            text='Передача коливинга',
-            callback_data='transfer_to'
+            text=BTN_LABEL_TRANSFER_TO,
+            callback_data=BTN_TRANSFER_TO
         ),
         InlineKeyboardButton(
-            text='Вернуться в меню',
-            callback_data='go_to_menu'
+            text=BTN_LABEL_GO_TO_MENU,
+            callback_data=BTN_GO_TO_MENU
         ),
     )
 )
@@ -208,7 +241,7 @@ COLIVING_PROFILE_KEYBOARD_NOT_VISIBLE = InlineKeyboardMarkup.from_column(
 
 #             InlineKeyboardButton(
 #                 text='Выбран',
-#                 callback_data='confirm'
+#                 callback_data=BTN_CONFIRM
 #             ),
 #         ]
 #     ]
@@ -218,23 +251,23 @@ COLIVING_PROFILE_KEYBOARD_NOT_VISIBLE = InlineKeyboardMarkup.from_column(
 # Пожаловаться на пользователя
 
 INVITE_ROOMMATES_PROFILE_KEYBOARD = InlineKeyboardButton(
-    text='Пригласить в коливинг',
-    callback_data='invite_roommate'
+    text=BTN_LABEL_INVITE_ROOMMATES,
+    callback_data=BTN_INVITE_ROOMMATES
 )
 
 DELETE_ROOMMATES_PROFILE_KEYBOARD = InlineKeyboardButton(
-    text='Удалить из коливинга',
-    callback_data='delete_roommate'
+    text=BTN_LABEL_DELETE_ROOMMATES,
+    callback_data=BTN_DELETE_ROOMMATES
 )
 
 REPORT_ROOMMATES_PROFILE_KEYBOARD = InlineKeyboardButton(
-    text='Пожаловаться на пользователя',
-    callback_data='report_to'
+    text=BTN_LABEL_REPORT_ROOMMATES,
+    callback_data=BTN_REPORT_ROOMMATES
 )
 
 CONFIRMATION_DELETE_KEYBOARD = InlineKeyboardButton(
-    text='Да, удалить',
-    callback_data='confirm'
+    text=BTN_LABEL_DELETE_CONFIRM,
+    callback_data=BTN_DELETE_CONFIRM
 )
 
 ROOMMATES_INVITE_REPORT_KEYBOARD = InlineKeyboardMarkup.from_column(
