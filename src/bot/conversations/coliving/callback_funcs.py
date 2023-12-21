@@ -45,17 +45,22 @@ from conversations.coliving.templates import (
     BTN_LABEL_ROOM_IN_APPARTMENT,
     BTN_LABEL_ROOM_IN_HOUSE,
     BTN_LABEL_SPB,
+    BTN_MOSCOW,
     BTN_ROOM_IN_APPARTMENT,
     BTN_ROOM_IN_HOUSE,
     BTN_ROOMMATES,
     BTN_SHOW,
+    BTN_SPB,
     BTN_TRANSFER_TO,
     BTN_VIEWS,
+    ERR_MSG_ABOUT_MAX_LEN,
     ERR_MSG_PRICE,
     ERR_NEED_TO_SELECT_BTN,
     ERR_PHOTO_NOT_TEXT,
     IS_VISIBLE_FIELD,
     LOCATION_FIELD,
+    MAX_ABOUT_LENGTH,
+    MIN_ABOUT_LENGTH,
     PRICE_FIELD,
     PROFILE_DATA,
     REPLY_BTN_HIDE,
@@ -80,6 +85,7 @@ from conversations.coliving.templates import (
     ROOMMATES_FIELD,
     VIEWERS_FIELD,
 )
+from general.validators import value_is_in_range_validator
 from internal_requests import mock as api_service
 from internal_requests.entities import ColivingProfile
 from internal_requests.service import create_coliving
@@ -155,7 +161,7 @@ async def handle_coliving(
 
     if call_back == BTN_EDIT_PROFILE:
         await update.effective_message.reply_text(
-            text=REPLY_MSG + BTN_LABEL_EDIT_PROFILE_KEYBOARD
+            text=f"{REPLY_MSG}{BTN_LABEL_EDIT_PROFILE_KEYBOARD}"
         )
         await update.effective_message.reply_text(
             text=REPLY_MSG_WHAT_TO_EDIT,
@@ -269,110 +275,90 @@ async def handle_coliving(
         return ConversationHandler.END
 
 
-async def location_not_text(update: Update, context):
-    """Проверка на выбор кнопки location, а не ввод текста пользователем."""
+async def handle_location(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """Выбор location и запись в контекст."""
 
-    if update.message.text:
-        await update.effective_message.reply_text(text=ERR_NEED_TO_SELECT_BTN)
+    try:
+        location = update.callback_query.data
+    except AttributeError:
+        await update.effective_message.reply_text(
+            ERR_NEED_TO_SELECT_BTN,
+        )
         await update.effective_chat.send_message(
             text=REPLY_MSG_ASK_LOCATION,
             reply_markup=LOCATION_KEYBOARD,
         )
         return states.LOCATION
-
-
-async def select_moscow_location(update: Update, context):
-    """Сохранение контекста location."""
-
-    message_text = BTN_LABEL_MOSCOW
-    context.user_data["location"] = message_text
-    return await _send_answer(message_text, update)
-
-
-async def select_spb_location(update: Update, context):
-    """Сохранение контекста location."""
-
-    message_text = BTN_LABEL_SPB
-    context.user_data["location"] = message_text
-    return await _send_answer(message_text, update)
-
-
-async def _send_answer(message_text, update):
-    """Перевод на выбор ROOM_TYPE."""
-
     await update.effective_message.edit_reply_markup()
-    await update.effective_message.reply_text(
-        text=f"{REPLY_MSG} {message_text}"
-    )
+    call_back = update.callback_query.data
+    if call_back == BTN_MOSCOW:
+        location = BTN_LABEL_MOSCOW
+    elif call_back == BTN_SPB:
+        location = BTN_LABEL_SPB
+    context.user_data["location"] = location
+    await update.effective_message.reply_text(text=f"{REPLY_MSG}{location}")
     await update.effective_message.reply_text(
         text=REPLY_MSG_ASK_ROOM_TYPE, reply_markup=ROOM_TYPE_KEYBOARD
     )
     return states.ROOM_TYPE
 
 
-async def room_type_not_text(update: Update, context):
-    """Проверка на выбор кнопки room_type, а не ввод текста пользователем."""
+async def handle_room_type(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """Выбор room_type и запись в контекст."""
 
-    if update.message.text:
-        await update.effective_message.reply_text(text=ERR_NEED_TO_SELECT_BTN)
+    try:
+        room_type = update.callback_query.data
+    except AttributeError:
         await update.effective_message.reply_text(
+            ERR_NEED_TO_SELECT_BTN,
+        )
+        await update.effective_chat.send_message(
             text=REPLY_MSG_ASK_ROOM_TYPE, reply_markup=ROOM_TYPE_KEYBOARD
         )
         return states.ROOM_TYPE
 
-
-async def select_bed_in_room_type(update: Update, context):
-    """Сохранение контекста room_type."""
-
-    message_text = BTN_LABEL_BED_IN_ROOM
-    context.user_data["room_type"] = message_text
-    return await _send_answer_room_type(message_text, update)
-
-
-async def select_room_in_apartment_type(update: Update, context):
-    """Сохранение контекста room_type."""
-
-    message_text = BTN_LABEL_ROOM_IN_APPARTMENT
-    context.user_data["room_type"] = message_text
-    return await _send_answer_room_type(message_text, update)
-
-
-async def select_room_in_house_type(update: Update, context):
-    """Сохранение контекста room_type."""
-
-    message_text = BTN_LABEL_ROOM_IN_HOUSE
-    context.user_data["room_type"] = message_text
-    return await _send_answer_room_type(message_text, update)
-
-
-async def _send_answer_room_type(message_text, update):
-    """Перевод на ввод описания ABOUT_ROOM."""
-
     await update.effective_message.edit_reply_markup()
-    await update.effective_message.reply_text(
-        text=f"{REPLY_MSG} {message_text}"
-    )
+    call_back = update.callback_query.data
+
+    if call_back == BTN_BED_IN_ROOM:
+        room_type = BTN_LABEL_BED_IN_ROOM
+    if call_back == BTN_ROOM_IN_APPARTMENT:
+        room_type = BTN_LABEL_ROOM_IN_APPARTMENT
+    if call_back == BTN_ROOM_IN_HOUSE:
+        room_type = BTN_LABEL_ROOM_IN_HOUSE
+
+    context.user_data["room_type"] = room_type
+    await update.effective_message.reply_text(text=f"{REPLY_MSG}{room_type}")
     await update.effective_message.reply_text(
         text=REPLY_MSG_ASK_ABOUT,
     )
     return states.ABOUT_ROOM
-    ##################
-
-    # if IS_EDIT == 0:
-    #     return states.ABOUT_ROOM
-
-    # if IS_EDIT == 1:
-    #     IS_EDIT = 0
-    #     return states.EDIT_CONFIRMATION
 
 
-async def about_coliving(update, context):
+async def handle_about_coliving(update, context):
     """Сохранение контекста about. Перевод на ввод PRICE."""
 
-    message_text = update.message.text.strip()
-    context.user_data["about"] = message_text
+    about_coliving = update.message.text
+    if not await value_is_in_range_validator(
+        update,
+        context,
+        len(about_coliving),
+        min=MIN_ABOUT_LENGTH,
+        max=MAX_ABOUT_LENGTH,
+        message=ERR_MSG_ABOUT_MAX_LEN.format(max=MAX_ABOUT_LENGTH),
+    ):
+        await update.effective_message.reply_text(
+            text=REPLY_MSG_ASK_ABOUT,
+        )
+        return states.ABOUT_ROOM
+
+    context.user_data["about"] = about_coliving
     await update.effective_message.reply_text(
-        text=f"{REPLY_MSG} {message_text}"
+        text=f"{REPLY_MSG}{about_coliving}"
     )
     await update.effective_message.reply_text(
         text=REPLY_MSG_ASK_PRICE,
@@ -380,19 +366,17 @@ async def about_coliving(update, context):
     return states.PRICE
 
 
-async def price(update, context):
+async def handle_price(update, context):
     """Сохранение контекста price. Перевод на выбор PHOTO."""
 
     try:
-        message_text = int(update.message.text)
+        price = int(update.message.text)
     except ValueError:
         await update.effective_message.reply_text(text=ERR_MSG_PRICE)
         return states.PRICE
-    message_text = update.message.text.strip()
+    message_text = update.message.text
     context.user_data["price"] = message_text
-    await update.effective_message.reply_text(
-        text=f"{REPLY_MSG} {message_text}"
-    )
+    await update.effective_message.reply_text(text=f"{REPLY_MSG}{price}")
     await update.effective_message.reply_text(
         text=REPLY_MSG_ASK_PHOTO_SEND,
     )
@@ -502,37 +486,6 @@ async def show_coliving_profile(
     )
 
 
-# async def show_coliving_profile(
-#     update: Update,
-#     context: ContextTypes.DEFAULT_TYPE
-# ):
-#     """Просмотр профиля и переводит на подтверждение профиля CONFIRMATION."""
-
-#     effective_chat = update.effective_chat
-#     ask_to_confirm = REPLY_MSG_ASK_TO_CONFIRM
-#     await context.bot.sendPhoto(
-#     # await context.bot.send_message(
-#         chat_id=update.effective_chat.id,
-#         photo=(
-#             f'media/{update.effective_chat.id}/photos/{effective_chat.first_name}_room_photo.jpg'
-#         ),
-#         caption=REPLY_MSG_TITLE
-#         + '\n'
-#         + PROFILE_DATA.format(
-#             location=context.user_data.get(LOCATION_FIELD),
-#             room_type=context.user_data.get(ROOM_TYPE_FIELD),
-#             about=context.user_data.get(ABOUT_FIELD),
-#             price=context.user_data.get(PRICE_FIELD),
-#             is_visible=False,
-#         )
-#         + '\n'
-#         + ask_to_confirm,
-#         parse_mode=ParseMode.HTML,
-#         reply_markup=CONFIRM_OR_EDIT_PROFILE_KEYBOARD
-#     )
-#     return states.CONFIRMATION
-
-
 async def confirm_or_edit_profile(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ):
@@ -553,12 +506,23 @@ async def confirm_or_edit_profile(
     #     return await show_coliving_profile(update, context)
     #################################################################
 
+    try:
+        update.callback_query.data
+    except AttributeError:
+        await update.effective_message.reply_text(
+            ERR_NEED_TO_SELECT_BTN,
+        )
+        await show_coliving_profile(
+            update, context, keyboard=CONFIRM_OR_EDIT_PROFILE_KEYBOARD
+        )
+        return states.CONFIRMATION
+
     await update.effective_message.edit_reply_markup()
     call_back = update.callback_query.data
 
     if call_back == BTN_EDIT_PROFILE:
         await update.effective_message.reply_text(
-            text=f"{REPLY_MSG} {BTN_LABEL_EDIT_PROFILE_KEYBOARD}"
+            text=f"{REPLY_MSG}{BTN_LABEL_EDIT_PROFILE_KEYBOARD}"
         )
         await update.effective_message.reply_text(
             text=REPLY_MSG_WHAT_TO_EDIT,
@@ -679,22 +643,6 @@ async def edit_select_room_type(
 ):
     """Редактирование типа помещения."""
 
-    #################################################################
-    # if update.message.text:
-    #   ^^^^^^^^^^^^^^^^^^^
-    # AttributeError: 'NoneType' object has no attribute 'text'
-    #################################################################
-
-    # if update.message.text:
-    #     await update.effective_message.reply_text(
-    #         text=ERR_NEED_TO_SELECT_BTN
-    #     )
-    #     await update.effective_message.reply_text(
-    #         text=REPLY_MSG_ASK_ROOM_TYPE,
-    #         reply_markup=ROOM_TYPE_KEYBOARD
-    #     )
-    #     return states.EDIT_ROOM_TYPE
-
     await update.effective_message.edit_reply_markup()
     call_back = update.callback_query.data
 
@@ -715,15 +663,29 @@ async def edit_select_room_type(
     return states.EDIT_CONFIRMATION
 
 
-async def edit_about_coliving(
+async def handle_edit_about_coliving(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ):
     """Редактирование описания коливинга."""
 
-    message_text = update.message.text
-    context.user_data["about"] = message_text
+    about_coliving = update.message.text
+    if not await value_is_in_range_validator(
+        update,
+        context,
+        len(about_coliving),
+        min=MIN_ABOUT_LENGTH,
+        max=MAX_ABOUT_LENGTH,
+        message=ERR_MSG_ABOUT_MAX_LEN.format(max=MAX_ABOUT_LENGTH),
+    ):
+        await update.effective_message.reply_text(
+            text=REPLY_MSG_ASK_ABOUT,
+        )
+        return states.EDIT_ABOUT_ROOM
+
+    about_coliving = update.message.text
+    context.user_data["about"] = about_coliving
     await update.effective_message.reply_text(
-        text=f"{REPLY_MSG}{message_text}"
+        text=f"{REPLY_MSG}{about_coliving}"
     )
     await show_coliving_profile(update, context, EDIT_CONFIRMATION_KEYBOARD)
     return states.EDIT_CONFIRMATION

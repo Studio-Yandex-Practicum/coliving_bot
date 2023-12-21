@@ -7,25 +7,19 @@ from telegram.ext import (
 )
 
 from .callback_funcs import (
-    about_coliving,
     confirm_or_edit_profile,
-    edit_about_coliving,
     edit_photo_room,
     edit_price,
     edit_profile_confirmation,
     edit_select_room_type,
+    handle_about_coliving,
     handle_coliving,
+    handle_edit_about_coliving,
+    handle_location,
+    handle_price,
+    handle_room_type,
     is_visible_coliving_profile,
-    location_not_text,
     photo,
-    price,
-    room_type_not_text,
-    select_bed_in_room_type,
-    select_moscow_location,
-    select_room_in_apartment_type,
-    select_room_in_house_type,
-    select_spb_location,
-    show_coliving_profile,
     start,
     what_to_edit,
 )
@@ -37,42 +31,44 @@ acquaintance_handler: ConversationHandler = ConversationHandler(
     states={
         states.LOCATION: [
             CallbackQueryHandler(
-                callback=select_moscow_location, pattern=r"^moscow_city"
+                callback=handle_location, pattern=r"^moscow_city"
             ),
             CallbackQueryHandler(
-                callback=select_spb_location, pattern=r"^spb_city"
+                callback=handle_location, pattern=r"^spb_city"
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
-                location_not_text,
+                handle_location,
             ),
         ],
         states.ROOM_TYPE: [
             CallbackQueryHandler(
-                callback=select_bed_in_room_type, pattern=r"^bed_in_room"
+                callback=handle_room_type, pattern=r"^bed_in_room"
             ),
             CallbackQueryHandler(
-                callback=select_room_in_apartment_type,
+                callback=handle_room_type,
                 pattern=r"^room_in_apartment",
             ),
             CallbackQueryHandler(
-                callback=select_room_in_house_type, pattern=r"^room_in_house"
+                callback=handle_room_type, pattern=r"^room_in_house"
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
-                room_type_not_text,
+                handle_room_type,
             ),
         ],
         states.ABOUT_ROOM: [
-            MessageHandler(filters.TEXT & ~filters.COMMAND, about_coliving),
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND, handle_about_coliving
+            ),
         ],
         states.PRICE: [
             MessageHandler(
                 # filters.Regex(r'^([0-9]{4})$') & ~filters.COMMAND, price
                 filters.Regex(r"^(\d*)$") & ~filters.COMMAND,
-                price,
+                handle_price,
             ),
-            MessageHandler(filters.TEXT & ~filters.COMMAND, price),
+            MessageHandler(filters.TEXT & ~filters.COMMAND, handle_price),
         ],
         states.PHOTO_ROOM: [
             MessageHandler(filters.PHOTO & ~filters.COMMAND, photo),
@@ -86,7 +82,9 @@ acquaintance_handler: ConversationHandler = ConversationHandler(
                 callback=confirm_or_edit_profile, pattern=r"^edit_profile"
             ),
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND, show_coliving_profile
+                filters.TEXT & ~filters.COMMAND,
+                confirm_or_edit_profile,
+                # show_coliving_profile
             ),
         ],
         states.EDIT: [
@@ -127,13 +125,13 @@ acquaintance_handler: ConversationHandler = ConversationHandler(
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
-                room_type_not_text,
+                handle_room_type,
             ),
         ],
         states.EDIT_ABOUT_ROOM: [
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
-                edit_about_coliving,
+                handle_edit_about_coliving,
             ),
         ],
         states.EDIT_PRICE: [

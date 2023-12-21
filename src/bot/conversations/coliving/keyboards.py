@@ -61,9 +61,6 @@ CANCEL_KEYBOARD = InlineKeyboardButton(
     text=BTN_LABEL_CANCEL, callback_data=BTN_CANCEL
 )
 
-# Москва
-# Санкт-Петербург
-
 LOCATION_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         [
@@ -74,10 +71,6 @@ LOCATION_KEYBOARD = InlineKeyboardMarkup.from_column(
         ]
     )
 )
-
-# Спальное место в комнате
-# Комната в квартире
-# Комната в доме
 
 ROOM_TYPE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
@@ -95,9 +88,6 @@ ROOM_TYPE_KEYBOARD = InlineKeyboardMarkup.from_column(
         ]
     )
 )
-
-# Да, верно
-# Изменить коливинг профиль
 
 EDIT_PROFILE_KEYBOARD = InlineKeyboardButton(
     text=BTN_LABEL_EDIT_PROFILE_KEYBOARD, callback_data=BTN_EDIT_PROFILE
@@ -133,8 +123,6 @@ WHAT_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     )
 )
 
-# Скрыть из поиска |  Показать в поиске
-
 SHOW_SEARCH_KEYBOARD = InlineKeyboardButton(
     text=BTN_LABEL_SHOW,
     callback_data=BTN_SHOW,
@@ -164,8 +152,6 @@ EDIT_CONFIRMATION_KEYBOARD = InlineKeyboardMarkup.from_column(
     )
 )
 
-# + Скрыть из поиска |  Показать в поиске
-
 COLIVING_PROFILE_KEYBOARD_VISIBLE = InlineKeyboardMarkup.from_column(
     button_column=(
         EDIT_PROFILE_KEYBOARD,
@@ -182,8 +168,6 @@ COLIVING_PROFILE_KEYBOARD_VISIBLE = InlineKeyboardMarkup.from_column(
         ),
     )
 )
-
-# + Показать в поиске
 
 COLIVING_PROFILE_KEYBOARD_NOT_VISIBLE = InlineKeyboardMarkup.from_column(
     button_column=(
@@ -215,9 +199,6 @@ COLIVING_PROFILE_KEYBOARD_NOT_VISIBLE = InlineKeyboardMarkup.from_column(
 #         ]
 #     ]
 # )
-
-# Пригласить в коливинг | Удалить из коливинга
-# Пожаловаться на пользователя
 
 INVITE_ROOMMATES_PROFILE_KEYBOARD = InlineKeyboardButton(
     text=BTN_LABEL_INVITE_ROOMMATES, callback_data=BTN_INVITE_ROOMMATES

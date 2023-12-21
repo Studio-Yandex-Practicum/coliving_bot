@@ -8,6 +8,14 @@ IS_VISIBLE_FIELD = "is_visible"
 ROOMMATES_FIELD = "roommates"
 VIEWERS_FIELD = "viewers"
 
+MIN_ABOUT_LENGTH = 0
+MAX_ABOUT_LENGTH = 1000
+
+DEFAULT_ERROR_MESSAGE = "Некорректный ввод"
+
+ERR_MSG_ABOUT_MAX_LEN = (
+    "Превышено максимальное количество символов равное {max}."
+)
 ERR_MSG_PRICE = "Цена, должна быть числом!"
 ERR_NEED_TO_SELECT_BTN = "Пожалуйста, выберите вариант из предложенных."
 ERR_PHOTO_NOT_TEXT = "Пожалуйста, отправьте 5 фотографий"
