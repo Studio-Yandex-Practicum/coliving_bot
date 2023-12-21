@@ -20,4 +20,5 @@ class ColivingStates(str, enum.Enum):
         EDIT_PRICE,
         EDIT_PHOTO_ROOM,
         EDIT_CONFIRMATION,
-    ) = range(15)
+        EDIT_LOCATION,
+    ) = range(16)

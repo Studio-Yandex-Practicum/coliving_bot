@@ -118,6 +118,8 @@ BTN_REPORT_ROOMMATES = "report_to"
 BTN_LABEL_REPORT_ROOMMATES = "Пожаловаться на пользователя"
 BTN_DELETE_CONFIRM = "confirm_delete"
 BTN_LABEL_DELETE_CONFIRM = "Да, удалить"
+BTN_EDIT_LOCATION = "edit_location"
+BTN_LABEL_EDIT_LOCATION = "Местоположение"
 
 PROFILE_DATA = (
     "<b>Место проживания:</b> {location}\n"

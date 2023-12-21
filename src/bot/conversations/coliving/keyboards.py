@@ -9,6 +9,7 @@ from conversations.coliving.templates import (
     BTN_DELETE_ROOMMATES,
     BTN_EDIT_ABOUT_ROOM,
     BTN_EDIT_CONTINUE,
+    BTN_EDIT_LOCATION,
     BTN_EDIT_PHOTO,
     BTN_EDIT_PRICE,
     BTN_EDIT_PROFILE,
@@ -25,6 +26,7 @@ from conversations.coliving.templates import (
     BTN_LABEL_DELETE_ROOMMATES,
     BTN_LABEL_EDIT_ABOUT_ROOM,
     BTN_LABEL_EDIT_CONTINUE,
+    BTN_LABEL_EDIT_LOCATION,
     BTN_LABEL_EDIT_PHOTO,
     BTN_LABEL_EDIT_PRICE,
     BTN_LABEL_EDIT_PROFILE_KEYBOARD,
@@ -105,6 +107,9 @@ WHAT_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
         [
             InlineKeyboardButton(
                 text=BTN_LABEL_FILL_AGAIN, callback_data=BTN_FILL_AGAIN
+            ),
+            InlineKeyboardButton(
+                text=BTN_LABEL_EDIT_LOCATION, callback_data=BTN_EDIT_LOCATION
             ),
             InlineKeyboardButton(
                 text=BTN_LABEL_EDIT_ROOM_TYPE, callback_data=BTN_EDIT_ROOM_TYPE
