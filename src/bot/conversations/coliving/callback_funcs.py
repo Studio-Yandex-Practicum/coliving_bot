@@ -8,6 +8,8 @@ from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
 
 from conversations.coliving.keyboards import (
+    COLIVING_PROFILE_KEYBOARD_NOT_VISIBLE,
+    COLIVING_PROFILE_KEYBOARD_VISIBLE,
     CONFIRM_OR_EDIT_PROFILE_KEYBOARD,
     EDIT_CONFIRMATION_KEYBOARD,
     IS_VISIBLE_OR_NOT_PROFILE_KEYBOARD,
@@ -32,6 +34,9 @@ ROOM_TYPE_FIELD = 'room_type'
 ABOUT_FIELD = 'about'
 PRICE_FIELD = 'price'
 IS_VISIBLE_FIELD = 'is_visible'
+ROOMMATES = 'roommates'
+VIEWERS = 'viewers'
+
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -57,22 +62,166 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             text=('Ууупс, похоже у вас еще не создан коливинг! ' '\n'
                   'Самое время создать профиль! ')
         )
-        # reply_markup = CONFIRMATION_KEYBOARD CANCEL_KEYBOARD
         await update.effective_chat.send_message(
             text='Где организован коливинг? ',
             reply_markup=LOCATION_KEYBOARD,
-            # reply_markup=CONFIRMATION_KEYBOARD CANCEL_KEYBOARD,
         )
         return states.LOCATION
 
     elif coliving_status.is_сoliving == True:
         user_coliving_profile = await api_service.get_user_coliving_info_by_tg_id(update)
-        # print(user_coliving_profile)
-        await update.effective_chat.send_message(
-            text=f'Ваш профиль коливинга \n{user_coliving_profile} '
+        await set_profile_to_context(update, context, user_coliving_profile)
+        if user_coliving_profile.is_visible == True:
+            await show_coliving_profile(
+                update,
+                context,
+                keyboard=COLIVING_PROFILE_KEYBOARD_VISIBLE
+            )
+        else:
+            await show_coliving_profile(
+                update,
+                context,
+                keyboard=COLIVING_PROFILE_KEYBOARD_NOT_VISIBLE
+            )
+        return states.COLIVING
+
+
+async def set_profile_to_context(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    user_coliving_profile,
+) -> None:
+    """Добавление информации о коливинге в контекст"""
+    context.user_data[LOCATION_FIELD] = user_coliving_profile.location
+    context.user_data[ROOM_TYPE_FIELD] = user_coliving_profile.room_type
+    context.user_data[ABOUT_FIELD] = user_coliving_profile.about
+    context.user_data[PRICE_FIELD] = user_coliving_profile.price
+    context.user_data[ROOMMATES] = user_coliving_profile.roommates
+    context.user_data[VIEWERS] = user_coliving_profile.viewers
+    context.user_data[IS_VISIBLE_FIELD] = user_coliving_profile.is_visible
+
+
+async def handle_coliving(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+) -> int:
+    """Взаимодействие с профилем коливинга"""
+
+    await update.effective_message.edit_reply_markup()
+    call_back = update.callback_query.data
+
+    if call_back == 'edit_profile':
+        await update.effective_message.reply_text(
+            text=f'Ваш ответ: Изменить коливинг профиль'
+        )
+        await update.effective_message.reply_text(
+            text='Что хотите изменить?',
+            reply_markup=WHAT_EDIT_PROFILE_KEYBOARD
+        )
+        return states.EDIT
+    elif call_back == 'hide':
+        context.user_data['is_visible'] = False
+        await update.effective_message.reply_text(
+            text=('Ваш ответ: Скрыть из поиска' '\n'
+                  '\n'
+                  'Анкета скрыта из поиска. '
+                  'Не забудьте установить этот параметр позже, '
+                  'чтобы найти соседей.')
+        )
+        #############################################################
+        # Будет ошибка
+        # поэтому заглушка
+        await update.effective_message.reply_text(
+            text=('заглушка. По идее здесь сохранение '
+                  'и перевод обрватно на state.COLIVING' '\n'
+                  '\n'
+                  'Нажмите /coliving')
+        )
+        return ConversationHandler.END
+        #############################################################
+        # await save_coliving_info_to_db(update, context)
+        # return states.COLIVING
+
+    elif call_back == 'show':
+        context.user_data['is_visible'] = True
+        await update.effective_message.reply_text(
+            text=('Ваш ответ: Показать в поиске' '\n'
+                  '\n'
+                  'Анкета доступна для поиска.')
+        )
+        #############################################################
+        # Будет ошибка
+        # поэтому заглушка
+        await update.effective_message.reply_text(
+            text=('Заглушка. По идее здесь сохранение '
+                  'и перевод обрватно на state.COLIVING' '\n'
+                  '\n'
+                  'Нажмите /coliving')
+        )
+        return ConversationHandler.END
+        #############################################################
+        # await save_coliving_info_to_db(update, context)
+        # return states.COLIVING
+
+    elif call_back == 'roommates_profiles':
+        #############################################################
+        # запрос к API
+        # заглушка
+        await update.effective_message.reply_text(
+            text=('Заглушка. По идее здесь запрос к API '
+                  'вывод списка соседей' '\n'
+                  '\n'
+                  'Нажмите /coliving')
+        )
+        #############################################################
+        return ConversationHandler.END
+
+    elif call_back == 'views':
+        #############################################################
+        # запрос к API
+        # заглушка
+        await update.effective_message.reply_text(
+            text=('Заглушка. По идее здесь запрос к API '
+                  'вывод списка профилей тех кто лайкнул' '\n'
+                  '\n'
+                  'Нажмите /coliving')
         )
 
-        # return states.LOCATION
+        #############################################################
+        return ConversationHandler.END
+
+    elif call_back == 'transfer_to':
+        #############################################################
+        # заглушка
+        await update.effective_message.reply_text(
+            text=('Заглушка. Предусмотрена передача коливинга '
+                  'другому владельцу' '\n'
+                  '\n'
+                  'Нажмите /coliving')
+        )
+        # await set_new_ownner(update, context)
+        #############################################################
+        return ConversationHandler.END
+
+
+    elif call_back == 'go_to_menu':
+        #############################################################
+        # states.MENU
+        # заглушка
+        await update.effective_message.reply_text(
+            text=('Заглушка. По идее здесь переход '
+                  'в МЕНЮ на state.MENU' '\n'
+                  '\n'
+                  'Нажмите /coliving')
+        )
+        # return states.MENU
+        #############################################################
+        return ConversationHandler.END
+
+
+
+
+
 
 
 async def location_not_text(update: Update, context):
@@ -728,6 +877,32 @@ async def edit_profile_confirmation(
 # решить что лучше выше.!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #####
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 async def save_coliving_info_to_db(
         update: Update,
         context: ContextTypes.DEFAULT_TYPE
@@ -743,9 +918,9 @@ async def save_coliving_info_to_db(
         about=context.user_data.get(ABOUT_FIELD),
         price=context.user_data.get(PRICE_FIELD),
         is_visible=context.user_data.get(IS_VISIBLE_FIELD),
-        # roommates=None,
-        # viewers=None,
-        # created_date=None,
+        roommates=None,
+        viewers=None,
+        created_date=None,
 
         # images=
     )

@@ -138,50 +138,66 @@ IS_VISIBLE_OR_NOT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
 
 EDIT_CONFIRMATION_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
-    CONFIRMATION_KEYBOARD,
-    InlineKeyboardButton(
-        text='Отменить редактирование',
-        callback_data='cancel'
-    ),
-    InlineKeyboardButton(
-        text='Продолжить редактирование',
-        callback_data='continue_editing'
-    ),
+        CONFIRMATION_KEYBOARD,
+        InlineKeyboardButton(
+            text='Отменить редактирование',
+            callback_data='cancel'
+        ),
+        InlineKeyboardButton(
+            text='Продолжить редактирование',
+            callback_data='continue_editing'
+        ),
     )
 )
 
-# Изменить коливинг профиль
-# Скрыть из поиска |  Показать в поиске
-# Посмотреть анкеты соседей
-# Просмотры
-# Передача коливинга
-# Вернуться
+# + Скрыть из поиска |  Показать в поиске
 
-COLIVING_PROFILE_KEYBOARD = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(
-                text='Изменить коливинг профиль',
-                callback_data='edit_profile'
-            ),
-            InlineKeyboardButton(
-                text='Посмотреть анкеты соседей',
-                callback_data='roommates_profiles'
-            ),
-            InlineKeyboardButton(
-                text='Просмотры',
-                callback_data='views'
-            ),
-            InlineKeyboardButton(
-                text='Передача коливинга',
-                callback_data='transfer_to'
-            ),
-            InlineKeyboardButton(
-                text='Вернуться в меню',
-                callback_data='go_to_menu'
-            ),
-        ]
-    ]
+COLIVING_PROFILE_KEYBOARD_VISIBLE = InlineKeyboardMarkup.from_column(
+    button_column=(
+        EDIT_PROFILE_KEYBOARD,
+        HIDE_SEARCH_KEYBOARD,
+        InlineKeyboardButton(
+            text='Посмотреть анкеты соседей',
+            callback_data='roommates_profiles'
+        ),
+        InlineKeyboardButton(
+            text='Просмотры',
+            callback_data='views'
+        ),
+        InlineKeyboardButton(
+            text='Передача коливинга',
+            callback_data='transfer_to'
+        ),
+        InlineKeyboardButton(
+            text='Вернуться в меню',
+            callback_data='go_to_menu'
+        ),
+    )
+)
+
+# + Показать в поиске
+
+COLIVING_PROFILE_KEYBOARD_NOT_VISIBLE = InlineKeyboardMarkup.from_column(
+    button_column=(
+        EDIT_PROFILE_KEYBOARD,
+        SHOW_SEARCH_KEYBOARD,
+        InlineKeyboardButton(
+            text='Посмотреть анкеты соседей',
+            callback_data='roommates_profiles'
+        ),
+        InlineKeyboardButton(
+            text='Просмотры',
+            callback_data='views'
+        ),
+        InlineKeyboardButton(
+            text='Передача коливинга',
+            callback_data='transfer_to'
+        ),
+        InlineKeyboardButton(
+            text='Вернуться в меню',
+            callback_data='go_to_menu'
+        ),
+    )
 )
 
 # Выбор

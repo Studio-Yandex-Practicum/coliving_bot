@@ -8,6 +8,7 @@ from .callback_funcs import (about_coliving, photo,
                              edit_price,
                              edit_profile_confirmation,
                              edit_select_room_type,
+                             handle_coliving,
                              is_visible_coliving_profile,
                              location_not_text,
                              price,
@@ -21,11 +22,11 @@ from .callback_funcs import (about_coliving, photo,
                              start,
                              what_to_edit)
 from .states import ColivingStates as states
-from .templates import COLIVING, LOCATION_MOSCOW_BTN_TEXT, LOCATION_SPB_BTN_TEXT
+from .templates import COLIVING_START, LOCATION_MOSCOW_BTN_TEXT, LOCATION_SPB_BTN_TEXT
 
 
 acquaintance_handler: ConversationHandler = ConversationHandler(
-    entry_points=[CommandHandler(COLIVING, start)],
+    entry_points=[CommandHandler(COLIVING_START, start)],
     states={
         states.LOCATION: [
             CallbackQueryHandler(
@@ -200,6 +201,36 @@ acquaintance_handler: ConversationHandler = ConversationHandler(
             ),
             # MessageHandler(filters.TEXT & ~filters.COMMAND, show_coliving_profile),
         ],
+        states.COLIVING: [
+            CallbackQueryHandler(
+                callback=handle_coliving,
+                pattern=r'^edit_profile'
+            ),
+            CallbackQueryHandler(
+                callback=handle_coliving,
+                pattern=r'^show'
+            ),
+            CallbackQueryHandler(
+                callback=handle_coliving,
+                pattern=r'^hide'
+            ),
+            CallbackQueryHandler(
+                callback=handle_coliving,
+                pattern=r'^roommates_profiles'
+            ),
+            CallbackQueryHandler(
+                callback=handle_coliving,
+                pattern=r'^views'
+            ),
+            CallbackQueryHandler(
+                callback=handle_coliving,
+                pattern=r'^transfer_to'
+            ),
+            CallbackQueryHandler(
+                callback=handle_coliving,
+                pattern=r'^go_to_menu'
+            ),
+        ]
 
     },
     fallbacks=[],
