@@ -12,6 +12,8 @@ from utils.configs import (
     LOGS_WHEN,
 )
 
+_LOGGER = logging.getLogger(__name__)
+
 
 def configure_logging() -> None:
     """
@@ -31,8 +33,7 @@ def configure_logging() -> None:
         encoding=LOGS_ENCODING,
     )
 
-    logger = logging.getLogger("logger")
-    logger.addHandler(console_handler)
-    logger.addHandler(file_handler)
+    _LOGGER.addHandler(console_handler)
+    _LOGGER.addHandler(file_handler)
 
     logging.getLogger("httpx").setLevel(logging.WARNING)
