@@ -1,6 +1,5 @@
 from telegram.ext import (
     CallbackQueryHandler,
-    CommandHandler,
     ConversationHandler,
     MessageHandler,
     filters,
@@ -10,6 +9,8 @@ from general.validators import (
     handle_text_input_instead_of_choosing_button,
     handle_text_input_instead_of_send_photo,
 )
+
+from conversations.menu.buttons import MY_PROFILE_BUTTON
 
 from .buttons import (
     ABOUT_BUTTON,
@@ -40,6 +41,7 @@ from .callback_funcs import (
     handle_profile,
     handle_sex,
     handle_visible,
+    profile,
     send_question_to_back_in_menu,
     send_question_to_cancel_profile_edit,
     send_question_to_edit_about_myself,
@@ -49,14 +51,22 @@ from .callback_funcs import (
     send_question_to_profile_is_invisible_in_search,
     send_question_to_profile_is_visible_in_search,
     send_question_to_resume_profile_edit,
-    start,
     start_filling_again,
 )
 from .states import States
 from .templates import AGE_PATTERN
 
 profile_handler: ConversationHandler = ConversationHandler(
-    entry_points=[CommandHandler(command="profile", callback=start)],
+    entry_points=[
+            CallbackQueryHandler(
+                callback=profile,
+                pattern=rf"^{MY_PROFILE_BUTTON}",
+            ),
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND,
+                handle_text_input_instead_of_choosing_button,
+            ),
+    ],
     states={
         States.PROFILE: [
             CallbackQueryHandler(
