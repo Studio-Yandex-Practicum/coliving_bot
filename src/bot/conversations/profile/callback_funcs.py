@@ -9,6 +9,7 @@ from telegram.ext import ContextTypes, ConversationHandler
 
 from general.validators import value_is_in_range_validator
 from internal_requests import mock as api_service
+
 from .buttons import EDIT_FORM_BUTTON, NOT_LOOK_YET_BUTTON, YES_BUTTON, YES_TO_DO_BUTTON
 from .keyboards import (
     FORM_EDIT_KEYBOARD,

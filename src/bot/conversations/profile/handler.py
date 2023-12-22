@@ -10,6 +10,7 @@ from general.validators import (
     handle_text_input_instead_of_choosing_button,
     handle_text_input_instead_of_send_photo,
 )
+
 from .buttons import (
     ABOUT_BUTTON,
     BACK_BUTTON,

@@ -1,13 +1,14 @@
 from math import inf
 from typing import Union
 
+from telegram import Update
+from telegram.ext import ContextTypes
+
 from conversations.profile.templates import (
     BUTTON_ERROR_MSG,
     DEFAULT_ERROR_MESSAGE,
     PHOTO_ERROR_MESSAGE,
 )
-from telegram import Update
-from telegram.ext import ContextTypes
 
 
 async def value_is_in_range_validator(
