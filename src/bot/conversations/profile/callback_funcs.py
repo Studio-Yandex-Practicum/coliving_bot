@@ -84,7 +84,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     Начало диалога. Проверяет, не был ли пользователь зарегистрирован ранее.
     Переводит диалог в состояние AGE (ввод возраста пользователя).
     """
-    flag = True  # Флаг для проверки ответвления если профиль уже заполнен
+    flag = False  # Флаг для проверки ответвления если профиль уже заполнен
     if flag:
         profile_info = await api_service.get_user_profile_by_telegram_id(
             update.effective_chat.id
@@ -316,7 +316,7 @@ async def look_at_profile(
             location=context.user_data.get(LOCATION_FIELD),
             about=context.user_data.get(ABOUT_FIELD),
             is_visible=PROFILE_IS_VISIBLE_TEXT
-            if context.user_data.get(ABOUT_FIELD)
+            if context.user_data.get(IS_VISIBLE_FIELD)
             else PROFILE_IS_INVISIBLE_TEXT,
         )
         + "\n"
