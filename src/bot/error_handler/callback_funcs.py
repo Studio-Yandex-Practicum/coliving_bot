@@ -6,6 +6,8 @@ from telegram.ext import ContextTypes
 
 from error_handler.templates import ERROR_MESSAGE_TEMPLATE, LOGGING_MESSAGE_TEMPLATE
 
+_LOGGER = logging.getLogger(__name__)
+
 
 async def error_handler(
         update: object, context: ContextTypes.DEFAULT_TYPE
@@ -14,11 +16,10 @@ async def error_handler(
     Passes the error to the logger.
     Sends a telegram message to the user about the error.
     """
-    logger = logging.getLogger("logger")
     error_text = LOGGING_MESSAGE_TEMPLATE.format(
         user_data=context.user_data, chat_data=context.chat_data
     )
-    logger.error(error_text, exc_info=context.error)
+    _LOGGER.error(error_text, exc_info=context.error)
     message = ERROR_MESSAGE_TEMPLATE.format(error=context.error)
 
     if isinstance(update, Update):
