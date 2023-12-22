@@ -60,7 +60,7 @@ pre-commit run --all-files
 
 6. **Создание Telegram бота**  
    [Документация](https://core.telegram.org/bots/features#botfather)  
-   Перед запуском нужно получить токен у бота
+   Перед запуском нужно получить **token** у бота
    [@BotFather](https://t.me/BotFather). После того как бот будет
    зарегестрирован - вам выдадут **token**, его нужно добавить в файл `.env`,
    строку `TOKEN=`. В документе `env.example` она обозначена комментарием.  
@@ -112,11 +112,13 @@ python manage.py import_locations
 python manage.py runserver
 ```
 
-Запускаем бота (не забываем добавить токен бота в файл `.env`)
+Запускаем бота  
+Перед выполнением команд откройте новый терминал
+(не забываем добавить **token** бота в файл `.env`, строку `TOKEN=`)
 
 ```shell
 cd src/bot/
-python bot.py
+python run_bot.py
 ```
 
 <!-- MARKDOWN LINKS & BADGES -->
