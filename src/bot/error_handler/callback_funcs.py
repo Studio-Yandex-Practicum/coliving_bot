@@ -4,8 +4,7 @@ from telegram import Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
-from error_handler.templates import ERROR_MESSAGE_TEMPLATE, \
-    LOGGING_MESSAGE_TEMPLATE
+from error_handler.templates import ERROR_MESSAGE_TEMPLATE, LOGGING_MESSAGE_TEMPLATE
 
 
 async def error_handler(
