@@ -19,8 +19,7 @@ async def error_handler(
     """
     logger = logging.getLogger("logger")
     error_text = LOGGING_MESSAGE_TEMPLATE.format(
-        user_data=context.user_data,
-        chat_data=context.chat_data
+        user_data=context.user_data, chat_data=context.chat_data
     )
     logger.error(error_text, exc_info=context.error)
     message = ERROR_MESSAGE_TEMPLATE.format(error=context.error)
