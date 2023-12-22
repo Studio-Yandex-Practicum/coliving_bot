@@ -1,6 +1,6 @@
 from telegram.ext import Application, ApplicationBuilder
 
-from utils.config import TOKEN
+from utils.configs import TOKEN
 from conversations.profile.handler import profile_handler
 
 
