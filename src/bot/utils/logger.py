@@ -2,6 +2,7 @@ import logging
 from logging import handlers
 
 from utils.configs import (
+    LOGGER_NAME,
     LOGGING_LEVEL,
     LOGS_BACKUP_COUNT,
     LOGS_ENCODING,
@@ -11,8 +12,6 @@ from utils.configs import (
     LOGS_INTERVAL,
     LOGS_WHEN,
 )
-
-_LOGGER = logging.getLogger(__name__)
 
 
 def configure_logging() -> None:
@@ -32,8 +31,8 @@ def configure_logging() -> None:
         backupCount=LOGS_BACKUP_COUNT,
         encoding=LOGS_ENCODING,
     )
-
-    _LOGGER.addHandler(console_handler)
-    _LOGGER.addHandler(file_handler)
+    logger = logging.getLogger(LOGGER_NAME)
+    logger.addHandler(console_handler)
+    logger.addHandler(file_handler)
 
     logging.getLogger("httpx").setLevel(logging.WARNING)
