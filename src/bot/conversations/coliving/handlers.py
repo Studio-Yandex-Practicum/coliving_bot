@@ -214,6 +214,7 @@ acquaintance_handler: ConversationHandler = ConversationHandler(
             CallbackQueryHandler(
                 callback=handle_coliving, pattern=r"^go_to_menu"
             ),
+            MessageHandler(filters.TEXT & ~filters.COMMAND, handle_coliving),
         ],
     },
     fallbacks=[],

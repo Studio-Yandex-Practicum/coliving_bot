@@ -7,11 +7,15 @@ PRICE_FIELD = "price"
 IS_VISIBLE_FIELD = "is_visible"
 ROOMMATES_FIELD = "roommates"
 VIEWERS_FIELD = "viewers"
+IMAGE_FIELD = "image"
 
 MIN_ABOUT_LENGTH = 0
 MAX_ABOUT_LENGTH = 1000
 
 DEFAULT_ERROR_MESSAGE = "Некорректный ввод"
+
+IS_VISIBLE_YES = "Да"
+IS_VISIBLE_NO = "Нет"
 
 ERR_MSG_ABOUT_MAX_LEN = (
     "Превышено максимальное количество символов равное {max}."

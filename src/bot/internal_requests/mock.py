@@ -9,24 +9,13 @@ async def get_user_coliving_info_by_tg_id(telegram_id: int) -> ColivingProfile:
     return ColivingProfile(
         roommates="Сосед Иван",
         location="Санкт-Петербург",
-        price=5500,
-        room_type="Комната в квартире",
-        about="Ну очень уютно",
-        is_visible=True,
+        price=2500,
+        room_type="Спальное место в комнате",
+        about="Очень уютная раскривушка)",
+        is_visible="Да",
         viewers=None,
         created_date=datetime.now(),
     )
-
-    # return ColivingProfile(
-    #         roommates=None,
-    #         location=None,
-    #         price=None,
-    #         room_type=None,
-    #         about=None,
-    #         is_visible=None,
-    #         viewers=None,
-    #         created_date=None,
-    #     )
 
 
 # async def get_user_coliving_info_by_tg_id(telegram_id: int) -> TestColivingProfile:
@@ -46,6 +35,12 @@ async def get_user_coliving_info_by_tg_id(telegram_id: int) -> ColivingProfile:
 
 async def get_user_coliving_status(telegram_id: int) -> UserProfile:
     """Получает данные о telegram-пользователе."""
+
+    ####################################################################
+    # Поменять для.
+    # is_сoliving=False для создания профиля
+    # is_сoliving=True для просмотра профиля
+    ####################################################################
 
     return UserProfile(
         # is_сoliving=False

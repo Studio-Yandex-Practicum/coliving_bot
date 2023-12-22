@@ -1,4 +1,5 @@
-# import base64
+import base64
+
 # import random
 from pathlib import Path
 
@@ -59,7 +60,10 @@ from conversations.coliving.templates import (
     ERR_MSG_PRICE,
     ERR_NEED_TO_SELECT_BTN,
     ERR_PHOTO_NOT_TEXT,
+    IMAGE_FIELD,
     IS_VISIBLE_FIELD,
+    IS_VISIBLE_NO,
+    IS_VISIBLE_YES,
     LOCATION_FIELD,
     MAX_ABOUT_LENGTH,
     MIN_ABOUT_LENGTH,
@@ -125,13 +129,19 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             await api_service.get_user_coliving_info_by_tg_id(update)
         )
         await set_profile_to_context(update, context, user_coliving_profile)
-        if user_coliving_profile.is_visible is True:
+        if user_coliving_profile.is_visible == IS_VISIBLE_YES:
             await show_coliving_profile(
-                update, context, keyboard=COLIVING_PROFILE_KEYBOARD_VISIBLE
+                update,
+                context,
+                " ",
+                keyboard=COLIVING_PROFILE_KEYBOARD_VISIBLE,
             )
         else:
             await show_coliving_profile(
-                update, context, keyboard=COLIVING_PROFILE_KEYBOARD_NOT_VISIBLE
+                update,
+                context,
+                " ",
+                keyboard=COLIVING_PROFILE_KEYBOARD_NOT_VISIBLE,
             )
         return states.COLIVING
 
@@ -158,6 +168,28 @@ async def handle_coliving(
 ) -> int:
     """Взаимодействие с профилем коливинга"""
 
+    try:
+        update.callback_query.data
+    except AttributeError:
+        await update.effective_message.reply_text(
+            ERR_NEED_TO_SELECT_BTN,
+        )
+        if context.user_data[IS_VISIBLE_FIELD] == IS_VISIBLE_YES:
+            await show_coliving_profile(
+                update,
+                context,
+                " ",
+                keyboard=COLIVING_PROFILE_KEYBOARD_VISIBLE,
+            )
+        else:
+            await show_coliving_profile(
+                update,
+                context,
+                " ",
+                keyboard=COLIVING_PROFILE_KEYBOARD_NOT_VISIBLE,
+            )
+        return states.COLIVING
+
     await update.effective_message.edit_reply_markup()
     call_back = update.callback_query.data
 
@@ -170,45 +202,36 @@ async def handle_coliving(
             reply_markup=WHAT_EDIT_PROFILE_KEYBOARD,
         )
         return states.EDIT
+
     elif call_back == BTN_HIDE:
-        context.user_data["is_visible"] = False
+        context.user_data[IS_VISIBLE_FIELD] = IS_VISIBLE_NO
         await update.effective_message.reply_text(text=REPLY_BTN_HIDE)
-        #############################################################
-        # Будет ошибка
-        # поэтому заглушка
-        await update.effective_message.reply_text(
-            text=(
-                "заглушка. По идее здесь сохранение "
-                "и перевод обрватно на state.COLIVING"
-                "\n"
-                "\n"
-                "Нажмите /coliving"
-            )
+        await show_coliving_profile(
+            update,
+            context,
+            " ",
+            keyboard=COLIVING_PROFILE_KEYBOARD_NOT_VISIBLE,
         )
-        return ConversationHandler.END
-        #############################################################
+        ############################################################
+        # добавить для сохранения в БД
         # await save_coliving_info_to_db(update, context)
-        # return states.COLIVING
+        #
+        ############################################################
+        return states.COLIVING
 
     elif call_back == BTN_SHOW:
-        context.user_data["is_visible"] = True
+        context.user_data[IS_VISIBLE_FIELD] = IS_VISIBLE_YES
         await update.effective_message.reply_text(text=REPLY_BTN_SHOW)
-        #############################################################
-        # Будет ошибка
-        # поэтому заглушка
-        await update.effective_message.reply_text(
-            text=(
-                "Заглушка. По идее здесь сохранение "
-                "и перевод обрватно на state.COLIVING"
-                "\n"
-                "\n"
-                "Нажмите /coliving"
-            )
+
+        await show_coliving_profile(
+            update, context, " ", keyboard=COLIVING_PROFILE_KEYBOARD_VISIBLE
         )
-        return ConversationHandler.END
-        #############################################################
+        ############################################################
+        # добавить для сохранения в БД
         # await save_coliving_info_to_db(update, context)
-        # return states.COLIVING
+        #
+        ############################################################
+        return states.COLIVING
 
     elif call_back == BTN_ROOMMATES:
         #############################################################
@@ -299,7 +322,7 @@ async def handle_location(
         location = BTN_LABEL_MOSCOW
     elif call_back == BTN_SPB:
         location = BTN_LABEL_SPB
-    context.user_data["location"] = location
+    context.user_data[LOCATION_FIELD] = location
     await update.effective_message.reply_text(text=f"{REPLY_MSG}{location}")
     await update.effective_message.reply_text(
         text=REPLY_MSG_ASK_ROOM_TYPE, reply_markup=ROOM_TYPE_KEYBOARD
@@ -333,7 +356,7 @@ async def handle_room_type(
     if call_back == BTN_ROOM_IN_HOUSE:
         room_type = BTN_LABEL_ROOM_IN_HOUSE
 
-    context.user_data["room_type"] = room_type
+    context.user_data[ROOM_TYPE_FIELD] = room_type
     await update.effective_message.reply_text(text=f"{REPLY_MSG}{room_type}")
     await update.effective_message.reply_text(
         text=REPLY_MSG_ASK_ABOUT,
@@ -360,7 +383,7 @@ async def handle_about_coliving(
         )
         return states.ABOUT_ROOM
 
-    context.user_data["about"] = about_coliving
+    context.user_data[ABOUT_FIELD] = about_coliving
     await update.effective_message.reply_text(
         text=f"{REPLY_MSG}{about_coliving}"
     )
@@ -381,14 +404,13 @@ async def handle_price(
         await update.effective_message.reply_text(text=ERR_MSG_PRICE)
         return states.PRICE
     message_text = update.message.text
-    context.user_data["price"] = message_text
+    context.user_data[PRICE_FIELD] = message_text
     await update.effective_message.reply_text(text=f"{REPLY_MSG}{price}")
     await update.effective_message.reply_text(
         text=REPLY_MSG_ASK_PHOTO_SEND,
     )
 
     return states.PHOTO_ROOM
-    # return ConversationHandler.END
 
 
 # async def photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -412,6 +434,24 @@ async def handle_price(
 #     return await show_coliving_profile(update, context)
 
 
+async def encode_photo_room(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+) -> str:
+    """Кодирование изображения"""
+    effective_chat = update.effective_chat
+    path = f"media/{update.effective_chat.id}/photos"
+    Path(path).mkdir(parents=True, exist_ok=True)
+    photo_file = await update.message.photo[-1].get_file()
+    await photo_file.download_to_drive(
+        f"{path}/{effective_chat.first_name}_room_photo.jpg"
+    )
+    with open(
+        f"{path}/{effective_chat.first_name}_room_photo.jpg", "rb"
+    ) as image:
+        return base64.b64encode(image.read())
+
+
 async def handle_photo_room(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -421,14 +461,31 @@ async def handle_photo_room(
         await update.effective_message.reply_text(text=ERR_PHOTO_NOT_TEXT)
         return states.PHOTO_ROOM
 
-    effective_chat = update.effective_chat
-    path = f"media/{update.effective_chat.id}/photos"
-    Path(path).mkdir(parents=True, exist_ok=True)
-    photo_file = await update.message.photo[-1].get_file()
+    # effective_chat = update.effective_chat
+    # path = f"media/{update.effective_chat.id}/photos"
+    # Path(path).mkdir(parents=True, exist_ok=True)
+    # photo_file = await update.message.photo[-1].get_file()
 
-    await photo_file.download_to_drive(
-        f"{path}/{effective_chat.first_name}_room_photo.jpg"
+    # await photo_file.download_to_drive(
+    #     f"{path}/{effective_chat.first_name}_room_photo.jpg"
+    # )
+
+    # with open(f"{path}/{effective_chat.first_name}_room_photo.jpg", "rb") as image:
+    #     photo_room = base64.b64encode(image.read())
+
+    context.user_data[IMAGE_FIELD] = await encode_photo_room(update, context)
+
+    await update.message.reply_text(REPLY_MSG_PHOTO)
+
+    context.user_data[IS_VISIBLE_FIELD] = IS_VISIBLE_NO
+
+    await show_coliving_profile(
+        update,
+        context,
+        REPLY_MSG_ASK_TO_CONFIRM,
+        keyboard=CONFIRM_OR_EDIT_PROFILE_KEYBOARD,
     )
+    return states.CONFIRMATION
 
     ######################################################
     # Так загрузит 6 фоток и 6 раз ответит
@@ -449,31 +506,31 @@ async def handle_photo_room(
     #     REPLY_MSG_PHOTO
     # )
     # return await show_coliving_profile(update, context)
-    return await send_photo_reply(update, context)
+    # return await send_photo_reply(update, context)
 
 
-async def send_photo_reply(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> int:
-    """Сообщение перед просмотром профиля."""
+# async def send_photo_reply(
+#     update: Update, context: ContextTypes.DEFAULT_TYPE
+# ) -> int:
+#     """Сообщение перед просмотром профиля."""
 
-    await update.message.reply_text(REPLY_MSG_PHOTO)
-    # return await show_coliving_profile(update, context)
-    await show_coliving_profile(
-        update, context, keyboard=CONFIRM_OR_EDIT_PROFILE_KEYBOARD
-    )
-    return states.CONFIRMATION
+#     await update.message.reply_text(REPLY_MSG_PHOTO)
+#     # return await show_coliving_profile(update, context)
+#     await show_coliving_profile(
+#         update, context, keyboard=CONFIRM_OR_EDIT_PROFILE_KEYBOARD
+#     )
+#     return states.CONFIRMATION
 
 
 async def show_coliving_profile(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
+    ask_to_confirm,
     keyboard: str,
 ) -> None:
     """Просмотр профиля и переводит на подтверждение профиля CONFIRMATION."""
 
     effective_chat = update.effective_chat
-    ask_to_confirm = REPLY_MSG_ASK_TO_CONFIRM
     await context.bot.sendPhoto(
         chat_id=update.effective_chat.id,
         photo=(
@@ -487,7 +544,7 @@ async def show_coliving_profile(
             room_type=context.user_data.get(ROOM_TYPE_FIELD),
             about=context.user_data.get(ABOUT_FIELD),
             price=context.user_data.get(PRICE_FIELD),
-            is_visible=False,
+            is_visible=context.user_data.get(IS_VISIBLE_FIELD),
         )
         + "\n"
         + ask_to_confirm,
@@ -512,7 +569,10 @@ async def handle_confirm_or_edit_profile(
             ERR_NEED_TO_SELECT_BTN,
         )
         await show_coliving_profile(
-            update, context, keyboard=CONFIRM_OR_EDIT_PROFILE_KEYBOARD
+            update,
+            context,
+            REPLY_MSG_ASK_TO_CONFIRM,
+            keyboard=CONFIRM_OR_EDIT_PROFILE_KEYBOARD,
         )
         return states.CONFIRMATION
 
@@ -564,11 +624,11 @@ async def handle_is_visible_coliving_profile(
     call_back = update.callback_query.data
 
     if call_back == BTN_HIDE:
-        context.user_data["is_visible"] = False
+        context.user_data[IS_VISIBLE_FIELD] = IS_VISIBLE_NO
         await update.effective_message.reply_text(text=REPLY_BTN_HIDE)
 
     elif call_back == BTN_SHOW:
-        context.user_data["is_visible"] = True
+        context.user_data[IS_VISIBLE_FIELD] = IS_VISIBLE_YES
         await update.effective_message.reply_text(text=REPLY_BTN_SHOW)
 
     return await save_coliving_info_to_db(update, context)
@@ -675,9 +735,11 @@ async def handle_edit_location(
         location = BTN_LABEL_MOSCOW
     elif call_back == BTN_SPB:
         location = BTN_LABEL_SPB
-    context.user_data["location"] = location
+    context.user_data[LOCATION_FIELD] = location
     await update.effective_message.reply_text(text=f"{REPLY_MSG}{location}")
-    await show_coliving_profile(update, context, EDIT_CONFIRMATION_KEYBOARD)
+    await show_coliving_profile(
+        update, context, REPLY_MSG_ASK_TO_CONFIRM, EDIT_CONFIRMATION_KEYBOARD
+    )
     return states.EDIT_CONFIRMATION
 
 
@@ -709,9 +771,11 @@ async def handle_edit_select_room_type(
     elif call_back == BTN_ROOM_IN_HOUSE:
         room_type = BTN_LABEL_ROOM_IN_HOUSE
 
-    context.user_data["room_type"] = room_type
+    context.user_data[ROOM_TYPE_FIELD] = room_type
     await update.effective_message.reply_text(text=f"{REPLY_MSG}{room_type}")
-    await show_coliving_profile(update, context, EDIT_CONFIRMATION_KEYBOARD)
+    await show_coliving_profile(
+        update, context, REPLY_MSG_ASK_TO_CONFIRM, EDIT_CONFIRMATION_KEYBOARD
+    )
     return states.EDIT_CONFIRMATION
 
 
@@ -735,11 +799,13 @@ async def handle_edit_about_coliving(
         return states.EDIT_ABOUT_ROOM
 
     about_coliving = update.message.text
-    context.user_data["about"] = about_coliving
+    context.user_data[ABOUT_FIELD] = about_coliving
     await update.effective_message.reply_text(
         text=f"{REPLY_MSG}{about_coliving}"
     )
-    await show_coliving_profile(update, context, EDIT_CONFIRMATION_KEYBOARD)
+    await show_coliving_profile(
+        update, context, REPLY_MSG_ASK_TO_CONFIRM, EDIT_CONFIRMATION_KEYBOARD
+    )
     return states.EDIT_CONFIRMATION
 
 
@@ -753,11 +819,13 @@ async def handle_edit_price(
     except ValueError:
         await update.effective_message.reply_text(text=ERR_MSG_PRICE)
         return states.EDIT_PRICE
-    context.user_data["price"] = message_text
+    context.user_data[PRICE_FIELD] = message_text
     await update.effective_message.reply_text(
         text=f"{REPLY_MSG}{message_text}"
     )
-    await show_coliving_profile(update, context, EDIT_CONFIRMATION_KEYBOARD)
+    await show_coliving_profile(
+        update, context, REPLY_MSG_ASK_TO_CONFIRM, EDIT_CONFIRMATION_KEYBOARD
+    )
     return states.EDIT_CONFIRMATION
 
 
@@ -770,14 +838,11 @@ async def handle_edit_photo_room(
         await update.effective_message.reply_text(text=ERR_PHOTO_NOT_TEXT)
         return states.EDIT_PHOTO_ROOM
 
-    effective_chat = update.effective_chat
-    path = f"media/{update.effective_chat.id}/photos"
-    Path(path).mkdir(parents=True, exist_ok=True)
-    photo_file = await update.message.photo[-1].get_file()
-    await photo_file.download_to_drive(
-        f"{path}/{effective_chat.first_name}_room_photo.jpg"
+    context.user_data[IMAGE_FIELD] = await encode_photo_room(update, context)
+
+    await show_coliving_profile(
+        update, context, REPLY_MSG_ASK_TO_CONFIRM, EDIT_CONFIRMATION_KEYBOARD
     )
-    await show_coliving_profile(update, context, EDIT_CONFIRMATION_KEYBOARD)
     return states.EDIT_CONFIRMATION
 
 
