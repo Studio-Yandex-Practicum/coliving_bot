@@ -3,10 +3,10 @@ from telegram import BotCommand, InlineKeyboardButton, InlineKeyboardMarkup
 import conversations.menu.templates as templates
 
 from .buttons import (
-    MY_PROFILE_BUTTON,
     COLIVING_BUTTON,
-    SEARCH_NEIGHBOR_BUTTON,
+    MY_PROFILE_BUTTON,
     SEARCH_COLIVING_BUTTON,
+    SEARCH_NEIGHBOR_BUTTON,
 )
 
 MENU_KEYBOARD = InlineKeyboardMarkup.from_column(

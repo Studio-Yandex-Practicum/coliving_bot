@@ -1,9 +1,6 @@
-from telegram.ext import (
-    CommandHandler,
-    ConversationHandler,
-)
+from telegram.ext import CommandHandler, ConversationHandler
 
-from .callback_funcs import start, menu
+from .callback_funcs import menu, start
 
 
 start_and_menu_handler: ConversationHandler = ConversationHandler(

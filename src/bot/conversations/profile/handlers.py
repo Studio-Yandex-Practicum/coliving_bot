@@ -5,12 +5,11 @@ from telegram.ext import (
     filters,
 )
 
+from conversations.menu.buttons import MY_PROFILE_BUTTON
 from general.validators import (
     handle_text_input_instead_of_choosing_button,
     handle_text_input_instead_of_send_photo,
 )
-
-from conversations.menu.buttons import MY_PROFILE_BUTTON
 
 from .buttons import (
     ABOUT_BUTTON,
