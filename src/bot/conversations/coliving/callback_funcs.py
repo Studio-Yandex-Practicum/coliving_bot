@@ -413,27 +413,6 @@ async def handle_price(
     return states.PHOTO_ROOM
 
 
-# async def photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
-#     """Сохраняет фото и ."""
-#     # user = update.message.from_user
-#     effective_chat = update.effective_chat
-#     path = f'media/{update.effective_chat.id}/photos'
-#     Path(path).mkdir(parents=True, exist_ok=True)
-#     # photo_file = await update.message.photo[-1].get_file()
-#     photo_files = await update.message.effective_attachment[-1].get_file()
-#     print(photo_files)
-#     # for photo in photo_files:
-#     # image_name = random.randint(0, 5)
-
-
-# await photo_files.download_to_drive(
-#     f'{path}/{effective_chat.first_name}_room_photo.jpg')
-# await update.message.reply_text(
-#     REPLY_MSG_PHOTO
-# )
-#     return await show_coliving_profile(update, context)
-
-
 async def encode_photo_room(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
@@ -450,6 +429,13 @@ async def encode_photo_room(
         f"{path}/{effective_chat.first_name}_room_photo.jpg", "rb"
     ) as image:
         return base64.b64encode(image.read())
+    ######################################################
+    # Так загрузит 6 фоток и 6 раз ответит
+
+    # await photo_file.download_to_drive(
+    #     f'{path}/{effective_chat.first_name}_{photo_file.file_unique_id}.jpg'
+    # )
+    ######################################################
 
 
 async def handle_photo_room(
@@ -461,24 +447,9 @@ async def handle_photo_room(
         await update.effective_message.reply_text(text=ERR_PHOTO_NOT_TEXT)
         return states.PHOTO_ROOM
 
-    # effective_chat = update.effective_chat
-    # path = f"media/{update.effective_chat.id}/photos"
-    # Path(path).mkdir(parents=True, exist_ok=True)
-    # photo_file = await update.message.photo[-1].get_file()
-
-    # await photo_file.download_to_drive(
-    #     f"{path}/{effective_chat.first_name}_room_photo.jpg"
-    # )
-
-    # with open(f"{path}/{effective_chat.first_name}_room_photo.jpg", "rb") as image:
-    #     photo_room = base64.b64encode(image.read())
-
     context.user_data[IMAGE_FIELD] = await encode_photo_room(update, context)
-
     await update.message.reply_text(REPLY_MSG_PHOTO)
-
     context.user_data[IS_VISIBLE_FIELD] = IS_VISIBLE_NO
-
     await show_coliving_profile(
         update,
         context,
@@ -486,40 +457,6 @@ async def handle_photo_room(
         keyboard=CONFIRM_OR_EDIT_PROFILE_KEYBOARD,
     )
     return states.CONFIRMATION
-
-    ######################################################
-    # Так загрузит 6 фоток и 6 раз ответит
-
-    # await photo_file.download_to_drive(
-    #     f'{path}/{effective_chat.first_name}_{photo_file.file_unique_id}.jpg'
-    # )
-    ######################################################
-
-    # with open(
-    #     f'{path}/{effective_chat.first_name}_{photo_file.file_unique_id}.jpg',
-    #     'w',
-    #     encoding='utf-8'
-    # ) as image:
-    #     image.write(file)
-
-    # await update.message.reply_text(
-    #     REPLY_MSG_PHOTO
-    # )
-    # return await show_coliving_profile(update, context)
-    # return await send_photo_reply(update, context)
-
-
-# async def send_photo_reply(
-#     update: Update, context: ContextTypes.DEFAULT_TYPE
-# ) -> int:
-#     """Сообщение перед просмотром профиля."""
-
-#     await update.message.reply_text(REPLY_MSG_PHOTO)
-#     # return await show_coliving_profile(update, context)
-#     await show_coliving_profile(
-#         update, context, keyboard=CONFIRM_OR_EDIT_PROFILE_KEYBOARD
-#     )
-#     return states.CONFIRMATION
 
 
 async def show_coliving_profile(
@@ -855,6 +792,20 @@ async def handle_edit_profile_confirmation(
     Продолжение редактирования,
     Отмена редактирования.
     """
+
+    try:
+        update.callback_query.data
+    except AttributeError:
+        await update.effective_message.reply_text(
+            ERR_NEED_TO_SELECT_BTN,
+        )
+        await show_coliving_profile(
+            update,
+            context,
+            REPLY_MSG_ASK_TO_CONFIRM,
+            EDIT_CONFIRMATION_KEYBOARD,
+        )
+        return states.EDIT_CONFIRMATION
 
     await update.effective_message.edit_reply_markup()
     call_back = update.callback_query.data

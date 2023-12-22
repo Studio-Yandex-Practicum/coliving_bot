@@ -65,7 +65,6 @@ acquaintance_handler: ConversationHandler = ConversationHandler(
         ],
         states.PRICE: [
             MessageHandler(
-                # filters.Regex(r'^([0-9]{4})$') & ~filters.COMMAND, price
                 filters.Regex(r"^(\d*)$") & ~filters.COMMAND,
                 handle_price,
             ),
@@ -88,7 +87,6 @@ acquaintance_handler: ConversationHandler = ConversationHandler(
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
                 handle_confirm_or_edit_profile,
-                # show_coliving_profile
             ),
         ],
         states.EDIT: [
@@ -196,7 +194,10 @@ acquaintance_handler: ConversationHandler = ConversationHandler(
                 callback=handle_edit_profile_confirmation,
                 pattern=r"^continue_editing",
             ),
-            # MessageHandler(filters.TEXT & ~filters.COMMAND, show_coliving_profile),
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND,
+                handle_edit_profile_confirmation,
+            ),
         ],
         states.COLIVING: [
             CallbackQueryHandler(
