@@ -2,7 +2,6 @@ from telegram.ext import CommandHandler, ConversationHandler
 
 from .callback_funcs import menu, start
 
-
 start_and_menu_handler: ConversationHandler = ConversationHandler(
     entry_points=[
             CommandHandler(command="start", callback=start),
