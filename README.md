@@ -3,12 +3,14 @@
 # Описание проекта
 
 ## Используемый стек
+
 [![Python][Python-badge]][Python-url]
 [![Django][Django-badge]][Django-url]
 [![DRF][DRF-badge]][DRF-url]
 [![Python-telegram-bot][Python-telegram-bot-badge]][Python-telegram-bot-url]
 [![Postgres][Postgres-badge]][Postgres-url]
 [![Nginx][Nginx-badge]][Nginx-url]
+
 ## Архитектура проекта
 
 | Директория    | Описание                                                |
@@ -20,60 +22,101 @@
 # Подготовка
 
 ## Требования
+
 1. **Python 3.12**  
-Убедитесь, что у вас установлена нужная версия Python или активирована в pyenv.
+   Убедитесь, что у вас установлена нужная версия Python или активирована в
+   pyenv.
 
 2. **Poetry**  
-Зависимости и пакеты управляются через poetry. Убедитесь, что poetry [установлен](https://python-poetry.org/docs/#installing-with-the-official-installer) на вашем компьютере и ознакомьтесь с [документацией](https://python-poetry.org/docs/basic-usage/).  
-Установка зависимостей
+   Зависимости и пакеты управляются через poetry. Убедитесь, что
+   poetry [установлен](https://python-poetry.org/docs/#installing-with-the-official-installer)
+   на вашем компьютере и ознакомьтесь
+   с [документацией](https://python-poetry.org/docs/basic-usage/).  
+   Установка зависимостей
+
 ```
 poetry install
 ```
-Также будет создано виртуальное окружение, если привычнее видеть его в директории проекта, то используйте [настройку](https://python-poetry.org/docs/configuration/#adding-or-updating-a-configuration-setting) `virtualenvs.in-project`  
+
+Также будет создано виртуальное окружение, если привычнее видеть его в
+директории проекта, то
+используйте [настройку](https://python-poetry.org/docs/configuration/#adding-or-updating-a-configuration-setting) `virtualenvs.in-project`
 
 3. **Docker**
 
 4. **Файлы requirements**  
-Файлы редактировать вручную не нужно. Обновляются через pre-commit хуки (если есть изменение в зависимостях, то список обновится при коммите).
+   Файлы редактировать вручную не нужно. Обновляются через pre-commit хуки (
+   если есть изменение в зависимостях, то список обновится при коммите).
 
 5. **pre-commit**  
-[Документация](https://pre-commit.com/)  
-При каждом коммите выполняются хуки (автоматизации) перечисленные в .pre-commit-config.yaml. Если не понятно какая ошибка мешает сделать коммит можно запустить хуки вручную и посмотреть ошибки:
+   [Документация](https://pre-commit.com/)  
+   При каждом коммите выполняются хуки (автоматизации) перечисленные в
+   .pre-commit-config.yaml. Если не понятно какая ошибка мешает сделать коммит
+   можно запустить хуки вручную и посмотреть ошибки:
+
 ```shell
 pre-commit run --all-files
 ```
 
+6. **Создание Telegram бота**  
+   [Документация](https://core.telegram.org/bots/features#botfather)  
+   Перед запуском нужно получить токен у бота
+   [@BotFather](https://t.me/BotFather). После того как бот будет
+   зарегестрирован - вам выдадут **token**, его нужно добавить в файл `.env`,
+   строку `TOKEN=`. В документе `env.example` она обозначена комментарием.  
+   *Про более подробное создание бота читать в приложенной документации.*
+
 ## Стиль кода
+
 Придерживаемся [black style](https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html)
 
 ## Ветки Git
-1. Создавая новую ветку, наследуйтесь от ветки develop, подхватывайте перед этим последние изменения
-2. Правила именования веток  
-- весь новый функционал — feature/название-функционала  
+
+1. Создавая новую ветку, наследуйтесь от ветки develop, подхватывайте перед
+   этим последние изменения
+2. Правила именования веток
+
+- весь новый функционал — feature/название-функционала
 - исправление ошибок — fix/название-багфикса
+
 3. 1 ветка - 1 задача
 
 # Разворачиваем проект локально
 
-Устанавливаем зависимости  
+Устанавливаем зависимости
 
-Создаём `.env` файл в корневой директории проекта и заполняем его по образцу `.env.example`  
+Создаём `.env` файл в корневой директории проекта и заполняем его по
+образцу `.env.example`
 
 Переходим в директорию `src/backend/`
+
 ```shell
 cd src/backend/
 ```
+
 Применяем миграции
+
 ```shell
 python manage.py migrate
 ```
+
 Загружаем фикстуры (локации)
+
 ```shell
 python manage.py import_locations
 ```
+
 Запускаем *development*-сервер *Django*
+
 ```shell
 python manage.py runserver
+```
+
+Запускаем бота (не забываем добавить токен бота в файл `.env`)
+
+```shell
+cd src/bot/
+python bot.py
 ```
 
 <!-- MARKDOWN LINKS & BADGES -->
