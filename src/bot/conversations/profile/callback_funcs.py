@@ -9,21 +9,7 @@ from telegram.ext import ContextTypes, ConversationHandler
 
 from general.validators import value_is_in_range_validator
 from internal_requests import mock as api_service
-
-from .buttons import (
-    ABOUT_BUTTON,
-    BACK_BUTTON,
-    EDIT_CANCEL_BUTTON,
-    EDIT_FORM_BUTTON,
-    EDIT_RESUME_BUTTON,
-    FILL_AGAIN_BUTTON,
-    HIDE_SEARCH_BUTTON,
-    NEW_PHOTO_BUTTON,
-    NOT_LOOK_YET_BUTTON,
-    SHOW_SEARCH_BUTTON,
-    YES_BUTTON,
-    YES_TO_DO_BUTTON,
-)
+from .buttons import EDIT_FORM_BUTTON, NOT_LOOK_YET_BUTTON, YES_BUTTON, YES_TO_DO_BUTTON
 from .keyboards import (
     FORM_EDIT_KEYBOARD,
     FORM_SAVE_OR_EDIT_KEYBOARD,
@@ -34,7 +20,7 @@ from .keyboards import (
     SEX_KEYBOARD,
 )
 from .states import States
-from .template import (
+from .templates import (
     ABOUT_FIELD,
     ABOUT_MAX_LEN_ERROR_MSG,
     AGE_ERROR_MSG,
@@ -50,7 +36,6 @@ from .template import (
     ASK_PHOTO,
     ASK_SEX,
     ASK_WANT_TO_CHANGE,
-    BUTTON_ERROR_MSG,
     FORM_IS_NOT_VISIBLE,
     FORM_IS_VISIBLE,
     FORM_NOT_CHANGED,
@@ -71,8 +56,9 @@ from .template import (
     NAME_LENGHT_ERROR_MSG,
     NAME_PATTERN,
     NAME_SYMBOL_ERROR_MSG,
-    PHOTO_ERROR_MESSAGE,
     PROFILE_DATA,
+    PROFILE_IS_INVISIBLE_TEXT,
+    PROFILE_IS_VISIBLE_TEXT,
     SEX_FIELD,
 )
 
@@ -87,7 +73,9 @@ async def set_profile_to_context(
     context.user_data[AGE_FIELD] = profile_info.age
     context.user_data[LOCATION_FIELD] = profile_info.location
     context.user_data[ABOUT_FIELD] = profile_info.about
-    context.user_data[IS_VISIBLE_FIELD] = profile_info.is_visible
+    context.user_data[IS_VISIBLE_FIELD] = (
+        True if profile_info.is_visible == PROFILE_IS_VISIBLE_TEXT else False
+    )
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -95,7 +83,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     Начало диалога. Проверяет, не был ли пользователь зарегистрирован ранее.
     Переводит диалог в состояние AGE (ввод возраста пользователя).
     """
-    flag = False
+    flag = True  # Флаг для проверки ответвления если профиль уже заполнен
     if flag:
         profile_info = await api_service.get_user_profile_by_telegram_id(
             update.effective_chat.id
@@ -108,44 +96,64 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     return States.AGE
 
 
-async def handle_fill_profile(
+async def send_question_to_profile_is_visible_in_search(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """
-    Показывает пользовательскую анкету.
-    Переводит диалог в состояние EDIT(редактирование).
+    Обработка кнопки 'Показать в поиске'.
+    Завершает диалог.
     """
-    try:
-        callback = update.callback_query.data
-    except AttributeError:
-        await update.effective_message.reply_text(
-            BUTTON_ERROR_MSG,
-        )
-        return States.PROFILE
-    await update.effective_message.reply_text(text=callback)
-    await update.effective_message.edit_reply_markup()
-    if callback == SHOW_SEARCH_BUTTON:
-        context.user_data[IS_VISIBLE_FIELD] = True
-        await update.effective_message.reply_text(
-            FORM_IS_VISIBLE,
-        )
-        return ConversationHandler.END
-    elif callback == HIDE_SEARCH_BUTTON:
-        context.user_data[IS_VISIBLE_FIELD] = False
-        await update.effective_message.reply_text(
-            FORM_IS_NOT_VISIBLE,
-        )
-        return ConversationHandler.END
-    elif callback == EDIT_FORM_BUTTON:
-        await update.effective_message.reply_text(
-            ASK_WANT_TO_CHANGE,
-            reply_markup=FORM_EDIT_KEYBOARD,
-        )
-        return States.EDIT
-    elif callback == BACK_BUTTON:
-        return ConversationHandler.END  # States.MENU
+    await _send_chosen_choice_and_remove_buttons(update=update)
+    context.user_data[IS_VISIBLE_FIELD] = True
+    await update.effective_message.reply_text(
+        text=FORM_IS_VISIBLE,
+    )
 
-    return States.PROFILE
+    return ConversationHandler.END
+
+
+async def send_question_to_profile_is_invisible_in_search(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """
+    Обработка кнопки 'Скрыть из поиска'.
+    Завершает диалог.
+    """
+    await _send_chosen_choice_and_remove_buttons(update=update)
+    context.user_data[IS_VISIBLE_FIELD] = False
+    await update.effective_message.reply_text(
+        text=FORM_IS_NOT_VISIBLE,
+    )
+
+    return ConversationHandler.END
+
+
+async def send_question_to_edit_profile(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """
+    Обработка кнопки 'Скрыть из поиска'.
+    Переводит диалог в состояние EDIT.
+    """
+    await _send_chosen_choice_and_remove_buttons(update=update)
+    await update.effective_message.reply_text(
+        text=ASK_WANT_TO_CHANGE,
+        reply_markup=FORM_EDIT_KEYBOARD,
+    )
+
+    return States.EDIT
+
+
+async def send_question_to_back_in_menu(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """
+    Обработка кнопки 'Вернуться'.
+    Переводит диалог в состояние MENU.
+    """
+    await _send_chosen_choice_and_remove_buttons(update=update)
+
+    return ConversationHandler.END  # MENU
 
 
 async def handle_age(
@@ -181,13 +189,7 @@ async def handle_sex(
     Обрабатывает введенный пользователем пол.
     Переводит диалог в состояние NAME (ввод имени пользователя).
     """
-    try:
-        sex = update.callback_query.data
-    except AttributeError:
-        await update.effective_message.reply_text(
-            BUTTON_ERROR_MSG,
-        )
-        return States.SEX
+    sex = update.callback_query.data
     await update.effective_message.reply_text(text=sex)
     await update.effective_message.edit_reply_markup()
     context.user_data[SEX_FIELD] = sex.split()[1].capitalize()
@@ -236,13 +238,7 @@ async def handle_location(
     Обрабатывает введенное пользователем желаемое место жительства.
     Переводит диалог в состояние ABOUT_YOURSELF (ввод информации о себе).
     """
-    try:
-        location = update.callback_query.data
-    except AttributeError:
-        await update.effective_message.reply_text(
-            BUTTON_ERROR_MSG,
-        )
-        return States.LOCATION
+    location = update.callback_query.data
     await update.effective_message.reply_text(text=location)
     await update.effective_message.edit_reply_markup()
     context.user_data[LOCATION_FIELD] = location
@@ -279,6 +275,10 @@ async def handle_about(
 async def encoding_profile_photo(
     update: Update, context: ContextTypes.DEFAULT_TYPE, photo
 ) -> str:
+    """
+    Обрабатывает загруженную пользователем фотографию.
+    Возвращает ее в закодированном виде.
+    """
     user = update.message.from_user
     path = f"files/{update._effective_chat.id}/photos"
     Path(path).mkdir(parents=True, exist_ok=True)
@@ -294,6 +294,9 @@ async def look_at_profile(
     keyboard: str,
     ask: bool = False,
 ) -> None:
+    """
+    Предварительный просмотр профиля.
+    """
     chat_id = update._effective_chat.id
     ask_text = copy(ASK_IS_THAT_RIGHT)
     if not ask:
@@ -311,7 +314,9 @@ async def look_at_profile(
             age=context.user_data.get(AGE_FIELD),
             location=context.user_data.get(LOCATION_FIELD),
             about=context.user_data.get(ABOUT_FIELD),
-            is_visible=False,
+            is_visible=PROFILE_IS_VISIBLE_TEXT
+            if context.user_data.get(ABOUT_FIELD)
+            else PROFILE_IS_INVISIBLE_TEXT,
         )
         + "\n"
         + ask_text,
@@ -327,9 +332,6 @@ async def handle_photo(
     Обрабатывает загруженную пользователем фотографию.
     Переводит диалог в состояние CONFIRMATION (анкета верна или нет)
     """
-    if update.message.text:
-        await update.effective_message.reply_text(text=PHOTO_ERROR_MESSAGE)
-        return States.PHOTO
     context.user_data[IMAGE_FIELD] = await encoding_profile_photo(
         update, context, await update.message.photo[-1].get_file()
     )
@@ -347,13 +349,7 @@ async def handle_profile(
     Выводит сообщение с заполненным профилем.
     Вызывает метод для отправки запроса на видимость анкеты,
     """
-    try:
-        edit = update.callback_query.data
-    except AttributeError:
-        await update.effective_message.reply_text(
-            BUTTON_ERROR_MSG,
-        )
-        return States.CONFIRMATION
+    edit = update.callback_query.data
     await update.effective_message.reply_text(text=edit)
     await update.effective_message.edit_reply_markup()
     if edit == EDIT_FORM_BUTTON:
@@ -379,13 +375,7 @@ async def handle_visible(
     Делает анкету видимой или нет.
     Переводит диалог в состояние END (сохранение анкеты).
     """
-    try:
-        visible = update.callback_query.data
-    except AttributeError:
-        await update.effective_message.reply_text(
-            BUTTON_ERROR_MSG,
-        )
-        return States.VISIBLE
+    visible = update.callback_query.data
     await update.effective_message.reply_text(text=visible)
     await update.effective_message.edit_reply_markup()
     if visible == YES_TO_DO_BUTTON:
@@ -397,39 +387,57 @@ async def handle_visible(
     return ConversationHandler.END
 
 
-async def handle_edit(
+async def start_filling_again(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """
-    Спрашивает какие поля анкеты изменить.
-    Переводит диалог в состояние AGE(возраст).
+    Обработка кнопки 'Заполнить заново.'.
     """
-    try:
-        edit = update.callback_query.data
-    except AttributeError:
-        await update.effective_message.reply_text(
-            BUTTON_ERROR_MSG,
-        )
-        return States.EDIT
-    await update.effective_message.reply_text(text=edit)
-    await update.effective_message.edit_reply_markup()
-    if edit == FILL_AGAIN_BUTTON:
-        await update.effective_message.reply_text(
-            text=ASK_AGE_AGAIN,
-        )
-        return States.AGE
-    elif edit == ABOUT_BUTTON:
-        await update.effective_message.reply_text(
-            text=ASK_ABOUT,
-        )
-        return States.EDIT_ABOUT_YOURSELF
-    elif edit == NEW_PHOTO_BUTTON:
-        await update.effective_message.reply_text(
-            text=ASK_NEW_PHOTO,
-        )
-        return States.EDIT_PHOTO
+    await _send_chosen_choice_and_remove_buttons(update=update)
+    await update.effective_message.reply_text(
+        text=ASK_AGE_AGAIN,
+    )
 
-    return States.EDIT
+    return States.AGE
+
+
+async def send_question_to_edit_about_myself(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """
+    Обработка кнопки 'О себе.'.
+    """
+    await _send_chosen_choice_and_remove_buttons(update=update)
+    await update.effective_message.reply_text(
+        text=ASK_ABOUT,
+    )
+
+    return States.EDIT_ABOUT_YOURSELF
+
+
+async def send_question_to_edit_photo(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """
+    Обработка кнопки 'Фотографию.'.
+    """
+    await _send_chosen_choice_and_remove_buttons(update=update)
+    await update.effective_message.reply_text(
+        text=ASK_NEW_PHOTO,
+    )
+
+    return States.EDIT_PHOTO
+
+
+async def _send_chosen_choice_and_remove_buttons(update: Update) -> None:
+    """
+    Удаление предыдущей клавиатуры.
+    Спрашивает что пользователь хочет изменить.
+    """
+    callback_query = update.callback_query
+    choice_text = callback_query.data
+    await callback_query.message.edit_reply_markup()
+    await callback_query.message.reply_text(text=choice_text)
 
 
 async def handle_edit_about(
@@ -468,9 +476,6 @@ async def handle_edit_photo(
     Обрабатывает отредактированную пользователем фотографию.
     Переводит диалог в состояние EDIT_CONFIRMATION (анкета верна или нет).
     """
-    if update.message.text:
-        await update.effective_message.reply_text(text=PHOTO_ERROR_MESSAGE)
-        return States.EDIT_PHOTO
     context.user_data[IMAGE_FIELD] = await encoding_profile_photo(
         update, context, await update.message.photo[-1].get_file()
     )
@@ -485,40 +490,51 @@ async def handle_edit_photo(
     return States.EDIT_CONFIRMATION
 
 
-async def handle_edit_confirmation(
+async def send_question_to_profile_is_correct(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """
     Спрашивает верна ли анкета.
-    Переводит диалог в состояние EDIT(редактирование).
+    Обработка кнопки 'Да. Верно'.
     Либо завершает диалог.
     """
-    try:
-        edit = update.callback_query.data
-    except AttributeError:
-        await update.effective_message.reply_text(
-            BUTTON_ERROR_MSG,
-        )
-        return States.EDIT_CONFIRMATION
-    await update.effective_message.reply_text(text=edit)
-    await update.effective_message.edit_reply_markup()
-    if edit == YES_BUTTON:
-        await send_confirmation_request(update, context)
-        return ConversationHandler.END
-    elif edit == EDIT_CANCEL_BUTTON:
-        await update.effective_message.reply_text(
-            text=FORM_NOT_CHANGED,
-        )
-        await send_confirmation_request(update, context)
-        return ConversationHandler.END
-    elif edit == EDIT_RESUME_BUTTON:
-        await update.effective_message.reply_text(
-            text=ASK_WANT_TO_CHANGE,
-            reply_markup=FORM_EDIT_KEYBOARD,
-        )
-        return States.EDIT
+    await _send_chosen_choice_and_remove_buttons(update=update)
+    await send_confirmation_request(update, context)
 
-    return States.EDIT_CONFIRMATION
+    return ConversationHandler.END
+
+
+async def send_question_to_cancel_profile_edit(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """
+    Спрашивает верна ли анкета.
+    Обработка кнопки 'Отменить редактирование'.
+    Либо завершает диалог.
+    """
+    await _send_chosen_choice_and_remove_buttons(update=update)
+    await update.effective_message.reply_text(
+        text=FORM_NOT_CHANGED,
+    )
+    await send_confirmation_request(update, context)
+
+    return ConversationHandler.END
+
+
+async def send_question_to_resume_profile_edit(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """
+    Спрашивает верна ли анкета.
+    Обработка кнопки 'Продолжить редактирование'.
+    """
+    await _send_chosen_choice_and_remove_buttons(update=update)
+    await update.effective_message.reply_text(
+        text=ASK_WANT_TO_CHANGE,
+        reply_markup=FORM_EDIT_KEYBOARD,
+    )
+
+    return States.EDIT
 
 
 async def send_confirmation_request(

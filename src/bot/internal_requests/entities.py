@@ -8,4 +8,4 @@ class UserProfile:
     age: int
     location: str
     about: str
-    is_visible: bool
+    is_visible: str

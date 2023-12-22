@@ -4,7 +4,8 @@ MIN_NAME_LENGTH = 3
 MAX_NAME_LENGTH = 30
 MIN_ABOUT_LENGTH = 0
 MAX_ABOUT_LENGTH = 1000
-NAME_PATTERN = "^[А-Яа-яA-Za-z\\s]+$"
+NAME_PATTERN = "^[А-Яа-яA-Za-z'-]+$"
+AGE_PATTERN = "^([0-9]{3})$"
 
 AGE_FIELD = "age"
 SEX_FIELD = "sex"
@@ -39,10 +40,10 @@ ASK_AGE_AGAIN = "Сколько тебе лет?"
 ASK_NEW_PHOTO = "Отправь новое фото."
 # fmt: off
 AGE_ERROR_MSG = (
-    'Неверный возраст. Должен быть целым числом в от {min} до {max}. Повторите ввод.'
+    'Неверный возраст. Должен быть целым числом от {min} до {max}. Повторите ввод.'
 )
 NAME_LENGHT_ERROR_MSG = (
-    'Слишком короткое имя. Должно быть в от {min} до {max}. Повторите ввод.'
+    'Слишком короткое имя. Должно быть от {min} до {max}. Повторите ввод.'
 )
 # fmt: on
 DEFAULT_ERROR_MESSAGE = "Некорректный ввод"
@@ -62,3 +63,5 @@ PROFILE_DATA = (
     "<b>О себе:</b> {about}\n"
     "<b>Видимость анкеты:</b> {is_visible}\n"
 )
+PROFILE_IS_VISIBLE_TEXT = "Отображается в поиске"
+PROFILE_IS_INVISIBLE_TEXT = "Скрыта из поиска"
