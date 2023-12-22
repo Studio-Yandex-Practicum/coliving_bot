@@ -112,7 +112,8 @@ python manage.py import_locations
 python manage.py runserver
 ```
 
-Запускаем бота  
+Запускаем бота
+
 Перед выполнением команд откройте новый терминал
 (не забываем добавить **token** бота в файл `.env`, строку `TOKEN=`)
 
