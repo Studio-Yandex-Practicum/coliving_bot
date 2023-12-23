@@ -1,6 +1,6 @@
 import base64
+import io
 from copy import copy
-from pathlib import Path
 from re import fullmatch
 
 from telegram import Update
@@ -280,12 +280,9 @@ async def encoding_profile_photo(
     Обрабатывает загруженную пользователем фотографию.
     Возвращает ее в закодированном виде.
     """
-    user = update.message.from_user
-    path = f"files/{update._effective_chat.id}/photos"
-    Path(path).mkdir(parents=True, exist_ok=True)
-    await photo.download_to_drive(f"{path}/{user.full_name}_photo.jpg")
-    with open(f"{path}/{user.full_name}_photo.jpg", "rb") as image:
-        return base64.b64encode(image.read())
+    buffer = io.BytesIO()
+    await photo.download_to_memory(buffer)
+    return base64.b64encode(buffer.getvalue())
 
 
 async def look_at_profile(
@@ -305,7 +302,7 @@ async def look_at_profile(
     await context.bot.sendPhoto(
         chat_id=chat_id,
         photo=(
-            f"files/{chat_id}/photos/{update.message.from_user.full_name}_photo.jpg"
+            base64.b64decode(context.user_data.get(IMAGE_FIELD))
         ),
         caption=title
         + "\n"
