@@ -9,9 +9,7 @@ from error_handler.templates import ERROR_MESSAGE_TEMPLATE, LOGGING_MESSAGE_TEMP
 _LOGGER = logging.getLogger(__name__)
 
 
-async def error_handler(
-        update: object, context: ContextTypes.DEFAULT_TYPE
-) -> None:
+async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Passes the error to the logger.
     Sends a telegram message to the user about the error.

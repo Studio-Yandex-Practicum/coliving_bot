@@ -2,7 +2,6 @@ import logging
 from logging import handlers
 
 from utils.configs import (
-    LOGGER_NAME,
     LOGGING_LEVEL,
     LOGS_BACKUP_COUNT,
     LOGS_ENCODING,
@@ -20,9 +19,6 @@ def configure_logging() -> None:
     """
     LOGS_FOLDER.mkdir(parents=True, exist_ok=True)
 
-    logging.basicConfig(level=LOGGING_LEVEL, format=LOGS_FORMAT)
-
-    # Logger handlers
     console_handler = logging.StreamHandler()
     file_handler = handlers.TimedRotatingFileHandler(
         filename=LOGS_FILE_PATH,
@@ -31,8 +27,14 @@ def configure_logging() -> None:
         backupCount=LOGS_BACKUP_COUNT,
         encoding=LOGS_ENCODING,
     )
-    logger = logging.getLogger(LOGGER_NAME)
-    logger.addHandler(console_handler)
-    logger.addHandler(file_handler)
+
+    logging.basicConfig(
+        level=LOGGING_LEVEL,
+        format=LOGS_FORMAT,
+        handlers=(
+            console_handler,
+            file_handler,
+        ),
+    )
 
     logging.getLogger("httpx").setLevel(logging.WARNING)

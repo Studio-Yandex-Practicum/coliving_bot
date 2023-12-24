@@ -17,7 +17,6 @@ TOKEN = os.getenv("TOKEN")
 LOGS_FOLDER = DATA_PATH / "logs"
 
 # Logger parameters
-LOGGER_NAME = "logger"
 LOGGING_LEVEL = logging.getLevelName(os.getenv("LOGGING_LEVEL"))
 LOGS_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 LOGS_FILE_PATH = LOGS_FOLDER / "bot.log"
