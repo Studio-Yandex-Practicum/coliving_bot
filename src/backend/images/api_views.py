@@ -1,5 +1,3 @@
-from typing import Union
-
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from rest_framework.permissions import SAFE_METHODS
@@ -20,9 +18,7 @@ class BaseImage(generics.ListCreateAPIView):
     Базовый вью-класс объектов 'ProfileImage', 'ColivingImage'.
     """
 
-    async def _get_object(
-        self, model: Union[Coliving, Profile]
-    ) -> list[Union[Coliving, Profile]]:
+    def _get_object(self, model):
         """Возвращает объекты 'Profile' или 'Coliving'."""
         return get_object_or_404(model, id=self.kwargs.get("id"))
 
@@ -44,7 +40,7 @@ class ProfileImageView(BaseImage):
             else ProfileImageCreateSerializer
         )
 
-    def perform_create(self, serializer):
+    def perform_create(self, serializer: ProfileImageCreateSerializer):
         serializer.save(profile=self._get_object(Profile))
 
 
@@ -65,5 +61,5 @@ class ColivingImageView(BaseImage):
             else ColivingImageCreateSerializer
         )
 
-    def perform_create(self, serializer):
+    def perform_create(self, serializer: ColivingImageCreateSerializer):
         serializer.save(coliving=self._get_object(Coliving))
