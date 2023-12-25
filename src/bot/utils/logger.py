@@ -19,9 +19,6 @@ def configure_logging() -> None:
     """
     LOGS_FOLDER.mkdir(parents=True, exist_ok=True)
 
-    logging.basicConfig(level=LOGGING_LEVEL, format=LOGS_FORMAT)
-
-    # Logger handlers
     console_handler = logging.StreamHandler()
     file_handler = handlers.TimedRotatingFileHandler(
         filename=LOGS_FILE_PATH,
@@ -31,8 +28,13 @@ def configure_logging() -> None:
         encoding=LOGS_ENCODING,
     )
 
-    logger = logging.getLogger("logger")
-    logger.addHandler(console_handler)
-    logger.addHandler(file_handler)
+    logging.basicConfig(
+        level=LOGGING_LEVEL,
+        format=LOGS_FORMAT,
+        handlers=(
+            console_handler,
+            file_handler,
+        ),
+    )
 
     logging.getLogger("httpx").setLevel(logging.WARNING)

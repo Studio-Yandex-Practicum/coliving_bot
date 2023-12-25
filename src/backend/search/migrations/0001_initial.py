@@ -76,9 +76,7 @@ class Migration(migrations.Migration):
         migrations.AddConstraint(
             model_name="matchrequest",
             constraint=models.CheckConstraint(
-                check=models.Q(
-                    ("sender", models.F("receiver")), _negated=True
-                ),
+                check=models.Q(("sender", models.F("receiver")), _negated=True),
                 name="Cant match to myself",
             ),
         ),

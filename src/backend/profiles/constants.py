@@ -38,5 +38,5 @@ class Literals(models.TextChoices):
     Константы (строковые литералы).
     """
 
-    NAME_CHECK = r"^[А-Яа-яA-Za-z\s]+$"
+    NAME_CHECK = r"^[А-Яа-яA-Za-z\s\-]+$"
     NAME_CHECK_MESSAGE = "Числа и спец. символы не поддерживаются"
