@@ -8,7 +8,7 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 # General data folder path
-DATA_PATH = BASE_DIR.parent / ".data"
+DATA_PATH = BASE_DIR / ".data"
 
 # Telegram BOT token
 TOKEN = os.getenv("TOKEN")
