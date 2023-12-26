@@ -42,7 +42,28 @@ poetry install
 директории проекта, то
 используйте [настройку](https://python-poetry.org/docs/configuration/#adding-or-updating-a-configuration-setting) `virtualenvs.in-project`
 
-3. **Docker**
+3. **Docker**  
+   Установите **Docker**.  
+   Запуск для **development**:  
+   Переименуйте файл `docker-compose.dev.yml` на `docker-compose.yml` в папке
+   infra.
+   Внесите изменения в файл `default.conf` в связи с комментариями.
+   Запустите с помощью консоли:
+   ```shell
+   cd infra/
+   docker-compose run
+   ```
+   Запуск для **production**:  
+   Переименуйте файл `docker-compose.production.yml` на `docker-compose.yml` в
+   папке infra, в этом же файле замените `# change to your image` на образы с
+   вашего
+   аккаунта Docker.
+   Внесите изменения в файл `default.conf` в связи с комментариями.
+   Запустите с помощью консоли:
+   ```shell
+   cd infra/
+   docker-compose run
+   ```
 
 4. **Файлы requirements**  
    Файлы редактировать вручную не нужно. Обновляются через pre-commit хуки (
