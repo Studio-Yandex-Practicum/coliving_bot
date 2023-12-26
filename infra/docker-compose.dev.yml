@@ -21,7 +21,7 @@ services:
       context: ..
       dockerfile: Dockerfile
     container_name: backend
-    command: bash -c "cd backend/ && gunicorn backend.wsgi:application --bind 0:8000"
+    command: bash -c "cd backend/ && gunicorn coliving_bot.wsgi:application --bind 0:8000"
     restart: always
     volumes:
       - static:/app/backend/static/
@@ -54,13 +54,14 @@ services:
     image: nginx:1.24-alpine
     container_name: nginx
     ports:
-      - "9090:80"
+      - "80:80"
     volumes:
       - ./default.conf:/etc/nginx/conf.d/default.conf
       - static:/var/html/static/
       - media:/var/html/media/
     depends_on:
       - bot
+      - backend
 
 
 volumes:
