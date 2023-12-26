@@ -165,3 +165,6 @@ media/
 
 # Logging data folder
 .data/
+
+# VS Code settings folder
+.vscode/ 
