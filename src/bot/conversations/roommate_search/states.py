@@ -3,6 +3,7 @@ import enum
 
 class RoommateSearchStates(str, enum.Enum):
     """Класс, описывающий состояния ветви roommate_search бота."""
+
     (
         AGE,
         LOCATION,

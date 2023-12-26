@@ -1,6 +1,5 @@
 import conversations.roommate_search.templates as buttons
 
-
 AGE_GROUP = {
     buttons.AGE_18_23_BTN: (18, 23),
     buttons.AGE_24_29_BTN: (24, 29),
