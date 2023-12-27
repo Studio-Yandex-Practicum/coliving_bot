@@ -1,8 +1,10 @@
 from django.shortcuts import get_object_or_404
+from rest_framework import status
 from rest_framework import generics
 from rest_framework.permissions import SAFE_METHODS
+from rest_framework.exceptions import NotFound
 
-from profiles.models import Coliving, Profile
+from profiles.models import Coliving, UserFromTelegram
 
 from .models import ColivingImage, ProfileImage
 from .serializers import (
@@ -18,9 +20,9 @@ class BaseImage(generics.ListCreateAPIView):
     Базовый вью-класс объектов 'ProfileImage', 'ColivingImage'.
     """
 
-    def _get_object(self, model):
+    def _get_object(self, model, **kwargs):
         """Возвращает объекты 'Profile' или 'Coliving'."""
-        return get_object_or_404(model, id=self.kwargs.get("id"))
+        return get_object_or_404(model, **kwargs)
 
 
 class ProfileImageView(BaseImage):
@@ -30,7 +32,9 @@ class ProfileImageView(BaseImage):
 
     def get_queryset(self):
         return ProfileImage.objects.filter(
-            profile=self._get_object(Profile).id
+            profile__user__telegram_id=self._get_object(
+                UserFromTelegram, telegram_id=self.kwargs.get("telegram_id")
+            ).telegram_id
         )
 
     def get_serializer_class(self):
@@ -44,15 +48,19 @@ class ProfileImageView(BaseImage):
         serializer.save(profile=self._get_object(Profile))
 
 
-class ColivingImageView(BaseImage):
+class ColivingImageView(generics.ListCreateAPIView):
     """
     Вью-класс для отображения и сохранения объектов 'ColivingImage'.
     """
 
     def get_queryset(self):
-        return ColivingImage.objects.filter(
-            coliving=self._get_object(Coliving).id
+        telegram_user = get_object_or_404(
+            UserFromTelegram, telegram_id=self.kwargs.get("telegram_id")
         )
+        colivings = telegram_user.colivings.filter(id=self.kwargs.get("coliving_id"))
+        if colivings.exists():
+            return colivings.first().images.all()
+        raise NotFound(detail="Коливинг не найден", code=status.HTTP_404_NOT_FOUND)
 
     def get_serializer_class(self):
         return (
