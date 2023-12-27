@@ -3,7 +3,7 @@ from rest_framework import generics, status
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import SAFE_METHODS
 
-from profiles.models import Coliving, Profile, UserFromTelegram
+from profiles.models import Profile, UserFromTelegram
 
 from .serializers import (
     ColivingImageCreateSerializer,
@@ -36,8 +36,8 @@ class ProfileImageView(generics.ListCreateAPIView):
             else ProfileImageCreateSerializer
         )
 
-    def perform_create(self, serializer: ProfileImageCreateSerializer):
-        serializer.save(profile=self._get_object(Profile))
+    # def perform_create(self, serializer):
+    #     serializer.save(profile=get_object_or_404(Profile))
 
 
 class ColivingImageView(generics.ListCreateAPIView):
@@ -65,5 +65,5 @@ class ColivingImageView(generics.ListCreateAPIView):
             else ColivingImageCreateSerializer
         )
 
-    def perform_create(self, serializer: ColivingImageCreateSerializer):
-        serializer.save(coliving=self._get_object(Coliving))
+    # def perform_create(self, serializer):
+    #     serializer.save(coliving=self.get_object_or_404(Coliving))
