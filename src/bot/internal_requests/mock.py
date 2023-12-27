@@ -18,21 +18,6 @@ async def get_user_coliving_info_by_tg_id(telegram_id: int) -> ColivingProfile:
     )
 
 
-# async def get_user_coliving_info_by_tg_id(telegram_id: int) -> TestColivingProfile:
-#     """Получает данные о telegram-пользователе."""
-
-#     return TestColivingProfile(
-#             roommates='Сосед Иван',
-#             location='Москва',
-#             price=5500,
-#             room_type='Комната в квартире',
-#             about='Ну очень уютно',
-#             is_visible=True,
-#             viewers=True,
-#             created_date=datetime.now()
-#         )
-
-
 async def get_user_coliving_status(telegram_id: int) -> UserProfile:
     """Получает данные о telegram-пользователе."""
 

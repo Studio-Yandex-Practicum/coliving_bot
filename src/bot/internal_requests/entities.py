@@ -18,17 +18,3 @@ class ColivingProfile:
     is_visible: str
     viewers: bool
     created_date: datetime
-
-    # Остальные атрибуты
-
-
-# @dataclass
-# class TestColivingProfile:
-#     roommates: str
-#     location: str
-#     price: int
-#     room_type: str
-#     about: str
-#     is_visible: str
-#     viewers: bool
-#     created_date: datetime

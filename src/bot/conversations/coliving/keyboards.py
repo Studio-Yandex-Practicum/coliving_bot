@@ -1,20 +1,9 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from conversations.coliving.templates import (
-    BTN_BED_IN_ROOM,
     BTN_CANCEL,
-    BTN_CANCEL_EDIT,
-    BTN_CONFIRM,
     BTN_DELETE_CONFIRM,
     BTN_DELETE_ROOMMATES,
-    BTN_EDIT_ABOUT_ROOM,
-    BTN_EDIT_CONTINUE,
-    BTN_EDIT_LOCATION,
-    BTN_EDIT_PHOTO,
-    BTN_EDIT_PRICE,
-    BTN_EDIT_PROFILE,
-    BTN_EDIT_ROOM_TYPE,
-    BTN_FILL_AGAIN,
     BTN_GO_TO_MENU,
     BTN_HIDE,
     BTN_INVITE_ROOMMATES,
@@ -44,19 +33,15 @@ from conversations.coliving.templates import (
     BTN_LABEL_SPB,
     BTN_LABEL_TRANSFER_TO,
     BTN_LABEL_VIEWS,
-    BTN_MOSCOW,
     BTN_REPORT_ROOMMATES,
-    BTN_ROOM_IN_APPARTMENT,
-    BTN_ROOM_IN_HOUSE,
     BTN_ROOMMATES,
     BTN_SHOW,
-    BTN_SPB,
     BTN_TRANSFER_TO,
     BTN_VIEWS,
 )
 
 CONFIRMATION_KEYBOARD = InlineKeyboardButton(
-    text=BTN_LABEL_CONFIRM, callback_data=BTN_CONFIRM
+    text=BTN_LABEL_CONFIRM, callback_data=BTN_LABEL_CONFIRM
 )
 
 CANCEL_KEYBOARD = InlineKeyboardButton(
@@ -67,9 +52,11 @@ LOCATION_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         [
             InlineKeyboardButton(
-                text=BTN_LABEL_MOSCOW, callback_data=BTN_MOSCOW
+                text=BTN_LABEL_MOSCOW, callback_data=BTN_LABEL_MOSCOW
             ),
-            InlineKeyboardButton(text=BTN_LABEL_SPB, callback_data=BTN_SPB),
+            InlineKeyboardButton(
+                text=BTN_LABEL_SPB, callback_data=BTN_LABEL_SPB
+            ),
         ]
     )
 )
@@ -78,21 +65,23 @@ ROOM_TYPE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         [
             InlineKeyboardButton(
-                text=BTN_LABEL_BED_IN_ROOM, callback_data=BTN_BED_IN_ROOM
+                text=BTN_LABEL_BED_IN_ROOM, callback_data=BTN_LABEL_BED_IN_ROOM
             ),
             InlineKeyboardButton(
                 text=BTN_LABEL_ROOM_IN_APPARTMENT,
-                callback_data=BTN_ROOM_IN_APPARTMENT,
+                callback_data=BTN_LABEL_ROOM_IN_APPARTMENT,
             ),
             InlineKeyboardButton(
-                text=BTN_LABEL_ROOM_IN_HOUSE, callback_data=BTN_ROOM_IN_HOUSE
+                text=BTN_LABEL_ROOM_IN_HOUSE,
+                callback_data=BTN_LABEL_ROOM_IN_HOUSE,
             ),
         ]
     )
 )
 
 EDIT_PROFILE_KEYBOARD = InlineKeyboardButton(
-    text=BTN_LABEL_EDIT_PROFILE_KEYBOARD, callback_data=BTN_EDIT_PROFILE
+    text=BTN_LABEL_EDIT_PROFILE_KEYBOARD,
+    callback_data=BTN_LABEL_EDIT_PROFILE_KEYBOARD,
 )
 
 CONFIRM_OR_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
@@ -106,23 +95,25 @@ WHAT_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         [
             InlineKeyboardButton(
-                text=BTN_LABEL_FILL_AGAIN, callback_data=BTN_FILL_AGAIN
+                text=BTN_LABEL_FILL_AGAIN, callback_data=BTN_LABEL_FILL_AGAIN
             ),
             InlineKeyboardButton(
-                text=BTN_LABEL_EDIT_LOCATION, callback_data=BTN_EDIT_LOCATION
+                text=BTN_LABEL_EDIT_LOCATION,
+                callback_data=BTN_LABEL_EDIT_LOCATION,
             ),
             InlineKeyboardButton(
-                text=BTN_LABEL_EDIT_ROOM_TYPE, callback_data=BTN_EDIT_ROOM_TYPE
+                text=BTN_LABEL_EDIT_ROOM_TYPE,
+                callback_data=BTN_LABEL_EDIT_ROOM_TYPE,
             ),
             InlineKeyboardButton(
                 text=BTN_LABEL_EDIT_ABOUT_ROOM,
-                callback_data=BTN_EDIT_ABOUT_ROOM,
+                callback_data=BTN_LABEL_EDIT_ABOUT_ROOM,
             ),
             InlineKeyboardButton(
-                text=BTN_LABEL_EDIT_PRICE, callback_data=BTN_EDIT_PRICE
+                text=BTN_LABEL_EDIT_PRICE, callback_data=BTN_LABEL_EDIT_PRICE
             ),
             InlineKeyboardButton(
-                text=BTN_LABEL_EDIT_PHOTO, callback_data=BTN_EDIT_PHOTO
+                text=BTN_LABEL_EDIT_PHOTO, callback_data=BTN_LABEL_EDIT_PHOTO
             ),
         ]
     )
@@ -149,10 +140,10 @@ EDIT_CONFIRMATION_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         CONFIRMATION_KEYBOARD,
         InlineKeyboardButton(
-            text=BTN_LABEL_CANCEL_EDIT, callback_data=BTN_CANCEL_EDIT
+            text=BTN_LABEL_CANCEL_EDIT, callback_data=BTN_LABEL_CANCEL_EDIT
         ),
         InlineKeyboardButton(
-            text=BTN_LABEL_EDIT_CONTINUE, callback_data=BTN_EDIT_CONTINUE
+            text=BTN_LABEL_EDIT_CONTINUE, callback_data=BTN_LABEL_EDIT_CONTINUE
         ),
     )
 )

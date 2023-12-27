@@ -11,6 +11,8 @@ IMAGE_FIELD = "image"
 
 MIN_ABOUT_LENGTH = 0
 MAX_ABOUT_LENGTH = 1000
+MIN_PRICE = 0
+MAX_PRICE = 1000000
 
 DEFAULT_ERROR_MESSAGE = "Некорректный ввод"
 
@@ -20,7 +22,9 @@ IS_VISIBLE_NO = "Нет"
 ERR_MSG_ABOUT_MAX_LEN = (
     "Превышено максимальное количество символов равное {max}."
 )
-ERR_MSG_PRICE = "Цена, должна быть числом!"
+ERR_MSG_PRICE = (
+    "Цена, должна быть целым числом от {min} до {max}. Повторите ввод!"
+)
 ERR_NEED_TO_SELECT_BTN = "Пожалуйста, выберите вариант из предложенных."
 ERR_PHOTO_NOT_TEXT = "Пожалуйста, отправьте 5 фотографий"
 
