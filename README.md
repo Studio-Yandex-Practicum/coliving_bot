@@ -68,7 +68,8 @@ poetry install
    Запуск для **production**:  
    В файле `docker-compose.production.yml` замените `# change to your image`
    на образы с **Docker Hub**.
-   Внесите изменения в файл `default.conf`.
+   Внесите изменения в файл `default.conf`. Здесь тоже нужно добавить
+   файл `.env` в папку `/infra` по примеру `.env.example`  
    Запустите с помощью консоли:
    ```shell
    cd infra/
