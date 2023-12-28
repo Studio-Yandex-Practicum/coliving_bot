@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 @dataclass
-class UserProfile:
+class UserProfileTest:
     # telegram_id: int
     is_сoliving: True
 

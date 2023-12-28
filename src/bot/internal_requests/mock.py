@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from internal_requests.entities import ColivingProfile, UserProfile
+from internal_requests.entities import ColivingProfile, UserProfileTest
 
 
 async def get_user_coliving_info_by_tg_id(telegram_id: int) -> ColivingProfile:
@@ -18,7 +18,7 @@ async def get_user_coliving_info_by_tg_id(telegram_id: int) -> ColivingProfile:
     )
 
 
-async def get_user_coliving_status(telegram_id: int) -> UserProfile:
+async def get_user_coliving_status(telegram_id: int) -> UserProfileTest:
     """Получает данные о telegram-пользователе."""
 
     ####################################################################
@@ -27,7 +27,7 @@ async def get_user_coliving_status(telegram_id: int) -> UserProfile:
     # is_сoliving=True для просмотра профиля
     ####################################################################
 
-    return UserProfile(
+    return UserProfileTest(
         is_сoliving=False
         # is_сoliving=True
     )
