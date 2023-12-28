@@ -44,23 +44,40 @@ poetry install
 
 3. **Docker**  
    Установите **Docker**.  
-   Запуск для **development**:  
-   Переименуйте файл `docker-compose.dev.yml` на `docker-compose.yml` в папке
-   infra.
+   Запуск для **development**:
    Запустите с помощью консоли:
    ```shell
    cd infra/
-   docker-compose run
+   docker-compose -f docker-compose.dev.yml up
+   ```  
+   Также для разработки предусмотрен супер пользователь, но придется
+   поменять у него пароль вручную:   
+   **Делать нижеперечисленное нужно в новом терминале!**  
+   Узнайте ID контейнера *backend*'а, командой:
+   ```shell
+   docker container ls
+   # примерный ответ
+   СONTAINER ID  IMAGE  COMMAND  CREATED  STATUS  PORTS  NAMES
+   # нам нужно значение из первой колонки
+   ```
+   Далее используйте команду, чтобы подключиться к терминалу контейнера,
+   *bash* должен быть в вашем **PATH**
+   ```shell
+   docker exec -it bot `container-id` bash
+   # должно появится что-то подобное
+   root@6449ab29fb81:/app#
+   # вводите
+   python manage.py changepassword admin
+   # и вводите новый пароль -> ваша админка для проверки готова
    ```
    Запуск для **production**:  
-   Переименуйте файл `docker-compose.production.yml` на `docker-compose.yml` в
-   папке infra, в этом же файле замените `# change to your image` на образы с
-   **Docker Hub**.
+   В файле `docker-compose.production.yml` замените `# change to your image`
+   на образы с **Docker Hub**.
    Внесите изменения в файл `default.conf`.
    Запустите с помощью консоли:
    ```shell
    cd infra/
-   docker-compose run
+   docker-compose -f docker-compose.prod.yml up
    ```
 
 4. **Файлы requirements**  
