@@ -14,35 +14,40 @@ services:
       - "5432"
     env_file:
       - ../.env
+    healthcheck:
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}'" ]
+      interval: 3s
+      timeout: 3s
+      retries: 5
 
 
   backend:
     build:
       context: ..
-      dockerfile: Dockerfile
+      dockerfile: /src/backend/Dockerfile
     container_name: backend
     command: >
-      bash -c "cd backend &&
-               python manage.py migrate &&
+      bash -c "python manage.py migrate &&
+               python manage.py createsuperuser --noinput --username admin --email admin@ya.ru &&
                python manage.py collectstatic --clear --noinput &&
                gunicorn coliving_bot.wsgi:application --bind 0:9090"
     restart: always
     volumes:
-      - static:/app/backend/static/
-      - media:/app/backend/media/
+      - static:/app/static/
+      - media:/app/media/
       - ../.data/logs/:/app/.data/logs/
     env_file:
       - ../.env
     depends_on:
       - db
-    image: coliving_bot:latest
+    image: coliving_bot_backend:latest
 
   bot:
     build:
       context: ..
-      dockerfile: Dockerfile
+      dockerfile: /src/bot/Dockerfile
     container_name: bot
-    command: bash -c "cd bot/ && python run_bot.py"
+    command: bash -c "python run_bot.py"
     env_file:
       - ../.env
     restart: always
@@ -50,7 +55,7 @@ services:
       - ../.data/logs/:/app/.data/logs/
     depends_on:
       - backend
-    image: coliving_bot:latest
+    image: coliving_bot_bot:latest
 
   nginx:
     image: nginx:1.24-alpine
