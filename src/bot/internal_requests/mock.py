@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from internal_requests.entities import ColivingProfile, UserProfileTest
+from conversations.profile.templates import PROFILE_IS_VISIBLE_TEXT
+from internal_requests.entities import ColivingProfile, UserProfile, UserProfileTest
 
 
 async def get_user_coliving_info_by_tg_id(telegram_id: int) -> ColivingProfile:
@@ -30,4 +31,15 @@ async def get_user_coliving_status(telegram_id: int) -> UserProfileTest:
     return UserProfileTest(
         is_сoliving=False
         # is_сoliving=True
+    )
+
+
+async def get_user_profile_by_telegram_id(telegram_id: int) -> UserProfile:
+    return UserProfile(
+        name="Володя",
+        sex="Я парень",
+        age=25,
+        location="Москва",
+        about="Немного о себе",
+        is_visible=PROFILE_IS_VISIBLE_TEXT,
     )

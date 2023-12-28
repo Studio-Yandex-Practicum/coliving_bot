@@ -18,3 +18,13 @@ class ColivingProfile:
     is_visible: str
     viewers: bool
     created_date: datetime
+
+
+@dataclass
+class UserProfile:
+    name: str
+    sex: str
+    age: int
+    location: str
+    about: str
+    is_visible: str
