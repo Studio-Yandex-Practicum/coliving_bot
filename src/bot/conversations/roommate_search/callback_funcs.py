@@ -145,19 +145,16 @@ async def profile_like(
     """
     current_profile = context.user_data.get("current_profile")
     roommate_id = current_profile.get("telegram_id")
-    status = await api_service.post_match_request(
+    await api_service.post_match_request(
         sender_id=update.effective_user.id, reciever_id=roommate_id
     )
 
-    # DEV/DEBUG - Обработка несуществующего roommate_id
-    try:
-        await context.bot.send_message(
-            chat_id=roommate_id, text=templates.LIKE_NOTIFICATION
-        )
-    except Exception as e:
-        await context.bot.send_message(
-            chat_id=update.effective_user.id, text=templates.LIKE_NOTIFICATION
-        )
+    await _send_like_notification(
+        update=update,
+        context=context,
+        reciever_id=roommate_id,
+        text=templates.LIKE_NOTIFICATION,
+    )
 
     await _message_delete_and_reply(
         update=update,
@@ -216,6 +213,9 @@ async def _message_edit(
     keyboard: InlineKeyboardMarkup | None = None,
     parse_mode: ODVInput[str] = DEFAULT_NONE,
 ) -> None:
+    """
+    Функция для изменение текста и клавиатуры последнего сообщения диалога.
+    """
     await update.callback_query.message.edit_reply_markup()
     await update.callback_query.message.edit_text(
         text=text, reply_markup=keyboard, parse_mode=parse_mode
@@ -225,5 +225,25 @@ async def _message_edit(
 async def _message_delete_and_reply(
     update: Update, text: str, keyboard: InlineKeyboardMarkup | None = None
 ) -> None:
+    """
+    Функция для удаления последнего сообщения диалога и отправки нового.
+    """
     await update.callback_query.message.delete()
     await update.effective_message.reply_text(text=text, reply_markup=keyboard)
+
+
+async def _send_like_notification(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    reciever_id: int,
+    text: str,
+) -> None:
+    """
+    Функция для отправки пользователю сообщения о лайке его анкеты.
+    """
+    try:
+        await context.bot.send_message(chat_id=reciever_id, text=text)
+    except Exception as e:  # noqa
+        await context.bot.send_message(
+            chat_id=update.effective_user.id, text=text
+        )
