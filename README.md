@@ -42,7 +42,39 @@ poetry install
 директории проекта, то
 используйте [настройку](https://python-poetry.org/docs/configuration/#adding-or-updating-a-configuration-setting) `virtualenvs.in-project`
 
-3. **Docker**
+3. **Docker**  
+   Установите **Docker**.  
+   Перед тем как запустить проект в контейнерах создайте в папке `infra`
+   файл `.env` по примеру `.env.example`, заполните отсутствующие поля,
+   замените комментарии.  
+   Запуск для **development**:  
+   Запустите с помощью консоли:
+   ```shell
+   cd infra/
+   docker-compose -f docker-compose.dev.yml up
+   ```  
+   Также для разработки предусмотрен супер пользователь, но придется
+   поменять у него пароль вручную:  
+   **Делать нижеперечисленное нужно в новом терминале!**  
+   Далее используйте команду, чтобы подключиться к терминалу контейнера:
+   ```shell
+   docker compose -f docker-compose.dev.yml exec -it backend bash
+   # должно появится что-то подобное
+   root@6449ab29fb81:/app#
+   # вводите
+   python manage.py changepassword admin
+   # и вводите новый пароль -> ваша админка для проверки готова
+   ```
+   Запуск для **production**:  
+   В файле `docker-compose.production.yml` замените `# change to your image`
+   на образы с **Docker Hub**.
+   Внесите изменения в файл `default.conf`. Здесь тоже нужно добавить
+   файл `.env` в папку `/infra` по примеру `.env.example`  
+   Запустите с помощью консоли:
+   ```shell
+   cd infra/
+   docker-compose -f docker-compose.prod.yml up
+   ```
 
 4. **Файлы requirements**  
    Файлы редактировать вручную не нужно. Обновляются через pre-commit хуки (
