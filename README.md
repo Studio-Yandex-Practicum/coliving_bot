@@ -60,10 +60,9 @@ poetry install
    СONTAINER ID  IMAGE  COMMAND  CREATED  STATUS  PORTS  NAMES
    # нам нужно значение из первой колонки
    ```
-   Далее используйте команду, чтобы подключиться к терминалу контейнера,
-   *bash* должен быть в вашем **PATH**
+   Далее используйте команду, чтобы подключиться к терминалу контейнера:
    ```shell
-   docker exec -it bot `container-id` bash
+   docker compose -f docker-compose.dev.yml exec -it backend bash
    # должно появится что-то подобное
    root@6449ab29fb81:/app#
    # вводите
