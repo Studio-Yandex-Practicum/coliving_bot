@@ -2,7 +2,7 @@ version: '3.12'
 
 services:
   db:
-    image: postgres:16-alpine
+    image: ${POSTGRES_IMAGE}
     container_name: db
     restart: always
     volumes:
@@ -13,11 +13,11 @@ services:
     expose:
       - "5432"
     env_file:
-      - ../.env
+      - .env
 
 
   backend:
-    image: # image name here
+    image: ${BACKEND_IMAGE}
     container_name: backend
     command: >
       bash -c "python manage.py migrate &&
@@ -29,16 +29,16 @@ services:
       - media:/app/backend/media/
       - ../.data/logs/:/app/.data/logs/
     env_file:
-      - ../.env
+      - .env
     depends_on:
       - db
 
   bot:
-    image: # image name here
+    image: ${BOT_IMAGE}
     container_name: bot
     command: bash -c "cd bot/ && python run_bot.py"
     env_file:
-      - ../.env
+      - .env
     restart: always
     volumes:
       - ../.data/logs/:/app/.data/logs/
@@ -46,8 +46,10 @@ services:
       - backend
 
   nginx:
-    image: nginx:1.24-alpine
+    image: ${NGINX_IMAGE}
     container_name: nginx
+    env_file:
+      - .env
     ports:
       - "9090:80"
     volumes:
