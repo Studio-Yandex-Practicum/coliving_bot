@@ -55,13 +55,6 @@ poetry install
    Также для разработки предусмотрен супер пользователь, но придется
    поменять у него пароль вручную:  
    **Делать нижеперечисленное нужно в новом терминале!**  
-   Узнайте ID контейнера *backend*'а, командой:
-   ```shell
-   docker container ls
-   # примерный ответ
-   СONTAINER ID  IMAGE  COMMAND  CREATED  STATUS  PORTS  NAMES
-   # нам нужно значение из первой колонки
-   ```
    Далее используйте команду, чтобы подключиться к терминалу контейнера:
    ```shell
    docker compose -f docker-compose.dev.yml exec -it backend bash
