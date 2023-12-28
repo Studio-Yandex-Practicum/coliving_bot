@@ -1,8 +1,11 @@
 version: '3.12'
 
 services:
+
   db:
-    image: postgres:16-alpine
+    env_file:
+      - .env
+    image: ${POSTGRES_IMAGE}
     container_name: db
     restart: always
     volumes:
@@ -10,10 +13,9 @@ services:
     environment:
       LANG: "ru_RU.UTF-8"
       POSTGRES_INITDB_ARGS: '--locale-provider=icu --icu-locale=ru-RU'
+      POSTGRES_IMAGE_VERSION:
     expose:
       - "5432"
-    env_file:
-      - ../.env
     healthcheck:
       test: [ "CMD-SHELL", "sh -c 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}'" ]
       interval: 3s
@@ -37,7 +39,7 @@ services:
       - media:/app/media/
       - ../.data/logs/:/app/.data/logs/
     env_file:
-      - ../.env
+      - .env
     depends_on:
       - db
     image: coliving_bot_backend:latest
@@ -49,7 +51,7 @@ services:
     container_name: bot
     command: bash -c "python run_bot.py"
     env_file:
-      - ../.env
+      - .env
     restart: always
     volumes:
       - ../.data/logs/:/app/.data/logs/
@@ -58,7 +60,9 @@ services:
     image: coliving_bot_bot:latest
 
   nginx:
-    image: nginx:1.24-alpine
+    env_file:
+      - .env
+    image: ${NGINX_IMAGE}
     container_name: nginx
     ports:
       - "9090:80"
