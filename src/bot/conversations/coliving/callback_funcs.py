@@ -19,9 +19,6 @@ from conversations.coliving.states import ColivingStates as states
 from conversations.coliving.templates import (
     ABOUT_FIELD,
     BTN_EDIT_PHOTO,
-    BTN_EDIT_PROFILE,
-    BTN_GO_TO_MENU,
-    BTN_HIDE,
     BTN_LABEL_CANCEL_EDIT,
     BTN_LABEL_CONFIRM,
     BTN_LABEL_EDIT_ABOUT_ROOM,
@@ -31,10 +28,6 @@ from conversations.coliving.templates import (
     BTN_LABEL_EDIT_PROFILE_KEYBOARD,
     BTN_LABEL_EDIT_ROOM_TYPE,
     BTN_LABEL_FILL_AGAIN,
-    BTN_ROOMMATES,
-    BTN_SHOW,
-    BTN_TRANSFER_TO,
-    BTN_VIEWS,
     ERR_MSG_ABOUT_MAX_LEN,
     ERR_MSG_PRICE,
     ERR_NEED_TO_SELECT_BTN,
@@ -143,142 +136,177 @@ async def set_profile_to_context(
     context.user_data[IS_VISIBLE_FIELD] = user_coliving_profile.is_visible
 
 
-async def handle_coliving(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE,
+async def handle_coliving_text_instead_of_button(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
-    """Взаимодействие с профилем коливинга"""
+    """
+    Проверка ввод текста или нажатие кнопки.
+    Провка статуса видимости.
+    """
 
-    try:
-        update.callback_query.data
-    except AttributeError:
-        await update.effective_message.reply_text(
-            ERR_NEED_TO_SELECT_BTN,
+    await update.effective_message.reply_text(
+        ERR_NEED_TO_SELECT_BTN,
+    )
+    if context.user_data[IS_VISIBLE_FIELD] == IS_VISIBLE_YES:
+        await show_coliving_profile(
+            update,
+            context,
+            " ",
+            keyboard=COLIVING_PROFILE_KEYBOARD_VISIBLE,
         )
-        if context.user_data[IS_VISIBLE_FIELD] == IS_VISIBLE_YES:
-            await show_coliving_profile(
-                update,
-                context,
-                " ",
-                keyboard=COLIVING_PROFILE_KEYBOARD_VISIBLE,
-            )
-        else:
-            await show_coliving_profile(
-                update,
-                context,
-                " ",
-                keyboard=COLIVING_PROFILE_KEYBOARD_NOT_VISIBLE,
-            )
-        return states.COLIVING
-
-    await update.effective_message.edit_reply_markup()
-    call_back = update.callback_query.data
-
-    if call_back == BTN_EDIT_PROFILE:
-        await update.effective_message.reply_text(
-            text=f"{REPLY_MSG}{BTN_LABEL_EDIT_PROFILE_KEYBOARD}"
-        )
-        await update.effective_message.reply_text(
-            text=REPLY_MSG_WHAT_TO_EDIT,
-            reply_markup=WHAT_EDIT_PROFILE_KEYBOARD,
-        )
-        return states.EDIT
-
-    elif call_back == BTN_HIDE:
-        context.user_data[IS_VISIBLE_FIELD] = IS_VISIBLE_NO
-        await update.effective_message.reply_text(text=REPLY_BTN_HIDE)
+    else:
         await show_coliving_profile(
             update,
             context,
             " ",
             keyboard=COLIVING_PROFILE_KEYBOARD_NOT_VISIBLE,
         )
-        ############################################################
-        # добавить для сохранения в БД
-        # await save_coliving_info_to_db(update, context)
-        #
-        ############################################################
-        return states.COLIVING
+    return states.COLIVING
 
-    elif call_back == BTN_SHOW:
-        context.user_data[IS_VISIBLE_FIELD] = IS_VISIBLE_YES
-        await update.effective_message.reply_text(text=REPLY_BTN_SHOW)
 
-        await show_coliving_profile(
-            update, context, " ", keyboard=COLIVING_PROFILE_KEYBOARD_VISIBLE
+async def handle_coliving_edit(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """Обработка ответа: Изменить коливинг профиль."""
+
+    await update.effective_message.edit_reply_markup()
+    await update.effective_message.reply_text(
+        text=f"{REPLY_MSG}{BTN_LABEL_EDIT_PROFILE_KEYBOARD}"
+    )
+    await update.effective_message.reply_text(
+        text=REPLY_MSG_WHAT_TO_EDIT,
+        reply_markup=WHAT_EDIT_PROFILE_KEYBOARD,
+    )
+    return states.EDIT
+
+
+async def handle_coliving_hide(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """Обработка ответа: Скрыть из поиска."""
+
+    await update.effective_message.edit_reply_markup()
+    context.user_data[IS_VISIBLE_FIELD] = IS_VISIBLE_NO
+    await update.effective_message.reply_text(text=REPLY_BTN_HIDE)
+    await show_coliving_profile(
+        update,
+        context,
+        " ",
+        keyboard=COLIVING_PROFILE_KEYBOARD_NOT_VISIBLE,
+    )
+    ############################################################
+    # добавить для сохранения в БД
+    # await save_coliving_info_to_db(update, context)
+    #
+    ############################################################
+    return states.COLIVING
+
+
+async def handle_coliving_show(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """Обработка ответа: Показать в поиске."""
+
+    await update.effective_message.edit_reply_markup()
+    context.user_data[IS_VISIBLE_FIELD] = IS_VISIBLE_YES
+    await update.effective_message.reply_text(text=REPLY_BTN_SHOW)
+    await show_coliving_profile(
+        update, context, " ", keyboard=COLIVING_PROFILE_KEYBOARD_VISIBLE
+    )
+    ############################################################
+    # добавить для сохранения в БД
+    # await save_coliving_info_to_db(update, context)
+    #
+    ############################################################
+    return states.COLIVING
+
+
+async def handle_coliving_roommates(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """Обработка ответа: Посмотреть анкеты соседей."""
+
+    #############################################################
+    # запрос к API
+    # заглушка
+    await update.effective_message.edit_reply_markup()
+    await update.effective_message.reply_text(
+        text=(
+            "Заглушка. По идее здесь запрос к API "
+            "вывод списка соседей"
+            "\n"
+            "\n"
+            "Нажмите /coliving"
         )
-        ############################################################
-        # добавить для сохранения в БД
-        # await save_coliving_info_to_db(update, context)
-        #
-        ############################################################
-        return states.COLIVING
+    )
+    #############################################################
+    return ConversationHandler.END
 
-    elif call_back == BTN_ROOMMATES:
-        #############################################################
-        # запрос к API
-        # заглушка
-        await update.effective_message.reply_text(
-            text=(
-                "Заглушка. По идее здесь запрос к API "
-                "вывод списка соседей"
-                "\n"
-                "\n"
-                "Нажмите /coliving"
-            )
+
+async def handle_coliving_views(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """Обработка ответа: Просмотры."""
+    #############################################################
+    # запрос к API
+    # заглушка
+    await update.effective_message.edit_reply_markup()
+    await update.effective_message.reply_text(
+        text=(
+            "Заглушка. По идее здесь запрос к API "
+            "вывод списка профилей тех кто лайкнул"
+            "\n"
+            "\n"
+            "Нажмите /coliving"
         )
-        #############################################################
-        return ConversationHandler.END
+    )
 
-    elif call_back == BTN_VIEWS:
-        #############################################################
-        # запрос к API
-        # заглушка
-        await update.effective_message.reply_text(
-            text=(
-                "Заглушка. По идее здесь запрос к API "
-                "вывод списка профилей тех кто лайкнул"
-                "\n"
-                "\n"
-                "Нажмите /coliving"
-            )
+    #############################################################
+    return ConversationHandler.END
+
+
+async def handle_coliving_transfer_to(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """Обработка ответа: Передача коливинга."""
+    #############################################################
+    # заглушка
+    await update.effective_message.edit_reply_markup()
+    await update.effective_message.reply_text(
+        text=(
+            "Заглушка. Предусмотрена передача коливинга "
+            "другому владельцу"
+            "\n"
+            "\n"
+            "Нажмите /coliving"
         )
+    )
+    # await set_new_ownner(update, context)
+    #############################################################
+    return ConversationHandler.END
 
-        #############################################################
-        return ConversationHandler.END
 
-    elif call_back == BTN_TRANSFER_TO:
-        #############################################################
-        # заглушка
-        await update.effective_message.reply_text(
-            text=(
-                "Заглушка. Предусмотрена передача коливинга "
-                "другому владельцу"
-                "\n"
-                "\n"
-                "Нажмите /coliving"
-            )
+async def handle_coliving_go_to_menu(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """Обработка ответа: Вернуться в меню."""
+
+    #############################################################
+    # states.MENU
+    # заглушка
+    await update.effective_message.edit_reply_markup()
+    await update.effective_message.reply_text(
+        text=(
+            "Заглушка. По идее здесь переход "
+            "в МЕНЮ на state.MENU"
+            "\n"
+            "\n"
+            "Нажмите /coliving"
         )
-        # await set_new_ownner(update, context)
-        #############################################################
-        return ConversationHandler.END
-
-    elif call_back == BTN_GO_TO_MENU:
-        #############################################################
-        # states.MENU
-        # заглушка
-        await update.effective_message.reply_text(
-            text=(
-                "Заглушка. По идее здесь переход "
-                "в МЕНЮ на state.MENU"
-                "\n"
-                "\n"
-                "Нажмите /coliving"
-            )
-        )
-        # return states.MENU
-        #############################################################
-        return ConversationHandler.END
+    )
+    # return states.MENU
+    #############################################################
+    return ConversationHandler.END
 
 
 async def handle_location_text_input_instead_of_choosing_button(

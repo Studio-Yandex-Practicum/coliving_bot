@@ -8,7 +8,14 @@ from telegram.ext import (
 
 from .callback_funcs import (
     handle_about_coliving,
-    handle_coliving,
+    handle_coliving_edit,
+    handle_coliving_go_to_menu,
+    handle_coliving_hide,
+    handle_coliving_roommates,
+    handle_coliving_show,
+    handle_coliving_text_instead_of_button,
+    handle_coliving_transfer_to,
+    handle_coliving_views,
     handle_confirm_or_edit_profile_text_instead_of_button,
     handle_confirm_or_edit_reply_confirm,
     handle_confirm_or_edit_reply_edit_profile,
@@ -249,21 +256,32 @@ coliving_handler: ConversationHandler = ConversationHandler(
         ],
         states.COLIVING: [
             CallbackQueryHandler(
-                callback=handle_coliving, pattern=r"^edit_profile"
-            ),
-            CallbackQueryHandler(callback=handle_coliving, pattern=r"^show"),
-            CallbackQueryHandler(callback=handle_coliving, pattern=r"^hide"),
-            CallbackQueryHandler(
-                callback=handle_coliving, pattern=r"^roommates_profiles"
-            ),
-            CallbackQueryHandler(callback=handle_coliving, pattern=r"^views"),
-            CallbackQueryHandler(
-                callback=handle_coliving, pattern=r"^transfer_to"
+                callback=handle_coliving_edit,
+                pattern=rf"^{BTN_LABEL_EDIT_PROFILE_KEYBOARD}",
             ),
             CallbackQueryHandler(
-                callback=handle_coliving, pattern=r"^go_to_menu"
+                callback=handle_coliving_show, pattern=r"^show"
             ),
-            MessageHandler(filters.TEXT & ~filters.COMMAND, handle_coliving),
+            CallbackQueryHandler(
+                callback=handle_coliving_hide, pattern=r"^hide"
+            ),
+            CallbackQueryHandler(
+                callback=handle_coliving_roommates,
+                pattern=r"^roommates_profiles",
+            ),
+            CallbackQueryHandler(
+                callback=handle_coliving_views, pattern=r"^views"
+            ),
+            CallbackQueryHandler(
+                callback=handle_coliving_transfer_to, pattern=r"^transfer_to"
+            ),
+            CallbackQueryHandler(
+                callback=handle_coliving_go_to_menu, pattern=r"^go_to_menu"
+            ),
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND,
+                handle_coliving_text_instead_of_button,
+            ),
         ],
     },
     fallbacks=[],
