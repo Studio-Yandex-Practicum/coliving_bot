@@ -13,16 +13,37 @@ from .serializers import (
 )
 
 
-class ProfileImageView(generics.ListCreateAPIView):
+class BaseImageView(generics.ListCreateAPIView):
+    """
+    Базовый вью-класс объектов 'ProfileImage', 'ColivingImage'.
+    """
+
+    def _get_telegram_user(self):
+        """Возвращает объект 'UserFromTelegram'."""
+        return get_object_or_404(
+            UserFromTelegram, telegram_id=self.kwargs.get("telegram_id")
+        )
+
+    def _get_colivings(self):
+        """Возвращает объект 'Coliving'."""
+
+        telegram_user_colivings = self._get_telegram_user().colivings.filter(
+            id=self.kwargs.get("coliving_id")
+        )
+        if not telegram_user_colivings.exists():
+            raise NotFound(
+                detail="Коливинг не найден", code=status.HTTP_404_NOT_FOUND
+            )
+        return telegram_user_colivings.first()
+
+
+class ProfileImageView(BaseImageView):
     """
     Вью-класс для отображения и сохранения объектов 'ProfileImage'.
     """
 
     def get_queryset(self):
-        telegram_user = get_object_or_404(
-            UserFromTelegram, telegram_id=self.kwargs.get("telegram_id")
-        )
-        profile = Profile.objects.filter(user=telegram_user)
+        profile = Profile.objects.filter(user=self._get_telegram_user())
         if profile.exists():
             return profile.first().images.all()
         raise NotFound(
@@ -36,27 +57,21 @@ class ProfileImageView(generics.ListCreateAPIView):
             else ProfileImageCreateSerializer
         )
 
-    # def perform_create(self, serializer):
-    #     serializer.save(profile=get_object_or_404(Profile))
+    def perform_create(self, serializer):
+        serializer.save(
+            profile=get_object_or_404(
+                Profile, user__telegram_id=self.kwargs.get("telegram_id")
+            )
+        )
 
 
-class ColivingImageView(generics.ListCreateAPIView):
+class ColivingImageView(BaseImageView):
     """
     Вью-класс для отображения и сохранения объектов 'ColivingImage'.
     """
 
     def get_queryset(self):
-        telegram_user = get_object_or_404(
-            UserFromTelegram, telegram_id=self.kwargs.get("telegram_id")
-        )
-        colivings = telegram_user.colivings.filter(
-            id=self.kwargs.get("coliving_id")
-        )
-        if colivings.exists():
-            return colivings.first().images.all()
-        raise NotFound(
-            detail="Коливинг не найден", code=status.HTTP_404_NOT_FOUND
-        )
+        return self._get_colivings().images.all()
 
     def get_serializer_class(self):
         return (
@@ -65,5 +80,5 @@ class ColivingImageView(generics.ListCreateAPIView):
             else ColivingImageCreateSerializer
         )
 
-    # def perform_create(self, serializer):
-    #     serializer.save(coliving=self.get_object_or_404(Coliving))
+    def perform_create(self, serializer):
+        serializer.save(coliving=self._get_colivings())
