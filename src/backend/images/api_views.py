@@ -19,13 +19,17 @@ class BaseImageView(generics.ListCreateAPIView):
     """
 
     def _get_telegram_user(self):
-        """Возвращает объект 'UserFromTelegram'."""
+        """
+        Возвращает объект 'UserFromTelegram'.
+        """
         return get_object_or_404(
             UserFromTelegram, telegram_id=self.kwargs.get("telegram_id")
         )
 
-    def _get_colivings(self):
-        """Возвращает объект 'Coliving'."""
+    def _get_coliving(self):
+        """
+        Возвращает объект 'Coliving'.
+        """
 
         telegram_user_colivings = self._get_telegram_user().colivings.filter(
             id=self.kwargs.get("coliving_id")
@@ -71,7 +75,7 @@ class ColivingImageView(BaseImageView):
     """
 
     def get_queryset(self):
-        return self._get_colivings().images.all()
+        return self._get_coliving().images.all()
 
     def get_serializer_class(self):
         return (
@@ -81,4 +85,4 @@ class ColivingImageView(BaseImageView):
         )
 
     def perform_create(self, serializer):
-        serializer.save(coliving=self._get_colivings())
+        serializer.save(coliving=self._get_coliving())
