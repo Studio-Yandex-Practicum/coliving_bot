@@ -28,5 +28,5 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.isort]
 profile = "black"
-skip_glob = ["**/migrations/**"]
+skip_glob = ["**/migrations/*.py"]
 src_paths = ["src/bot", "src/backend"]

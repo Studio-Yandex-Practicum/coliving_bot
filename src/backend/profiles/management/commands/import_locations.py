@@ -15,15 +15,10 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         print("Создаю объекты 'Location'")
         try:
-            path = os.path.join(
-                settings.BASE_DIR, "fixtures/", "locations.json"
-            )
+            path = os.path.join(settings.BASE_DIR, "fixtures/", "locations.json")
             data = json.load(open(path, "r", encoding="utf8"))
             Location.objects.bulk_create(
-                [
-                    Location(**field)
-                    for field in [data["fields"] for data in data]
-                ],
+                [Location(**field) for field in [data["fields"] for data in data]],
                 ignore_conflicts=True,
             )
             print("Успешно завершено")
