@@ -1,29 +1,24 @@
 from telegram import Update
-from telegram.ext import ContextTypes, ConversationHandler
+from telegram.constants import ParseMode
+from telegram.ext import ContextTypes
 
-from .keyboards import MENU_KEYBOARD
-from .templates import MENU_TEXT, WELCOME_MESSAGE
+from conversations.menu.keyboards import MENU_KEYBOARD
+from conversations.menu.templates import MENU_TEXT, WELCOME_MESSAGE_TEXT
 
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """
-    Начало диалога. Пиветствует пользователя.
-    Предлагает посмотреть меню.
-    """
-    await update.effective_message.reply_text(
-            text=WELCOME_MESSAGE,
+async def start(update: Update, _context: ContextTypes.DEFAULT_TYPE):
+    await update.effective_chat.send_message(
+        text=WELCOME_MESSAGE_TEXT,
+        parse_mode=ParseMode.HTML,
     )
 
-    return ConversationHandler.END
 
-
-async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def menu(update: Update, _context: ContextTypes.DEFAULT_TYPE):
     """
     Просмотр меню.
     """
-    await update.effective_message.reply_text(
+    await update.effective_chat.send_message(
         text=MENU_TEXT,
         reply_markup=MENU_KEYBOARD,
+        parse_mode=ParseMode.HTML,
     )
-
-    return ConversationHandler.END
