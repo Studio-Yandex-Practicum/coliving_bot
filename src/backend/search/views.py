@@ -1,5 +1,6 @@
 from rest_framework import exceptions, generics
 
+from search.constants import MatchStatuses
 from search.models import UserFromTelegram, UserReport
 from search.serializers import MatchListSerializer, UserReportSerializer
 
@@ -18,10 +19,17 @@ class MatchedUsersListView(generics.ListAPIView):
 
     def get_queryset(self):
         telegram_id = self.kwargs.get("telegram_id")
-        if not UserFromTelegram.objects.filter(telegram_id=telegram_id).exists():
+        user = UserFromTelegram.objects.filter(telegram_id=telegram_id).first()
+        if user is None:
             raise exceptions.NotFound("Такого пользователя не существует.")
-        return UserFromTelegram.objects.filter(
-            likes__receiver__telegram_id=telegram_id,
-            match_requests__sender__telegram_id=telegram_id,
-            match_requests__status=1,
-        ).distinct()
+        users_who_sent_like = UserFromTelegram.objects.select_related(
+            "user_profile"
+        ).filter(
+            likes__receiver=user,
+            likes__status=MatchStatuses.is_match,
+        )
+        liked_users = UserFromTelegram.objects.select_related("user_profile").filter(
+            match_requests__sender=user,
+            match_requests__status=MatchStatuses.is_match,
+        )
+        return (users_who_sent_like | liked_users).all()
