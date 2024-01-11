@@ -24,3 +24,6 @@ LOGS_WHEN = "midnight"
 LOGS_INTERVAL = 1
 LOGS_BACKUP_COUNT = 14
 LOGS_ENCODING = "utf-8"
+
+# Internal requests to backend
+INTERNAL_API_URL = os.getenv("INTERNAL_API_URL", "http://127.0.0.1:8000/api/v1/")
