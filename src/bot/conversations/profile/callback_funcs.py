@@ -38,7 +38,7 @@ async def start(
     Начало диалога. Проверяет, не был ли пользователь зарегистрирован ранее.
     Переводит диалог в состояние AGE (ввод возраста пользователя).
     """
-    flag = True  # Флаг для проверки ответвления если профиль уже заполнен
+    flag = False  # Флаг для проверки ответвления если профиль уже заполнен
     if flag:
         profile_info = await api_service.get_user_profile_by_telegram_id(
             update.effective_chat.id
