@@ -64,10 +64,14 @@ from .templates import (
     BTN_LABEL_ROOM_IN_HOUSE,
     BTN_LABEL_SPB,
     COLIVING_START,
+    COLIVING_START_BTN,
 )
 
 coliving_handler: ConversationHandler = ConversationHandler(
-    entry_points=[CommandHandler(COLIVING_START, start)],
+    entry_points=[
+        CommandHandler(COLIVING_START, start),
+        CallbackQueryHandler(pattern=rf"^{COLIVING_START_BTN}$", callback=start),
+    ],
     states={
         states.LOCATION: [
             CallbackQueryHandler(
@@ -105,9 +109,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
             ),
         ],
         states.ABOUT_ROOM: [
-            MessageHandler(
-                filters.TEXT & ~filters.COMMAND, handle_about_coliving
-            ),
+            MessageHandler(filters.TEXT & ~filters.COMMAND, handle_about_coliving),
         ],
         states.PRICE: [
             MessageHandler(
@@ -117,9 +119,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
             MessageHandler(filters.TEXT & ~filters.COMMAND, handle_price),
         ],
         states.PHOTO_ROOM: [
-            MessageHandler(
-                filters.PHOTO & ~filters.COMMAND, handle_photo_room
-            ),
+            MessageHandler(filters.PHOTO & ~filters.COMMAND, handle_photo_room),
             MessageHandler(filters.TEXT & ~filters.COMMAND, handle_photo_room),
         ],
         states.CONFIRMATION: [
@@ -259,19 +259,13 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 callback=handle_coliving_edit,
                 pattern=rf"^{BTN_LABEL_EDIT_PROFILE_KEYBOARD}",
             ),
-            CallbackQueryHandler(
-                callback=handle_coliving_show, pattern=r"^show"
-            ),
-            CallbackQueryHandler(
-                callback=handle_coliving_hide, pattern=r"^hide"
-            ),
+            CallbackQueryHandler(callback=handle_coliving_show, pattern=r"^show"),
+            CallbackQueryHandler(callback=handle_coliving_hide, pattern=r"^hide"),
             CallbackQueryHandler(
                 callback=handle_coliving_roommates,
                 pattern=r"^roommates_profiles",
             ),
-            CallbackQueryHandler(
-                callback=handle_coliving_views, pattern=r"^views"
-            ),
+            CallbackQueryHandler(callback=handle_coliving_views, pattern=r"^views"),
             CallbackQueryHandler(
                 callback=handle_coliving_transfer_to, pattern=r"^transfer_to"
             ),
