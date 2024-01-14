@@ -29,8 +29,8 @@ async def get_user_coliving_status(telegram_id: int) -> UserProfileTest:
     ####################################################################
 
     return UserProfileTest(
-        is_сoliving=False
-        # is_сoliving=True
+        # is_сoliving=False
+        is_сoliving=True
     )
 
 

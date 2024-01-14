@@ -6,10 +6,11 @@ from telegram.ext import (
     filters,
 )
 
-from .callback_funcs import (
+from conversations.menu.callback_funcs import menu
+
+from .callback_funcs import (  # handle_coliving_go_to_menu,
     handle_about_coliving,
     handle_coliving_edit,
-    handle_coliving_go_to_menu,
     handle_coliving_hide,
     handle_coliving_roommates,
     handle_coliving_show,
@@ -269,9 +270,13 @@ coliving_handler: ConversationHandler = ConversationHandler(
             CallbackQueryHandler(
                 callback=handle_coliving_transfer_to, pattern=r"^transfer_to"
             ),
-            CallbackQueryHandler(
-                callback=handle_coliving_go_to_menu, pattern=r"^go_to_menu"
-            ),
+            # ########################################
+            # заменил на функцию из conversation.menu
+            # ########################################
+            # CallbackQueryHandler(
+            # callback=handle_coliving_go_to_menu, pattern=r"^go_to_menu"
+            # ),
+            CallbackQueryHandler(callback=menu, pattern=r"^go_to_menu"),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
                 handle_coliving_text_instead_of_button,
