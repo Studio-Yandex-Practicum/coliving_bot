@@ -11,12 +11,8 @@ from .buttons import (
 
 MENU_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
-        InlineKeyboardButton(
-            text=MY_PROFILE_BUTTON, callback_data=MY_PROFILE_BUTTON
-        ),
-        InlineKeyboardButton(
-            text=COLIVING_BUTTON, callback_data=COLIVING_BUTTON
-        ),
+        InlineKeyboardButton(text=MY_PROFILE_BUTTON, callback_data=MY_PROFILE_BUTTON),
+        InlineKeyboardButton(text=COLIVING_BUTTON, callback_data=COLIVING_BUTTON),
         InlineKeyboardButton(
             text=SEARCH_NEIGHBOR_BUTTON, callback_data=SEARCH_NEIGHBOR_BUTTON
         ),

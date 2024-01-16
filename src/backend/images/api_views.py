@@ -41,9 +41,7 @@ class BaseImageView(generics.ListCreateAPIView):
             id=self.kwargs.get("coliving_id")
         )
         if not telegram_user_colivings.exists():
-            raise NotFound(
-                detail="Коливинг не найден", code=status.HTTP_404_NOT_FOUND
-            )
+            raise NotFound(detail="Коливинг не найден", code=status.HTTP_404_NOT_FOUND)
         return telegram_user_colivings.first()
 
 
@@ -58,9 +56,7 @@ class ProfileImageView(BaseImageView):
         )
         if profile.exists():
             return profile.first().images.all()
-        raise NotFound(
-            detail="Профиль не найден", code=status.HTTP_404_NOT_FOUND
-        )
+        raise NotFound(detail="Профиль не найден", code=status.HTTP_404_NOT_FOUND)
 
     def get_serializer_class(
         self,
@@ -96,7 +92,5 @@ class ColivingImageView(BaseImageView):
             else ColivingImageCreateSerializer
         )
 
-    def perform_create(
-        self, serializer: ColivingImageCreateSerializer
-    ) -> None:
+    def perform_create(self, serializer: ColivingImageCreateSerializer) -> None:
         serializer.save(coliving=self._get_coliving())
