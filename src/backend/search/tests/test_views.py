@@ -6,7 +6,7 @@ from profiles.models import UserFromTelegram
 from search.models import UserReport
 
 
-class ReportMatchTests(APITestCase):
+class ReportMatchViewTests(APITestCase):
     """Тесты для UserReportCreateView и MatchedUsersListView."""
 
     def setUp(self):
@@ -98,7 +98,12 @@ class ReportMatchTests(APITestCase):
         methods = ["post", "put", "patch", "delete"]
         for method in methods:
             with self.subTest(method=method):
-                response = self.client.generic(method, reverse("report"))
+                response = self.client.generic(
+                    method,
+                    reverse(
+                        "matched-users", kwargs={"telegram_id": self.test_user_1.id}
+                    ),
+                )
                 self.assertEqual(
                     response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED
                 )
