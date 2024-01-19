@@ -2,8 +2,9 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from profiles.models import UserFromTelegram
-from search.models import UserReport
+from profiles.models import Location, Profile, UserFromTelegram
+from search.constants import MatchStatuses
+from search.models import MatchRequest, UserReport
 
 
 class ReportMatchViewTests(APITestCase):
@@ -11,15 +12,71 @@ class ReportMatchViewTests(APITestCase):
 
     def setUp(self):
         self.test_user_1 = UserFromTelegram.objects.create(telegram_id=1)
-        self.test_user_1.save()
         self.test_user_2 = UserFromTelegram.objects.create(telegram_id=2)
-        self.test_user_2.save()
+        self.test_user_3 = UserFromTelegram.objects.create(telegram_id=3)
+        self.test_user_4 = UserFromTelegram.objects.create(telegram_id=4)
+        self.test_user_5 = UserFromTelegram.objects.create(telegram_id=5)
+        self.location = Location.objects.create(name="location")
+        self.profile_1 = Profile.objects.create(
+            user=self.test_user_1, name="test_1", age=25, location=self.location
+        )
+        self.profile_2 = Profile.objects.create(
+            user=self.test_user_2, name="test_2", age=25, location=self.location
+        )
+        self.profile_3 = Profile.objects.create(
+            user=self.test_user_3, name="test_3", age=25, location=self.location
+        )
+        self.profile_4 = Profile.objects.create(
+            user=self.test_user_4, name="test_4", age=25, location=self.location
+        )
+        self.profile_5 = Profile.objects.create(
+            user=self.test_user_5, name="test_5", age=25, location=self.location
+        )
+
+        self.match_1 = MatchRequest.objects.create(
+            sender=self.test_user_1,
+            receiver=self.test_user_2,
+            status=MatchStatuses.is_match,
+        )
+        self.match_2 = MatchRequest.objects.create(
+            sender=self.test_user_2,
+            receiver=self.test_user_1,
+            status=MatchStatuses.is_match,
+        )
+        self.match_3 = MatchRequest.objects.create(
+            sender=self.test_user_3,
+            receiver=self.test_user_1,
+            status=MatchStatuses.is_match,
+        )
+        self.negative_match = MatchRequest.objects.create(
+            sender=self.test_user_5,
+            receiver=self.test_user_1,
+            status=MatchStatuses.is_rejected,
+        )
 
         self.report_data = {
             "reporter": self.test_user_1.id,
             "reported_user": self.test_user_2.id,
             "text": "test_text",
             "category": "Категория 1",
+        }
+
+        self.expected_match_data_for_user_1 = [
+            {"telegram_id": 2, "name": "test_2", "age": 25},
+            {"telegram_id": 3, "name": "test_3", "age": 25},
+        ]
+
+        self.expected_match_data_for_user_2 = [
+            {"telegram_id": 1, "name": "test_1", "age": 25}
+        ]
+
+        self.empty_match_data = []
+
+        self.global_match_data = {
+            1: self.expected_match_data_for_user_1,
+            2: self.expected_match_data_for_user_2,
+            4: self.empty_match_data,
+            5: self.empty_match_data,
         }
 
     def test_report_create(self):
@@ -107,3 +164,12 @@ class ReportMatchViewTests(APITestCase):
                 self.assertEqual(
                     response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED
                 )
+
+    def test_matches_correct_data(self):
+        """Тест на корректный вывод данных мэтчей."""
+        for id, data in self.global_match_data.items():
+            with self.subTest(id=id, data=data):
+                response = self.client.get(
+                    reverse("matched-users", kwargs={"telegram_id": id})
+                )
+                self.assertEqual(response.json(), data)

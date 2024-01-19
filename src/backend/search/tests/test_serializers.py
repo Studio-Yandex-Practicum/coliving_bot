@@ -10,15 +10,11 @@ class ReportMatchSerializerTests(APITestCase):
 
     def setUp(self):
         self.test_user_1 = UserFromTelegram.objects.create(telegram_id=1)
-        self.test_user_1.save()
         self.test_user_2 = UserFromTelegram.objects.create(telegram_id=2)
-        self.test_user_2.save()
         self.location = Location.objects.create(name="location")
-        self.location.save()
         self.user_profile = Profile.objects.create(
             user=self.test_user_1, name="Vlad", age=25, location=self.location
         )
-        self.user_profile.save()
 
         self.report_data = {
             "reporter": self.test_user_1.id,
