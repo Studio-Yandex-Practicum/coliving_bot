@@ -1,6 +1,6 @@
 import mimetypes
 import urllib.parse
-from typing import Optional, List
+from typing import List, Optional
 
 from httpx import AsyncClient, Response
 
