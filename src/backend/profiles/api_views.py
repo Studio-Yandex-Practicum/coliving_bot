@@ -2,7 +2,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import generics, status
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import get_object_or_404
-from rest_framework.response import Response
 
 from .models import Location, Profile, UserFromTelegram
 from .serializers import ProfileSerializer
@@ -63,11 +62,3 @@ class ProfileView(
             location=location,
             is_visible=self.request.data.get("is_visible", False),
         )
-
-    def patch(self, request, *args, **kwargs) -> Response:
-        partial = kwargs.pop("partial", True)
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return Response(serializer.data)
