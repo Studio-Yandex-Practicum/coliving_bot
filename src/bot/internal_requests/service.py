@@ -1,8 +1,10 @@
 import mimetypes
 import urllib.parse
-from typing import Optional
+from typing import Optional, List
 
 from httpx import AsyncClient, Response
+
+from .entities import Location
 
 
 class APIService:
@@ -48,3 +50,16 @@ class APIService:
             url: str = urllib.parse.urljoin(base=self.base_url, url=endpoint_urn)
             response: Response = await client.post(url=url, files=files, data=data)
             response.raise_for_status()
+
+    async def get_locations(self) -> List[Location]:
+        """
+        Получение списка локаций.
+        """
+        endpoint_urn = "v1/locations/"
+        async with AsyncClient() as client:
+            url: str = urllib.parse.urljoin(base=self.base_url, url=endpoint_urn)
+            response: Response = await client.get(url)
+            response.raise_for_status()
+            data = response.json()
+            locations = [Location(id=item['id'], name=item['name']) for item in data]
+            return locations
