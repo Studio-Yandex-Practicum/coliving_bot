@@ -1,9 +1,8 @@
-from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import generics, status
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import get_object_or_404
 
-from .models import Location, Profile, UserFromTelegram
+from .models import Profile, UserFromTelegram
 from .serializers import ProfileSerializer
 
 
@@ -14,7 +13,10 @@ class ProfileView(
     Вью-класс для отображения, сохранения и обновления объектов 'Profile'.
     """
 
+    # queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
+    # lookup_field = "user"
+    # lookup_url_kwarg = "telegram_id"
     http_method_names = ["get", "post", "patch"]
 
     def get_object(self) -> Profile:
@@ -41,24 +43,15 @@ class ProfileView(
         user, _is_created = UserFromTelegram.objects.get_or_create(
             telegram_id=self.kwargs.get("telegram_id")
         )
-        location_id, _is_created = Location.objects.get_or_create(
-            name=self.request.data.get("location")
-        )
         serializer.save(
             user=user,
-            location=location_id,
             is_visible=False,
         )
 
     def perform_update(self, serializer) -> None:
-        try:
-            location = Location.objects.get(name=self.request.data.get("location"))
-        except ObjectDoesNotExist:
-            location = self.get_object().location
         serializer.save(
             user=get_object_or_404(
                 UserFromTelegram, telegram_id=self.kwargs.get("telegram_id")
             ),
-            location=location,
             is_visible=self.request.data.get("is_visible", False),
         )

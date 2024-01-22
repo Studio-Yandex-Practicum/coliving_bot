@@ -26,5 +26,4 @@ class ProfileSerializer(serializers.ModelSerializer):
         )
 
     def get_user(self, obj):
-        telegram_id = self.context["request"].parser_context["kwargs"]["telegram_id"]
-        return telegram_id
+        return obj.user.telegram_id
