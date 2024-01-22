@@ -77,6 +77,35 @@ else:
         }
     }
 
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        },
+    },
+    "handlers": {
+        "file": {
+            "level":  os.getenv("LOGGING_LEVEL"),
+            "class": "logging.FileHandler",
+            "filename": BASE_DIR.parent / ".data/logs/django.log",
+            "formatter": "verbose",
+        },
+        "console": {
+            "level": os.getenv("LOGGING_LEVEL"),
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+         },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["file", "console"],
+            "propagate": True,
+        },
+    }
+}
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -92,7 +121,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "ru-ru"
 
 TIME_ZONE = "UTC"
 
