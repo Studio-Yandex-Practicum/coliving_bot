@@ -34,53 +34,29 @@
    с [документацией](https://python-poetry.org/docs/basic-usage/).  
    Установка зависимостей
 
-```
-poetry install
-```
-
-Также будет создано виртуальное окружение, если привычнее видеть его в
-директории проекта, то
-используйте [настройку](https://python-poetry.org/docs/configuration/#adding-or-updating-a-configuration-setting) `virtualenvs.in-project`
-
-3. **Docker**  
-   Установите **Docker**.  
-   Перед тем как запустить проект в контейнерах создайте в папке `infra`
-   файл `.env` по примеру `.env.example`, заполните отсутствующие поля,
-   замените комментарии.  
-   Запуск для **development**:  
-   Запустите с помощью консоли:
-   ```shell
-   cd infra/
-   docker-compose -f docker-compose.dev.yml up
-   ```  
-   Также для разработки предусмотрен супер пользователь, но придется
-   поменять у него пароль вручную:  
-   **Делать нижеперечисленное нужно в новом терминале!**  
-   Далее используйте команду, чтобы подключиться к терминалу контейнера:
-   ```shell
-   docker compose -f docker-compose.dev.yml exec -it backend bash
-   # должно появится что-то подобное
-   root@6449ab29fb81:/app#
-   # вводите
-   python manage.py changepassword admin
-   # и вводите новый пароль -> ваша админка для проверки готова
    ```
-   Запуск для **production**:  
-   В файле `docker-compose.production.yml` замените `# change to your image`
-   на образы с **Docker Hub**.
-   Внесите изменения в файл `default.conf`. Здесь тоже нужно добавить
-   файл `.env` в папку `/infra` по примеру `.env.example`  
-   Запустите с помощью консоли:
-   ```shell
-   cd infra/
-   docker-compose -f docker-compose.prod.yml up
+   poetry install
    ```
 
-4. **Файлы requirements**  
+   Также будет создано виртуальное окружение, если привычнее видеть его в
+   директории проекта, то
+   используйте [настройку](https://python-poetry.org/docs/configuration/#adding-or-updating-a-configuration-setting) `virtualenvs.in-project`
+
+3. **Docker**
+
+4. **Токен Telegram бота**  
+   [Документация](https://core.telegram.org/bots/features#botfather)  
+   Перед запуском нужно получить **token** у бота
+   [@BotFather](https://t.me/BotFather). После того как бот будет
+   зарегестрирован - вам выдадут **token**, его нужно добавить в файл `.env`,
+   строку `TOKEN=`. В документе `env.example` она обозначена комментарием.  
+   *Про более подробное создание бота читать в приложенной документации.*
+
+5. **Файлы requirements**  
    Файлы редактировать вручную не нужно. Обновляются через pre-commit хуки (
    если есть изменение в зависимостях, то список обновится при коммите).
 
-5. **pre-commit**  
+6. **pre-commit**  
    [Документация](https://pre-commit.com/)  
    При каждом коммите выполняются хуки (автоматизации) перечисленные в
    .pre-commit-config.yaml. Если не понятно какая ошибка мешает сделать коммит
@@ -89,15 +65,6 @@ poetry install
 ```shell
 pre-commit run --all-files
 ```
-
-6. **Создание Telegram бота**  
-   [Документация](https://core.telegram.org/bots/features#botfather)  
-   Перед запуском нужно получить **token** у бота
-   [@BotFather](https://t.me/BotFather). После того как бот будет
-   зарегестрирован - вам выдадут **token**, его нужно добавить в файл `.env`,
-   строку `TOKEN=`. В документе `env.example` она обозначена комментарием.  
-   *Про более подробное создание бота читать в приложенной документации.*
-
 ## Стиль кода
 
 Придерживаемся [black style](https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html)
@@ -112,6 +79,34 @@ pre-commit run --all-files
 - исправление ошибок — fix/название-багфикса
 
 3. 1 ветка - 1 задача
+
+# Разворачиваем проект в контейнерах
+Создаём `.env` файл в корневой директории проекта и заполняем его по
+образцу `.env.example`
+
+Переходим в директорию `infra/`
+
+```shell
+cd infra/
+```
+
+Поднимаем контейнеры
+```shell
+docker compose -f docker-compose.dev.yml up -d
+```
+На win: `docker-compose` вместо `docker compose`
+
+При первом запуске можно создать записи в БД о городах командой
+```shell
+docker exec backend python manage.py import_locations
+```
+
+## Администрирование развёрнутого приложения
+### Создание суперпользователя
+Используйте команду ниже и следуйте инструкциям в терминале
+```shell
+docker exec -it backend python manage.py createsuperuser
+```
 
 # Разворачиваем проект локально
 
