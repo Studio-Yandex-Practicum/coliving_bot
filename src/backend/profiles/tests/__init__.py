@@ -1,0 +1,1 @@
+from .test_profiles import ProfileAPITestCase # noqa

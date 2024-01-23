@@ -6,5 +6,6 @@ urlpatterns = [
     path(
         "v1/users/<int:telegram_id>/profile/",
         ProfileView.as_view(),
+        name="profiles",
     ),
 ]
