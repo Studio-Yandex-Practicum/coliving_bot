@@ -47,7 +47,12 @@ class APIService:
         data: Optional[dict] = None,
     ) -> None:
         """
-        Внутренний POST-запрос для создания объектов 'ProfileImage' и 'ColivingImage'.
+        Отправляет асинхронный HTTP POST-запрос к указанному эндпоинту.
+
+        :param endpoint_urn: Относительный URI эндпоинта.
+        :param files: Опциональный параметр. Словарь файлов для отправки
+        (в формате {'file_field_name': ('filename', bytes, 'content_type')}).
+        :param data: Опциональный параметр. Словарь данных для отправки в формате JSON.
         """
         async with AsyncClient() as client:
             url: str = urllib.parse.urljoin(base=self.base_url, url=endpoint_urn)
