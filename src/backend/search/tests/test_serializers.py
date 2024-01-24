@@ -8,30 +8,31 @@ from search.serializers import MatchListSerializer, UserReportSerializer
 class ReportMatchSerializerTests(APITestCase):
     """Тесты для UserReportSerializer и MatchListSerializer."""
 
-    def setUp(self):
-        self.test_user_1 = UserFromTelegram.objects.create(telegram_id=1)
-        self.test_user_2 = UserFromTelegram.objects.create(telegram_id=2)
-        self.location = Location.objects.create(name="location")
-        self.user_profile = Profile.objects.create(
-            user=self.test_user_1, name="Vlad", age=25, location=self.location
+    @classmethod
+    def setUpTestData(cls):
+        cls.test_user_1 = UserFromTelegram.objects.create(telegram_id=1)
+        cls.test_user_2 = UserFromTelegram.objects.create(telegram_id=2)
+        cls.location = Location.objects.create(name="location")
+        cls.user_profile = Profile.objects.create(
+            user=cls.test_user_1, name="Vlad", age=25, location=cls.location
         )
 
-        self.report_data = {
-            "reporter": self.test_user_1.id,
-            "reported_user": self.test_user_2.id,
+        cls.report_data = {
+            "reporter": cls.test_user_1.id,
+            "reported_user": cls.test_user_2.id,
             "text": "test_text",
             "category": "Категория 1",
         }
 
-        self.invalid_report_data = {
+        cls.invalid_report_data = {
             "reporter": "invalid_reporter",
             "reported_user": 99999,
             "text": "",
             "category": "invalid_category",
         }
 
-        self.serializer_data = {
-            "telegram_id": self.test_user_1.id,
+        cls.serializer_data = {
+            "telegram_id": cls.test_user_1.id,
             "name": "Vlad",
             "age": 25,
         }
