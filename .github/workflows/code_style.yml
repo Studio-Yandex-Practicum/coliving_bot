@@ -7,7 +7,7 @@ on:
 
 jobs:
   linter_tests:
-    uses: ./shared.yml
+    uses: ./.github/workflows/shared.yml
     steps:
 
       - name: Flake8 checking

@@ -4,7 +4,7 @@ on: push
 
 jobs:
   tests:
-    uses: ./shared.yml
+    uses: ./.github/workflows/shared.yml
     steps:
 
     - name: Test project
