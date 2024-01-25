@@ -1,0 +1,13 @@
+name: Project tests checking
+
+on: push
+
+jobs:
+  tests:
+    uses: ./shared.yml
+    steps:
+
+    - name: Test project
+      run: |
+        cd src/backend
+        python manage.py test
