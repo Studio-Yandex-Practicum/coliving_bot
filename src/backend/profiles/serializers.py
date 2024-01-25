@@ -1,6 +1,12 @@
 from rest_framework import serializers
 
-from .models import Location, Profile
+from profiles.models import Location, Profile
+
+
+class LocationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Location
+        fields = ["id", "name"]
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -25,5 +31,6 @@ class ProfileSerializer(serializers.ModelSerializer):
             "is_visible",
         )
 
-    def get_user(self, obj):
+    @staticmethod
+    def get_user(obj):
         return obj.user.telegram_id

@@ -4,15 +4,13 @@ from rest_framework.test import APITestCase
 
 from profiles.models import Location, Profile, UserFromTelegram
 
-from .constants import (
-    EXISTING_PROFILE_TELEGRAM_ID,
-    NON_EXISTENT_PROFILE_TELEGRAM_ID,
-    TEST_TELEGRAM_ID,
-)
+TEST_TELEGRAM_ID = 12345
+EXISTING_PROFILE_TELEGRAM_ID = 877877
+NON_EXISTENT_PROFILE_TELEGRAM_ID = 99999
 
 
 class ProfileAPITestCase(APITestCase):
-    """Тесты для проверки ресурса Profiles."""
+    """Тесты для проверки ресурса Profile."""
 
     @classmethod
     def setUpTestData(cls):
@@ -39,7 +37,7 @@ class ProfileAPITestCase(APITestCase):
             "about": "Классный",
         }
         response = self.client.post(
-            reverse("profiles", args=[TEST_TELEGRAM_ID]), data, format="json"
+            reverse("api-v1:user-profile", args=[TEST_TELEGRAM_ID]), data, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assert_profile_data(response, TEST_TELEGRAM_ID, data)
@@ -48,7 +46,7 @@ class ProfileAPITestCase(APITestCase):
         """Тест на создание профиля с невалидными данными."""
         data = {"name": "Иван", "sex": "Парень", "age": 22, "about": "Классный"}
         response = self.client.post(
-            reverse("profiles", args=[TEST_TELEGRAM_ID]), data, format="json"
+            reverse("api-v1:user-profile", args=[TEST_TELEGRAM_ID]), data, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
@@ -58,7 +56,7 @@ class ProfileAPITestCase(APITestCase):
     def test_get_existing_profile(self):
         """Тест на получение данных профиля."""
         response = self.client.get(
-            reverse("profiles", args=[EXISTING_PROFILE_TELEGRAM_ID])
+            reverse("api-v1:user-profile", args=[EXISTING_PROFILE_TELEGRAM_ID])
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assert_profile_data(response, EXISTING_PROFILE_TELEGRAM_ID)
@@ -66,7 +64,7 @@ class ProfileAPITestCase(APITestCase):
     def test_get_nonexistent_profile(self):
         """Тест на получение данных несуществующего профиля."""
         response = self.client.get(
-            reverse("profiles", args=[NON_EXISTENT_PROFILE_TELEGRAM_ID])
+            reverse("api-v1:user-profile", args=[NON_EXISTENT_PROFILE_TELEGRAM_ID])
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.data, {"detail": "Not found."})
@@ -87,7 +85,7 @@ class ProfileAPITestCase(APITestCase):
         for data in data_list:
             with self.subTest(data=data):
                 response = self.client.patch(
-                    reverse("profiles", args=[EXISTING_PROFILE_TELEGRAM_ID]),
+                    reverse("api-v1:user-profile", args=[EXISTING_PROFILE_TELEGRAM_ID]),
                     data,
                     format="json",
                 )
@@ -98,7 +96,7 @@ class ProfileAPITestCase(APITestCase):
         """Тест на обновление профиля с невалидными данными."""
         data = {"name": "Кирилл", "age": 23, "location": "Екатеринбург"}
         response = self.client.patch(
-            reverse("profiles", args=[EXISTING_PROFILE_TELEGRAM_ID]),
+            reverse("api-v1:user-profile", args=[EXISTING_PROFILE_TELEGRAM_ID]),
             data,
             format="json",
         )
@@ -126,7 +124,8 @@ class ProfileAPITestCase(APITestCase):
         for method in methods:
             with self.subTest(method=method):
                 response = self.client.generic(
-                    method, reverse("profiles", args=[EXISTING_PROFILE_TELEGRAM_ID])
+                    method,
+                    reverse("api-v1:user-profile", args=[EXISTING_PROFILE_TELEGRAM_ID]),
                 )
                 self.assertEqual(
                     response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED

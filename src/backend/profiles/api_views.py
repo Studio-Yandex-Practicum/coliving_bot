@@ -1,8 +1,8 @@
 from rest_framework import generics
 from rest_framework.generics import get_object_or_404
 
-from .models import Profile, UserFromTelegram
-from .serializers import ProfileSerializer
+from profiles.models import Location, Profile, UserFromTelegram
+from profiles.serializers import LocationSerializer, ProfileSerializer
 
 
 class ProfileView(
@@ -34,3 +34,8 @@ class ProfileView(
             ),
             is_visible=self.request.data.get("is_visible", False),
         )
+
+
+class LocationList(generics.ListAPIView):
+    queryset = Location.objects.all()
+    serializer_class = LocationSerializer
