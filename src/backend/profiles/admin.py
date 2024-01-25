@@ -1,8 +1,7 @@
 from django.contrib import admin
 
 from images.models import ColivingImage, ProfileImage
-
-from .models import Coliving, Location, Profile, UserFromTelegram
+from profiles.models import Coliving, Location, Profile, UserFromTelegram
 
 
 @admin.register(UserFromTelegram)
