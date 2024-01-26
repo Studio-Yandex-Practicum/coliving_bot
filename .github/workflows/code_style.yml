@@ -7,8 +7,10 @@ on:
 
 jobs:
   linter_tests:
-    uses: ./.github/workflows/shared.yml
     steps:
+
+      - name: Use a shared instruction
+        uses: ./.github/workflows/shared.yml
 
       - name: Flake8 checking
         run: poetry run flake8 --exclude=.venv/ .
