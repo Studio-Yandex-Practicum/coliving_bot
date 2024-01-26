@@ -37,7 +37,7 @@ jobs:
           poetry run isort --check-only --skip-gitignore --diff .
       - name: Start testing
         run: |
-          source $VIRTUAL_ENV/bin/activate
+          source .venv/bin/activate
           echo "Current environment: $VIRTUAL_ENV"
           cd src/backend
           python manage.py test
