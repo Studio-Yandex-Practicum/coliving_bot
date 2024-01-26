@@ -1,6 +1,6 @@
-name: Shared Steps
+name: Main workflow
 
-on: [push, pull_request]
+on: push
 
 jobs:
   common_steps:
@@ -30,3 +30,12 @@ jobs:
         run: poetry install --no-interaction --no-root
       - name: Install project
         run: poetry install --no-interaction
+      - name: Run code_style checking if pull_request
+        if: github.event_name == 'pull_request'
+        run: |
+          poetry run flake8 --exclude=.venv/ .
+          poetry run isort --check-only --skip-gitignore --diff .
+      - name: Start testing
+        run: |
+          cd src/backend
+          python manage.py test
