@@ -48,7 +48,5 @@ jobs:
     steps:
       - name: Start testing
         run: |
-          source .venv/bin/activate
-          echo "Current environment: $VIRTUAL_ENV"
           cd src/backend
           python manage.py test
