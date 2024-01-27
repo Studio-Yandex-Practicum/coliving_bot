@@ -32,21 +32,15 @@ jobs:
       - name: Install project
         run: poetry install --no-interaction
 
-  code_style:
-    needs: common_steps
-    runs-on: ubuntu-latest
-    steps:
       - name: Run code_style checking if pull_request
         if: github.event_name == 'pull_request'
         run: |
           poetry run flake8 --exclude=.venv/ .
           poetry run isort --check-only --skip-gitignore --diff .
 
-  tests:
-    needs: common_steps
-    runs-on: ubuntu-latest
-    steps:
       - name: Start testing
         run: |
+          source .venv/bin/activate
+          echo "Current environment: $VIRTUAL_ENV"
           cd src/backend
           python manage.py test
