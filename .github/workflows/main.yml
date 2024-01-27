@@ -33,6 +33,7 @@ jobs:
         run: poetry install --no-interaction
 
   code_style:
+    runs-on: ubuntu-latest
     steps:
       - name: Run code_style checking if pull_request
         if: github.event_name == 'pull_request'
@@ -41,6 +42,7 @@ jobs:
           poetry run isort --check-only --skip-gitignore --diff .
 
   tests:
+    runs-on: ubuntu-latest
     steps:
       - name: Start testing
         run: |
