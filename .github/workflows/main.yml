@@ -3,6 +3,7 @@ name: Main workflow
 on: push
 
 jobs:
+
   common_steps:
     runs-on: ubuntu-latest
     steps:
@@ -30,11 +31,17 @@ jobs:
         run: poetry install --no-interaction --no-root
       - name: Install project
         run: poetry install --no-interaction
+
+  code_style:
+    steps:
       - name: Run code_style checking if pull_request
         if: github.event_name == 'pull_request'
         run: |
           poetry run flake8 --exclude=.venv/ .
           poetry run isort --check-only --skip-gitignore --diff .
+
+  tests:
+    steps:
       - name: Start testing
         run: |
           source .venv/bin/activate
