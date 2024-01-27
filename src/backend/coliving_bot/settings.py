@@ -1,3 +1,4 @@
+from logging.handlers import TimedRotatingFileHandler
 import os
 from pathlib import Path
 
@@ -77,6 +78,7 @@ else:
         }
     }
 
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -88,8 +90,12 @@ LOGGING = {
     "handlers": {
         "file": {
             "level":  os.getenv("LOGGING_LEVEL"),
-            "class": "logging.FileHandler",
+            "class": TimedRotatingFileHandler,
             "filename": BASE_DIR.parent / ".data/logs/django.log",
+            "when": "midnight",
+            "interval": 1,
+            "backupCount": 14,
+            "encoding": "utf-8",
             "formatter": "verbose",
         },
         "console": {
@@ -101,7 +107,6 @@ LOGGING = {
     "loggers": {
         "django": {
             "handlers": ["file", "console"],
-            "propagate": True,
         },
     }
 }
