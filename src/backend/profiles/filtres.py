@@ -1,4 +1,5 @@
 from django_filters import rest_framework as filters
+
 from .models import Coliving, Location
 
 
@@ -11,7 +12,8 @@ class ColivingFilter(filters.FilterSet):
     location = filters.ModelChoiceFilter(field_name='location__name',
                                          queryset=Location.objects.all(),
                                          to_field_name='name')
+    owner = filters.NumberFilter(field_name='host__telegram_id')
 
     class Meta:
         model = Coliving
-        fields = ('location', 'room_type', 'min_price', 'max_price', )
+        fields = ('location', 'room_type', 'min_price', 'max_price', 'owner')
