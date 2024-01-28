@@ -11,7 +11,7 @@ class LocationSerializer(serializers.ModelSerializer):
 
 class ProfileSerializer(serializers.ModelSerializer):
     """
-    Сериализатор объекта 'Profile' (безопасные методы).
+    Сериализатор объекта 'Profile'.
     """
 
     user = serializers.SerializerMethodField()

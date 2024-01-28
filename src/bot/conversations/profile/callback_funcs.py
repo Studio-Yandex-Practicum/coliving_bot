@@ -13,7 +13,7 @@ import conversations.profile.keyboards as keyboards
 import conversations.profile.templates as templates
 from conversations.profile.states import States
 from general.validators import value_is_in_range_validator
-from internal_requests import mock as api_service
+from internal_requests import api_service
 
 
 async def set_profile_to_context(
@@ -26,9 +26,7 @@ async def set_profile_to_context(
     context.user_data[templates.AGE_FIELD] = profile_info.age
     context.user_data[templates.LOCATION_FIELD] = profile_info.location
     context.user_data[templates.ABOUT_FIELD] = profile_info.about
-    context.user_data[templates.IS_VISIBLE_FIELD] = (
-        True if profile_info.is_visible == templates.PROFILE_IS_VISIBLE_TEXT else False
-    )
+    context.user_data[templates.IS_VISIBLE_FIELD] = profile_info.is_visible
 
 
 async def start(
@@ -38,11 +36,10 @@ async def start(
     Начало диалога. Проверяет, не был ли пользователь зарегистрирован ранее.
     Переводит диалог в состояние AGE (ввод возраста пользователя).
     """
-    flag = False  # Флаг для проверки ответвления если профиль уже заполнен
-    if flag:
-        profile_info = await api_service.get_user_profile_by_telegram_id(
-            update.effective_chat.id
-        )
+    profile_info = await api_service.get_user_profile_by_telegram_id(
+        update.effective_chat.id
+    )
+    if profile_info:
         await set_profile_to_context(update, context, profile_info)
         await _look_at_profile(update, context, "", keyboards.PROFILE_KEYBOARD)
         return States.PROFILE
@@ -95,6 +92,11 @@ async def send_question_to_edit_profile(
         text=templates.ASK_WANT_TO_CHANGE,
         reply_markup=keyboards.FORM_EDIT_KEYBOARD,
     )
+    # update_data = {
+    #     "is_visible": False,
+    # }
+    # await api_service.update_user_profile(
+    #     update.effective_chat.id, update_data)
 
     return States.EDIT
 
@@ -404,6 +406,10 @@ async def handle_edit_about(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     ):
         return States.ABOUT_YOURSELF
     context.user_data[templates.ABOUT_FIELD] = about
+    update_data = {
+        "about": str(context.user_data[templates.ABOUT_FIELD]),
+    }
+    await api_service.update_user_profile(update.effective_chat.id, update_data)
     await _look_at_profile(
         update,
         context,
@@ -443,7 +449,7 @@ async def send_question_to_profile_is_correct(
     Либо завершает диалог.
     """
     await _send_chosen_choice_and_remove_buttons(update=update)
-    await send_confirmation_request(update, context)
+    # await send_confirmation_request(update, context)
 
     return ConversationHandler.END
 
@@ -460,7 +466,7 @@ async def send_question_to_cancel_profile_edit(
     await update.effective_message.reply_text(
         text=templates.FORM_NOT_CHANGED,
     )
-    await send_confirmation_request(update, context)
+    # await send_confirmation_request(update, context)
 
     return ConversationHandler.END
 
@@ -487,7 +493,8 @@ async def send_confirmation_request(
     """
     Отправляет сохраняет профиль в базе данных.
     """
-    # save to database
+    # print(context.user_data)
+    await api_service.create_user_profile(update.effective_chat.id, context.user_data)
     await update.effective_message.reply_text(
         text=templates.FORM_SAVED,
     )

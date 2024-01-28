@@ -24,7 +24,7 @@ class ProfileView(
         )
         serializer.save(
             user=user,
-            is_visible=False,
+            is_visible=self.request.data.get("is_visible", False),
         )
 
     def perform_update(self, serializer) -> None:
