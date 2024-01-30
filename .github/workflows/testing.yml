@@ -1,4 +1,4 @@
-name: Main workflow
+name: Check code style and run tests
 
 on: push
 
