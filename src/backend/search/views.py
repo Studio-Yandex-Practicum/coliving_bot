@@ -32,4 +32,4 @@ class MatchedUsersListView(generics.ListAPIView):
             match_requests__sender=user,
             match_requests__status=MatchStatuses.is_match,
         )
-        return (users_who_sent_like | liked_users).all()
+        return (users_who_sent_like | liked_users).distinct()
