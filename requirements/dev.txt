@@ -8,6 +8,7 @@ colorama==0.4.6 ; python_version >= "3.12" and python_version < "4.0" and platfo
 distlib==0.3.7 ; python_version >= "3.12" and python_version < "4.0"
 django==5.0 ; python_version >= "3.12" and python_version < "4.0"
 djangorestframework==3.14.0 ; python_version >= "3.12" and python_version < "4.0"
+emoji==2.10.0 ; python_version >= "3.12" and python_version < "4.0"
 filelock==3.13.1 ; python_version >= "3.12" and python_version < "4.0"
 flake8==6.1.0 ; python_version >= "3.12" and python_version < "4.0"
 gunicorn==21.2.0 ; python_version >= "3.12" and python_version < "4.0"

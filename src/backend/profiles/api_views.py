@@ -1,5 +1,4 @@
 from rest_framework import generics
-from rest_framework.generics import get_object_or_404
 
 from profiles.models import Location, Profile, UserFromTelegram
 from profiles.serializers import LocationSerializer, ProfileSerializer
@@ -24,15 +23,6 @@ class ProfileView(
         )
         serializer.save(
             user=user,
-            is_visible=self.request.data.get("is_visible", False),
-        )
-
-    def perform_update(self, serializer) -> None:
-        serializer.save(
-            user=get_object_or_404(
-                UserFromTelegram, telegram_id=self.kwargs.get("telegram_id")
-            ),
-            is_visible=self.request.data.get("is_visible", False),
         )
 
 

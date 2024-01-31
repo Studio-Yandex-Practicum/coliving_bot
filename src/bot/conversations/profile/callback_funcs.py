@@ -60,6 +60,7 @@ async def send_question_to_profile_is_visible_in_search(
     await update.effective_message.reply_text(
         text=templates.FORM_IS_VISIBLE,
     )
+    await api_service.update_user_profile(update.effective_chat.id, context.user_data)
 
     return ConversationHandler.END
 
@@ -76,6 +77,7 @@ async def send_question_to_profile_is_invisible_in_search(
     await update.effective_message.reply_text(
         text=templates.FORM_IS_NOT_VISIBLE,
     )
+    await api_service.update_user_profile(update.effective_chat.id, context.user_data)
 
     return ConversationHandler.END
 
@@ -92,11 +94,6 @@ async def send_question_to_edit_profile(
         text=templates.ASK_WANT_TO_CHANGE,
         reply_markup=keyboards.FORM_EDIT_KEYBOARD,
     )
-    # update_data = {
-    #     "is_visible": False,
-    # }
-    # await api_service.update_user_profile(
-    #     update.effective_chat.id, update_data)
 
     return States.EDIT
 
@@ -283,6 +280,12 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     context.user_data[templates.IMAGE_FIELD] = await _encoding_profile_photo(
         update, context, await update.message.photo[-1].get_file()
     )
+    file_id = update.effective_message.photo[-1].file_id
+    new_file = await context.bot.get_file(file_id)
+    photo_bytearray = await new_file.download_as_bytearray()
+    context.user_data["file_id"] = file_id
+    context.user_data["new_file"] = new_file.file_path
+    context.user_data["photo_bytearray"] = photo_bytearray
     await _look_at_profile(
         update,
         context,
@@ -406,10 +409,6 @@ async def handle_edit_about(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     ):
         return States.ABOUT_YOURSELF
     context.user_data[templates.ABOUT_FIELD] = about
-    update_data = {
-        "about": str(context.user_data[templates.ABOUT_FIELD]),
-    }
-    await api_service.update_user_profile(update.effective_chat.id, update_data)
     await _look_at_profile(
         update,
         context,
@@ -449,8 +448,7 @@ async def send_question_to_profile_is_correct(
     Либо завершает диалог.
     """
     await _send_chosen_choice_and_remove_buttons(update=update)
-    # await send_confirmation_request(update, context)
-
+    await send_confirmation_request(update, context)
     return ConversationHandler.END
 
 
@@ -466,7 +464,6 @@ async def send_question_to_cancel_profile_edit(
     await update.effective_message.reply_text(
         text=templates.FORM_NOT_CHANGED,
     )
-    # await send_confirmation_request(update, context)
 
     return ConversationHandler.END
 
@@ -493,8 +490,19 @@ async def send_confirmation_request(
     """
     Отправляет сохраняет профиль в базе данных.
     """
-    # print(context.user_data)
-    await api_service.create_user_profile(update.effective_chat.id, context.user_data)
+    updated_profile = await api_service.update_user_profile(
+        update.effective_chat.id, context.user_data
+    )
+    if updated_profile is None:
+        await api_service.create_user_profile(
+            update.effective_chat.id, context.user_data
+        )
+    await api_service.save_photo(
+        telegram_id=update.effective_chat.id,
+        photo_bytearray=context.user_data["photo_bytearray"],
+        filename=context.user_data["new_file"],
+        file_id=context.user_data["file_id"],
+    )
     await update.effective_message.reply_text(
         text=templates.FORM_SAVED,
     )

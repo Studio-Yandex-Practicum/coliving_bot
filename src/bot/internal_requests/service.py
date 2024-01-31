@@ -15,6 +15,27 @@ class APIService:
     def __init__(self, base_url: str) -> None:
         self.base_url: str = base_url
 
+    # async def get_image_by_telegram_id(
+    #      self, telegram_id: int) -> Optional[str]:
+    #     """
+    #     Получение изображения пользователя.
+
+    #     :param telegram_id: Идентификатор пользователя.
+    #     :param coliving_id: Идентификатор коливинга (опционально).
+    #     :return: изображение или None, если изображение не найдено.
+    #     """
+    #     try:
+    #         endpoint_urn = f"users/{telegram_id}/profile/images/"
+    #         response = await self._get_request(endpoint_urn)
+    #         if response.status_code == 200:
+    #             data = response.json()
+    #             return data[-1].get("image")
+    #         else:
+    #             return None
+    #     except HTTPError as exc:
+    #         print(f"Картинка не найдена: {exc}")
+    #         return None
+
     async def save_photo(
         self,
         telegram_id: int,
@@ -63,10 +84,7 @@ class APIService:
         try:
             response = await self._get_request(f"users/{telegram_id}/profile/")
             if response.status_code == 200:
-                data = response.json()
-                return UserProfile(**data)
-            else:
-                return None
+                return UserProfile(**response.json())
         except HTTPError as exc:
             print(f"Профиль не найден: {exc}")
             return None
@@ -81,22 +99,7 @@ class APIService:
         :param data: Объект UserProfile с данными для создания профиля.
         :return: Созданный профиль или None, если что-то пошло не так.
         """
-        endpoint_urn = f"users/{telegram_id}/profile/"
-        request_data = {
-            "name": data.get("name", ""),
-            "sex": data.get("sex", "").replace("🚺", ""),
-            "age": data.get("age", 0),
-            "location": data.get("location", ""),
-            "about": data.get("about", ""),
-            "is_visible": data.get("is_visible", True),
-        }
-        response = await self._post_request(endpoint_urn, data=request_data)
-        if response.status_code == 201:
-            created_profile_data = response.json()
-            return UserProfile(**created_profile_data)
-        else:
-            print(f"Ошибка создания профиля. Status code: {response.status_code}")
-            return None
+        return await self._profile_request(telegram_id, data, method="post")
 
     async def update_user_profile(
         self, telegram_id: int, data: dict
@@ -108,18 +111,37 @@ class APIService:
         :param data: Словарь данных для обновления профиля.
         :return: Обновленный профиль или None, если что-то пошло не так.
         """
+        return await self._profile_request(telegram_id, data, method="patch")
+
+    async def _profile_request(
+        self, telegram_id: int, data: dict, method: str
+    ) -> Optional[UserProfile]:
+        """
+        Основная функция для создания и обновления профиля.
+
+        :param telegram_id: Идентификатор пользователя.
+        :param data: Словарь данных для профиля.
+        :param method: HTTP-метод ('post' или 'patch').
+        :return: Созданный или обновленный профиль или None, если что-то пошло не так.
+        """
         try:
             endpoint_urn = f"users/{telegram_id}/profile/"
-            response = await self._patch_request(endpoint_urn, data=data)
+            request_data = {
+                "name": data.get("name", ""),
+                "sex": data.get("sex", "").replace("🚺", "").replace("🚹", ""),
+                "age": data.get("age", 0),
+                "location": data.get("location", ""),
+                "about": data.get("about", ""),
+                "is_visible": data.get("is_visible", True),
+            }
+            response = await getattr(self, f"_{method}_request")(
+                endpoint_urn, data=request_data
+            )
 
-            if response.status_code == 200:
-                updated_profile_data = response.json()
-                return UserProfile(**updated_profile_data)
-            else:
-                print(f"Ошибка обновления профиля. Status code: {response.status_code}")
-                return None
+            if response.status_code in {200, 201}:
+                return UserProfile(**response.json())
         except HTTPError as exc:
-            print(f"Ошибка обновления профиля: {exc}")
+            print(f"Ошибка {method} профиля: {exc}")
             return None
 
     async def _post_request(
