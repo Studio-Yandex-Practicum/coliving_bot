@@ -1,8 +1,8 @@
 from rest_framework import exceptions, generics
-
+from django.shortcuts import get_object_or_404
 from search.constants import MatchStatuses
-from search.models import UserFromTelegram, UserReport
-from search.serializers import MatchListSerializer, UserReportSerializer
+from search.models import UserFromTelegram, UserReport, MatchRequest
+from search.serializers import MatchListSerializer, UserReportSerializer, MatchRequestSerializer
 
 
 class UserReportCreateView(generics.CreateAPIView):
@@ -33,3 +33,17 @@ class MatchedUsersListView(generics.ListAPIView):
             match_requests__status=MatchStatuses.is_match,
         )
         return (users_who_sent_like | liked_users).all()
+    
+class MatchRequestView(generics.CreateAPIView):
+    """Apiview для ."""
+    queryset = MatchRequest.objects.all()
+    serializer_class = MatchRequestSerializer
+
+    def perform_create(self, serializer):
+        user = self.request.data.get("sender")
+        user_1 = self.request.data.get("receiver")
+        math = MatchRequest.objects.filter(sender__telegram_id=user_1,receiver__telegram_id=user)
+        if math:
+            math.update(status=MatchStatuses.is_match)
+        else:
+            return serializer.save()
