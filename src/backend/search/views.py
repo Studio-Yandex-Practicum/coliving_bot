@@ -47,10 +47,10 @@ class MatchRequestView(generics.CreateAPIView):
     def perform_create(self, serializer):
         user = self.request.data.get("sender")
         user_1 = self.request.data.get("receiver")
-        math = MatchRequest.objects.filter(
+        matсh = MatchRequest.objects.filter(
             sender__telegram_id=user_1,
             receiver__telegram_id=user)
-        if math:
-            math.update(status=MatchStatuses.is_match)
+        if matсh:
+            matсh.update(status=MatchStatuses.is_match)
         else:
             return serializer.save()
