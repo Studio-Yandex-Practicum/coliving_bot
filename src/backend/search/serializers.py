@@ -1,8 +1,7 @@
 from rest_framework import serializers
-from search.constants import MatchStatuses
+
 from profiles.models import UserFromTelegram
-from search.models import UserReport, MatchRequest
-from django.shortcuts import get_object_or_404
+from search.models import MatchRequest, UserReport
 
 
 class UserReportSerializer(serializers.ModelSerializer):
@@ -43,14 +42,14 @@ class MatchListSerializer(serializers.ModelSerializer):
 
 
 class MatchRequestSerializer(serializers.ModelSerializer):
+    """Сериализатор для создания MatchRequest."""
     receiver = serializers.SlugRelatedField(
         slug_field="telegram_id", queryset=UserFromTelegram.objects.all()
     )
     sender = serializers.SlugRelatedField(
         slug_field="telegram_id", queryset=UserFromTelegram.objects.all()
     )
+
     class Meta:
         model = MatchRequest
         fields = ("receiver", "sender")
-
-    

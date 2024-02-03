@@ -1,6 +1,6 @@
 from django.urls import path
 
-from search.views import MatchedUsersListView, UserReportCreateView, MatchRequestView
+from search.views import MatchedUsersListView, MatchRequestView, UserReportCreateView
 
 API_V1_PREFIX = "v1"
 app_name = "api-v1"

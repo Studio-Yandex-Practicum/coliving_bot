@@ -2,9 +2,10 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from profiles.models import UserFromTelegram
 from search.constants import MatchStatuses
-from profiles.models import  UserFromTelegram
 from search.models import MatchRequest
+
 
 class MatchRequestAPITest(APITestCase):
     """Тесты для проверки ресурса MatchRequest."""
@@ -13,9 +14,9 @@ class MatchRequestAPITest(APITestCase):
             sender=UserFromTelegram.objects.create(telegram_id=1234567),
             receiver=UserFromTelegram.objects.create(telegram_id=1234568),
             status=MatchStatuses.is_pending,)
-    
         UserFromTelegram.objects.create(telegram_id=234569)
         UserFromTelegram.objects.create(telegram_id=234567)
+
     def test_create_MatchRequest(self):
         """Тест на создание  нового MatchRequest."""
         url = reverse('api-v1:match-request')
