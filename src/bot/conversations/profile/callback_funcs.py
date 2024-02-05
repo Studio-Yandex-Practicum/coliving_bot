@@ -1,5 +1,3 @@
-import base64
-import io
 from copy import copy
 from re import fullmatch
 from typing import Union
@@ -7,6 +5,8 @@ from typing import Union
 from telegram import Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
+from http import HTTPStatus as codes
+from httpx import HTTPError
 
 import conversations.profile.buttons as buttons
 import conversations.profile.keyboards as keyboards
@@ -27,6 +27,7 @@ async def set_profile_to_context(
     context.user_data[templates.LOCATION_FIELD] = profile_info.location
     context.user_data[templates.ABOUT_FIELD] = profile_info.about
     context.user_data[templates.IS_VISIBLE_FIELD] = profile_info.is_visible
+    context.user_data[templates.FILE_ID_FIELD] = profile_info.images
 
 
 async def start(
@@ -36,16 +37,18 @@ async def start(
     Начало диалога. Проверяет, не был ли пользователь зарегистрирован ранее.
     Переводит диалог в состояние AGE (ввод возраста пользователя).
     """
-    profile_info = await api_service.get_user_profile_by_telegram_id(
-        update.effective_chat.id
-    )
-    if profile_info:
-        await set_profile_to_context(update, context, profile_info)
-        await _look_at_profile(update, context, "", keyboards.PROFILE_KEYBOARD)
-        return States.PROFILE
-    await update.effective_message.reply_text(text=templates.ASK_AGE)
-
-    return States.AGE
+    try:
+        profile_info = await api_service.get_user_profile_by_telegram_id(
+            update.effective_chat.id
+        )
+    except HTTPError as exc:
+        if exc.response.status_code == codes.NOT_FOUND:
+            await update.effective_message.reply_text(text=templates.ASK_AGE)
+            return States.AGE
+        raise exc
+    await set_profile_to_context(update, context, profile_info)
+    await _look_at_profile(update, context, "", keyboards.PROFILE_KEYBOARD)
+    return States.PROFILE
 
 
 async def send_question_to_profile_is_visible_in_search(
@@ -219,21 +222,17 @@ async def handle_about(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     ):
         return States.ABOUT_YOURSELF
     context.user_data[templates.ABOUT_FIELD] = about
+    try:
+        await api_service.update_user_profile(
+            update.effective_chat.id, context.user_data
+        )
+    except HTTPError as exc:
+        if exc.response.status_code == codes.NOT_FOUND:
+            await api_service.create_user_profile(
+                        update.effective_chat.id, context.user_data)
     await update.effective_message.reply_text(text=templates.ASK_PHOTO)
 
     return States.PHOTO
-
-
-async def _encoding_profile_photo(
-    update: Update, context: ContextTypes.DEFAULT_TYPE, photo
-) -> bytes:
-    """
-    Обрабатывает загруженную пользователем фотографию.
-    Возвращает ее в закодированном виде.
-    """
-    buffer = io.BytesIO()
-    await photo.download_to_memory(buffer)
-    return base64.b64encode(buffer.getvalue())
 
 
 async def _look_at_profile(
@@ -252,7 +251,7 @@ async def _look_at_profile(
         ask_text = ""
     await context.bot.sendPhoto(
         chat_id=chat_id,
-        photo=(base64.b64decode(context.user_data.get(templates.IMAGE_FIELD))),
+        photo=context.user_data.get(templates.FILE_ID_FIELD)[-1],
         caption=title
         + "\n"
         + templates.PROFILE_DATA.format(
@@ -277,15 +276,15 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     Обрабатывает загруженную пользователем фотографию.
     Переводит диалог в состояние CONFIRMATION (анкета верна или нет)
     """
-    context.user_data[templates.IMAGE_FIELD] = await _encoding_profile_photo(
-        update, context, await update.message.photo[-1].get_file()
-    )
     file_id = update.effective_message.photo[-1].file_id
     new_file = await context.bot.get_file(file_id)
-    photo_bytearray = await new_file.download_as_bytearray()
-    context.user_data["file_id"] = file_id
-    context.user_data["new_file"] = new_file.file_path
-    context.user_data["photo_bytearray"] = photo_bytearray
+    context.user_data[templates.FILE_ID_FIELD] = [file_id]
+    await api_service.save_photo(
+        telegram_id=update.effective_chat.id,
+        photo_bytearray=await new_file.download_as_bytearray(),
+        filename=new_file.file_path,
+        file_id=file_id,
+    )
     await _look_at_profile(
         update,
         context,
@@ -333,6 +332,9 @@ async def handle_visible(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         context.user_data[templates.IS_VISIBLE_FIELD] = True
     elif visible == buttons.NOT_LOOK_YET_BUTTON:
         context.user_data[templates.IS_VISIBLE_FIELD] = False
+    await api_service.update_user_profile(
+            update.effective_chat.id, context.user_data
+        )
     await send_confirmation_request(update, context)
 
     return ConversationHandler.END
@@ -409,6 +411,9 @@ async def handle_edit_about(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     ):
         return States.ABOUT_YOURSELF
     context.user_data[templates.ABOUT_FIELD] = about
+    await api_service.update_user_profile(
+            update.effective_chat.id, context.user_data
+        )
     await _look_at_profile(
         update,
         context,
@@ -425,8 +430,14 @@ async def handle_edit_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     Обрабатывает отредактированную пользователем фотографию.
     Переводит диалог в состояние EDIT_CONFIRMATION (анкета верна или нет).
     """
-    context.user_data[templates.IMAGE_FIELD] = await _encoding_profile_photo(
-        update, context, await update.message.photo[-1].get_file()
+    file_id = update.effective_message.photo[-1].file_id
+    new_file = await context.bot.get_file(file_id)
+    context.user_data[templates.FILE_ID_FIELD] = [file_id]
+    await api_service.save_photo(
+        telegram_id=update.effective_chat.id,
+        photo_bytearray=await new_file.download_as_bytearray(),
+        filename=new_file.file_path,
+        file_id=file_id,
     )
     await _look_at_profile(
         update,
@@ -490,19 +501,6 @@ async def send_confirmation_request(
     """
     Отправляет сохраняет профиль в базе данных.
     """
-    updated_profile = await api_service.update_user_profile(
-        update.effective_chat.id, context.user_data
-    )
-    if updated_profile is None:
-        await api_service.create_user_profile(
-            update.effective_chat.id, context.user_data
-        )
-    await api_service.save_photo(
-        telegram_id=update.effective_chat.id,
-        photo_bytearray=context.user_data["photo_bytearray"],
-        filename=context.user_data["new_file"],
-        file_id=context.user_data["file_id"],
-    )
     await update.effective_message.reply_text(
         text=templates.FORM_SAVED,
     )

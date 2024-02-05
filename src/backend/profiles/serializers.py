@@ -14,9 +14,12 @@ class ProfileSerializer(serializers.ModelSerializer):
     Сериализатор объекта 'Profile'.
     """
 
-    user = serializers.SerializerMethodField()
+    user = serializers.SlugRelatedField(slug_field="telegram_id", read_only=True)
     location = serializers.SlugRelatedField(
         queryset=Location.objects.all(), slug_field="name"
+    )
+    images = serializers.SlugRelatedField(
+        slug_field="file_id", many=True, read_only=True
     )
 
     class Meta:
@@ -29,8 +32,5 @@ class ProfileSerializer(serializers.ModelSerializer):
             "location",
             "about",
             "is_visible",
+            "images",
         )
-
-    @staticmethod
-    def get_user(obj):
-        return obj.user.telegram_id

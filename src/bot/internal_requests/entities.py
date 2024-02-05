@@ -10,6 +10,7 @@ class UserProfile:
     location: str
     about: str = field(default=None)
     is_visible: bool = field(default=True)
+    images: list = field(default_factory=list)
 
 
 @dataclass

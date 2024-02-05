@@ -2,7 +2,7 @@ import mimetypes
 import urllib.parse
 from typing import List, Optional
 
-from httpx import AsyncClient, HTTPError, Response
+from httpx import AsyncClient, Response
 
 from internal_requests.entities import Location, UserProfile
 
@@ -14,27 +14,6 @@ class APIService:
 
     def __init__(self, base_url: str) -> None:
         self.base_url: str = base_url
-
-    # async def get_image_by_telegram_id(
-    #      self, telegram_id: int) -> Optional[str]:
-    #     """
-    #     Получение изображения пользователя.
-
-    #     :param telegram_id: Идентификатор пользователя.
-    #     :param coliving_id: Идентификатор коливинга (опционально).
-    #     :return: изображение или None, если изображение не найдено.
-    #     """
-    #     try:
-    #         endpoint_urn = f"users/{telegram_id}/profile/images/"
-    #         response = await self._get_request(endpoint_urn)
-    #         if response.status_code == 200:
-    #             data = response.json()
-    #             return data[-1].get("image")
-    #         else:
-    #             return None
-    #     except HTTPError as exc:
-    #         print(f"Картинка не найдена: {exc}")
-    #         return None
 
     async def save_photo(
         self,
@@ -81,13 +60,8 @@ class APIService:
         :param telegram_id: Идентификатор телеграма пользователя.
         :return: Объект UserProfile или None, если профиль не найден.
         """
-        try:
-            response = await self._get_request(f"users/{telegram_id}/profile/")
-            if response.status_code == 200:
-                return UserProfile(**response.json())
-        except HTTPError as exc:
-            print(f"Профиль не найден: {exc}")
-            return None
+        response = await self._get_request(f"users/{telegram_id}/profile/")
+        return UserProfile(**response.json())
 
     async def create_user_profile(
         self, telegram_id: int, data: dict
@@ -124,25 +98,19 @@ class APIService:
         :param method: HTTP-метод ('post' или 'patch').
         :return: Созданный или обновленный профиль или None, если что-то пошло не так.
         """
-        try:
-            endpoint_urn = f"users/{telegram_id}/profile/"
-            request_data = {
-                "name": data.get("name", ""),
-                "sex": data.get("sex", "").replace("🚺", "").replace("🚹", ""),
-                "age": data.get("age", 0),
-                "location": data.get("location", ""),
-                "about": data.get("about", ""),
-                "is_visible": data.get("is_visible", True),
-            }
-            response = await getattr(self, f"_{method}_request")(
-                endpoint_urn, data=request_data
-            )
-
-            if response.status_code in {200, 201}:
-                return UserProfile(**response.json())
-        except HTTPError as exc:
-            print(f"Ошибка {method} профиля: {exc}")
-            return None
+        endpoint_urn = f"users/{telegram_id}/profile/"
+        request_data = {
+            "name": data.get("name", ""),
+            "sex": data.get("sex", "").replace("🚺", "").replace("🚹", ""),
+            "age": data.get("age", 0),
+            "location": data.get("location", ""),
+            "about": data.get("about", ""),
+            "is_visible": data.get("is_visible", True),
+        }
+        response = await getattr(self, f"_{method}_request")(
+            endpoint_urn, data=request_data
+        )
+        return UserProfile(**response.json())
 
     async def _post_request(
         self,
