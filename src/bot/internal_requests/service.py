@@ -1,8 +1,10 @@
 import mimetypes
 import urllib.parse
-from typing import Optional
+from typing import List, Optional
 
 from httpx import AsyncClient, Response
+
+from internal_requests.entities import Location
 
 
 class APIService:
@@ -23,7 +25,7 @@ class APIService:
     ) -> None:
         """
         Создает структуру запроса на создание объектов 'ProfileImage' и 'ColivingImage'
-        запускает POST-запрос.
+        отправляет POST-запрос.
         """
         endpoint_urn = (
             f"users/{telegram_id}/colivings/{coliving_id}/images/"
@@ -38,13 +40,48 @@ class APIService:
             )
         }
         data = dict(file_id=file_id)
-        await self.post_request(endpoint_urn, files, data)
+        await self._post_request(endpoint_urn, files, data)
 
-    async def post_request(self, endpoint_urn: str, files: dict, data: dict) -> None:
+    async def get_locations(self) -> List[Location]:
         """
-        POST-запрос для создания объектов 'ProfileImage' и 'ColivingImage'.
+        Получение списка локаций.
+        """
+        response = await self._get_request("locations/")
+        data = response.json()
+        locations = [Location(id=item["id"], name=item["name"]) for item in data]
+        return locations
+
+    async def _post_request(
+        self,
+        endpoint_urn: str,
+        files: Optional[dict] = None,
+        data: Optional[dict] = None,
+    ) -> Response:
+        """
+        Асинхронно отправляет POST-запрос к указанному эндпоинту.
+
+        :param endpoint_urn: Относительный URI эндпоинта.
+        :param files: Опциональный параметр. Словарь файлов для отправки
+        (в формате {'file_field_name': ('filename', bytes, 'content_type')}).
+        :param data: Опциональный параметр. Словарь данных для отправки в формате JSON.
         """
         async with AsyncClient() as client:
             url: str = urllib.parse.urljoin(base=self.base_url, url=endpoint_urn)
-            response: Response = await client.post(url=url, files=files, data=data)
+            if files:
+                response: Response = await client.post(url=url, files=files, data=data)
+            elif data:
+                response: Response = await client.post(url=url, json=data)
+            else:
+                raise ValueError("Оба значения 'files' и 'data' не могут быть None.")
             response.raise_for_status()
+        return response
+
+    async def _get_request(self, endpoint_urn: str) -> Response:
+        """
+        Асинхронно отправляет GET-запрос к указанному эндпоинту.
+        """
+        async with AsyncClient() as client:
+            url: str = urllib.parse.urljoin(base=self.base_url, url=endpoint_urn)
+            response: Response = await client.get(url)
+            response.raise_for_status()
+        return response

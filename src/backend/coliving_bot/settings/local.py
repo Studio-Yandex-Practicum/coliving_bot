@@ -1,6 +1,5 @@
 from .base import *  # noqa
 
-
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -13,12 +12,20 @@ LOGGING = {
         "console": {
             "class": "logging.StreamHandler",
             "formatter": "verbose",
-         },
+        },
     },
     "loggers": {
+        "django": {
+            "level": "INFO",
+            "handlers": [
+                "console",
+            ],
+        },
         "django.db.backends": {
             "level": "DEBUG",
-            "handlers": ["console", ],
+            "handlers": [
+                "console",
+            ],
         },
-    }
+    },
 }
