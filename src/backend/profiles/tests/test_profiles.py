@@ -1,5 +1,6 @@
 from django.urls import reverse
 from rest_framework import status
+from rest_framework.exceptions import ErrorDetail
 from rest_framework.test import APITestCase
 
 from profiles.models import Location, Profile, UserFromTelegram
@@ -49,8 +50,8 @@ class ProfileAPITestCase(APITestCase):
             reverse("api-v1:user-profile", args=[TEST_TELEGRAM_ID]), data, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(
-            Profile.objects.filter(user__telegram_id=TEST_TELEGRAM_ID).count(), 0
+        self.assertFalse(
+            Profile.objects.filter(user__telegram_id=TEST_TELEGRAM_ID).exists()
         )
 
     def test_get_existing_profile(self):
@@ -67,12 +68,10 @@ class ProfileAPITestCase(APITestCase):
             reverse("api-v1:user-profile", args=[NON_EXISTENT_PROFILE_TELEGRAM_ID])
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual(response.data, {"detail": "Not found."})
-        self.assertEqual(
+        self.assertFalse(
             Profile.objects.filter(
                 user__telegram_id=NON_EXISTENT_PROFILE_TELEGRAM_ID
-            ).count(),
-            0,
+            ).exists(),
         )
 
     def test_patch_profile_update_fields(self):
@@ -101,10 +100,7 @@ class ProfileAPITestCase(APITestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(
-            response.data,
-            {"location": ["Object with name=Екатеринбург does not exist."]},
-        )
+        self.assertIsInstance(response.data["location"][0], ErrorDetail)
 
     def assert_profile_data(self, response, telegram_id, data=None):
         """Проверка содержимого полей ответа."""

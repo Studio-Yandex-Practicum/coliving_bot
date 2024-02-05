@@ -139,6 +139,13 @@ python manage.py import_locations
 python manage.py runserver
 ```
 
+> **Note**  
+> Есть возможность изменить используемый файл настроек, определив переменную `DJANGO_SETTINGS_MODULE`,
+> например,
+> ```shell
+> export DJANGO_SETTINGS_MODULE=coliving_bot.settings.dev
+> ```
+
 Запускаем бота
 
 Перед выполнением команд откройте новый терминал
