@@ -330,9 +330,9 @@ async def handle_visible(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     await update.effective_message.edit_reply_markup()
     if visible == buttons.YES_TO_DO_BUTTON:
         context.user_data[templates.IS_VISIBLE_FIELD] = True
-    elif visible == buttons.NOT_LOOK_YET_BUTTON:
+    elif visible == buttons.HIDE_SEARCH_BUTTON:
         context.user_data[templates.IS_VISIBLE_FIELD] = False
-    await api_service.update_user_profile(
+        await api_service.update_user_profile(
             update.effective_chat.id, context.user_data
         )
     await send_confirmation_request(update, context)

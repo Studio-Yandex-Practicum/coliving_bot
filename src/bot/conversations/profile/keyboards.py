@@ -12,7 +12,6 @@ from .buttons import (
     MALE_BUTTON,
     MSK_BUTTON,
     NEW_PHOTO_BUTTON,
-    NOT_LOOK_YET_BUTTON,
     SHOW_SEARCH_BUTTON,
     SPB_BUTTON,
     YES_BUTTON,
@@ -53,7 +52,7 @@ FORM_VISIBLE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         InlineKeyboardButton(text=YES_TO_DO_BUTTON, callback_data=YES_TO_DO_BUTTON),
         InlineKeyboardButton(
-            text=NOT_LOOK_YET_BUTTON, callback_data=NOT_LOOK_YET_BUTTON
+            text=HIDE_SEARCH_BUTTON, callback_data=HIDE_SEARCH_BUTTON
         ),
     )
 )
