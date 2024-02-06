@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "django_filters",
     "profiles.apps.ProfilesConfig",
     "search.apps.SearchConfig",
     "images.apps.ImagesConfig",
@@ -114,4 +115,5 @@ API_V1_PREFIX = "v1"
 
 REST_FRAMEWORK = {
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
 }

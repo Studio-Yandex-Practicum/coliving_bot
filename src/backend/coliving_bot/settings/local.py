@@ -26,6 +26,7 @@ LOGGING = {
             "handlers": [
                 "console",
             ],
+            "propagate": False,
         },
     },
 }
