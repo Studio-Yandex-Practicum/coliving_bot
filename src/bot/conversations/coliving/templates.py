@@ -55,7 +55,7 @@ REPLY_MSG_PHOTO = (
     "О, классная квартира. " "\n" "Давай взглянем на то, как выглядит твой коливинг:"
 )
 REPLY_MSG_ASK_TO_CONFIRM = "Всё верно?"
-REPLY_MSG_TITLE = "Твой профиль: " "\n"
+REPLY_MSG_TITLE = "Твой профиль: \n\n"
 REPLY_MSG_ASK_TO_SHOW_PROFILE = (
     "Сделать профиль доступным для поиска? "
     "\n"
@@ -123,7 +123,5 @@ PROFILE_DATA = (
     "<b>Тип спального места:</b> {room_type}\n"
     "<b>Описание коливинга:</b> {about}\n"
     "<b>Цена:</b> {price}\n"
-    "<b>Видимость:</b> {is_visible}\n"
-    # '<b>Соседи:</b> {'roommates'}\n'
-    # '<b>Просмотры:</b> {'viewers'}\n'
+    "<b>Видимость:</b> {is_visible}\n\n"
 )
