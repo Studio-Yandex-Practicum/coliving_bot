@@ -1,8 +1,14 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
 from rest_framework.generics import get_object_or_404
 
-from profiles.models import Location, Profile, UserFromTelegram
-from profiles.serializers import LocationSerializer, ProfileSerializer
+from profiles.filters import ColivingFilter
+from profiles.models import Coliving, Location, Profile, UserFromTelegram
+from profiles.serializers import (
+    ColivingSerializer,
+    LocationSerializer,
+    ProfileSerializer,
+)
 
 
 class ProfileView(
@@ -39,3 +45,23 @@ class ProfileView(
 class LocationList(generics.ListAPIView):
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
+
+
+class ColivingView(generics.ListCreateAPIView):
+    """Apiview для создания и получения Coliving."""
+
+    queryset = (
+        Coliving.objects.select_related("location", "host")
+        .prefetch_related("images")
+        .all()
+    )
+    serializer_class = ColivingSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ColivingFilter
+
+
+class ColivingDetailView(generics.RetrieveUpdateAPIView):
+    """Apiview для обновления Coliving."""
+
+    queryset = Coliving.objects.select_related("location", "host").all()
+    serializer_class = ColivingSerializer
