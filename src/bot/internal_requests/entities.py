@@ -9,3 +9,9 @@ class UserProfile:
     location: str
     about: str
     is_visible: str
+
+
+@dataclass
+class Location:
+    id: int
+    name: str
