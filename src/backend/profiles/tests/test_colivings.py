@@ -118,6 +118,7 @@ class ColivingAPITest(APITestCase):
                     "price": 2500,
                     "room_type": "Комната",
                     "about": "Уютное пространство...",
+                    "is_visible": True,
                     "images": [],
                 }
             ],

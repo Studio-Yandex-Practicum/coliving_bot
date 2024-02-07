@@ -169,3 +169,6 @@ media/
 
 # Logging data folder
 .data/
+
+# media dir
+media
