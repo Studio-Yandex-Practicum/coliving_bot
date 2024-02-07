@@ -1,3 +1,5 @@
+from internal_requests.entities import Coliving
+
 COLIVING_START = "coliving"
 COLIVING_START_BTN = "Коливинг"
 
@@ -17,8 +19,8 @@ MAX_PRICE = 1000000
 
 DEFAULT_ERROR_MESSAGE = "Некорректный ввод"
 
-IS_VISIBLE_YES = "Да"
-IS_VISIBLE_NO = "Нет"
+IS_VISIBLE_YES = "\nАнкета видна в поиске"
+IS_VISIBLE_NO = "\nАнкета скрыта из поиска"
 
 ERR_MSG_ABOUT_MAX_LEN = "Превышено максимальное количество символов равное {max}."
 ERR_MSG_PRICE = "Цена, должна быть целым числом от {min} до {max}. Повторите ввод!"
@@ -27,7 +29,7 @@ ERR_PHOTO_NOT_TEXT = "Пожалуйста, отправьте 5 фотогра�
 
 REPLY_MSG_HELLO = "Привет! давай проверим твой коливинг"
 REPLY_MSG_TIME_TO_CREATE_PROFILE = (
-    "Ууупс, похоже у вас еще не создан коливинг! " "\n" "Самое время создать профиль! "
+    "У вас еще не создан коливинг! " "\n" "Самое время его создать! "
 )
 REPLY_MSG_ASK_LOCATION = "Где организован коливинг?"
 REPLY_MSG = "Ваш ответ: "
@@ -45,7 +47,7 @@ REPLY_MSG_ASK_ROOM_TYPE = "Выберите тип помещения:"
 REPLY_MSG_ASK_ABOUT = (
     "Расскажи о своей квартире." "\n" "Краткое описание коливинга и его жильцов ?"
 )
-REPLY_MSG_ASK_PRICE = "Укажите цену спального места за сутки?"
+REPLY_MSG_ASK_PRICE = "Укажите цену аренды за месяц?"
 REPLY_MSG_ASK_PHOTO_SEND = (
     "Теперь можете отправить фото, квартиры. "
     "\n"
@@ -54,8 +56,8 @@ REPLY_MSG_ASK_PHOTO_SEND = (
 REPLY_MSG_PHOTO = (
     "О, классная квартира. " "\n" "Давай взглянем на то, как выглядит твой коливинг:"
 )
-REPLY_MSG_ASK_TO_CONFIRM = "Всё верно?"
-REPLY_MSG_TITLE = "Твой профиль: \n\n"
+REPLY_MSG_ASK_TO_CONFIRM = "\nВсё верно?"
+REPLY_MSG_TITLE = "Твой коливинг: \n\n"
 REPLY_MSG_ASK_TO_SHOW_PROFILE = (
     "Сделать профиль доступным для поиска? "
     "\n"
@@ -79,16 +81,13 @@ BTN_TRANSFER_TO = "transfer_to"
 BTN_LABEL_TRANSFER_TO = "Передача коливинга"
 BTN_GO_TO_MENU = "go_to_menu"
 BTN_LABEL_GO_TO_MENU = "Вернуться в меню"
-BTN_MOSCOW = "moscow_city"
-BTN_LABEL_MOSCOW = "Москва"
-BTN_SPB = "spb_city"
-BTN_LABEL_SPB = "Санкт-Петербург"
-BTN_BED_IN_ROOM = "bed_in_room"
-BTN_LABEL_BED_IN_ROOM = "Спальное место в комнате"
-BTN_ROOM_IN_APPARTMENT = "room_in_apartment"
-BTN_LABEL_ROOM_IN_APPARTMENT = "Комната в квартире"
-BTN_ROOM_IN_HOUSE = "room_in_house"
-BTN_LABEL_ROOM_IN_HOUSE = "Комната в доме"
+
+LOCATION_CALLBACK_DATA = "select_location"
+
+ROOM_TYPE_CALLBACK_DATA = "select_room_type"
+BTN_LABEL_BED_IN_ROOM = "Спальное место"
+BTN_LABEL_ROOM_IN_APPARTMENT = "Комната"
+
 BTN_CONFIRM = "confirm"
 BTN_LABEL_CONFIRM = "Да, подтвердить"
 BTN_CANCEL = "cancel"
@@ -98,7 +97,7 @@ BTN_LABEL_CANCEL_EDIT = "Отменить редактирование"
 BTN_FILL_AGAIN = "edit_fill_again"
 BTN_LABEL_FILL_AGAIN = "Заполнить заново"
 BTN_EDIT_ROOM_TYPE = "edit_room_type"
-BTN_LABEL_EDIT_ROOM_TYPE = "Тип помещения"
+BTN_LABEL_EDIT_ROOM_TYPE = "Тип аренды"
 BTN_EDIT_ABOUT_ROOM = "edit_about"
 BTN_LABEL_EDIT_ABOUT_ROOM = "Описание"
 BTN_EDIT_PRICE = "edit_price"
@@ -120,8 +119,22 @@ BTN_LABEL_EDIT_LOCATION = "Местоположение"
 
 PROFILE_DATA = (
     "<b>Место проживания:</b> {location}\n"
-    "<b>Тип спального места:</b> {room_type}\n"
-    "<b>Описание коливинга:</b> {about}\n"
-    "<b>Цена:</b> {price}\n"
-    "<b>Видимость:</b> {is_visible}\n\n"
+    "<b>Тип аренды:</b> {room_type}\n"
+    "<b>Описание:</b> {about}\n"
+    "<b>Цена:</b> {price} р/мес\n"
 )
+
+
+async def format_coliving_profile_message(coliving_info: Coliving) -> str:
+    result = REPLY_MSG_TITLE + PROFILE_DATA.format(
+        location=coliving_info.location,
+        room_type=coliving_info.room_type,
+        about=coliving_info.about,
+        price=coliving_info.price,
+    )
+    if isinstance(coliving_info.is_visible, bool):
+        if coliving_info.is_visible:
+            result += IS_VISIBLE_YES
+        else:
+            result += IS_VISIBLE_NO
+    return result

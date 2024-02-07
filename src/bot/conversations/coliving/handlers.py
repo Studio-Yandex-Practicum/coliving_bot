@@ -1,6 +1,5 @@
 from telegram.ext import (
     CallbackQueryHandler,
-    CommandHandler,
     ConversationHandler,
     MessageHandler,
     filters,
@@ -13,7 +12,6 @@ from conversations.menu.callback_funcs import menu
 
 coliving_handler: ConversationHandler = ConversationHandler(
     entry_points=[
-        CommandHandler(templates.COLIVING_START, callback_funcs.start),
         CallbackQueryHandler(
             pattern=rf"^{templates.COLIVING_START_BTN}$", callback=callback_funcs.start
         ),
@@ -22,34 +20,17 @@ coliving_handler: ConversationHandler = ConversationHandler(
         states.LOCATION: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_location,
-                pattern=rf"^{templates.BTN_LABEL_MOSCOW}",
-            ),
-            CallbackQueryHandler(
-                callback=callback_funcs.handle_location,
-                pattern=rf"^{templates.BTN_LABEL_SPB}",
+                pattern=rf"^{templates.LOCATION_CALLBACK_DATA}:(.+)$",
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
                 callback_funcs.handle_location_text_input_instead_of_choosing_button,
             ),
         ],
-        ###########################################################################
-        #
-        # pattern=rf"^{BTN_LABEL_BED_IN_ROOM}|{BTN_LABEL_ROOM_IN_APARTMENT}"
-        # переделать
-        ##########################################################################
         states.ROOM_TYPE: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_room_type,
-                pattern=rf"^{templates.BTN_LABEL_BED_IN_ROOM}",
-            ),
-            CallbackQueryHandler(
-                callback=callback_funcs.handle_room_type,
-                pattern=rf"^{templates.BTN_LABEL_ROOM_IN_APPARTMENT}",
-            ),
-            CallbackQueryHandler(
-                callback=callback_funcs.handle_room_type,
-                pattern=rf"^{templates.BTN_LABEL_ROOM_IN_HOUSE}",
+                pattern=rf"^{templates.ROOM_TYPE_CALLBACK_DATA}:(.+)$",
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -72,10 +53,8 @@ coliving_handler: ConversationHandler = ConversationHandler(
         ],
         states.PHOTO_ROOM: [
             MessageHandler(
-                filters.PHOTO & ~filters.COMMAND, callback_funcs.handle_photo_room
-            ),
-            MessageHandler(
-                filters.TEXT & ~filters.COMMAND, callback_funcs.handle_photo_room
+                filters.PHOTO | filters.TEXT & ~filters.COMMAND,
+                callback_funcs.handle_photo_room,
             ),
         ],
         states.CONFIRMATION: [
@@ -125,11 +104,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
         states.IS_VISIBLE: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_is_visible_coliving_profile_yes,
-                pattern=r"^show",
-            ),
-            CallbackQueryHandler(
-                callback=callback_funcs.handle_is_visible_coliving_profile_no,
-                pattern=r"^hide",
+                pattern=r"^(True|False)$",
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -139,11 +114,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
         states.EDIT_LOCATION: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_edit_location,
-                pattern=rf"^{templates.BTN_LABEL_MOSCOW}",
-            ),
-            CallbackQueryHandler(
-                callback=callback_funcs.handle_edit_location,
-                pattern=rf"^{templates.BTN_LABEL_SPB}",
+                pattern=rf"^{templates.LOCATION_CALLBACK_DATA}:(.+)",
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -153,15 +124,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
         states.EDIT_ROOM_TYPE: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_edit_select_room_type,
-                pattern=rf"^{templates.BTN_LABEL_BED_IN_ROOM}",
-            ),
-            CallbackQueryHandler(
-                callback=callback_funcs.handle_edit_select_room_type,
-                pattern=rf"^{templates.BTN_LABEL_ROOM_IN_HOUSE}",
-            ),
-            CallbackQueryHandler(
-                callback=callback_funcs.handle_edit_select_room_type,
-                pattern=rf"^{templates.BTN_LABEL_ROOM_IN_HOUSE}",
+                pattern=rf"^{templates.ROOM_TYPE_CALLBACK_DATA}:(.+)$",
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -186,7 +149,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
         ],
         states.EDIT_PHOTO_ROOM: [
             MessageHandler(
-                filters.PHOTO & ~filters.COMMAND,
+                filters.PHOTO,
                 callback_funcs.handle_edit_photo_room,
             ),
             MessageHandler(

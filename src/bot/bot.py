@@ -1,6 +1,7 @@
 from telegram.ext import Application, ApplicationBuilder, CommandHandler
 
 from conversations.coliving.handlers import coliving_handler
+from conversations.coliving.keyboards import create_keyboard_of_locations
 from conversations.menu.callback_funcs import menu, start
 from conversations.menu.keyboards import get_main_menu_commands
 from conversations.profile.handlers import profile_handler
@@ -11,6 +12,7 @@ from utils.configs import TOKEN
 async def post_init(application: Application) -> None:
     """Создает кнопку меню и наполняет ее командами."""
     await application.bot.set_my_commands(get_main_menu_commands())
+    application.bot_data["location_keyboard"] = await create_keyboard_of_locations()
 
 
 def create_bot_app() -> Application:

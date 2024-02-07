@@ -53,15 +53,31 @@ class APIService:
         """Запрос на получение списка городов."""
         response = await self._get_request("locations/")
         data = response.json()
+        if not data:
+            raise ValueError("Список Locations пуст, возможно, в БД не созданы записи.")
         locations = [Location(**item) for item in data]
         return locations
 
     async def save_coliving_info(self, coliving: Coliving) -> Coliving:
         """Запрос на сохранение коливинга в БД."""
         endpoint_urn = "colivings/"
+        images = coliving.images.copy()
+        coliving.images.clear()
         data = asdict(coliving)
         response = await self._post_request(endpoint_urn=endpoint_urn, data=data)
-        return await self._parse_response_to_coliving(response.json())
+        created_coliving = await self._parse_response_to_coliving(response.json())
+        for image in images:
+            file = await image.photo_size.get_file()
+            photo_bytearray = await file.download_as_bytearray()
+            await self.save_photo(
+                telegram_id=created_coliving.host,
+                photo_bytearray=photo_bytearray,
+                filename=file.file_path,
+                file_id=image.file_id,
+                coliving_id=created_coliving.id,
+            )
+            created_coliving.images.append(Image(file_id=image.file_id))
+        return created_coliving
 
     async def get_coliving_info_by_user(self, telegram_id: int) -> Coliving:
         """
@@ -74,15 +90,15 @@ class APIService:
         response_json = response.json()
         if not response_json:
             raise ColivingNotFound(
-                message="Пользователь не зарегистрировал коливингов", response=response
+                message="Пользователь не зарегистрировал коливингов",
+                response=response,
             )
         return await self._parse_response_to_coliving(response_json[0])
 
-    async def update_coliving_info(
-        self, coliving_pk: int, coliving: Coliving
-    ) -> Coliving:
+    async def update_coliving_info(self, coliving: Coliving) -> Coliving:
         """Запрос на частичное обновление информации по коливингу."""
-        endpoint_urn = f"colivings/{coliving_pk}/"
+        endpoint_urn = f"colivings/{coliving.id}/"
+        coliving.images.clear()
         data = asdict(coliving)
         response = await self._patch_request(endpoint_urn=endpoint_urn, data=data)
         return await self._parse_response_to_coliving(response.json())

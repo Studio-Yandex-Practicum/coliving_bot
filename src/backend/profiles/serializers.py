@@ -58,5 +58,6 @@ class ColivingSerializer(serializers.ModelSerializer):
             "price",
             "room_type",
             "about",
+            "is_visible",
             "images",
         )

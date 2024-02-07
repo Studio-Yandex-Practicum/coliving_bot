@@ -23,14 +23,14 @@ class Image:
 
 @dataclass
 class Coliving:
-    location: str
-    price: int
-    room_type: str
-    about: str
+    images: List[Image] = field(default_factory=list)
+    location: Optional[str] = field(default=None)
+    price: Optional[int] = field(default=None)
+    room_type: Optional[str] = field(default=None)
+    about: Optional[str] = field(default=None)
     id: Optional[int] = field(default=None)
     host: Optional[int] = field(default=None)
     is_visible: Optional[str] = field(default=None)
-    images: Optional[List[Image]] = field(default=None)
 
 
 @dataclass
