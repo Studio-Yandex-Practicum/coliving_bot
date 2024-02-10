@@ -14,16 +14,14 @@ LOCATION_FIELD = "location"
 ABOUT_FIELD = "about"
 IMAGE_FIELD = "image"
 IS_VISIBLE_FIELD = "is_visible"
-FILE_ID_FIELD = "file_id"
-NEW_FILE_FIELD = "new_file"
-PHOTO_BYTEARRAY_FIELD = "photo_bytearray"
+RECEIVED_PHOTOS_FIELD = "received_photos"
 
 ASK_AGE = "Хорошо. Давай познакомимся. Сколько тебе лет?"
 ASK_SEX = "Какой твой пол?"
 ASK_NAME = "Как тебя зовут?"
 ASK_LOCATION = "В каком городе ты бы хотел жить?"
 ASK_ABOUT = "Расскажи о себе. Чем интересуешься, чем занимаешься."
-ASK_PHOTO = "Теперь отправь фото. Его будут видеть другие пользователи."
+ASK_PHOTO = "Отправь фотографии, а затем нажми на кнопку, чтобы их сохранить."
 LOOK_AT_FORM_FIRST = (
     "О, классная фотка. Давай взглянем на то, как выглядит твоя анкета:"
 )
@@ -38,7 +36,7 @@ FORM_IS_VISIBLE = "Теперь твоя анкета видна в поиске
 FORM_IS_NOT_VISIBLE = "Теперь твоя анкета не видна в поиске."
 ASK_WANT_TO_CHANGE = "Что ты хочешь изменить?"
 ASK_AGE_AGAIN = "Сколько тебе лет?"
-ASK_NEW_PHOTO = "Отправь новое фото."
+ASK_NEW_PHOTO = "Отправь новые фотографии, а затем нажми на кнопку, чтобы их сохранить."
 # fmt: off
 AGE_ERROR_MSG = (
     'Неверный возраст. Должен быть целым числом от {min} до {max}. Повторите ввод.'
