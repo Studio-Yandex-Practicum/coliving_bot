@@ -54,7 +54,8 @@ class ProfilesSearchView(generics.ListAPIView):
         age_gte = request.query_params.get("age_gte", None) 
         sex = request.query_params.get("sex", None)
         sex = Sex.MAN if sex == "Парень" else Sex.WOMAN
-        location = Location.objects.filter(name=request.query_params.get("location", None)).first()
+        location = Location.objects.filter(
+            name=request.query_params.get("location", None)).first()
 
         serializer = self.get_serializer(
             self.get_queryset().filter(
