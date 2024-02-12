@@ -10,14 +10,14 @@ class ColivingAPITest(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        Coliving.objects.create(
+        cls.coliving_moscow = Coliving.objects.create(
             host=UserFromTelegram.objects.create(telegram_id=1111111),
             price=2500,
             room_type="Комната",
             location=Location.objects.create(name="Москва"),
             about="Уютное пространство...",
         )
-        Coliving.objects.create(
+        cls.coliving_spb = Coliving.objects.create(
             host=UserFromTelegram.objects.create(telegram_id=12345678),
             price=2500,
             room_type="Комната",
