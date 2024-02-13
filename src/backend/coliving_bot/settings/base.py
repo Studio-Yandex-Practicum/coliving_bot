@@ -120,6 +120,7 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
+
 SPECTACULAR_SETTINGS = {
     "TITLE": "Coliving Bot API",
     "DESCRIPTION": "Flat white - это бот, для поиска соседа и организации коливинга. ",
