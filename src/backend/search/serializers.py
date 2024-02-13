@@ -43,6 +43,7 @@ class MatchListSerializer(serializers.ModelSerializer):
 
 class MatchRequestSerializer(serializers.ModelSerializer):
     """Сериализатор для создания MatchRequest."""
+
     receiver = serializers.SlugRelatedField(
         slug_field="telegram_id", queryset=UserFromTelegram.objects.all()
     )

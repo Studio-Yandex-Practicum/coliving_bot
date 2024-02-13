@@ -41,16 +41,17 @@ class MatchedUsersListView(generics.ListAPIView):
 
 class MatchRequestView(generics.CreateAPIView):
     """Apiview для создания MatchRequest."""
+
     queryset = MatchRequest.objects.all()
     serializer_class = MatchRequestSerializer
 
     def perform_create(self, serializer):
-        user = self.request.data.get("sender")
-        user_1 = self.request.data.get("receiver")
-        matсh = MatchRequest.objects.filter(
-            sender__telegram_id=user_1,
-            receiver__telegram_id=user)
-        if matсh:
-            matсh.update(status=MatchStatuses.is_match)
+        sender = self.request.data.get("sender")
+        receiver = self.request.data.get("receiver")
+        match = MatchRequest.objects.filter(
+            sender__telegram_id=receiver, receiver__telegram_id=sender
+        )
+        if match:
+            match.update(status=MatchStatuses.is_match)
         else:
             return serializer.save()

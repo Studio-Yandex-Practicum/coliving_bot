@@ -1,14 +1,20 @@
+from django.conf import settings
 from django.urls import path
 
-from .api_views import ColivingImageView, ProfileImageView
+from images.api_views import ColivingImageView, ProfileImageView
+
+app_name = "images"
 
 urlpatterns = [
     path(
-        "v1/users/<int:telegram_id>/profile/images/",
+        f"{settings.API_V1_PREFIX}/users/<int:telegram_id>/profile/images/",
         ProfileImageView.as_view(),
     ),
     path(
-        "v1/users/<int:telegram_id>/colivings/<int:coliving_id>/images/",
+        (
+            f"{settings.API_V1_PREFIX}/users/<int:telegram_id>/"
+            "colivings/<int:coliving_id>/images/"
+        ),
         ColivingImageView.as_view(),
     ),
 ]

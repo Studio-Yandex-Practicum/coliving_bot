@@ -1,24 +1,24 @@
+from django.conf import settings
 from django.urls import path
 
 from search.views import MatchedUsersListView, MatchRequestView, UserReportCreateView
 
-API_V1_PREFIX = "v1"
-app_name = "api-v1"
+app_name = "search"
 
 urlpatterns = [
     path(
-        f"{API_V1_PREFIX}/users/<int:telegram_id>/matches/",
+        f"{settings.API_V1_PREFIX}/users/<int:telegram_id>/matches/",
         MatchedUsersListView.as_view(),
         name="matched-users",
     ),
     path(
-        f"{API_V1_PREFIX}/reports/",
+        f"{settings.API_V1_PREFIX}/reports/",
         UserReportCreateView.as_view(),
         name="report",
     ),
-
     path(
-        f"{API_V1_PREFIX}/match_requests/",
+        f"{settings.API_V1_PREFIX}/match_requests/",
         MatchRequestView.as_view(),
         name="match-request",
-    ),]
+    ),
+]
