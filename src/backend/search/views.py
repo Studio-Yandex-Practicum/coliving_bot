@@ -2,11 +2,17 @@ from rest_framework import exceptions, generics, status, viewsets
 from rest_framework.response import Response
 
 from search.constants import MatchStatuses
-from search.models import UserFromTelegram, UserReport
-from search.serializers import MatchListSerializer, UserReportSerializer
+
 from profiles.serializers import ProfileSerializer
 from profiles.constants import Sex, ColivingTypes
 from profiles.models import Profile, Location
+
+from search.models import MatchRequest, UserFromTelegram, UserReport
+from search.serializers import (
+    MatchListSerializer,
+    MatchRequestSerializer,
+    UserReportSerializer,
+)
 
 
 class UserReportCreateView(generics.CreateAPIView):
@@ -36,6 +42,7 @@ class MatchedUsersListView(generics.ListAPIView):
             match_requests__sender=user,
             match_requests__status=MatchStatuses.is_match,
         )
+
         return (users_who_sent_like | liked_users).distinct()
 
 
@@ -65,3 +72,21 @@ class ProfilesSearchView(generics.ListAPIView):
                     age__lt=age_lt).order_by("-created_date"),
                     many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class MatchRequestView(generics.CreateAPIView):
+    """Apiview для создания MatchRequest."""
+
+    queryset = MatchRequest.objects.all()
+    serializer_class = MatchRequestSerializer
+
+    def perform_create(self, serializer):
+        sender = self.request.data.get("sender")
+        receiver = self.request.data.get("receiver")
+        match = MatchRequest.objects.filter(
+            sender__telegram_id=receiver, receiver__telegram_id=sender
+        )
+        if match:
+            match.update(status=MatchStatuses.is_match)
+        else:
+            return serializer.save()

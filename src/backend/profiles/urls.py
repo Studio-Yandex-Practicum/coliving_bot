@@ -8,7 +8,7 @@ from profiles.api_views import (
     ProfileView,
 )
 
-app_name = "api-v1"
+app_name = "profiles"
 
 urlpatterns = [
     path(
