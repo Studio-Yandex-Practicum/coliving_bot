@@ -3,6 +3,8 @@ from django.urls import path
 
 from images.api_views import ColivingImageView, ProfileImageView
 
+app_name = "images"
+
 urlpatterns = [
     path(
         f"{settings.API_V1_PREFIX}/users/<int:telegram_id>/profile/images/",

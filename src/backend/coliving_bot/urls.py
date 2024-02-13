@@ -6,11 +6,15 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 
+api_urlpatterns = [
+    path("/", include("profiles.urls")),
+    path("/", include("search.urls")),
+    path("/", include("images.urls")),
+]
+
 urlpatterns = [
-    path("api/", include("search.urls")),
     path("admin/", admin.site.urls),
-    path("api/", include("images.urls")),
-    path("api/", include("profiles.urls")),
+    path("api/", include((api_urlpatterns, "api-v1"), namespace="api-v1")),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     # документация API:
     path(

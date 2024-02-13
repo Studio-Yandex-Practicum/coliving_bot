@@ -4,6 +4,9 @@ from rest_framework.test import APITestCase
 
 from profiles.models import Coliving, Location, UserFromTelegram
 
+OWNER_1_TELEGRAM_ID = 1111111
+OWNER_2_TELEGRAM_ID = 12345678
+
 
 class ColivingAPITest(APITestCase):
     """Тесты для проверки ресурса Coliving."""
@@ -11,14 +14,14 @@ class ColivingAPITest(APITestCase):
     @classmethod
     def setUpTestData(cls):
         Coliving.objects.create(
-            host=UserFromTelegram.objects.create(telegram_id=1111111),
+            host=UserFromTelegram.objects.create(telegram_id=OWNER_1_TELEGRAM_ID),
             price=2500,
             room_type="Комната",
             location=Location.objects.create(name="Москва"),
             about="Уютное пространство...",
         )
         Coliving.objects.create(
-            host=UserFromTelegram.objects.create(telegram_id=12345678),
+            host=UserFromTelegram.objects.create(telegram_id=OWNER_2_TELEGRAM_ID),
             price=2500,
             room_type="Комната",
             location=Location.objects.create(name="Санкт-Петербург"),
@@ -27,7 +30,7 @@ class ColivingAPITest(APITestCase):
 
     def test_create_coliving(self):
         """Тест на создание Coliving с валидными данными."""
-        url = reverse("api-v1:colivings-list")
+        url = reverse("api-v1:profiles:colivings-list")
         data = {
             "host": 1111111,
             "location": "Москва",
@@ -41,7 +44,7 @@ class ColivingAPITest(APITestCase):
 
     def test_create_coliving_invalid_data(self):
         """Тест на создание Coliving с невалидными данными."""
-        url = reverse("api-v1:colivings-list")
+        url = reverse("api-v1:profiles:colivings-list")
         data = {
             "host": 1111111,
             "room_type": "Комната",
@@ -52,19 +55,19 @@ class ColivingAPITest(APITestCase):
 
     def test_get_coliving(self):
         """Тест на получение cписка Coliving."""
-        url = reverse("api-v1:colivings-list")
+        url = reverse("api-v1:profiles:colivings-list")
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_get_coliving_id(self):
         """Тест на получение данных Coliving."""
-        url = reverse("api-v1:colivings-detail", args=[1])
+        url = reverse("api-v1:profiles:colivings-detail", args=[1])
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_patch_coliving(self):
         """Тест на обновление Coliving с валидными данными."""
-        url = reverse("api-v1:colivings-detail", args=[1])
+        url = reverse("api-v1:profiles:colivings-detail", args=[1])
         data_list = [
             {"price": 2500},
             {"price": 3500},
@@ -81,7 +84,7 @@ class ColivingAPITest(APITestCase):
 
     def test_patch_coliving__invalid_data(self):
         """Тест на обновление Coliving с невалидными данными."""
-        url = reverse("api-v1:colivings-detail", args=[1])
+        url = reverse("api-v1:profiles:colivings-detail", args=[1])
         data_list = [
             {"location": "Москва"},
             {"location": "Токио"},
@@ -96,10 +99,10 @@ class ColivingAPITest(APITestCase):
                 )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_filtres_coliving(self):
-        """Тест на филтрацию данных Coliving."""
+    def test_filters_coliving(self):
+        """Тест на фильтрацию данных Coliving."""
         response = self.client.get(
-            "/api/v1/colivings/",
+            reverse("api-v1:profiles:colivings-list"),
             {
                 "location": "Москва",
                 "room_type": "Комната",
@@ -125,8 +128,10 @@ class ColivingAPITest(APITestCase):
         )
         self.assertEqual(len(response.data), 1)
 
-    def test_filtres_owner_coliving(self):
-        """Тест на филтрацию данных Coliving."""
-        response = self.client.get("/api/v1/colivings/", {"owner": 12345678})
+    def test_filters_owner_coliving(self):
+        """Тест на фильтрацию данных Coliving."""
+        response = self.client.get(
+            reverse("api-v1:profiles:colivings-list"), {"owner": OWNER_2_TELEGRAM_ID}
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
