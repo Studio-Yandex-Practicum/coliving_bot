@@ -12,12 +12,12 @@ class LocationListTestCase(APITestCase):
         Location.objects.create(name="Location 2")
 
     def test_location_list_status_code(self):
-        url = reverse("api-v1:locations-list")
+        url = reverse("api-v1:profiles:locations-list")
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_location_list_response_data(self):
-        url = reverse("api-v1:locations-list")
+        url = reverse("api-v1:profiles:locations-list")
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
@@ -26,7 +26,7 @@ class LocationListTestCase(APITestCase):
         )
 
     def test_location_list_idempotent(self):
-        url = reverse("api-v1:locations-list")
+        url = reverse("api-v1:profiles:locations-list")
         response1 = self.client.get(url)
         response2 = self.client.get(url)
         self.assertEqual(response1.data, response2.data)

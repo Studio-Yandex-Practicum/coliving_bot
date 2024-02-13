@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from profiles.models import UserFromTelegram
-from search.models import UserReport
+from search.models import MatchRequest, UserReport
 
 
 class UserReportSerializer(serializers.ModelSerializer):
@@ -39,3 +39,18 @@ class MatchListSerializer(serializers.ModelSerializer):
         representation["name"] = profile.name
         representation["age"] = profile.age
         return representation
+
+
+class MatchRequestSerializer(serializers.ModelSerializer):
+    """Сериализатор для создания MatchRequest."""
+
+    receiver = serializers.SlugRelatedField(
+        slug_field="telegram_id", queryset=UserFromTelegram.objects.all()
+    )
+    sender = serializers.SlugRelatedField(
+        slug_field="telegram_id", queryset=UserFromTelegram.objects.all()
+    )
+
+    class Meta:
+        model = MatchRequest
+        fields = ("receiver", "sender")
