@@ -31,8 +31,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: ./src/bot
-          file: Dockerfile
+          context: ./src/bot/
+          file: ./src/bot/Dockerfile
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:test
