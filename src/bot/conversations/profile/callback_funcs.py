@@ -3,7 +3,7 @@ from http import HTTPStatus as codes
 from re import fullmatch
 from typing import Union
 
-from httpx import HTTPError
+from httpx import HTTPStatusError
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
@@ -41,12 +41,13 @@ async def start(
         profile_info = await api_service.get_user_profile_by_telegram_id(
             update.effective_chat.id
         )
-    except HTTPError as exc:
+    except HTTPStatusError as exc:
         if exc.response.status_code == codes.NOT_FOUND:
-            await update.effective_message.reply_text(text=templates.ASK_AGE)
+            await update.effective_message.edit_text(text=templates.ASK_AGE)
             return States.AGE
         raise exc
     await set_profile_to_context(update, context, profile_info)
+    await update.effective_message.delete()
     await _look_at_profile(update, context, "", keyboards.PROFILE_KEYBOARD)
     return States.PROFILE
 
@@ -58,27 +59,15 @@ async def send_question_to_profile_is_visible_in_search(
     Обработка кнопки 'Показать в поиске'.
     Завершает диалог.
     """
-    await _send_chosen_choice_and_remove_buttons(update=update)
-    context.user_data[templates.IS_VISIBLE_FIELD] = True
+    await update.effective_message.edit_reply_markup()
+    is_visible: bool = eval(update.callback_query.data.split(":")[1])
+    context.user_data[templates.IS_VISIBLE_FIELD] = is_visible
+    if is_visible:
+        message_text = templates.FORM_IS_VISIBLE
+    else:
+        message_text = templates.FORM_IS_NOT_VISIBLE
     await update.effective_message.reply_text(
-        text=templates.FORM_IS_VISIBLE,
-    )
-    await api_service.update_user_profile(update.effective_chat.id, context.user_data)
-
-    return ConversationHandler.END
-
-
-async def send_question_to_profile_is_invisible_in_search(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> Union[int, States]:
-    """
-    Обработка кнопки 'Скрыть из поиска'.
-    Завершает диалог.
-    """
-    await _send_chosen_choice_and_remove_buttons(update=update)
-    context.user_data[templates.IS_VISIBLE_FIELD] = False
-    await update.effective_message.reply_text(
-        text=templates.FORM_IS_NOT_VISIBLE,
+        text=message_text, parse_mode=ParseMode.HTML
     )
     await api_service.update_user_profile(update.effective_chat.id, context.user_data)
 
@@ -221,17 +210,17 @@ async def handle_about(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         ),
     ):
         return States.ABOUT_YOURSELF
-    context.user_data[templates.ABOUT_FIELD] = about
-    try:
+    if context.user_data.get(templates.ABOUT_FIELD):
+        context.user_data[templates.ABOUT_FIELD] = about
         await api_service.update_user_profile(
             update.effective_chat.id, context.user_data
         )
-    except HTTPError as exc:
-        if exc.response.status_code == codes.NOT_FOUND:
-            await api_service.create_user_profile(
+    else:
+        context.user_data[templates.ABOUT_FIELD] = about
+        await api_service.create_user_profile(
                 update.effective_chat.id, context.user_data
             )
-            context.user_data[templates.IS_VISIBLE_FIELD] = True
+        context.user_data[templates.IS_VISIBLE_FIELD] = True
     await update.effective_chat.send_message(
         text=templates.ASK_PHOTO,
         reply_markup=InlineKeyboardMarkup.from_button(
@@ -258,12 +247,8 @@ async def _look_at_profile(
     ask_text = copy(templates.ASK_IS_THAT_RIGHT)
     if not ask:
         ask_text = templates.ASK_WANT_TO_CHANGE
-    received_photos = context.user_data.get(templates.RECEIVED_PHOTOS_FIELD, [])
-    media_group = [InputMediaPhoto(file_id) for file_id in received_photos]
-    await context.bot.sendMediaGroup(
-        chat_id=chat_id,
-        media=media_group,
-        caption=title
+    message_text = (
+        title
         + "\n"
         + templates.PROFILE_DATA.format(
             name=context.user_data.get(templates.NAME_FIELD),
@@ -275,9 +260,21 @@ async def _look_at_profile(
             if context.user_data.get(templates.IS_VISIBLE_FIELD)
             else templates.PROFILE_IS_INVISIBLE_TEXT,
         )
-        + "\n",
-        parse_mode=ParseMode.HTML,
+        + "\n"
     )
+    received_photos = context.user_data.get(templates.RECEIVED_PHOTOS_FIELD, [])
+    if received_photos:
+        media_group = [InputMediaPhoto(file_id) for file_id in received_photos]
+        await update.effective_chat.send_media_group(
+            media=media_group,
+            caption=message_text,
+            parse_mode=ParseMode.HTML,
+        )
+    else:
+        await update.effective_chat.send_message(
+            text=message_text,
+            parse_mode=ParseMode.HTML
+        )
     await context.bot.send_message(
         chat_id=chat_id,
         text=ask_text,
@@ -357,7 +354,6 @@ async def handle_visible(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         context.user_data[templates.IS_VISIBLE_FIELD] = True
     elif visible == buttons.HIDE_SEARCH_BUTTON:
         context.user_data[templates.IS_VISIBLE_FIELD] = False
-        print(context.user_data)
         await api_service.update_user_profile(
             update.effective_chat.id, context.user_data
         )
@@ -443,7 +439,6 @@ async def handle_edit_about(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     ):
         return States.ABOUT_YOURSELF
     context.user_data[templates.ABOUT_FIELD] = about
-    await api_service.update_user_profile(update.effective_chat.id, context.user_data)
     await _look_at_profile(
         update,
         context,
@@ -471,7 +466,6 @@ async def handle_edit_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     )
     received_photos = context.user_data.get(templates.RECEIVED_PHOTOS_FIELD, [])
     received_photos.append(file_id)
-
     context.user_data[templates.RECEIVED_PHOTOS_FIELD] = received_photos
 
     return None
@@ -499,6 +493,8 @@ async def send_question_to_profile_is_correct(
     Либо завершает диалог.
     """
     await _send_chosen_choice_and_remove_buttons(update=update)
+    await api_service.update_user_profile(
+        update.effective_chat.id, context.user_data)
     await send_confirmation_request(update, context)
     return ConversationHandler.END
 

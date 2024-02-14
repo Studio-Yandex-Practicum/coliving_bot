@@ -1,3 +1,5 @@
+from conversations.profile.buttons import SHOW_SEARCH_BUTTON, HIDE_SEARCH_BUTTON
+
 MIN_AGE = 18
 MAX_AGE = 99
 MIN_NAME_LENGTH = 3
@@ -32,8 +34,10 @@ ASK_FORM_VISIBLE = "Сейчас твоя анкета видна всем, хо
 FORM_SAVED = "Спасибо, анкета успешно сохранена."
 FORM_EDIT_SAVED = "Отлично! Изменения сохранены."
 FORM_NOT_CHANGED = "Хорошо. Анкета не изменилась."
-FORM_IS_VISIBLE = "Теперь твоя анкета видна в поиске."
-FORM_IS_NOT_VISIBLE = "Теперь твоя анкета не видна в поиске."
+FORM_IS_VISIBLE = (
+    f"<b>Твой ответ:</b> {SHOW_SEARCH_BUTTON}\nТеперь твоя анкета видна в поиске.")
+FORM_IS_NOT_VISIBLE = (
+    f"<b>Твой ответ:</b> {HIDE_SEARCH_BUTTON}\nТеперь твоя анкета не видна в поиске.")
 ASK_WANT_TO_CHANGE = "Что ты хочешь изменить?"
 ASK_AGE_AGAIN = "Сколько тебе лет?"
 ASK_NEW_PHOTO = "Отправь новые фотографии, а затем нажми на кнопку, чтобы их сохранить."

@@ -1,6 +1,5 @@
 from telegram.ext import (
     CallbackQueryHandler,
-    CommandHandler,
     ConversationHandler,
     MessageHandler,
     filters,
@@ -18,7 +17,6 @@ from general.validators import (
 
 profile_handler: ConversationHandler = ConversationHandler(
     entry_points=[
-        CommandHandler(command="profile", callback=callback_funcs.start),
         CallbackQueryHandler(
             pattern=rf"^{MY_PROFILE_BUTTON}$", callback=callback_funcs.start
         ),
@@ -27,12 +25,12 @@ profile_handler: ConversationHandler = ConversationHandler(
         States.PROFILE: [
             CallbackQueryHandler(
                 callback=callback_funcs.send_question_to_profile_is_visible_in_search,
-                pattern=rf"^{buttons.SHOW_SEARCH_BUTTON}",
+                pattern=r"^is_visible:(True|False)$",
             ),
-            CallbackQueryHandler(
-                callback=callback_funcs.send_question_to_profile_is_invisible_in_search,
-                pattern=rf"^{buttons.HIDE_SEARCH_BUTTON}",
-            ),
+            # CallbackQueryHandler(
+            #     callback=callback_funcs.send_question_to_profile_is_invisible_in_search,
+            #     pattern=rf"^{buttons.HIDE_SEARCH_BUTTON}",
+            # ),
             CallbackQueryHandler(
                 callback=callback_funcs.send_question_to_edit_profile,
                 pattern=rf"^{buttons.EDIT_FORM_BUTTON}",
