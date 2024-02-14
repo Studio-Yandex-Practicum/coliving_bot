@@ -4,29 +4,29 @@ from rest_framework.test import APITestCase
 
 from profiles.models import Coliving, Location, UserFromTelegram
 
+OWNER_1_TELEGRAM_ID = 1111111
+OWNER_2_TELEGRAM_ID = 12345678
+
 
 class ColivingAPITest(APITestCase):
     """Тесты для проверки ресурса Coliving."""
 
     @classmethod
     def setUpTestData(cls):
-        cls.user = UserFromTelegram.objects.create(telegram_id=1111111)
-        cls.user_2 = UserFromTelegram.objects.create(telegram_id=12345678)
-        cls.coliving_moscow = Coliving.objects.create(
-            host=cls.user,
+        Coliving.objects.create(
+            host=UserFromTelegram.objects.create(telegram_id=OWNER_1_TELEGRAM_ID),
             price=2500,
             room_type="Комната",
             location=Location.objects.create(name="Москва"),
             about="Уютное пространство...",
         )
-        cls.coliving_spb = Coliving.objects.create(
-            host=cls.user_2,
+        Coliving.objects.create(
+            host=UserFromTelegram.objects.create(telegram_id=OWNER_2_TELEGRAM_ID),
             price=2500,
             room_type="Комната",
             location=Location.objects.create(name="Санкт-Петербург"),
             about="Небольшая",
         )
-
 
     def test_create_coliving(self):
         """Тест на создание Coliving с валидными данными."""
@@ -98,11 +98,11 @@ class ColivingAPITest(APITestCase):
                     format="json",
                 )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_filtres_coliving(self):
-        """Тест на филтрацию данных Coliving."""
+    
+    def test_filters_coliving(self):
+        """Тест на фильтрацию данных Coliving."""
         response = self.client.get(
-            "/api/v1/colivings/",
+            reverse("api-v1:colivings-list"),
             {
                 "location": "Москва",
                 "room_type": "Комната",
@@ -128,50 +128,54 @@ class ColivingAPITest(APITestCase):
         )
         self.assertEqual(len(response.data), 1)
 
-    def test_filtres_owner_coliving(self):
-        """Тест на филтрацию данных Coliving."""
-        response = self.client.get("/api/v1/colivings/", {"owner": 12345678})
+    def test_filters_owner_coliving(self):
+        """Тест на фильтрацию данных Coliving."""
+        response = self.client.get(
+            reverse("api-v1:colivings-list"), {"owner": OWNER_2_TELEGRAM_ID}
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
     
     def test_attach_user_to_coliving(self):
-        """Тест на прикрепление пользователя к коливингу."""   # не работает
-        url = reverse("api-v1:user-residence-update", kwargs={"telegram_id": self.user.telegram_id})
-        data = {"residence": self.coliving_moscow.id}
+        """Тест на прикрепление пользователя к коливингу."""
+        coliving = Coliving.objects.filter(host__telegram_id=OWNER_1_TELEGRAM_ID).first()
+        url = reverse("api-v1:user-residence-update", kwargs={"telegram_id": OWNER_1_TELEGRAM_ID})
+        data = {"residence": coliving.id}
         response = self.client.patch(url, data, format="json")
 
-        self.user.refresh_from_db()
-
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(self.user.residence.id, self.coliving_moscow.id)
+        user = UserFromTelegram.objects.get(telegram_id=OWNER_1_TELEGRAM_ID)
+        self.assertEqual(user.residence.id, coliving.id)
 
     def test_detach_user_from_coliving(self):
-        """Тест на открепление пользователя от коливинга."""   # не работает
-        # Сначала прикрепим пользователя к коливингу
-        self.user.residence = self.coliving_moscow
-        self.user.save()
+        """Тест на открепление пользователя от коливинга."""
+        user = UserFromTelegram.objects.get(telegram_id=OWNER_1_TELEGRAM_ID)
+        user.residence = Coliving.objects.filter(host__telegram_id=OWNER_1_TELEGRAM_ID).first()
+        user.save()
 
-        url = reverse("api-v1:user-residence-update", kwargs={"telegram_id": self.user.telegram_id})
+        url = reverse("api-v1:user-residence-update", kwargs={"telegram_id": OWNER_1_TELEGRAM_ID})
         data = {"residence": None}
         response = self.client.patch(url, data, format="json")
 
-        self.user.refresh_from_db()
-
+        user.refresh_from_db()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIsNone(self.user.residence)
+        self.assertIsNone(user.residence)
 
     def test_update_with_invalid_telegram_id(self):
         """Тест обновления с невалидным telegram_id."""
-        url = reverse("api-v1:user-residence-update", kwargs={"telegram_id": 999999})  # Несуществующий telegram_id
-        data = {"residence": self.coliving_moscow.id}
+        invalid_telegram_id = 999999
+        url = reverse("api-v1:user-residence-update", kwargs={"telegram_id": invalid_telegram_id})
+        data = {"residence": 1}
         response = self.client.patch(url, data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-    
+
     def test_update_with_invalid_residence_id(self):
         """Тест обновления с невалидным residence_id."""
-        url = reverse("api-v1:user-residence-update", kwargs={"telegram_id": self.user.telegram_id})
-        data = {"residence": 999999}  # Несуществующий ID коливинга
+        user_telegram_id = OWNER_1_TELEGRAM_ID
+        invalid_residence_id = 999999  # Несуществующий ID коливинга
+        url = reverse("api-v1:user-residence-update", kwargs={"telegram_id": user_telegram_id})
+        data = {"residence": invalid_residence_id}
         response = self.client.patch(url, data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

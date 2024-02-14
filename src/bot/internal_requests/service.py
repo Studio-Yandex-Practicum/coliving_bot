@@ -172,11 +172,9 @@ class APIService:
         позволяя прикрепить его к коливингу или открепить.
         """
         endpoint_urn = f"users/{telegram_id}/"
-        data = {'residence': residence_id}  # residence_id может быть None, что означает открепление пользователя
+        data = {'residence': residence_id}
         async with AsyncClient() as client:
             url = urljoin(self.base_url, endpoint_urn)
             response = await client.patch(url, json=data)
-        # Проверка успешности запроса
         response.raise_for_status()
-        # Возвращение ответа API в виде словаря
         return response.json()

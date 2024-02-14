@@ -77,3 +77,4 @@ class UserResidenceUpdateAPIView(generics.UpdateAPIView):
     """
     queryset = UserFromTelegram.objects.all()
     serializer_class = UserResidenceSerializer
+    lookup_field = "telegram_id"

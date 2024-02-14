@@ -6,7 +6,7 @@ from profiles.api_views import (
     ColivingView,
     LocationList,
     ProfileView,
-    UserResidenceUpdateAPIView,
+    UserResidenceUpdateAPIView
 )
 
 app_name = "api-v1"
