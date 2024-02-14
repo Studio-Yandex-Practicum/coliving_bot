@@ -31,7 +31,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: ./src/bot/
+          context: .
           file: ./src/bot/Dockerfile
           push: true
           tags: |
