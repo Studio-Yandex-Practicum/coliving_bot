@@ -49,8 +49,8 @@ jobs:
       - name: Copy docker-compose file
         uses: appleboy/scp-action@master
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           source: "infra/docker-compose.dev.yaml"
           target: ${{ env.DEPLOY_PATH }}
@@ -58,8 +58,8 @@ jobs:
       - name: Create .env file
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd ${{ env.DEPLOY_PATH }}
@@ -99,8 +99,8 @@ jobs:
       - name: Start appication
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd ${{ env.DEPLOY_PATH }}
