@@ -7,6 +7,7 @@ from profiles.serializers import ProfileSerializer
 from profiles.constants import Sex, ColivingTypes
 from profiles.models import Profile, Location
 
+from search.filters import ProfilesSearchFilterSet
 from search.models import MatchRequest, UserFromTelegram, UserReport
 from search.serializers import (
     MatchListSerializer,
@@ -50,28 +51,8 @@ class ProfilesSearchView(generics.ListAPIView):
     """Apiview для для поиска профилей."""
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
+    filterset_class = ProfilesSearchFilterSet
     http_method_names = ["get"]
-
-    def list(self, request, *args, **kwargs):
-        user = UserFromTelegram.objects.get(
-            telegram_id=request.query_params.get("telegram_id", None))
-        if user is None:
-            raise exceptions.NotFound("Такого пользователя не существует.")
-        age_lt = request.query_params.get("age_lt", None) 
-        age_gte = request.query_params.get("age_gte", None) 
-        sex = request.query_params.get("sex", None)
-        sex = Sex.MAN if sex == "Парень" else Sex.WOMAN
-        location = Location.objects.filter(
-            name=request.query_params.get("location", None)).first()
-
-        serializer = self.get_serializer(
-            self.get_queryset().filter(
-                    sex=sex).filter(
-                    location=location.pk).filter(
-                    age__gte=age_gte).filter(
-                    age__lt=age_lt).order_by("-created_date"),
-                    many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class MatchRequestView(generics.CreateAPIView):
