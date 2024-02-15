@@ -1,10 +1,10 @@
 import base64
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 
 from telegram import InlineKeyboardMarkup, InputMediaPhoto, Update
 from telegram.constants import ParseMode
-from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
+from telegram.ext import CallbackContext, ContextTypes, ConversationHandler, CallbackQueryHandler
 
 import conversations.coliving.keyboards as keyboards
 import conversations.coliving.states as states
@@ -305,37 +305,57 @@ async def handle_price(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
 async def encode_photo_room(
     update: Update,
     _context: ContextTypes.DEFAULT_TYPE,
-) -> bytes:
-    """Кодирование изображения"""
+) -> List[bytes]:
+    """Кодирование изображений"""
     effective_chat = update.effective_chat
     path = f"media/{update.effective_chat.id}/photos"
     Path(path).mkdir(parents=True, exist_ok=True)
-    photo_file = await update.message.photo[-1].get_file()
-    # for i in range(len)
-    await photo_file.download_to_drive(
-        f"{path}/{effective_chat.first_name}_room_photo.jpg"
-    )
-    with open(f"{path}/{effective_chat.first_name}_room_photo.jpg", "rb") as image:
-        return base64.b64encode(image.read())
-    ######################################################
-    # Так загрузит 6 фоток и 6 раз ответит
+    
+    images = []
+    for i, photo in enumerate(update.message.photo):
+        photo_file = await photo.get_file()
+        file_path = f"{path}/{effective_chat.first_name}_room_photo_{i}.jpg"
+        await photo_file.download_to_drive(file_path)
+        with open(file_path, "rb") as image:
+            encoded_image = base64.b64encode(image.read())
+            images.append(encoded_image)
 
-    # await photo_file.download_to_drive(
-    #     f'{path}/{effective_chat.first_name}_{photo_file.file_unique_id}.jpg'
-    # )
-    ######################################################
+    return images
 
 
-async def handle_photo_room(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Сохраняет фото."""
+async def handle_photo_room(
+        update: Update,
+        context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """Обрабатывает полученные фотографии."""
     if update.message.text:
         await update.effective_message.reply_text(text=templates.ERR_PHOTO_NOT_TEXT)
         return states.PHOTO_ROOM
-    photo = update.effective_message.photo[-1]
-    context.user_data["coliving_info"].images.append(
-        Image(file_id=photo.file_id, photo_size=photo)
+
+    file_id = update.effective_message.photo[-1].file_id
+    new_file = await context.bot.get_file(file_id)
+    photo_bytearray = await new_file.download_as_bytearray()
+    telegram_id = update.effective_user.id
+
+    await api_service.save_photo(
+        photo_bytearray=photo_bytearray,
+        filename=new_file.file_path,
+        file_id=file_id,
+        telegram_id=telegram_id
     )
-    await update.message.reply_text(templates.REPLY_MSG_PHOTO)
+    received_photos = context.user_data.get("received_photos")
+
+    if received_photos:
+        received_photos.append(InputMediaPhoto(file_id))
+
+    keyboard = keyboards.CONFIRMATION_KEYBOARD
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    # keyboard = [[InlineKeyboardButton("Сохранить", callback_data="save_photo")]
+
+    await update.message.reply_text(
+        text=templates.REPLY_MSG_PHOTO,
+        reply_markup=reply_markup
+    )
     await _show_coliving_profile(
         update,
         context,
@@ -343,6 +363,51 @@ async def handle_photo_room(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         keyboard=keyboards.CONFIRM_OR_EDIT_PROFILE_KEYBOARD,
     )
     return states.CONFIRMATION
+
+# async def encode_photo_room(
+#     update: Update,
+#     _context: ContextTypes.DEFAULT_TYPE,
+# ) -> bytes:
+#     """Кодирование изображения"""
+#     effective_chat = update.effective_chat
+#     path = f"media/{update.effective_chat.id}/photos"
+#     Path(path).mkdir(parents=True, exist_ok=True)
+#     photo_file = await update.message.photo[-1].get_file()
+#     # for i in range(len)
+#     await photo_file.download_to_drive(
+#         f"{path}/{effective_chat.first_name}_room_photo.jpg"
+#     )
+#     with open(f"{path}/{effective_chat.first_name}_room_photo.jpg", "rb") as image:
+#         return base64.b64encode(image.read())
+#     ######################################################
+#     # Так загрузит 6 фоток и 6 раз ответит
+
+#     # await photo_file.download_to_drive(
+#     #     f'{path}/{effective_chat.first_name}_{photo_file.file_unique_id}.jpg'
+#     # )
+#     ######################################################
+
+
+# async def handle_photo_room(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+#     """Сохраняет фото."""
+#     if update.message.text:
+#         await update.effective_message.reply_text(text=templates.ERR_PHOTO_NOT_TEXT)
+#         return states.PHOTO_ROOM
+    
+#     for photo in update.effective_message.photo:
+#         context.user_data["coliving_info"].images.append(
+#             Image(file_id=photo.file_id, photo_size=photo)
+#         )
+
+#     await update.message.reply_text(templates.REPLY_MSG_PHOTO)
+#     await _show_coliving_profile(
+#         update,
+#         context,
+#         templates.REPLY_MSG_ASK_TO_CONFIRM,
+#         keyboard=keyboards.CONFIRM_OR_EDIT_PROFILE_KEYBOARD,
+#     )
+
+#     return states.CONFIRMATION
 
 
 async def handle_confirm_or_edit_profile_text_instead_of_button(
