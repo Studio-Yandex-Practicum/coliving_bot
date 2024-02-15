@@ -100,6 +100,6 @@ jobs:
             cd ${{ env.DEPLOY_PATH }}
             sudo docker image prune -f
             sudo docker pull ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:test
-            sudo docker compose --file docker-compose.dev.yaml stop
-            sudo docker compose --file docker-compose.dev.yaml rm bot -f
-            sudo docker compose --file docker-compose.dev.yaml up -d
+            sudo docker compose --file docker-compose.dev.yml stop
+            sudo docker compose --file docker-compose.dev.yml rm bot -f
+            sudo docker compose --file docker-compose.dev.yml up -d
