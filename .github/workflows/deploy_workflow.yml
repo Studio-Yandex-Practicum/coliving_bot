@@ -66,8 +66,8 @@ jobs:
             sudo rm -f .env
             touch .env
 
-            echo NGINX_IMAGE=${{ secrets.NGINX_IMAGE }} >> .env
-            echo POSTGRES_IMAGE=${{ secrets.POSTGRES_IMAGE }} >> .env
+            echo NGINX_IMAGE='${{ secrets.NGINX_IMAGE }}' >> .env
+            echo POSTGRES_IMAGE='${{ secrets.POSTGRES_IMAGE }}' >> .env
 
             echo TOKEN=${{ secrets.TOKEN }} >> .env
             echo INTERNAL_API_URL=${{ secrets.INTERNAL_API_URL }} >> .env
