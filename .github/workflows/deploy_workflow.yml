@@ -49,8 +49,8 @@ jobs:
       - name: Copy docker-compose file
         uses: appleboy/scp-action@master
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           source: "infra/docker-compose.dev.yaml"
           target: ${{ env.DEPLOY_PATH }}
