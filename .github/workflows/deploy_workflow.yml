@@ -41,7 +41,7 @@ jobs:
     name: Deploy
     runs-on: ubuntu-latest
     environment:
-      name: test_deploy
+      name: stage
     needs: build_and_push
     steps:
       - name: Check out repository
@@ -58,24 +58,18 @@ jobs:
       - name: Create .env file
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd ${{ env.DEPLOY_PATH }}
             sudo rm -f .env
             touch .env
-            echo LOGGING_LEVEL=${{ secrets.LOGGING_LEVEL }} >> .env
-            echo LOGS_WHEN=${{ secrets.LOGS_WHEN }} >> .env
-            echo LOGS_INTERVAL=${{ secrets.LOGS_INTERVAL }} >> .env
-            echo LOGS_BACKUP_COUNT=${{ secrets.LOGS_BACKUP_COUNT }} >> .env
-            echo LOGS_ENCODING=${{ secrets.LOGS_ENCODING }} >> .env
-
 
             echo NGINX_IMAGE=${{ secrets.NGINX_IMAGE }} >> .env
             echo POSTGRES_IMAGE=${{ secrets.POSTGRES_IMAGE }} >> .env
 
-            echo TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }} >> .env
+            echo TOKEN=${{ secrets.TOKEN }} >> .env
             echo INTERNAL_API_URL=${{ secrets.INTERNAL_API_URL }} >> .env
 
             echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
@@ -93,14 +87,14 @@ jobs:
     name: Start application
     runs-on: ubuntu-latest
     environment:
-      name: test_deploy
+      name: stage
     needs: deploy
     steps:
       - name: Start appication
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd ${{ env.DEPLOY_PATH }}
