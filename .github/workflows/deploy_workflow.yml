@@ -125,5 +125,5 @@ jobs:
             
             sudo docker compose --env-file .env --file infra/docker-compose.dev.yml up -d
 
-            docker exec backend python backend/manage.py migrate
-            docker exec backend python backend/manage.py collectstatic --noinput
+            sudo docker exec backend python backend/manage.py migrate
+            sudo docker exec backend python backend/manage.py collectstatic --noinput
