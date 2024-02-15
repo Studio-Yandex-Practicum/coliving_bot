@@ -10,11 +10,13 @@ services:
     extends:
       file: common-services.yml
       service: backend
+    image: ghcr.io/studio-yandex-practicum/coliving_bot_backend:dev
 
   bot:
     extends:
       file: common-services.yml
       service: bot
+    image: ghcr.io/studio-yandex-practicum/coliving_bot:dev
 
   nginx:
     extends:
