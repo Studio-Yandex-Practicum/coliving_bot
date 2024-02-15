@@ -69,7 +69,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          source: "./infra/docker-compose.dev.yml, ./infra/default.conf, ./infra/common-services.yml"
+          source: "./infra/docker-compose.test.yml, ./infra/default.conf, ./infra/common-services.yml"
           target: ${{ env.DEPLOY_PATH }}
           strip_components: 1
 
@@ -122,9 +122,9 @@ jobs:
             sudo docker pull ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BOT_IMAGE_NAME }}:dev
             sudo docker pull ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BACKEND_IMAGE_NAME }}:dev
 
-            sudo docker compose --file infra/docker-compose.dev.yml stop nginx backend bot db
+            sudo docker compose --file infra/docker-compose.test.yml stop nginx backend bot db
             
-            sudo docker compose --file infra/docker-compose.dev.yml rm bot -f
-            sudo docker compose --file infra/docker-compose.dev.yml rm backend -f
+            sudo docker compose --file infra/docker-compose.test.yml rm bot -f
+            sudo docker compose --file infra/docker-compose.test.yml rm backend -f
             
-            sudo docker compose --env-file .env --file infra/docker-compose.dev.yml up -d
+            sudo docker compose --env-file .env --file infra/docker-compose.test.yml up -d
