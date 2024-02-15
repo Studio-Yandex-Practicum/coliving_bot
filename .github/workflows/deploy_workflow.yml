@@ -7,7 +7,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: coliving_bot
+  BOT_IMAGE_NAME: coliving_bot
+  BACKEND_IMAGE_NAME: coliving_bot_backend
   DEPLOY_PATH: ~/coliving_bot
   REP_OWNER: studio-yandex-practicum
 
@@ -22,20 +23,31 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+      
       - name: GitHub Packeges login
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
           USERNAME: ${{ github.actor}}
           GITHUB: ${{ env.REGISTRY }}
         run: echo "$GITHUB_TOKEN" | docker login "$GITHUB" -u "$USERNAME" --password-stdin
-      - name: Build and push
+      
+      - name: Build and push bot
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./src/bot/Dockerfile
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:test
+            ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BOT_IMAGE_NAME }}:test
+      
+      - name: Build and push backend
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./src/backend/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BACKEND_IMAGE_NAME }}:test
 
   deploy:
     name: Deploy
@@ -46,15 +58,17 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
+
       - name: Copy docker-compose file
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          source: "./infra/docker-compose.prod.yml, ./infra/default.conf, ./infra/common-services.yml"
+          source: "./infra/docker-compose.dev.yml, ./infra/default.conf, ./infra/common-services.yml"
           target: ${{ env.DEPLOY_PATH }}
           strip_components: 1
+
       - name: Create .env file
         uses: appleboy/ssh-action@master
         with:
@@ -101,14 +115,15 @@ jobs:
 
             sudo docker image prune -f
 
-            sudo docker pull ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:test
+            sudo docker pull ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BOT_IMAGE_NAME }}:test
+            sudo docker pull ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BACKEND_IMAGE_NAME }}:test
 
-            sudo docker compose --file infra/docker-compose.prod.yml stop nginx backend bot db
-
-            sudo docker compose --file infra/docker-compose.prod.yml rm backend -f
-            sudo docker compose --file infra/docker-compose.prod.yml rm bot -f
-
-            sudo docker compose --env-file .env --file infra/docker-compose.prod.yml up -d
+            sudo docker compose --file infra/docker-compose.dev.yml stop nginx backend bot db
+            
+            sudo docker compose --file infra/docker-compose.dev.yml rm bot -f
+            sudo docker compose --file infra/docker-compose.dev.yml rm backend -f
+            
+            sudo docker compose --env-file .env --file infra/docker-compose.dev.yml up -d
 
             docker exec backend python backend/manage.py migrate
             docker exec backend python backend/manage.py collectstatic --noinput
