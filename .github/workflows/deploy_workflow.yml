@@ -98,8 +98,17 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd ${{ env.DEPLOY_PATH }}
+
             sudo docker image prune -f
+
             sudo docker pull ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:test
-            sudo docker compose --file infra/docker-compose.dev.yml stop
+
+            sudo docker compose --file infra/docker-compose.dev.yml stop nginx backend bot db
+
+            sudo docker compose --file infra/docker-compose.dev.yml rm backend -f
             sudo docker compose --file infra/docker-compose.dev.yml rm bot -f
-            sudo docker compose --file infra/docker-compose.dev.yml up -d
+
+            sudo docker compose --env-file .env --file infra/docker-compose.dev.yml up -d
+
+            docker exec backend python backend/manage.py migrate
+            docker exec backend python backend/manage.py collectstatic --noinput
