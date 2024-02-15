@@ -52,7 +52,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          source: "./infra/docker-compose.dev.yml, ./infra/default.conf, ./infra/common-services.yml"
+          source: "./infra/docker-compose.prod.yml, ./infra/default.conf, ./infra/common-services.yml"
           target: ${{ env.DEPLOY_PATH }}
           strip_components: 1
       - name: Create .env file
@@ -103,12 +103,12 @@ jobs:
 
             sudo docker pull ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:test
 
-            sudo docker compose --file infra/docker-compose.dev.yml stop nginx backend bot db
+            sudo docker compose --file infra/docker-compose.prod.yml stop nginx backend bot db
 
-            sudo docker compose --file infra/docker-compose.dev.yml rm backend -f
-            sudo docker compose --file infra/docker-compose.dev.yml rm bot -f
+            sudo docker compose --file infra/docker-compose.prod.yml rm backend -f
+            sudo docker compose --file infra/docker-compose.prod.yml rm bot -f
 
-            sudo docker compose --env-file .env --file infra/docker-compose.dev.yml up -d
+            sudo docker compose --env-file .env --file infra/docker-compose.prod.yml up -d
 
             docker exec backend python backend/manage.py migrate
             docker exec backend python backend/manage.py collectstatic --noinput
