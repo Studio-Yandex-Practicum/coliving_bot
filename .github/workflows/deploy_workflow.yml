@@ -119,8 +119,8 @@ jobs:
 
             sudo docker image prune -f
 
-            sudo docker pull ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BOT_IMAGE_NAME }}:dev
-            sudo docker pull ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BACKEND_IMAGE_NAME }}:dev
+            sudo docker pull ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BOT_IMAGE_NAME }}:test
+            sudo docker pull ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BACKEND_IMAGE_NAME }}:test
 
             sudo docker compose --file infra/docker-compose.test.yml stop nginx backend bot db
             
