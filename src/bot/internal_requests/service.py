@@ -165,3 +165,17 @@ class APIService:
         if images:
             coliving_info.images = [Image(file_id=file_id) for file_id in images]
         return coliving_info
+
+    async def send_match_request(self, sender: int, receiver: int):
+        """Совершает POST-запрос к эндпоинту создания MatchRequest.
+        
+        :param sender: id отправителя.
+        :param receiver: id получателя.
+        """
+        endpoint_urn = "match-request/"
+        data = {
+            "sender": sender,
+            "receiver": receiver
+        }
+        response = await self._post_request(endpoint_urn=endpoint_urn, data=data)
+        return response
