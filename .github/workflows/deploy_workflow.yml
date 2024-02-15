@@ -52,7 +52,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          source: "./infra/docker-compose.dev.yaml"
+          source: "./infra/docker-compose.dev.yml, ./infra/default.conf, ./infra/common-services.yml"
           target: ${{ env.DEPLOY_PATH }}
           strip_components: 1
       - name: Create .env file
