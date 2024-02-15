@@ -72,7 +72,7 @@ jobs:
             echo TOKEN=${{ secrets.TOKEN }} >> .env
             echo INTERNAL_API_URL=${{ secrets.INTERNAL_API_URL }} >> .env
 
-            echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
+            echo SECRET_KEY='${{ secrets.SECRET_KEY }}' >> .env
             echo DEBUG=${{ secrets.DEBUG }} >> .env
             echo USE_SQLITE=${{ secrets.USE_SQLITE }} >> .env
 
