@@ -87,8 +87,8 @@ jobs:
             echo INTERNAL_API_URL=${{ secrets.INTERNAL_API_URL }} >> .env
 
             echo SECRET_KEY='${{ secrets.SECRET_KEY }}' >> .env
-            echo DEBUG=${{ secrets.DEBUG }} >> .env
-            echo USE_SQLITE=${{ secrets.USE_SQLITE }} >> .env
+            echo DEBUG=${{ vars.DEBUG }} >> .env
+            echo USE_SQLITE=${{ vars.USE_SQLITE }} >> .env
 
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
             echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env
