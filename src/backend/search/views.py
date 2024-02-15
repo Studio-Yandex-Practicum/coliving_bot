@@ -54,6 +54,14 @@ class ProfilesSearchView(generics.ListAPIView):
     filterset_class = ProfilesSearchFilterSet
     http_method_names = ["get"]
 
+    def get_queryset(self):
+        user = UserFromTelegram.objects.get(
+            telegram_id=self.request.query_params.get("telegram_id", None))
+        if user is None:
+            raise exceptions.NotFound("Такого пользователя не существует.")
+
+        return super().get_queryset().exclude(pk=Profile.objects.all().filter(viewers=user))
+
 
 class MatchRequestView(generics.CreateAPIView):
     """Apiview для создания MatchRequest."""
