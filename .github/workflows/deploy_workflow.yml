@@ -42,7 +42,7 @@ jobs:
           file: ./src/bot/Dockerfile
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BOT_IMAGE_NAME }}:stage
+            ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BOT_IMAGE_NAME }}:test
       
       - name: Build and push backend
         uses: docker/build-push-action@v5
@@ -51,7 +51,7 @@ jobs:
           file: ./src/backend/Dockerfile
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BACKEND_IMAGE_NAME }}:stage
+            ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BACKEND_IMAGE_NAME }}:test
 
   deploy:
     name: Deploy
