@@ -11,7 +11,7 @@ SECRET_KEY = os.getenv("SECRET_KEY", default="secret")
 
 DEBUG = os.getenv("DEBUG", default="True") == "True"
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
