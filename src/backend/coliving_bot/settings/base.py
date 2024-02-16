@@ -126,4 +126,5 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "Flat white - это бот, для поиска соседа и организации коливинга. ",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    "SCHEMA_PATH_PREFIX": "/api/v1"
 }
