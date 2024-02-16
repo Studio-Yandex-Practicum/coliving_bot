@@ -93,6 +93,8 @@ jobs:
             echo SECRET_KEY='${{ secrets.SECRET_KEY }}' >> .env
             echo DEBUG=${{ vars.DEBUG }} >> .env
             echo USE_SQLITE=${{ vars.USE_SQLITE }} >> .env
+            echo DJANGO_SETTINGS_MODULE=${{ vars.DJANGO_SETTINGS_MODULE }} >> .env
+            echo ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }} >> .env
 
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
             echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env
