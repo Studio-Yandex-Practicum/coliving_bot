@@ -168,7 +168,7 @@ class APIService:
 
     async def send_match_request(self, sender: int, receiver: int):
         """Совершает POST-запрос к эндпоинту создания MatchRequest.
-        
+
         :param sender: id отправителя.
         :param receiver: id получателя.
         """
