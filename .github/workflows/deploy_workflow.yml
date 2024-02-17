@@ -35,7 +35,7 @@ jobs:
     needs: check_if_merged
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       
       - name: GitHub Packeges login
         env:
@@ -70,7 +70,7 @@ jobs:
     needs: build_and_push
     steps:
       - name: Check out repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Copy docker-compose file
         uses: appleboy/scp-action@master
@@ -138,5 +138,3 @@ jobs:
             sudo docker compose --file infra/docker-compose.test.yml rm backend -f
             
             sudo docker compose --env-file .env --file infra/docker-compose.test.yml up -d
-
-            sudo docker exec backend python manage.py import_locations

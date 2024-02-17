@@ -2,7 +2,7 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.getenv(
+os.environ.setdefault(
     key="DJANGO_SETTINGS_MODULE",
     default="coliving_bot.settings.local"
 )
