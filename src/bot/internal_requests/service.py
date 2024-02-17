@@ -169,10 +169,10 @@ class APIService:
     async def send_match_request(self, sender: int, receiver: int):
         """Совершает POST-запрос к эндпоинту создания MatchRequest.
 
-        :param sender: id отправителя.
-        :param receiver: id получателя.
+        :param sender: telegram_id отправителя.
+        :param receiver: telegram_id получателя.
         """
-        endpoint_urn = "match-request/"
+        endpoint_urn = "match-requests/"
         data = {
             "sender": sender,
             "receiver": receiver
