@@ -28,6 +28,6 @@ urlpatterns = [
     ),
     path(f"{settings.API_V1_PREFIX}/users/<int:telegram_id>/", 
          UserResidenceUpdateAPIView.as_view(), 
-         name='user-residence-update'
+         name='users-detail'
     ),
 ]
