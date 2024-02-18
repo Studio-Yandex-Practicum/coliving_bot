@@ -263,18 +263,12 @@ async def _look_at_profile(
         + "\n"
     )
     received_photos = context.user_data.get(templates.RECEIVED_PHOTOS_FIELD, [])
-    if received_photos:
-        media_group = [InputMediaPhoto(file_id) for file_id in received_photos]
-        await update.effective_chat.send_media_group(
-            media=media_group,
-            caption=message_text,
-            parse_mode=ParseMode.HTML,
-        )
-    else:
-        await update.effective_chat.send_message(
-            text=message_text,
-            parse_mode=ParseMode.HTML
-        )
+    media_group = [InputMediaPhoto(file_id) for file_id in received_photos]
+    await update.effective_chat.send_media_group(
+        media=media_group,
+        caption=message_text,
+        parse_mode=ParseMode.HTML,
+    )
     await context.bot.send_message(
         chat_id=chat_id,
         text=ask_text,
@@ -306,16 +300,29 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 async def send_received_photos(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
-    await update.effective_message.edit_reply_markup()
-    await _look_at_profile(
-        update,
-        context,
-        templates.LOOK_AT_FORM_FIRST,
-        keyboards.FORM_SAVED_KEYBOARD,
-        True,
+    if context.user_data.get(templates.RECEIVED_PHOTOS_FIELD):
+        await update.effective_message.edit_reply_markup()
+        await _look_at_profile(
+            update,
+            context,
+            templates.LOOK_AT_FORM_FIRST,
+            keyboards.FORM_SAVED_KEYBOARD,
+            True,
+        )
+        return States.CONFIRMATION
+    await update.effective_chat.send_message(
+        text=templates.DONT_SAVE_WITHOUT_PHOTO,
+        parse_mode=ParseMode.HTML
     )
-
-    return States.CONFIRMATION
+    await update.effective_message.edit_reply_markup(
+        reply_markup=InlineKeyboardMarkup.from_button(
+            InlineKeyboardButton(
+                text=buttons.SAVE_PHOTO_REPEAT_BUTTON,
+                callback_data=buttons.SAVE_PHOTO_BUTTON
+            )
+        )
+    )
+    return States.PHOTO
 
 
 async def handle_profile(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
