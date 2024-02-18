@@ -1,7 +1,7 @@
 from django_filters import ChoiceFilter, FilterSet, ModelChoiceFilter, RangeFilter
 
-from profiles.models import Location, Profile
 from profiles.constants import Sex
+from profiles.models import Location, Profile
 
 
 class ProfilesSearchFilterSet(FilterSet):
