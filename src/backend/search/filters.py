@@ -1,6 +1,6 @@
 from django_filters import FilterSet, ModelChoiceFilter, RangeFilter
 
-from profiles.models import Profile, Location
+from profiles.models import Location, Profile
 
 
 class ProfilesSearchFilterSet(FilterSet):

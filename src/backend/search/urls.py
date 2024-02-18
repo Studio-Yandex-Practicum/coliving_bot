@@ -1,11 +1,12 @@
 from django.conf import settings
 from django.urls import path
 
-
-from search.views import (MatchedUsersListView,
-                          MatchRequestView,
-                          ProfilesSearchView,
-                          UserReportCreateView)
+from search.views import (
+    MatchedUsersListView,
+    MatchRequestView,
+    ProfilesSearchView,
+    UserReportCreateView,
+)
 
 app_name = "search"
 
