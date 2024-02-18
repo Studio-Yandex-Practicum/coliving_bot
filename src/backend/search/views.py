@@ -1,13 +1,9 @@
-from rest_framework import exceptions, generics, status, viewsets
-from rest_framework.response import Response
+from rest_framework import exceptions, generics
 from django.core.exceptions import ObjectDoesNotExist
 
 from search.constants import MatchStatuses
-
 from profiles.serializers import ProfileSerializer
-from profiles.constants import Sex, ColivingTypes
-from profiles.models import Profile, Location
-
+from profiles.models import Profile
 from search.filters import ProfilesSearchFilterSet
 from search.models import MatchRequest, UserFromTelegram, UserReport
 from search.serializers import (
@@ -56,13 +52,12 @@ class ProfilesSearchView(generics.ListAPIView):
 
     def get_queryset(self):
         try:
-            user = UserFromTelegram.objects.get(
-            telegram_id=self.request.query_params.get("telegram_id", None))
+            telegram_id = self.request.query_params.get("telegram_id", None)
+            user = UserFromTelegram.objects.get(telegram_id=telegram_id)
         except ObjectDoesNotExist:
             raise exceptions.NotFound("Такого пользователя не существует.")
 
-        return super().get_queryset().filter(
-            is_visible=True).exclude(pk__in=Profile.objects.all().filter(viewers=user))
+        return super().get_queryset().filter(is_visible=True).exclude(pk__in=Profile.objects.all().filter(viewers=user))
 
 
 class MatchRequestView(generics.CreateAPIView):

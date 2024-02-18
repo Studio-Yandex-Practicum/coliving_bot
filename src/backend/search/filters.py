@@ -2,6 +2,7 @@ from django_filters import FilterSet, ModelChoiceFilter, RangeFilter
 
 from profiles.models import Profile, Location
 
+
 class ProfilesSearchFilterSet(FilterSet):
     location = ModelChoiceFilter(field_name='location',
                                  queryset=Location.objects.all())
