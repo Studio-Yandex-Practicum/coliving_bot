@@ -310,18 +310,11 @@ async def send_received_photos(
             True,
         )
         return States.CONFIRMATION
-    await update.effective_chat.send_message(
-        text=templates.DONT_SAVE_WITHOUT_PHOTO,
-        parse_mode=ParseMode.HTML
-    )
-    await update.effective_message.edit_reply_markup(
-        reply_markup=InlineKeyboardMarkup.from_button(
-            InlineKeyboardButton(
-                text=buttons.SAVE_PHOTO_REPEAT_BUTTON,
-                callback_data=buttons.SAVE_PHOTO_BUTTON
-            )
+    await context.bot.answer_callback_query(
+            callback_query_id=update.callback_query.id,
+            text=templates.DONT_SAVE_WITHOUT_PHOTO,
+            show_alert=True,
         )
-    )
     return States.PHOTO
 
 
