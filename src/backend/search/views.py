@@ -1,6 +1,10 @@
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import exceptions, generics
 
+from profiles.models import Profile
+from profiles.serializers import ProfileSerializer
 from search.constants import MatchStatuses
+from search.filters import ProfilesSearchFilterSet
 from search.models import MatchRequest, UserFromTelegram, UserReport
 from search.serializers import (
     MatchListSerializer,
@@ -36,7 +40,26 @@ class MatchedUsersListView(generics.ListAPIView):
             match_requests__sender=user,
             match_requests__status=MatchStatuses.is_match,
         )
-        return (users_who_sent_like | liked_users).all()
+
+        return (users_who_sent_like | liked_users).distinct()
+
+
+class ProfilesSearchView(generics.ListAPIView):
+    """Apiview для для поиска профилей."""
+    queryset = Profile.objects.all().select_related("user", "location")
+    serializer_class = ProfileSerializer
+    filterset_class = ProfilesSearchFilterSet
+
+    def get_queryset(self):
+        try:
+            user = UserFromTelegram.objects.get(
+                                    telegram_id=self.request.query_params.get(
+                                                             "telegram_id", None))
+        except ObjectDoesNotExist:
+            raise exceptions.NotFound("Такого пользователя не существует.")
+
+        return super().get_queryset().filter(is_visible=True).exclude(
+                                    pk__in=Profile.objects.all().filter(viewers=user))
 
 
 class MatchRequestView(generics.CreateAPIView):
