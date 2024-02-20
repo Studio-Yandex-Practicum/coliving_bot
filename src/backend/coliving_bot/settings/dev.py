@@ -6,6 +6,8 @@ log_path = BASE_DIR.parent / ".data/logs"
 log_path.mkdir(parents=True, exist_ok=True)
 log_filename = log_path / "backend.log"
 
+ALLOWED_HOSTS += ["backend"]
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
