@@ -5,7 +5,7 @@ from urllib.parse import urljoin
 
 from httpx import AsyncClient, Response
 
-from internal_requests.entities import Coliving, Image, Location
+from internal_requests.entities import Coliving, Image, Location, UserProfile
 
 
 class ColivingNotFound(Exception):
@@ -122,6 +122,67 @@ class APIService:
             response = await client.get(urljoin(base=self.base_url, url=endpoint_urn))
             response.raise_for_status()
         return response
+
+    async def get_user_profile_by_telegram_id(
+        self, telegram_id: int
+    ) -> Optional[UserProfile]:
+        """
+        Получение профиля пользователя по идентификатору телеграма.
+
+        :param telegram_id: Идентификатор телеграма пользователя.
+        :return: Объект UserProfile или None, если профиль не найден.
+        """
+        response = await self._get_request(f"users/{telegram_id}/profile/")
+        return UserProfile(**response.json())
+
+    async def create_user_profile(
+        self, telegram_id: int, data: dict
+    ) -> Optional[UserProfile]:
+        """
+        Создание профиля пользователя.
+
+        :param telegram_id: Идентификатор пользователя.
+        :param data: Объект UserProfile с данными для создания профиля.
+        :return: Созданный профиль или None, если что-то пошло не так.
+        """
+        return await self._profile_request(telegram_id, data, method="post")
+
+    async def update_user_profile(
+        self, telegram_id: int, data: dict
+    ) -> Optional[UserProfile]:
+        """
+        Обновление профиля пользователя.
+
+        :param telegram_id: Идентификатор пользователя.
+        :param data: Словарь данных для обновления профиля.
+        :return: Обновленный профиль или None, если что-то пошло не так.
+        """
+        return await self._profile_request(telegram_id, data, method="patch")
+
+    async def _profile_request(
+        self, telegram_id: int, data: dict, method: str
+    ) -> Optional[UserProfile]:
+        """
+        Основная функция для создания и обновления профиля.
+
+        :param telegram_id: Идентификатор пользователя.
+        :param data: Словарь данных для профиля.
+        :param method: HTTP-метод ('post' или 'patch').
+        :return: Созданный или обновленный профиль или None, если что-то пошло не так.
+        """
+        endpoint_urn = f"users/{telegram_id}/profile/"
+        request_data = {
+            "name": data.get("name", ""),
+            "sex": data.get("sex", ""),
+            "age": data.get("age", 0),
+            "location": data.get("location", ""),
+            "about": data.get("about", ""),
+            "is_visible": data.get("is_visible", True),
+        }
+        response = await getattr(self, f"_{method}_request")(
+            endpoint_urn, data=request_data
+        )
+        return UserProfile(**response.json())
 
     async def _post_request(
         self,

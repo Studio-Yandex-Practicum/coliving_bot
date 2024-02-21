@@ -6,12 +6,14 @@ from telegram import PhotoSize
 
 @dataclass
 class UserProfile:
+    user: int
     name: str
     sex: str
     age: int
     location: str
-    about: str
-    is_visible: str
+    about: str = field(default=None)
+    is_visible: bool = field(default=True)
+    images: list = field(default_factory=list)
 
 
 @dataclass

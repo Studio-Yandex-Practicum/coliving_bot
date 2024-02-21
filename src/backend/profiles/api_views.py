@@ -1,6 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
-from rest_framework.generics import get_object_or_404
 
 from profiles.filters import ColivingFilter
 from profiles.models import Coliving, Location, Profile, UserFromTelegram
@@ -31,15 +30,6 @@ class ProfileView(
         )
         serializer.save(
             user=user,
-            is_visible=False,
-        )
-
-    def perform_update(self, serializer) -> None:
-        serializer.save(
-            user=get_object_or_404(
-                UserFromTelegram, telegram_id=self.kwargs.get("telegram_id")
-            ),
-            is_visible=self.request.data.get("is_visible", False),
         )
 
 
