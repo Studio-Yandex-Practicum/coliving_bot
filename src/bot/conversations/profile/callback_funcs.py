@@ -218,8 +218,8 @@ async def handle_about(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     else:
         context.user_data[templates.ABOUT_FIELD] = about
         await api_service.create_user_profile(
-                update.effective_chat.id, context.user_data
-            )
+            update.effective_chat.id, context.user_data
+        )
         context.user_data[templates.IS_VISIBLE_FIELD] = True
     await update.effective_chat.send_message(
         text=templates.ASK_PHOTO,
@@ -311,10 +311,10 @@ async def send_received_photos(
         )
         return States.CONFIRMATION
     await context.bot.answer_callback_query(
-            callback_query_id=update.callback_query.id,
-            text=templates.DONT_SAVE_WITHOUT_PHOTO,
-            show_alert=True,
-        )
+        callback_query_id=update.callback_query.id,
+        text=templates.DONT_SAVE_WITHOUT_PHOTO,
+        show_alert=True,
+    )
     return States.PHOTO
 
 
@@ -493,8 +493,7 @@ async def send_question_to_profile_is_correct(
     Либо завершает диалог.
     """
     await _send_chosen_choice_and_remove_buttons(update=update)
-    await api_service.update_user_profile(
-        update.effective_chat.id, context.user_data)
+    await api_service.update_user_profile(update.effective_chat.id, context.user_data)
     await send_confirmation_request(update, context)
     return ConversationHandler.END
 
