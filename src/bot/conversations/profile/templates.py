@@ -1,3 +1,5 @@
+from conversations.profile.buttons import HIDE_SEARCH_BUTTON, SHOW_SEARCH_BUTTON
+
 MIN_AGE = 18
 MAX_AGE = 99
 MIN_NAME_LENGTH = 3
@@ -14,28 +16,34 @@ LOCATION_FIELD = "location"
 ABOUT_FIELD = "about"
 IMAGE_FIELD = "image"
 IS_VISIBLE_FIELD = "is_visible"
+RECEIVED_PHOTOS_FIELD = "received_photos"
 
 ASK_AGE = "Хорошо. Давай познакомимся. Сколько тебе лет?"
 ASK_SEX = "Какой твой пол?"
 ASK_NAME = "Как тебя зовут?"
 ASK_LOCATION = "В каком городе ты бы хотел жить?"
 ASK_ABOUT = "Расскажи о себе. Чем интересуешься, чем занимаешься."
-ASK_PHOTO = "Теперь отправь фото. Его будут видеть другие пользователи."
+ASK_PHOTO = "Отправь фотографии, а затем нажми на кнопку, чтобы их сохранить."
+DONT_SAVE_WITHOUT_PHOTO = "Нельзя сохранить анкету без фото."
 LOOK_AT_FORM_FIRST = (
     "О, классная фотка. Давай взглянем на то, как выглядит твоя анкета:"
 )
 LOOK_AT_FORM_SECOND = "Супер. Теперь твоя анкета выглядит так."
 LOOK_AT_FORM_THIRD = "Мне нравится! Давай взглянем на то, как выглядит твоя анкета:"
 ASK_IS_THAT_RIGHT = "Всё верно?"
-ASK_FORM_VISIBLE = "Сделать анкету видимой в поиске?"
+ASK_FORM_VISIBLE = "Сейчас твоя анкета видна всем, хочешь скрыть ее?"
 FORM_SAVED = "Спасибо, анкета успешно сохранена."
 FORM_EDIT_SAVED = "Отлично! Изменения сохранены."
 FORM_NOT_CHANGED = "Хорошо. Анкета не изменилась."
-FORM_IS_VISIBLE = "Теперь твоя анкета видна в поиске."
-FORM_IS_NOT_VISIBLE = "Теперь твоя анкета не видна в поиске."
+FORM_IS_VISIBLE = (
+    f"<b>Твой ответ:</b> {SHOW_SEARCH_BUTTON}\nТеперь твоя анкета видна в поиске."
+)
+FORM_IS_NOT_VISIBLE = (
+    f"<b>Твой ответ:</b> {HIDE_SEARCH_BUTTON}\nТеперь твоя анкета не видна в поиске."
+)
 ASK_WANT_TO_CHANGE = "Что ты хочешь изменить?"
 ASK_AGE_AGAIN = "Сколько тебе лет?"
-ASK_NEW_PHOTO = "Отправь новое фото."
+ASK_NEW_PHOTO = "Отправь новые фотографии, а затем нажми на кнопку, чтобы их сохранить."
 # fmt: off
 AGE_ERROR_MSG = (
     'Неверный возраст. Должен быть целым числом от {min} до {max}. Повторите ввод.'
