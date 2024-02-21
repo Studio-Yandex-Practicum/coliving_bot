@@ -184,6 +184,17 @@ class APIService:
         )
         return UserProfile(**response.json())
 
+    async def send_match_request(self, sender: int, receiver: int) -> Response:
+        """Совершает POST-запрос к эндпоинту создания MatchRequest.
+
+        :param sender: telegram_id отправителя.
+        :param receiver: telegram_id получателя.
+        """
+        endpoint_urn = "match-requests/"
+        data = {"sender": sender, "receiver": receiver}
+        response = await self._post_request(endpoint_urn=endpoint_urn, data=data)
+        return response
+
     async def _post_request(
         self,
         endpoint_urn: str,
