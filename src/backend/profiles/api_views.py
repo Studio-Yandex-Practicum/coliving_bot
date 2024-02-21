@@ -8,6 +8,7 @@ from profiles.serializers import (
     ColivingSerializer,
     LocationSerializer,
     ProfileSerializer,
+    UserResidenceSerializer,
 )
 
 
@@ -65,3 +66,15 @@ class ColivingDetailView(generics.RetrieveUpdateAPIView):
 
     queryset = Coliving.objects.select_related("location", "host").all()
     serializer_class = ColivingSerializer
+
+
+class UserResidenceUpdateAPIView(generics.UpdateAPIView):
+    """Apiview представление для обновления информации о проживании пользователя.
+    Обрабатывает PATCH-запросы на адрес /api/v1/users/{telegram_id}/,
+    позволяя прикреплять пользователя к определенному коливингу
+    или откреплять его
+    """
+
+    queryset = UserFromTelegram.objects.all()
+    serializer_class = UserResidenceSerializer
+    lookup_field = "telegram_id"

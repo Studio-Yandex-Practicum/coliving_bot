@@ -103,6 +103,17 @@ class APIService:
         response = await self._patch_request(endpoint_urn=endpoint_urn, data=data)
         return await self._parse_response_to_coliving(response.json())
 
+    async def update_user_residence(
+        self, telegram_id: int, residence_id: Optional[int] = None
+    ) -> dict:
+        """
+        Обновляет проживание пользователя,
+        позволяя прикрепить его к коливингу или открепить.
+        """
+        endpoint_urn = f"users/{telegram_id}/"
+        data = {"residence": residence_id}
+        return await self._patch_request(endpoint_urn=endpoint_urn, data=data)
+
     async def _get_request(self, endpoint_urn: str) -> Response:
         """
         Отправляет GET-запрос к указанному эндпоинту.

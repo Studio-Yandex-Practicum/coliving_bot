@@ -61,3 +61,9 @@ class ColivingSerializer(serializers.ModelSerializer):
             "is_visible",
             "images",
         )
+
+
+class UserResidenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserFromTelegram
+        fields = ["residence"]
