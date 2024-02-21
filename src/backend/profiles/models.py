@@ -16,7 +16,8 @@ class Location(models.Model):
     """
 
     name = models.TextField(
-        verbose_name="Название", unique=True,
+        verbose_name="Название",
+        unique=True,
     )
 
     class Meta:

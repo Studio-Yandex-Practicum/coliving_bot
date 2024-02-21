@@ -66,4 +66,4 @@ class ColivingSerializer(serializers.ModelSerializer):
 class UserResidenceSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserFromTelegram
-        fields = ['residence']
+        fields = ["residence"]

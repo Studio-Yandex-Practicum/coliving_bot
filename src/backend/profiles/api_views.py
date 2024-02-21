@@ -4,7 +4,6 @@ from rest_framework.generics import get_object_or_404
 
 from profiles.filters import ColivingFilter
 from profiles.models import Coliving, Location, Profile, UserFromTelegram
-from rest_framework import generics
 from profiles.serializers import (
     ColivingSerializer,
     LocationSerializer,
@@ -71,10 +70,11 @@ class ColivingDetailView(generics.RetrieveUpdateAPIView):
 
 class UserResidenceUpdateAPIView(generics.UpdateAPIView):
     """Apiview представление для обновления информации о проживании пользователя.
-    Обрабатывает PATCH-запросы на адрес /api/v1/users/{telegram_id}/, 
-    позволяя прикреплять пользователя к определенному коливингу 
+    Обрабатывает PATCH-запросы на адрес /api/v1/users/{telegram_id}/,
+    позволяя прикреплять пользователя к определенному коливингу
     или откреплять его
     """
+
     queryset = UserFromTelegram.objects.all()
     serializer_class = UserResidenceSerializer
     lookup_field = "telegram_id"
