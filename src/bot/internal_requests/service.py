@@ -102,6 +102,15 @@ class APIService:
         data = asdict(coliving)
         response = await self._patch_request(endpoint_urn=endpoint_urn, data=data)
         return await self._parse_response_to_coliving(response.json())
+    
+    async def update_user_residence(self, telegram_id: int, residence_id: Optional[int] = None) -> dict:
+        """
+        Обновляет проживание пользователя, 
+        позволяя прикрепить его к коливингу или открепить.
+        """
+        endpoint_urn = f"users/{telegram_id}/"
+        data = {"residence": residence_id}
+        return await self._patch_request(endpoint_urn=endpoint_urn, data=data)
 
     async def _get_request(self, endpoint_urn: str) -> Response:
         """
@@ -165,16 +174,3 @@ class APIService:
         if images:
             coliving_info.images = [Image(file_id=file_id) for file_id in images]
         return coliving_info
-    
-    async def update_user_residence(self, telegram_id: int, residence_id: Optional[int] = None) -> dict:
-        """
-        Обновляет проживание пользователя, 
-        позволяя прикрепить его к коливингу или открепить.
-        """
-        endpoint_urn = f"users/{telegram_id}/"
-        data = {'residence': residence_id}
-        async with AsyncClient() as client:
-            url = urljoin(self.base_url, endpoint_urn)
-            response = await client.patch(url, json=data)
-        response.raise_for_status()
-        return response.json()

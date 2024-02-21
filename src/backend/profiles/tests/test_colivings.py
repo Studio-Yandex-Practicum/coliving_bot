@@ -152,13 +152,7 @@ class UserResidenceUpdateAPITestCase(APITestCase):
             location=Location.objects.create(name="Москва"),
             about="Уютное пространство...",
         )
-        Coliving.objects.create(
-            host=UserFromTelegram.objects.create(telegram_id=OWNER_2_TELEGRAM_ID),
-            price=2500,
-            room_type="Комната",
-            location=Location.objects.create(name="Санкт-Петербург"),
-            about="Небольшая",
-        )
+
     def test_attach_user_to_coliving(self):
         """Тест на прикрепление пользователя к коливингу."""
         coliving = Coliving.objects.filter(host__telegram_id=OWNER_1_TELEGRAM_ID).first()
