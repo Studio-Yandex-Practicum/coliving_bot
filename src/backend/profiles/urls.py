@@ -6,10 +6,10 @@ from profiles.api_views import (
     ColivingView,
     LocationList,
     ProfileView,
-    UserResidenceUpdateAPIView
+    UserResidenceUpdateAPIView,
 )
 
-app_name = "api-v1"
+app_name = "profiles"
 
 urlpatterns = [
     path(
@@ -26,8 +26,9 @@ urlpatterns = [
     path(
         "v1/colivings/<int:pk>/", ColivingDetailView.as_view(), name="colivings-detail"
     ),
-    path(f"{settings.API_V1_PREFIX}/users/<int:telegram_id>/", 
-         UserResidenceUpdateAPIView.as_view(), 
-         name='users-detail'
+    path(
+        f"{settings.API_V1_PREFIX}/users/<int:telegram_id>/",
+        UserResidenceUpdateAPIView.as_view(),
+        name="users-detail",
     ),
 ]
