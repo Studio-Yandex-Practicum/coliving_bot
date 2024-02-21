@@ -27,7 +27,7 @@ services:
     volumes:
       - static:/app/static/
       - media:/app/media/
-      - ../.data/logs/:/app/.data/logs/
+      - ../.data/logs/:/.data/logs/
     command: >
       bash -c "python manage.py migrate &&
                python manage.py collectstatic --clear --noinput &&
@@ -50,7 +50,7 @@ services:
     restart: always
     command: bash -c "python run_bot.py"
     volumes:
-      - ../.data/logs/:/app/.data/logs/
+      - ../.data/logs/:/.data/logs/
     env_file:
       - ../.env
     depends_on:

@@ -169,3 +169,7 @@ media/
 
 # Logging data folder
 .data/
+
+# media dir
+media
+src/.DS_Store
