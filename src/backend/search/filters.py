@@ -1,9 +1,4 @@
-from django_filters import (
-    ChoiceFilter,
-    FilterSet,
-    ModelChoiceFilter,
-    RangeFilter,
-)
+from django_filters import ChoiceFilter, FilterSet, ModelChoiceFilter, RangeFilter
 
 from profiles.constants import Sex
 from profiles.models import Location, Profile

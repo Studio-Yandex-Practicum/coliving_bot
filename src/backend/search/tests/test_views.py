@@ -249,7 +249,7 @@ class ProfileSearchViewTests(APITestCase):
 
         cls.expected_search_data_1 = {
             "search_criteria":
-            {"location": "M", "sex": "Парень", "age__range": "20,30"},
+            {"location": "M", "sex": "Парень", "age_min": "20", "age_max": "30"},
             "search_result":
             [{"telegram_id": 1, "name": "Name_1", "age": 21,
               "location": "M", "sex": cls.sex_m},
@@ -260,7 +260,7 @@ class ProfileSearchViewTests(APITestCase):
         }
         cls.expected_search_data_2 = {
             "search_criteria":
-            {"location": "M", "sex": "Девушка", "age__range": "25,35"},
+            {"location": "M", "sex": "Девушка", "age_min": "25", "age_max": "35"},
             "search_result":
             [{"telegram_id": 4, "name": "Name_4", "age": 32,
               "location": "M", "sex": cls.sex_f},
@@ -269,7 +269,7 @@ class ProfileSearchViewTests(APITestCase):
         }
         cls.expected_search_data_3 = {
             "search_criteria":
-            {"location": "S", "sex": "Парень", "age__range": "30,40"},
+            {"location": "S", "sex": "Парень", "age_min": "30", "age_max": "40"},
             "search_result":
             [{"telegram_id": 6, "name": "Name_1", "age": 36,
               "location": "S", "sex": cls.sex_m},
@@ -278,7 +278,7 @@ class ProfileSearchViewTests(APITestCase):
         }
         cls.expected_search_data_4 = {
             "search_criteria":
-            {"location": "S", "sex": "Девушка", "age__range": "35,45"}
+            {"location": "S", "sex": "Девушка", "age_min": "35", "age_max": "45"}
             ,
             "search_result":
             [{"telegram_id": 8, "name": "Name_8", "age": 41,
@@ -317,7 +317,7 @@ class ProfileSearchViewTests(APITestCase):
     def test_search_correct_data(self):
         """Тест на корректные результаты поиска для разных критериев."""
         for telegram_id, data in self.global_search_results_data.items():
-            with self.subTest(id=telegram_id, data=data):
+            with self.subTest(id=telegram_id, data=data["search_result"]):
                 kwargs = {}
                 kwargs["telegram_id"] = telegram_id
                 for key, value in data["search_criteria"]:
