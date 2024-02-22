@@ -183,3 +183,150 @@ class ReportMatchViewTests(APITestCase):
                     )
                 )
                 self.assertEqual(response.json(), data)
+
+
+class ProfileSearchViewTests(APITestCase):
+    """Тесты для ProfilesSearchView."""
+
+    empty_match_data = []
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.test_user_1 = UserFromTelegram.objects.create(telegram_id=1)
+        cls.test_user_2 = UserFromTelegram.objects.create(telegram_id=2)
+        cls.test_user_3 = UserFromTelegram.objects.create(telegram_id=3)
+        cls.test_user_4 = UserFromTelegram.objects.create(telegram_id=4)
+        cls.test_user_5 = UserFromTelegram.objects.create(telegram_id=5)
+        cls.test_user_6 = UserFromTelegram.objects.create(telegram_id=6)
+        cls.test_user_7 = UserFromTelegram.objects.create(telegram_id=7)
+        cls.test_user_8 = UserFromTelegram.objects.create(telegram_id=8)
+        cls.test_user_9 = UserFromTelegram.objects.create(telegram_id=9)
+        cls.test_user_10 = UserFromTelegram.objects.create(telegram_id=10)
+        cls.sex_m = "Парень"
+        cls.sex_f = "Девушка"
+        cls.location_m = Location.objects.create(name="M")
+        cls.location_s = Location.objects.create(name="S")
+        cls.profile_1 = Profile.objects.create(
+            user=cls.test_user_1, name="Name_1", age=21, location=cls.location_m,
+            sex=cls.sex_m
+        )
+        cls.profile_2 = Profile.objects.create(
+            user=cls.test_user_2, name="Name_2", age=25, location=cls.location_m,
+            sex=cls.sex_m
+        )
+        cls.profile_3 = Profile.objects.create(
+            user=cls.test_user_3, name="Name_3", age=28, location=cls.location_m,
+            sex=cls.sex_m
+        )
+        cls.profile_4 = Profile.objects.create(
+            user=cls.test_user_4, name="Name_4", age=32, location=cls.location_m,
+            sex=cls.sex_f
+        )
+        cls.profile_5 = Profile.objects.create(
+            user=cls.test_user_5, name="Name_5", age=34, location=cls.location_m,
+            sex=cls.sex_f
+        )
+        cls.profile_5 = Profile.objects.create(
+            user=cls.test_user_6, name="Name_6", age=36, location=cls.location_s,
+            sex=cls.sex_m
+        )
+        cls.profile_5 = Profile.objects.create(
+            user=cls.test_user_7, name="Name_7", age=38, location=cls.location_s,
+            sex=cls.sex_m
+        )
+        cls.profile_5 = Profile.objects.create(
+            user=cls.test_user_8, name="Name_8", age=41, location=cls.location_s,
+            sex=cls.sex_f
+        )
+        cls.profile_5 = Profile.objects.create(
+            user=cls.test_user_9, name="Name_9", age=42, location=cls.location_s,
+            sex=cls.sex_f
+        )
+        cls.profile_5 = Profile.objects.create(
+            user=cls.test_user_10, name="Name_10", age=44, location=cls.location_s,
+            sex=cls.sex_f
+        )
+
+        cls.expected_search_data_1 = {
+            "search_criteria":
+            {"location": "M", "sex": "Парень", "age__range": "20,30"},
+            "search_result":
+            [{"telegram_id": 1, "name": "Name_1", "age": 21,
+              "location": "M", "sex": cls.sex_m},
+             {"telegram_id": 2, "name": "Name_2", "age": 25,
+              "location": "M", "sex": cls.sex_m},
+             {"telegram_id": 3, "name": "Name_3", "age": 28,
+              "location": "M", "sex": cls.sex_m},]
+        }
+        cls.expected_search_data_2 = {
+            "search_criteria":
+            {"location": "M", "sex": "Девушка", "age__range": "25,35"},
+            "search_result":
+            [{"telegram_id": 4, "name": "Name_4", "age": 32,
+              "location": "M", "sex": cls.sex_f},
+             {"telegram_id": 5, "name": "Name_5", "age": 34,
+              "location": "M", "sex": cls.sex_f},]
+        }
+        cls.expected_search_data_3 = {
+            "search_criteria":
+            {"location": "S", "sex": "Парень", "age__range": "30,40"},
+            "search_result":
+            [{"telegram_id": 6, "name": "Name_1", "age": 36,
+              "location": "S", "sex": cls.sex_m},
+             {"telegram_id": 7, "name": "Name_2", "age": 38,
+              "location": "S", "sex": cls.sex_m},]
+        }
+        cls.expected_search_data_4 = {
+            "search_criteria":
+            {"location": "S", "sex": "Девушка", "age__range": "35,45"}
+            ,
+            "search_result":
+            [{"telegram_id": 8, "name": "Name_8", "age": 41,
+              "location": "S", "sex": cls.sex_f},
+             {"telegram_id": 9, "name": "Name_9", "age": 42,
+              "location": "S", "sex": cls.sex_f},
+             {"telegram_id": 10, "name": "Name_10", "age": 44,
+              "location": "S", "sex": cls.sex_f},]
+        }
+
+        cls.empty_match_data = []
+
+        cls.global_search_results_data = {
+            1: cls.expected_search_data_1,
+            2: cls.expected_search_data_2,
+            3: cls.expected_search_data_3,
+            4: cls.expected_search_data_4,
+        }
+
+    def test_invalid_methods_match(self):
+        """Тест на некорректные методы запроса (profile-search)."""
+        methods = ["post", "put", "patch", "delete"]
+        for method in methods:
+            with self.subTest(method=method):
+                response = self.client.generic(
+                    method,
+                    reverse(
+                        "api-v1:search:profiles",
+                        kwargs={"telegram_id": self.test_user_1.id},
+                    ),
+                )
+                self.assertEqual(
+                    response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED
+                )
+
+    def test_search_correct_data(self):
+        """Тест на корректные результаты поиска для разных критериев."""
+        for telegram_id, data in self.global_search_results_data.items():
+            with self.subTest(id=telegram_id, data=data):
+                kwargs = {}
+                kwargs["telegram_id"] = telegram_id
+                for key, value in data["search_criteria"]:
+                    kwargs[key] += value
+
+                response = self.client.get(
+                    reverse(
+                        "api-v1:search:profiles",
+                        kwargs=kwargs,
+                    )
+                )
+                self.assertEqual(response.json(), data["search_result"])
