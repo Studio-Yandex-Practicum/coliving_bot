@@ -5,11 +5,11 @@ from profiles.models import Location, Profile
 
 
 class ProfilesSearchFilterSet(FilterSet):
-    location = ModelChoiceFilter(field_name='location',
+    location = ModelChoiceFilter(field_name="location__name",
                                  queryset=Location.objects.all())
-    sex = ChoiceFilter(field_name='sex', choices=Sex.choices)
-    age = RangeFilter(field_name='age')
+    sex = ChoiceFilter(field_name="sex", choices=Sex.choices)
+    age = RangeFilter(field_name="age")
 
     class Meta:
         model = Profile
-        fields = ['location', 'sex', 'age']
+        fields = ["location", "sex", "age"]

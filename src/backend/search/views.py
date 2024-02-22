@@ -54,12 +54,15 @@ class ProfilesSearchView(generics.ListAPIView):
         try:
             user = UserFromTelegram.objects.get(
                                     telegram_id=self.request.query_params.get(
-                                                             "telegram_id", None))
+                                                             "viewer", None))
         except ObjectDoesNotExist:
             raise exceptions.NotFound("Такого пользователя не существует.")
 
-        return super().get_queryset().filter(is_visible=True).exclude(
-                                    pk__in=Profile.objects.all().filter(viewers=user))
+        return super().get_queryset().filter(
+                       is_visible=True).exclude(
+                                        pk__in=Profile.objects.all().filter(
+                                               viewers=user).filter(
+                                               user=user))
 
 
 class MatchRequestView(generics.CreateAPIView):
