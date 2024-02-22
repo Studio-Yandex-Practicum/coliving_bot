@@ -12,7 +12,8 @@ from .buttons import (
     MALE_BUTTON,
     MSK_BUTTON,
     NEW_PHOTO_BUTTON,
-    NOT_LOOK_YET_BUTTON,
+    SAVE_EDITED_PHOTO_BUTTON,
+    SAVE_PHOTO_BUTTON,
     SHOW_SEARCH_BUTTON,
     SPB_BUTTON,
     YES_BUTTON,
@@ -21,8 +22,8 @@ from .buttons import (
 
 PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
-        InlineKeyboardButton(text=SHOW_SEARCH_BUTTON, callback_data=SHOW_SEARCH_BUTTON),
-        InlineKeyboardButton(text=HIDE_SEARCH_BUTTON, callback_data=HIDE_SEARCH_BUTTON),
+        InlineKeyboardButton(text=SHOW_SEARCH_BUTTON, callback_data="is_visible:True"),
+        InlineKeyboardButton(text=HIDE_SEARCH_BUTTON, callback_data="is_visible:False"),
         InlineKeyboardButton(text=EDIT_FORM_BUTTON, callback_data=EDIT_FORM_BUTTON),
         InlineKeyboardButton(text=BACK_BUTTON, callback_data=BACK_BUTTON),
     )
@@ -42,6 +43,12 @@ LOCATION_KEYBOARD = InlineKeyboardMarkup.from_column(
     )
 )
 
+PHOTO_KEYBOARD = (
+    InlineKeyboardMarkup.from_button(
+        InlineKeyboardButton(text=SAVE_PHOTO_BUTTON, callback_data=SAVE_PHOTO_BUTTON)
+    ),
+)
+
 FORM_SAVED_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         InlineKeyboardButton(text=YES_BUTTON, callback_data=YES_BUTTON),
@@ -52,10 +59,16 @@ FORM_SAVED_KEYBOARD = InlineKeyboardMarkup.from_column(
 FORM_VISIBLE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         InlineKeyboardButton(text=YES_TO_DO_BUTTON, callback_data=YES_TO_DO_BUTTON),
-        InlineKeyboardButton(
-            text=NOT_LOOK_YET_BUTTON, callback_data=NOT_LOOK_YET_BUTTON
-        ),
+        InlineKeyboardButton(text=HIDE_SEARCH_BUTTON, callback_data=HIDE_SEARCH_BUTTON),
     )
+)
+
+PHOTO_EDIT_KEYBOARD = (
+    InlineKeyboardMarkup.from_button(
+        InlineKeyboardButton(
+            text=SAVE_EDITED_PHOTO_BUTTON, callback_data=SAVE_EDITED_PHOTO_BUTTON
+        )
+    ),
 )
 
 FORM_EDIT_KEYBOARD = InlineKeyboardMarkup.from_column(

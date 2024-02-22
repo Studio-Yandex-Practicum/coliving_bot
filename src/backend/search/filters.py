@@ -5,6 +5,7 @@ from profiles.models import Location, Profile
 
 
 class ProfilesSearchFilterSet(FilterSet):
+
     location = ModelChoiceFilter(field_name="location__name",
                                  queryset=Location.objects.all())
     sex = ChoiceFilter(field_name="sex", choices=Sex.choices)
