@@ -192,6 +192,7 @@ class ProfileSearchViewTests(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
+        cls.url_reverse = reverse("api-v1:search:profiles")
         cls.test_user_1 = UserFromTelegram.objects.create(telegram_id=1)
         cls.test_user_2 = UserFromTelegram.objects.create(telegram_id=2)
         cls.test_user_3 = UserFromTelegram.objects.create(telegram_id=3)
@@ -226,67 +227,68 @@ class ProfileSearchViewTests(APITestCase):
             user=cls.test_user_5, name="Name_5", age=34, location=cls.location_m,
             sex=cls.sex_f
         )
-        cls.profile_5 = Profile.objects.create(
+        cls.profile_6 = Profile.objects.create(
             user=cls.test_user_6, name="Name_6", age=36, location=cls.location_s,
             sex=cls.sex_m
         )
-        cls.profile_5 = Profile.objects.create(
+        cls.profile_7 = Profile.objects.create(
             user=cls.test_user_7, name="Name_7", age=38, location=cls.location_s,
             sex=cls.sex_m
         )
-        cls.profile_5 = Profile.objects.create(
+        cls.profile_8 = Profile.objects.create(
             user=cls.test_user_8, name="Name_8", age=41, location=cls.location_s,
             sex=cls.sex_f
         )
-        cls.profile_5 = Profile.objects.create(
+        cls.profile_9 = Profile.objects.create(
             user=cls.test_user_9, name="Name_9", age=42, location=cls.location_s,
             sex=cls.sex_f
         )
-        cls.profile_5 = Profile.objects.create(
+        cls.profile_10 = Profile.objects.create(
             user=cls.test_user_10, name="Name_10", age=44, location=cls.location_s,
             sex=cls.sex_f
         )
 
         cls.expected_search_data_1 = {
             "search_criteria":
-            {"location": "M", "sex": "Парень", "age_min": "20", "age_max": "30"},
+            {"location": "M", "sex": cls.sex_m, "age_min": "20", "age_max": "30"},
             "search_result":
-            [{"telegram_id": 1, "name": "Name_1", "age": 21,
-              "location": "M", "sex": cls.sex_m},
-             {"telegram_id": 2, "name": "Name_2", "age": 25,
-              "location": "M", "sex": cls.sex_m},
-             {"telegram_id": 3, "name": "Name_3", "age": 28,
-              "location": "M", "sex": cls.sex_m},]
+            [{"user": 2, "name": "Name_2", "sex": cls.sex_m, "age": 25,
+              "location": "M", "about": None, "is_visible": True, "images": []},
+             {"user": 3, "name": "Name_3", "sex": cls.sex_m, "age": 28,
+              "location": "M", "about": None, "is_visible": True, "images": []},
+             ]
         }
         cls.expected_search_data_2 = {
             "search_criteria":
-            {"location": "M", "sex": "Девушка", "age_min": "25", "age_max": "35"},
+            {"location": "M", "sex": cls.sex_f, "age_min": "30", "age_max": "40"},
             "search_result":
-            [{"telegram_id": 4, "name": "Name_4", "age": 32,
-              "location": "M", "sex": cls.sex_f},
-             {"telegram_id": 5, "name": "Name_5", "age": 34,
-              "location": "M", "sex": cls.sex_f},]
+            [{"user": 4, "name": "Name_4", "sex": cls.sex_f, "age": 32,
+              "location": "M", "about": None, "is_visible": True, "images": []},
+             {"user": 5, "name": "Name_5", "sex": cls.sex_f, "age": 34,
+              "location": "M", "about": None, "is_visible": True, "images": []},
+             ]
         }
         cls.expected_search_data_3 = {
             "search_criteria":
-            {"location": "S", "sex": "Парень", "age_min": "30", "age_max": "40"},
+            {"location": "S", "sex": cls.sex_m, "age_min": "35", "age_max": "40"},
             "search_result":
-            [{"telegram_id": 6, "name": "Name_1", "age": 36,
-              "location": "S", "sex": cls.sex_m},
-             {"telegram_id": 7, "name": "Name_2", "age": 38,
-              "location": "S", "sex": cls.sex_m},]
+            [{"user": 6, "name": "Name_6", "sex": cls.sex_m, "age": 36,
+              "location": "S", "about": None, "is_visible": True, "images": []},
+             {"user": 7, "name": "Name_7", "sex": cls.sex_m, "age": 38,
+              "location": "S", "about": None, "is_visible": True, "images": []},
+             ]
         }
         cls.expected_search_data_4 = {
             "search_criteria":
-            {"location": "S", "sex": "Девушка", "age_min": "35", "age_max": "45"}
-            ,
+            {"location": "S", "sex": cls.sex_f, "age_min": "40", "age_max": "50"},
             "search_result":
-            [{"telegram_id": 8, "name": "Name_8", "age": 41,
-              "location": "S", "sex": cls.sex_f},
-             {"telegram_id": 9, "name": "Name_9", "age": 42,
-              "location": "S", "sex": cls.sex_f},
-             {"telegram_id": 10, "name": "Name_10", "age": 44,
-              "location": "S", "sex": cls.sex_f},]
+            [{"user": 8, "name": "Name_8", "sex": cls.sex_f, "age": 41,
+              "location": "S", "about": None, "is_visible": True, "images": []},
+             {"user": 9, "name": "Name_9", "sex": cls.sex_f, "age": 42,
+              "location": "S", "about": None, "is_visible": True, "images": []},
+             {"user": 10, "name": "Name_10", "sex": cls.sex_f, "age": 44,
+              "location": "S", "about": None, "is_visible": True, "images": []},
+             ]
         }
 
         cls.empty_match_data = []
@@ -298,35 +300,27 @@ class ProfileSearchViewTests(APITestCase):
             4: cls.expected_search_data_4,
         }
 
-    def test_invalid_methods_match(self):
-        """Тест на некорректные методы запроса (profile-search)."""
+    def test_invalid_methods_match2(self):
+        data = {
+            "viewer": 1, "location": "M",
+            "age_min": "25", "age_max": "35", "sex": self.sex_f
+        }
         methods = ["post", "put", "patch", "delete"]
         for method in methods:
             with self.subTest(method=method):
-                response = self.client.generic(
-                    method,
-                    reverse(
-                        "api-v1:search:profiles",
-                        kwargs={"telegram_id": self.test_user_1.id},
-                    ),
-                )
+                response = self.client.generic(method, self.url_reverse, data)
                 self.assertEqual(
                     response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED
                 )
 
     def test_search_correct_data(self):
         """Тест на корректные результаты поиска для разных критериев."""
-        for telegram_id, data in self.global_search_results_data.items():
-            with self.subTest(id=telegram_id, data=data["search_result"]):
+        for telegram_id, gsr_data in self.global_search_results_data.items():
+            with self.subTest(id=telegram_id, data=gsr_data["search_result"]):
                 kwargs = {}
-                kwargs["telegram_id"] = telegram_id
-                for key, value in data["search_criteria"]:
-                    kwargs[key] += value
+                kwargs["viewer"] = telegram_id
+                for key, value in gsr_data["search_criteria"].items():
+                    kwargs[key] = value
 
-                response = self.client.get(
-                    reverse(
-                        "api-v1:search:profiles",
-                        kwargs=kwargs,
-                    )
-                )
-                self.assertEqual(response.json(), data["search_result"])
+                response = self.client.get(self.url_reverse, kwargs)
+                self.assertEqual(response.json(), gsr_data["search_result"])

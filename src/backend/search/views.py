@@ -62,7 +62,8 @@ class ProfilesSearchView(generics.ListAPIView):
         excl_list.append(req_user.pk)
         for viwed in Profile.objects.all().filter(viewers=user):
             excl_list.append(viwed.pk)
-        return super().get_queryset().filter(is_visible=True).exclude(pk__in=excl_list)
+        return super().get_queryset().filter(is_visible=True).exclude(
+                                        pk__in=excl_list).order_by('pk')
 
 
 class MatchRequestView(generics.CreateAPIView):
