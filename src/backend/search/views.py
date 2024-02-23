@@ -57,12 +57,12 @@ class ProfilesSearchView(generics.ListAPIView):
                                                              "viewer", None))
         except ObjectDoesNotExist:
             raise exceptions.NotFound("Такого пользователя не существует.")
-
-        return super().get_queryset().filter(
-                       is_visible=True).exclude(
-                                        pk__in=Profile.objects.all().filter(
-                                               viewers=user).filter(
-                                               user=user))
+        excl_list = []
+        req_user = Profile.objects.get(pk=user.pk)
+        excl_list.append(req_user.pk)
+        for viwed in Profile.objects.all().filter(viewers=user):
+            excl_list.append(viwed.pk)
+        return super().get_queryset().filter(is_visible=True).exclude(pk__in=excl_list)
 
 
 class MatchRequestView(generics.CreateAPIView):
