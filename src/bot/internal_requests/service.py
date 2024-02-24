@@ -113,7 +113,7 @@ class APIService:
         endpoint_urn = f"users/{telegram_id}/"
         data = {"residence": residence_id}
         return await self._patch_request(endpoint_urn=endpoint_urn, data=data)
-    
+
     async def delete_image(self, image_type: str, image_id: int) -> None:
         """
         Отправляет запрос на удаление изображения.
@@ -135,7 +135,12 @@ class APIService:
         :param endpoint_urn: Относительный URI эндпоинта.
         """
         async with AsyncClient() as client:
-            response = await client.delete(urljoin(base=self.base_url, url=endpoint_urn))
+            response = await client.delete(
+                urljoin(
+                    base=self.base_url, 
+                    url=endpoint_urn
+                )
+            )
             response.raise_for_status()
         return response
 
