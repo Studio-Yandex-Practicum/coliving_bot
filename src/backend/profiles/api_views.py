@@ -31,7 +31,7 @@ class ProfileView(
         serializer.save(
             user=user,
         )
-
+    
 
 class LocationList(generics.ListAPIView):
     queryset = Location.objects.all()

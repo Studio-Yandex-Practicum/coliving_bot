@@ -3,6 +3,7 @@ from typing import Type
 from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
+from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import SAFE_METHODS
 
@@ -17,9 +18,10 @@ from .serializers import (
 )
 
 
-class BaseImageView(generics.ListCreateAPIView):
+class BaseImageView(generics.ListCreateAPIView, generics.DestroyAPIView):
     """
     Базовый вью-класс объектов 'ProfileImage', 'ColivingImage'.
+    Позволяет получать список изображений, создавать новые, получать детали по конкретному изображению и удалять их.
     """
 
     def _get_telegram_user(self) -> UserFromTelegram:
@@ -68,11 +70,16 @@ class ProfileImageView(BaseImageView):
         )
 
     def perform_create(self, serializer: ProfileImageCreateSerializer) -> None:
-        serializer.save(
-            profile=get_object_or_404(
-                Profile, user__telegram_id=self.kwargs.get("telegram_id")
-            )
-        )
+        profile = get_object_or_404(Profile, user__telegram_id=self.kwargs.get("telegram_id"))
+        serializer.save(profile=profile)
+    
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def perform_destroy(self, instance):
+        instance.delete()
 
 
 class ColivingImageView(BaseImageView):
@@ -93,4 +100,5 @@ class ColivingImageView(BaseImageView):
         )
 
     def perform_create(self, serializer: ColivingImageCreateSerializer) -> None:
-        serializer.save(coliving=self._get_coliving())
+        coliving = self._get_coliving()
+        serializer.save(coliving=coliving)
