@@ -70,8 +70,11 @@ class ProfileImageView(BaseImageView):
         )
 
     def perform_create(self, serializer: ProfileImageCreateSerializer) -> None:
-        profile = get_object_or_404(Profile, user__telegram_id=self.kwargs.get("telegram_id"))
-        serializer.save(profile=profile)
+        serializer.save(
+            profile=get_object_or_404(
+                Profile, user__telegram_id=self.kwargs.get("telegram_id")
+            )
+        )
     
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -100,5 +103,4 @@ class ColivingImageView(BaseImageView):
         )
 
     def perform_create(self, serializer: ColivingImageCreateSerializer) -> None:
-        coliving = self._get_coliving()
-        serializer.save(coliving=coliving)
+        serializer.save(coliving=self._get_coliving())
