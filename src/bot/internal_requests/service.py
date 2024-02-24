@@ -113,6 +113,31 @@ class APIService:
         endpoint_urn = f"users/{telegram_id}/"
         data = {"residence": residence_id}
         return await self._patch_request(endpoint_urn=endpoint_urn, data=data)
+    
+    async def delete_image(self, image_type: str, image_id: int) -> None:
+        """
+        Отправляет запрос на удаление изображения.
+
+        :param image_type: Тип изображения ('profile' или 'coliving').
+        :param image_id: Идентификатор изображения для удаления.
+        """
+        endpoint_urn = f"images/delete/{image_type}/{image_id}/"
+        response = await self._delete_request(endpoint_urn)
+        if response.status_code == 204:
+            print("Изображение успешно удалено.")
+        else:
+            print(f"Ошибка при удалении изображения: {response.status_code}")
+
+    async def _delete_request(self, endpoint_urn: str) -> Response:
+        """
+        Отправляет DELETE-запрос к указанному эндпоинту.
+
+        :param endpoint_urn: Относительный URI эндпоинта.
+        """
+        async with AsyncClient() as client:
+            response = await client.delete(urljoin(base=self.base_url, url=endpoint_urn))
+            response.raise_for_status()
+        return response
 
     async def _get_request(self, endpoint_urn: str) -> Response:
         """
