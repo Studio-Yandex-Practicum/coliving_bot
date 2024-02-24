@@ -137,7 +137,7 @@ class APIService:
         async with AsyncClient() as client:
             response = await client.delete(
                 urljoin(
-                    base=self.base_url, 
+                    base=self.base_url,
                     url=endpoint_urn
                 )
             )

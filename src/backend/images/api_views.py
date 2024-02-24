@@ -21,7 +21,7 @@ from .serializers import (
 class BaseImageView(generics.ListCreateAPIView, generics.DestroyAPIView):
     """
     Базовый вью-класс объектов 'ProfileImage', 'ColivingImage'.
-    Позволяет получать список изображений, создавать новые, 
+    Позволяет получать список изображений, создавать новые,
     получать детали по конкретному изображению и удалять их.
     """
 
