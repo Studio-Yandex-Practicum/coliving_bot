@@ -3,9 +3,9 @@ from typing import Type
 from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
-from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import SAFE_METHODS
+from rest_framework.response import Response
 
 from profiles.models import Coliving, Profile, UserFromTelegram
 

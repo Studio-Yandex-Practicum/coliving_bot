@@ -13,7 +13,7 @@ urlpatterns = [
     path(
         f"{settings.API_V1_PREFIX}/users/<int:telegram_id>/profile/images/<int:pk>/",
         ProfileImageView.as_view(),
-        name='profile-image-detail'
+        name="profile-image-detail",
     ),
     path(
         (
@@ -25,6 +25,6 @@ urlpatterns = [
     path(
         "users/<int:telegram_id>/colivings/<int:coliving_id>/images/<int:pk>/",
         ColivingImageView.as_view(),
-        name='coliving-image-detail'
+        name="coliving-image-detail",
     ),
 ]
