@@ -1,4 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q
 from rest_framework import exceptions, generics
 
 from profiles.models import Profile
@@ -57,11 +58,8 @@ class ProfilesSearchView(generics.ListAPIView):
                                                              "viewer", None))
         except ObjectDoesNotExist:
             raise exceptions.NotFound("Такого пользователя не существует.")
-        excl_list = []
-        req_user = Profile.objects.get(pk=user.pk)
-        excl_list.append(req_user.pk)
-        for viwed in Profile.objects.all().filter(viewers=user):
-            excl_list.append(viwed.pk)
+        excl_list = Profile.objects.filter(
+            Q(user=user) | Q(viewers=user)).values_list("pk", flat=True)
         return super().get_queryset().filter(is_visible=True).exclude(
                                         pk__in=excl_list).order_by('pk')
 

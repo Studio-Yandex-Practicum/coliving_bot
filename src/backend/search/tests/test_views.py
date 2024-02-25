@@ -1,8 +1,12 @@
+from collections import namedtuple
+
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from profiles.constants import Sex
 from profiles.models import Location, Profile, UserFromTelegram
+from profiles.serializers import ProfileSerializer
 from search.constants import MatchStatuses
 from search.models import MatchRequest, UserReport
 
@@ -187,111 +191,72 @@ class ReportMatchViewTests(APITestCase):
 
 class ProfileSearchViewTests(APITestCase):
     """Тесты для ProfilesSearchView."""
-
-    empty_match_data = []
+    LOCATION_M_NAME = "M"
+    LOCATION_S_NAME = "S"
+    URL_REVERSE = reverse("api-v1:search:profiles")
 
     @classmethod
     def setUpTestData(cls):
-        cls.url_reverse = reverse("api-v1:search:profiles")
-        cls.test_user_1 = UserFromTelegram.objects.create(telegram_id=1)
-        cls.test_user_2 = UserFromTelegram.objects.create(telegram_id=2)
-        cls.test_user_3 = UserFromTelegram.objects.create(telegram_id=3)
-        cls.test_user_4 = UserFromTelegram.objects.create(telegram_id=4)
-        cls.test_user_5 = UserFromTelegram.objects.create(telegram_id=5)
-        cls.test_user_6 = UserFromTelegram.objects.create(telegram_id=6)
-        cls.test_user_7 = UserFromTelegram.objects.create(telegram_id=7)
-        cls.test_user_8 = UserFromTelegram.objects.create(telegram_id=8)
-        cls.test_user_9 = UserFromTelegram.objects.create(telegram_id=9)
-        cls.test_user_10 = UserFromTelegram.objects.create(telegram_id=10)
-        cls.sex_m = "Парень"
-        cls.sex_f = "Девушка"
-        cls.location_m = Location.objects.create(name="M")
-        cls.location_s = Location.objects.create(name="S")
-        cls.profile_1 = Profile.objects.create(
-            user=cls.test_user_1, name="Name_1", age=21, location=cls.location_m,
-            sex=cls.sex_m
-        )
-        cls.profile_2 = Profile.objects.create(
-            user=cls.test_user_2, name="Name_2", age=25, location=cls.location_m,
-            sex=cls.sex_m
-        )
-        cls.profile_3 = Profile.objects.create(
-            user=cls.test_user_3, name="Name_3", age=28, location=cls.location_m,
-            sex=cls.sex_m
-        )
-        cls.profile_4 = Profile.objects.create(
-            user=cls.test_user_4, name="Name_4", age=32, location=cls.location_m,
-            sex=cls.sex_f
-        )
-        cls.profile_5 = Profile.objects.create(
-            user=cls.test_user_5, name="Name_5", age=34, location=cls.location_m,
-            sex=cls.sex_f
-        )
-        cls.profile_6 = Profile.objects.create(
-            user=cls.test_user_6, name="Name_6", age=36, location=cls.location_s,
-            sex=cls.sex_m
-        )
-        cls.profile_7 = Profile.objects.create(
-            user=cls.test_user_7, name="Name_7", age=38, location=cls.location_s,
-            sex=cls.sex_m
-        )
-        cls.profile_8 = Profile.objects.create(
-            user=cls.test_user_8, name="Name_8", age=41, location=cls.location_s,
-            sex=cls.sex_f
-        )
-        cls.profile_9 = Profile.objects.create(
-            user=cls.test_user_9, name="Name_9", age=42, location=cls.location_s,
-            sex=cls.sex_f
-        )
-        cls.profile_10 = Profile.objects.create(
-            user=cls.test_user_10, name="Name_10", age=44, location=cls.location_s,
-            sex=cls.sex_f
-        )
+        test_users = [UserFromTelegram.objects.create(
+                                        telegram_id=id) for id in range(0, 11)]
+
+        cls.location_m = Location.objects.create(name=cls.LOCATION_M_NAME)
+        cls.location_s = Location.objects.create(name=cls.LOCATION_S_NAME)
+
+        ProfileTestData = namedtuple("ProfileTestData",
+                                     ["user", "name", "age", "location", "sex"])
+        profiles_data = (
+            ProfileTestData(test_users[0], "Name_0", 18, cls.location_m, Sex.MAN),
+            ProfileTestData(test_users[1], "Name_1", 21, cls.location_m, Sex.MAN),
+            ProfileTestData(test_users[2], "Name_2", 25, cls.location_m, Sex.MAN),
+            ProfileTestData(test_users[3], "Name_3", 28, cls.location_m, Sex.MAN),
+            ProfileTestData(test_users[4], "Name_4", 32, cls.location_m, Sex.WOMAN),
+            ProfileTestData(test_users[5], "Name_5", 34, cls.location_m, Sex.WOMAN),
+            ProfileTestData(test_users[6], "Name_6", 36, cls.location_s, Sex.MAN),
+            ProfileTestData(test_users[7], "Name_7", 38, cls.location_s, Sex.MAN),
+            ProfileTestData(test_users[8], "Name_8", 41, cls.location_s, Sex.WOMAN),
+            ProfileTestData(test_users[9], "Name_9", 42, cls.location_s, Sex.WOMAN),
+            ProfileTestData(test_users[10], "Name_10", 44, cls.location_s, Sex.WOMAN),
+            )
+        test_profiles = [
+            Profile.objects.create(**data._asdict()) for data in profiles_data
+            ]
 
         cls.expected_search_data_1 = {
             "search_criteria":
-            {"location": "M", "sex": cls.sex_m, "age_min": "20", "age_max": "30"},
+            {"location": cls.LOCATION_M_NAME, "sex": Sex.MAN,
+             "age_min": "20", "age_max": "30"},
             "search_result":
-            [{"user": 2, "name": "Name_2", "sex": cls.sex_m, "age": 25,
-              "location": "M", "about": None, "is_visible": True, "images": []},
-             {"user": 3, "name": "Name_3", "sex": cls.sex_m, "age": 28,
-              "location": "M", "about": None, "is_visible": True, "images": []},
-             ]
+            [ProfileSerializer(test_profiles[2]).data,
+             ProfileSerializer(test_profiles[3]).data,]
+
         }
         cls.expected_search_data_2 = {
             "search_criteria":
-            {"location": "M", "sex": cls.sex_f, "age_min": "30", "age_max": "40"},
+            {"location": cls.LOCATION_M_NAME, "sex": Sex.WOMAN,
+             "age_min": "30", "age_max": "40"},
             "search_result":
-            [{"user": 4, "name": "Name_4", "sex": cls.sex_f, "age": 32,
-              "location": "M", "about": None, "is_visible": True, "images": []},
-             {"user": 5, "name": "Name_5", "sex": cls.sex_f, "age": 34,
-              "location": "M", "about": None, "is_visible": True, "images": []},
-             ]
+            [ProfileSerializer(test_profiles[4]).data,
+             ProfileSerializer(test_profiles[5]).data,]
         }
         cls.expected_search_data_3 = {
             "search_criteria":
-            {"location": "S", "sex": cls.sex_m, "age_min": "35", "age_max": "40"},
+            {"location": cls.LOCATION_S_NAME, "sex": Sex.MAN,
+             "age_min": "35", "age_max": "40"},
             "search_result":
-            [{"user": 6, "name": "Name_6", "sex": cls.sex_m, "age": 36,
-              "location": "S", "about": None, "is_visible": True, "images": []},
-             {"user": 7, "name": "Name_7", "sex": cls.sex_m, "age": 38,
-              "location": "S", "about": None, "is_visible": True, "images": []},
-             ]
+            [ProfileSerializer(test_profiles[6]).data,
+             ProfileSerializer(test_profiles[7]).data,]
+
         }
         cls.expected_search_data_4 = {
             "search_criteria":
-            {"location": "S", "sex": cls.sex_f, "age_min": "40", "age_max": "50"},
+            {"location": cls.LOCATION_S_NAME, "sex": Sex.WOMAN,
+             "age_min": "40", "age_max": "50"},
             "search_result":
-            [{"user": 8, "name": "Name_8", "sex": cls.sex_f, "age": 41,
-              "location": "S", "about": None, "is_visible": True, "images": []},
-             {"user": 9, "name": "Name_9", "sex": cls.sex_f, "age": 42,
-              "location": "S", "about": None, "is_visible": True, "images": []},
-             {"user": 10, "name": "Name_10", "sex": cls.sex_f, "age": 44,
-              "location": "S", "about": None, "is_visible": True, "images": []},
-             ]
+            [ProfileSerializer(test_profiles[8]).data,
+             ProfileSerializer(test_profiles[9]).data,
+             ProfileSerializer(test_profiles[10]).data,]
         }
-
-        cls.empty_match_data = []
 
         cls.global_search_results_data = {
             1: cls.expected_search_data_1,
@@ -302,13 +267,13 @@ class ProfileSearchViewTests(APITestCase):
 
     def test_invalid_methods_match2(self):
         data = {
-            "viewer": 1, "location": "M",
-            "age_min": "25", "age_max": "35", "sex": self.sex_f
+            "viewer": 1, "location": self.LOCATION_M_NAME,
+            "age_min": "25", "age_max": "35", "sex": Sex.MAN
         }
         methods = ["post", "put", "patch", "delete"]
         for method in methods:
             with self.subTest(method=method):
-                response = self.client.generic(method, self.url_reverse, data)
+                response = self.client.generic(method, self.URL_REVERSE, data)
                 self.assertEqual(
                     response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED
                 )
@@ -322,5 +287,5 @@ class ProfileSearchViewTests(APITestCase):
                 for key, value in gsr_data["search_criteria"].items():
                     kwargs[key] = value
 
-                response = self.client.get(self.url_reverse, kwargs)
+                response = self.client.get(self.URL_REVERSE, kwargs)
                 self.assertEqual(response.json(), gsr_data["search_result"])
