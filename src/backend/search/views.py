@@ -1,4 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q
 from rest_framework import exceptions, generics
 
 from profiles.models import Profile
@@ -46,7 +47,6 @@ class MatchedUsersListView(generics.ListAPIView):
 
 class ProfilesSearchView(generics.ListAPIView):
     """Apiview для для поиска профилей."""
-
     queryset = Profile.objects.all().select_related("user", "location")
     serializer_class = ProfileSerializer
     filterset_class = ProfilesSearchFilterSet
@@ -54,17 +54,14 @@ class ProfilesSearchView(generics.ListAPIView):
     def get_queryset(self):
         try:
             user = UserFromTelegram.objects.get(
-                telegram_id=self.request.query_params.get("telegram_id", None)
-            )
+                                    telegram_id=self.request.query_params.get(
+                                                             "viewer", None))
         except ObjectDoesNotExist:
             raise exceptions.NotFound("Такого пользователя не существует.")
-
-        return (
-            super()
-            .get_queryset()
-            .filter(is_visible=True)
-            .exclude(pk__in=Profile.objects.all().filter(viewers=user))
-        )
+        excl_list = Profile.objects.filter(
+            Q(user=user) | Q(viewers=user)).values_list("pk", flat=True)
+        return super().get_queryset().filter(is_visible=True).exclude(
+                                        pk__in=excl_list).order_by('pk')
 
 
 class MatchRequestView(generics.CreateAPIView):
