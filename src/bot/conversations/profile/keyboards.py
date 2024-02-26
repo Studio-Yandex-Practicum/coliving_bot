@@ -18,6 +18,7 @@ from .buttons import (
     SPB_BUTTON,
     YES_BUTTON,
     YES_TO_DO_BUTTON,
+    CANCEL_BUTTON,
 )
 
 PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
@@ -84,5 +85,11 @@ FORM_SAVE_OR_EDIT_KEYBOARD = InlineKeyboardMarkup.from_column(
         InlineKeyboardButton(text=YES_BUTTON, callback_data=YES_BUTTON),
         InlineKeyboardButton(text=EDIT_CANCEL_BUTTON, callback_data=EDIT_CANCEL_BUTTON),
         InlineKeyboardButton(text=EDIT_RESUME_BUTTON, callback_data=EDIT_RESUME_BUTTON),
+    )
+)
+
+CANCELED_KEYBOARD = InlineKeyboardMarkup.from_row(
+    button_row=(
+        InlineKeyboardButton(text=CANCEL_BUTTON, callback_data=CANCEL_BUTTON),
     )
 )

@@ -4,7 +4,7 @@ from re import fullmatch
 from typing import Union
 
 from httpx import HTTPStatusError
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, Update
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, Update, ReplyKeyboardMarkup
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
 
@@ -46,6 +46,7 @@ async def start(
             await update.effective_message.edit_text(text=templates.ASK_AGE)
             return States.AGE
         raise exc
+
     await set_profile_to_context(update, context, profile_info)
     await update.effective_message.delete()
     await _look_at_profile(update, context, "", keyboards.PROFILE_KEYBOARD)
@@ -539,3 +540,12 @@ async def send_confirmation_request(
     await update.effective_message.reply_text(
         text=templates.FORM_SAVED,
     )
+
+
+async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Отменяет текущий диалог и возвращает в главное меню."""
+    await update.message.reply_text(
+        "Вы отменили текущую операцию. Вы можете вернуться к этому в любое время."
+    )
+
+    return ConversationHandler.END
