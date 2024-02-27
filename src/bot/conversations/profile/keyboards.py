@@ -34,6 +34,7 @@ SEX_KEYBOARD = InlineKeyboardMarkup.from_row(
     button_row=(
         InlineKeyboardButton(text=MALE_BUTTON, callback_data=MALE_BUTTON),
         InlineKeyboardButton(text=FEMALE_BUTTON, callback_data=FEMALE_BUTTON),
+        InlineKeyboardButton(text=CANCEL_BUTTON, callback_data=CANCEL_BUTTON)
     )
 )
 
@@ -88,7 +89,7 @@ FORM_SAVE_OR_EDIT_KEYBOARD = InlineKeyboardMarkup.from_column(
     )
 )
 
-CANCELED_KEYBOARD = InlineKeyboardMarkup.from_row(
+CANCEL_KEYBOARD = InlineKeyboardMarkup.from_row(
     button_row=(
         InlineKeyboardButton(text=CANCEL_BUTTON, callback_data=CANCEL_BUTTON),
     )

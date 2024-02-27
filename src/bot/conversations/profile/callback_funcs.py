@@ -3,6 +3,7 @@ from http import HTTPStatus as codes
 from re import fullmatch
 from typing import Union
 
+
 from httpx import HTTPStatusError
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, Update, ReplyKeyboardMarkup
 from telegram.constants import ParseMode
@@ -43,7 +44,11 @@ async def start(
         )
     except HTTPStatusError as exc:
         if exc.response.status_code == codes.NOT_FOUND:
-            await update.effective_message.edit_text(text=templates.ASK_AGE)
+            await update.effective_message.edit_text(
+                text=templates.ASK_AGE,
+                reply_markup=keyboards.CANCEL_KEYBOARD,
+            )
+
             return States.AGE
         raise exc
 
@@ -144,6 +149,7 @@ async def handle_sex(
     context.user_data[templates.SEX_FIELD] = sex.split()[1].capitalize()
     await update.effective_message.reply_text(
         templates.ASK_NAME,
+        reply_markup=keyboards.CANCEL_KEYBOARD,
     )
 
     return States.NAME
@@ -189,6 +195,7 @@ async def handle_location(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     context.user_data[templates.LOCATION_FIELD] = location
     await update.effective_message.reply_text(
         text=templates.ASK_ABOUT,
+        reply_markup=keyboards.CANCEL_KEYBOARD,
     )
 
     return States.ABOUT_YOURSELF
@@ -544,8 +551,9 @@ async def send_confirmation_request(
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Отменяет текущий диалог и возвращает в главное меню."""
-    await update.message.reply_text(
-        "Вы отменили текущую операцию. Вы можете вернуться к этому в любое время."
+    await update.effective_message.reply_text(
+        text=templates.PROFILE_CANCEL_TEXT,
     )
+    await update.effective_message.edit_reply_markup()
 
     return ConversationHandler.END

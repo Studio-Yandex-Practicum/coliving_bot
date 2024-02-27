@@ -165,5 +165,10 @@ profile_handler: ConversationHandler = ConversationHandler(
             ),
         ],
     },
-    fallbacks=[],
+    fallbacks=[
+        CallbackQueryHandler(
+            callback=callback_funcs.cancel,
+            pattern=rf"^{buttons.CANCEL_BUTTON}",
+        ),
+    ],
 )
