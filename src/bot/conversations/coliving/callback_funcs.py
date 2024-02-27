@@ -331,6 +331,10 @@ async def handle_photo_room(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     if update.message.text:
         await update.effective_message.reply_text(text=templates.ERR_PHOTO_NOT_TEXT)
         return states.PHOTO_ROOM
+
+    coliving_id = context.user_data["coliving_info"].id  # добавлено мной
+    await api_service.delete_coliving_photos(coliving_id)  # добавлено мной
+
     photo = update.effective_message.photo[-1]
     context.user_data["coliving_info"].images.append(
         Image(file_id=photo.file_id, photo_size=photo)

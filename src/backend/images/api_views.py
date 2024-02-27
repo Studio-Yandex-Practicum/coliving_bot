@@ -47,6 +47,22 @@ class BaseImageView(generics.ListCreateAPIView, generics.DestroyAPIView):
             raise NotFound(detail="Коливинг не найден", code=status.HTTP_404_NOT_FOUND)
         return telegram_user_colivings.first()
 
+    def destroy(self, request, *args, **kwargs):
+        if "coliving_id" in self.kwargs:
+            # Удаление всех фотографий коливинга
+            queryset = ColivingImage.objects.filter(
+                coliving_id=self.kwargs["coliving_id"]
+            )
+        elif "telegram_id" in self.kwargs:
+            # Удаление всех фотографий профиля
+            profile = get_object_or_404(Profile, user=self._get_telegram_user())
+            queryset = ProfileImage.objects.filter(profile=profile)
+        else:
+            return Response(status=status.HTTP_400_BAD_BAD_REQUEST)
+        # Удаление объектов
+        queryset.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class ProfileImageView(BaseImageView):
     """
@@ -76,14 +92,6 @@ class ProfileImageView(BaseImageView):
                 Profile, user__telegram_id=self.kwargs.get("telegram_id")
             )
         )
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def perform_destroy(self, instance):
-        instance.delete()
 
 
 class ColivingImageView(BaseImageView):

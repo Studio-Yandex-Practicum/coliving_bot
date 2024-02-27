@@ -262,17 +262,34 @@ async def _look_at_profile(
         )
         + "\n"
     )
+    # received_photos = context.user_data.get(templates.RECEIVED_PHOTOS_FIELD, [])
+    # media_group = [InputMediaPhoto(file_id) for file_id in received_photos]
+    # await update.effective_chat.send_media_group(
+    #     media=media_group,
+    #     caption=message_text,
+    #     parse_mode=ParseMode.HTML,
+    # )
+    # await context.bot.send_message(
+    #     chat_id=chat_id,
+    #     text=ask_text,
+    #     reply_markup=keyboard,
+    # )
     received_photos = context.user_data.get(templates.RECEIVED_PHOTOS_FIELD, [])
-    media_group = [InputMediaPhoto(file_id) for file_id in received_photos]
-    await update.effective_chat.send_media_group(
-        media=media_group,
-        caption=message_text,
-        parse_mode=ParseMode.HTML,
-    )
+    if received_photos:
+        # Если есть фото для отправки
+        media_group = [InputMediaPhoto(file_id) for file_id in received_photos]
+        await update.effective_chat.send_media_group(
+            media=media_group, caption=message_text, parse_mode=ParseMode.HTML
+        )
+    else:
+        # Если фото нет, отправляем только текст
+        await update.effective_chat.send_message(
+            text=message_text, parse_mode=ParseMode.HTML
+        )
+
+    # Отправляем сообщение с вопросом после предварительного просмотра
     await context.bot.send_message(
-        chat_id=chat_id,
-        text=ask_text,
-        reply_markup=keyboard,
+        chat_id=chat_id, text=ask_text, reply_markup=keyboard
     )
 
 
@@ -282,6 +299,7 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     Переводит диалог в состояние CONFIRMATION (анкета верна или нет)
     """
     file_id = update.effective_message.photo[-1].file_id
+
     new_file = await context.bot.get_file(file_id)
     photo_bytearray = await new_file.download_as_bytearray()
     await api_service.save_photo(
@@ -426,6 +444,7 @@ async def handle_edit_about(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     Обрабатывает отредактированную пользователем информацию о себе.
     Переводит диалог в состояние EDIT_CONFIRMATION (анкета верна или нет).
     """
+
     about = update.message.text
     if not await value_is_in_range_validator(
         update,
@@ -437,7 +456,7 @@ async def handle_edit_about(update: Update, context: ContextTypes.DEFAULT_TYPE) 
             max=templates.MAX_ABOUT_LENGTH
         ),
     ):
-        return States.ABOUT_YOURSELF
+        return States.ABOUT_YOURSEL
     context.user_data[templates.ABOUT_FIELD] = about
     await _look_at_profile(
         update,
@@ -455,6 +474,10 @@ async def handle_edit_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     Обрабатывает отредактированную пользователем фотографию.
     Переводит диалог в состояние EDIT_CONFIRMATION (анкета верна или нет).
     """
+    #print(len(update.message.photo))
+    telegram_id = update.effective_chat.id
+    await api_service.delete_profile_photos(telegram_id)
+
     file_id = update.effective_message.photo[-1].file_id
     new_file = await context.bot.get_file(file_id)
     photo_bytearray = await new_file.download_as_bytearray()
