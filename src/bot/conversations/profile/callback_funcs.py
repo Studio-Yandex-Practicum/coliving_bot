@@ -474,7 +474,6 @@ async def handle_edit_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     Обрабатывает отредактированную пользователем фотографию.
     Переводит диалог в состояние EDIT_CONFIRMATION (анкета верна или нет).
     """
-    #print(len(update.message.photo))
     telegram_id = update.effective_chat.id
     await api_service.delete_profile_photos(telegram_id)
 
