@@ -180,7 +180,9 @@ async def handle_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     context.user_data[templates.NAME_FIELD] = name
     await update.effective_message.reply_text(
         text=templates.ASK_LOCATION,
-        reply_markup=keyboards.LOCATION_KEYBOARD,
+        reply_markup=combine_keyboards(
+            keyboards.LOCATION_KEYBOARD,
+            keyboards.CANCEL_KEYBOARD),
     )
 
     return States.LOCATION
@@ -381,6 +383,7 @@ async def start_filling_again(
     await _send_chosen_choice_and_remove_buttons(update=update)
     await update.effective_message.reply_text(
         text=templates.ASK_AGE_AGAIN,
+        reply_markup=keyboards.CANCEL_KEYBOARD,
     )
 
     return States.AGE
@@ -395,6 +398,7 @@ async def send_question_to_edit_about_myself(
     await _send_chosen_choice_and_remove_buttons(update=update)
     await update.effective_message.reply_text(
         text=templates.ASK_ABOUT,
+        reply_markup=keyboards.CANCEL_KEYBOARD,
     )
 
     return States.EDIT_ABOUT_YOURSELF
