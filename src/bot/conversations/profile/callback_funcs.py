@@ -566,6 +566,13 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 
 def combine_keyboards(keyboard1, keyboard2):
+    """
+    Объединяет две клавиатуры типа InlineKeyboardMarkup в одну клавиатуру.
+
+    :param keyboard1: Первая клавиатура для объединения.
+    :param keyboard2: Вторая клавиатура для объединения.
+    :return: Объединенная клавиатура типа InlineKeyboardMarkup.
+    """
     combined_keyboard = InlineKeyboardMarkup(inline_keyboard=[
         *keyboard1.inline_keyboard,
         *keyboard2.inline_keyboard
