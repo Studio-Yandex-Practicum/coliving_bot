@@ -2,7 +2,6 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from .buttons import (
     ABOUT_BUTTON,
-    BACK_BUTTON,
     EDIT_CANCEL_BUTTON,
     EDIT_FORM_BUTTON,
     EDIT_RESUME_BUTTON,
@@ -19,13 +18,17 @@ from .buttons import (
     YES_BUTTON,
     YES_TO_DO_BUTTON,
 )
+from conversations.templates import BTN_LABEL_GO_TO_MENU
 
 PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         InlineKeyboardButton(text=SHOW_SEARCH_BUTTON, callback_data="is_visible:True"),
         InlineKeyboardButton(text=HIDE_SEARCH_BUTTON, callback_data="is_visible:False"),
         InlineKeyboardButton(text=EDIT_FORM_BUTTON, callback_data=EDIT_FORM_BUTTON),
-        InlineKeyboardButton(text=BACK_BUTTON, callback_data=BACK_BUTTON),
+        InlineKeyboardButton(
+            text=BTN_LABEL_GO_TO_MENU,
+            callback_data=BTN_LABEL_GO_TO_MENU
+        ),
     )
 )
 

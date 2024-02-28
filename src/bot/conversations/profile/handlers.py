@@ -8,6 +8,7 @@ from telegram.ext import (
 import conversations.profile.buttons as buttons
 import conversations.profile.callback_funcs as callback_funcs
 import conversations.profile.templates as templates
+from conversations.templates import BTN_LABEL_GO_TO_MENU
 from conversations.menu.buttons import MY_PROFILE_BUTTON
 from conversations.profile.states import States
 from general.validators import (
@@ -37,7 +38,7 @@ profile_handler: ConversationHandler = ConversationHandler(
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.send_question_to_back_in_menu,
-                pattern=rf"^{buttons.BACK_BUTTON}",
+                pattern=rf"^{BTN_LABEL_GO_TO_MENU}",
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
