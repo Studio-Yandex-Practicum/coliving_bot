@@ -3,9 +3,14 @@ from http import HTTPStatus as codes
 from re import fullmatch
 from typing import Union
 
-
 from httpx import HTTPStatusError
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, Update, ReplyKeyboardMarkup
+from telegram import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    InputMediaPhoto,
+    ReplyKeyboardMarkup,
+    Update,
+)
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
 
@@ -131,8 +136,8 @@ async def handle_age(
     await update.effective_message.reply_text(
         templates.ASK_SEX,
         reply_markup=combine_keyboards(
-            keyboards.SEX_KEYBOARD,
-            keyboards.CANCEL_KEYBOARD),
+            keyboards.SEX_KEYBOARD, keyboards.CANCEL_KEYBOARD
+        ),
     )
 
     return States.SEX
@@ -181,8 +186,8 @@ async def handle_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     await update.effective_message.reply_text(
         text=templates.ASK_LOCATION,
         reply_markup=combine_keyboards(
-            keyboards.LOCATION_KEYBOARD,
-            keyboards.CANCEL_KEYBOARD),
+            keyboards.LOCATION_KEYBOARD, keyboards.CANCEL_KEYBOARD
+        ),
     )
 
     return States.LOCATION
@@ -573,9 +578,8 @@ def combine_keyboards(keyboard1, keyboard2):
     :param keyboard2: Вторая клавиатура для объединения.
     :return: Объединенная клавиатура типа InlineKeyboardMarkup.
     """
-    combined_keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        *keyboard1.inline_keyboard,
-        *keyboard2.inline_keyboard
-    ])
+    combined_keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[*keyboard1.inline_keyboard, *keyboard2.inline_keyboard]
+    )
 
     return combined_keyboard
