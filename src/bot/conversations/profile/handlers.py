@@ -116,6 +116,26 @@ profile_handler: ConversationHandler = ConversationHandler(
                 pattern=rf"^{buttons.FILL_AGAIN_BUTTON}",
             ),
             CallbackQueryHandler(
+                callback=callback_funcs.send_question_to_back_to_profile,
+                pattern=rf"^{buttons.BACK_BUTTON}",
+            ),
+            CallbackQueryHandler(
+                callback=callback_funcs.send_question_to_edit_name,
+                pattern=rf"^{buttons.NEW_NAME_NEW_BEGINNING_BUTTON}",
+            ),
+            CallbackQueryHandler(
+                callback=callback_funcs.send_question_to_edit_sex,
+                pattern=rf"^{buttons.SEX_BUTTON}",
+            ),
+            CallbackQueryHandler(
+                callback=callback_funcs.send_question_to_edit_age,
+                pattern=rf"^{buttons.AGE_BUTTON}",
+            ),
+            CallbackQueryHandler(
+                callback=callback_funcs.send_question_to_edit_location,
+                pattern=rf"^{buttons.LOCATION_BUTTON}",
+            ),
+            CallbackQueryHandler(
                 callback=callback_funcs.send_question_to_edit_about_myself,
                 pattern=rf"^{buttons.ABOUT_BUTTON}",
             ),
@@ -127,6 +147,26 @@ profile_handler: ConversationHandler = ConversationHandler(
                 filters.TEXT & ~filters.COMMAND,
                 handle_text_input_instead_of_choosing_button,
             ),
+        ],
+        States.EDIT_NAME: [
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND, callback_funcs.handle_edit_name
+            )
+        ],
+        States.EDIT_SEX: [
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND, callback_funcs.handle_edit_sex
+            )
+        ],
+        States.EDIT_AGE: [
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND, callback_funcs.handle_edit_age
+            )
+        ],
+        States.EDIT_LOCATION: [
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND, callback_funcs.handle_edit_location
+            )
         ],
         States.EDIT_ABOUT_YOURSELF: [
             MessageHandler(

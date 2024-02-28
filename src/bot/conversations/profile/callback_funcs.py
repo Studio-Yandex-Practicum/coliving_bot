@@ -99,6 +99,18 @@ async def send_question_to_edit_profile(
     return States.EDIT
 
 
+async def send_question_to_back_to_profile(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> Union[int, States]:
+    """
+    Обработка кнопки 'Вернуться'.
+    Переводит диалог в состояние PROFILE.
+    """
+    await _send_chosen_choice_and_remove_buttons(update=update)
+
+    return States.PROFILE
+
+
 async def send_question_to_back_in_menu(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> Union[int, States]:
@@ -347,6 +359,63 @@ async def start_filling_again(
     return States.AGE
 
 
+async def send_question_to_edit_name(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """
+    Обработка кнопки 'Имя'.
+    """
+    await _send_chosen_choice_and_remove_buttons(update=update)
+    await update.effective_message.reply_text(
+        text=templates.ASK_NEW_NAME,
+    )
+
+    return States.EDIT_NAME
+
+
+async def send_question_to_edit_sex(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """
+    Обработка кнопки 'Пол'.
+    """
+    await _send_chosen_choice_and_remove_buttons(update=update)
+    await update.effective_message.reply_text(
+        text=templates.ASK_SEX_AGAIN,
+    )
+
+    return States.EDIT_SEX
+    
+
+async def send_question_to_edit_age(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """
+    Обработка кнопки 'Возраст'.
+    """
+    await _send_chosen_choice_and_remove_buttons(update=update)
+    await update.effective_message.reply_text(
+        text=templates.ASK_AGE_AGAIN,
+    )
+
+    return States.EDIT_AGE
+
+
+async def send_question_to_edit_location(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """
+    Обработка кнопки 'Место проживания'.
+    """
+    await _send_chosen_choice_and_remove_buttons(update=update)
+    await update.effective_message.reply_text(
+        text=templates.ASK_NEW_LOCATION,
+    )
+
+    return States.EDIT_LOCATION
+
+
+
 async def send_question_to_edit_about_myself(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -384,6 +453,107 @@ async def _send_chosen_choice_and_remove_buttons(update: Update) -> None:
     choice_text = callback_query.data
     await callback_query.message.edit_reply_markup()
     await callback_query.message.reply_text(text=choice_text)
+
+
+async def handle_edit_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """
+    Обрабатывает отредактированное пользователем имя.
+    Переводит диалог в состояние EDIT_CONFIRMATION (анкета верна или нет).
+    """
+    name = update.message.text.strip()
+    if not fullmatch(templates.NAME_PATTERN, name):
+        await update.effective_message.reply_text(text=templates.NAME_SYMBOL_ERROR_MSG)
+        return States.NAME
+    if not await value_is_in_range_validator(
+        update=update,
+        context=context,
+        value=len(name),
+        min=templates.MIN_NAME_LENGTH,
+        max=templates.MAX_NAME_LENGTH,
+        message=templates.NAME_LENGHT_ERROR_MSG.format(
+            min=templates.MIN_NAME_LENGTH, max=templates.MAX_NAME_LENGTH
+        ),
+    ):
+        return States.NAME
+    context.user_data[templates.NAME_FIELD] = name
+    await _look_at_profile(
+        update,
+        context,
+        templates.LOOK_AT_FORM_SECOND,
+        keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
+        True,
+    )
+
+    return States.EDIT_CONFIRMATION
+
+
+async def handle_edit_sex(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """
+    Обрабатывает отредактированную информацию касательно пола.
+    Переводит диалог в состояние EDIT_CONFIRMATION (анкета верна или нет).
+    """
+    sex = update.callback_query.data
+    await update.effective_message.reply_text(text=sex)
+    await update.effective_message.edit_reply_markup()
+    context.user_data[templates.SEX_FIELD] = sex.split()[1].capitalize()
+    await _look_at_profile(
+        update,
+        context,
+        templates.LOOK_AT_FORM_SECOND,
+        keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
+        True,
+    )
+
+    return States.EDIT_CONFIRMATION
+
+
+async def handle_edit_age(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """
+    Обрабатывает отредактированный возраст.
+    Переводит диалог в состояние EDIT_CONFIRMATION (анкета верна или нет).
+    """
+    age = update.message.text
+    if not await value_is_in_range_validator(
+        update=update,
+        context=context,
+        value=age,
+        min=templates.MIN_AGE,
+        max=templates.MAX_AGE,
+        message=templates.AGE_ERROR_MSG.format(
+            min=templates.MIN_AGE, max=templates.MAX_AGE
+        ),
+    ):
+        return States.AGE
+    context.user_data[templates.AGE_FIELD] = int(age)
+    await _look_at_profile(
+        update,
+        context,
+        templates.LOOK_AT_FORM_SECOND,
+        keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
+        True,
+    )
+
+    return States.EDIT_CONFIRMATION
+
+
+async def handle_edit_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """
+    Обрабатывает отредактированный город.
+    Переводит диалог в состояние EDIT_CONFIRMATION (анкета верна или нет).
+    """
+    location = update.callback_query.data
+    await update.effective_message.reply_text(text=location)
+    await update.effective_message.edit_reply_markup()
+    context.user_data[templates.LOCATION_FIELD] = location
+    await _look_at_profile(
+        update,
+        context,
+        templates.LOOK_AT_FORM_SECOND,
+        keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
+        True,
+    )
+
+    return States.EDIT_CONFIRMATION
 
 
 async def handle_edit_about(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
