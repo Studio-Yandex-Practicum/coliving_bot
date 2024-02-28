@@ -130,7 +130,7 @@ async def handle_age(
     context.user_data[templates.AGE_FIELD] = int(age)
     await update.effective_message.reply_text(
         templates.ASK_SEX,
-        reply_markup=keyboards.SEX_KEYBOARD,
+        reply_markup=create_sex_cancel_keyboard(),
     )
 
     return States.SEX
@@ -550,10 +550,32 @@ async def send_confirmation_request(
 
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Отменяет текущий диалог и возвращает в главное меню."""
+    """Отменяет текущий диалог."""
     await update.effective_message.reply_text(
-        text=templates.PROFILE_CANCEL_TEXT,
+        text=templates.CANCEL_TEXT,
     )
     await update.effective_message.edit_reply_markup()
 
     return ConversationHandler.END
+
+
+def create_sex_cancel_keyboard():
+    sex_keyboard = InlineKeyboardMarkup.from_row(
+        button_row=(
+            InlineKeyboardButton(text=buttons.MALE_BUTTON, callback_data=buttons.MALE_BUTTON),
+            InlineKeyboardButton(text=buttons.FEMALE_BUTTON, callback_data=buttons.FEMALE_BUTTON),
+        )
+    )
+
+    cancel_keyboard = InlineKeyboardMarkup.from_row(
+        button_row=(
+            InlineKeyboardButton(text=buttons.CANCEL_BUTTON, callback_data=buttons.CANCEL_BUTTON),
+        )
+    )
+
+    sex_cancel_keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        *sex_keyboard.inline_keyboard,
+        *cancel_keyboard.inline_keyboard
+    ])
+
+    return sex_cancel_keyboard

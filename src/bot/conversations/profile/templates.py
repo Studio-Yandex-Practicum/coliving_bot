@@ -70,4 +70,4 @@ PROFILE_DATA = (
 PROFILE_IS_VISIBLE_TEXT = "Отображается в поиске"
 PROFILE_IS_INVISIBLE_TEXT = "Скрыта из поиска"
 
-PROFILE_CANCEL_TEXT = "Хорошо, вы можете вернуться к этому в любой момент."
+CANCEL_TEXT = "Хорошо, вы можете вернуться к этому в любой момент."
