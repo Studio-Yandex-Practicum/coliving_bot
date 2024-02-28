@@ -12,6 +12,7 @@ import conversations.profile.buttons as buttons
 import conversations.profile.keyboards as keyboards
 import conversations.profile.templates as templates
 from conversations.profile.states import States
+from conversations.menu.callback_funcs import menu
 from general.validators import value_is_in_range_validator
 from internal_requests import api_service
 
@@ -93,13 +94,12 @@ async def send_question_to_edit_profile(
 async def send_question_to_back_in_menu(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> Union[int, States]:
-    """
-    Обработка кнопки 'Вернуться'.
-    Переводит диалог в состояние MENU.
-    """
-    await _send_chosen_choice_and_remove_buttons(update=update)
+    """Обработка ответа: Вернуться в меню."""
 
-    return ConversationHandler.END  # MENU
+    await update.effective_message.edit_reply_markup()
+    await menu(update, context)
+
+    return ConversationHandler.END
 
 
 async def handle_age(
