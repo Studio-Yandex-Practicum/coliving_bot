@@ -1,5 +1,7 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
+from conversations.templates import BTN_LABEL_GO_TO_MENU
+
 from .buttons import (
     ABOUT_BUTTON,
     EDIT_CANCEL_BUTTON,
@@ -18,7 +20,6 @@ from .buttons import (
     YES_BUTTON,
     YES_TO_DO_BUTTON,
 )
-from conversations.templates import BTN_LABEL_GO_TO_MENU
 
 PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(

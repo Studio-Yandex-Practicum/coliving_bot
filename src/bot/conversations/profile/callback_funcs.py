@@ -11,8 +11,8 @@ from telegram.ext import ContextTypes, ConversationHandler
 import conversations.profile.buttons as buttons
 import conversations.profile.keyboards as keyboards
 import conversations.profile.templates as templates
-from conversations.profile.states import States
 from conversations.menu.callback_funcs import menu
+from conversations.profile.states import States
 from general.validators import value_is_in_range_validator
 from internal_requests import api_service
 

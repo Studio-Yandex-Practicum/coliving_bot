@@ -8,9 +8,9 @@ from telegram.ext import (
 import conversations.profile.buttons as buttons
 import conversations.profile.callback_funcs as callback_funcs
 import conversations.profile.templates as templates
-from conversations.templates import BTN_LABEL_GO_TO_MENU
 from conversations.menu.buttons import MY_PROFILE_BUTTON
 from conversations.profile.states import States
+from conversations.templates import BTN_LABEL_GO_TO_MENU
 from general.validators import (
     handle_text_input_instead_of_choosing_button,
     handle_text_input_instead_of_send_photo,
