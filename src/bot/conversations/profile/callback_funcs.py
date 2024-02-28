@@ -130,7 +130,9 @@ async def handle_age(
     context.user_data[templates.AGE_FIELD] = int(age)
     await update.effective_message.reply_text(
         templates.ASK_SEX,
-        reply_markup=create_sex_cancel_keyboard(),
+        reply_markup=combine_keyboards(
+            keyboards.SEX_KEYBOARD,
+            keyboards.CANCEL_KEYBOARD),
     )
 
     return States.SEX
@@ -559,23 +561,10 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     return ConversationHandler.END
 
 
-def create_sex_cancel_keyboard():
-    sex_keyboard = InlineKeyboardMarkup.from_row(
-        button_row=(
-            InlineKeyboardButton(text=buttons.MALE_BUTTON, callback_data=buttons.MALE_BUTTON),
-            InlineKeyboardButton(text=buttons.FEMALE_BUTTON, callback_data=buttons.FEMALE_BUTTON),
-        )
-    )
-
-    cancel_keyboard = InlineKeyboardMarkup.from_row(
-        button_row=(
-            InlineKeyboardButton(text=buttons.CANCEL_BUTTON, callback_data=buttons.CANCEL_BUTTON),
-        )
-    )
-
-    sex_cancel_keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        *sex_keyboard.inline_keyboard,
-        *cancel_keyboard.inline_keyboard
+def combine_keyboards(keyboard1, keyboard2):
+    combined_keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        *keyboard1.inline_keyboard,
+        *keyboard2.inline_keyboard
     ])
 
-    return sex_cancel_keyboard
+    return combined_keyboard
