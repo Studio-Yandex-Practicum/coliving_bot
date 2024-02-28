@@ -8,7 +8,6 @@ from telegram import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
     InputMediaPhoto,
-    ReplyKeyboardMarkup,
     Update,
 )
 from telegram.constants import ParseMode
