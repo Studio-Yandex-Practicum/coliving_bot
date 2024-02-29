@@ -136,9 +136,7 @@ profile_handler: ConversationHandler = ConversationHandler(
             )
         ],
         States.EDIT_PHOTO: [
-            MessageHandler(
-                filters.PHOTO, callback_funcs.handle_edit_photo
-            ),  # ,было изменено
+            MessageHandler(filters.PHOTO, callback_funcs.handle_edit_photo),
             CallbackQueryHandler(
                 pattern=rf"^{buttons.SAVE_EDITED_PHOTO_BUTTON}",
                 callback=callback_funcs.send_edited_photos,

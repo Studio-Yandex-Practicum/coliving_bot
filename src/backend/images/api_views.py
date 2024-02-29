@@ -18,7 +18,7 @@ from .serializers import (
 )
 
 
-class BaseImageView(generics.ListCreateAPIView, generics.DestroyAPIView):
+class BaseImageView(generics.ListCreateAPIView):
     """
     Базовый вью-класс объектов 'ProfileImage', 'ColivingImage'.
     Позволяет получать список изображений, создавать новые,
@@ -47,20 +47,9 @@ class BaseImageView(generics.ListCreateAPIView, generics.DestroyAPIView):
             raise NotFound(detail="Коливинг не найден", code=status.HTTP_404_NOT_FOUND)
         return telegram_user_colivings.first()
 
-    def destroy(self, request, *args, **kwargs):
-        if "coliving_id" in self.kwargs:
-            # Удаление всех фотографий коливинга
-            queryset = ColivingImage.objects.filter(
-                coliving_id=self.kwargs["coliving_id"]
-            )
-        elif "telegram_id" in self.kwargs:
-            # Удаление всех фотографий профиля
-            profile = get_object_or_404(Profile, user=self._get_telegram_user())
-            queryset = ProfileImage.objects.filter(profile=profile)
-        else:
-            return Response(status=status.HTTP_400_BAD_BAD_REQUEST)
-        # Удаление объектов
-        queryset.delete()
+    def delete(self, request, *args, **kwargs):
+        images = self.get_queryset()
+        images.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
