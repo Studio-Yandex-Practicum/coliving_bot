@@ -1,9 +1,8 @@
 from copy import copy
-from http import HTTPStatus as codes
 from re import fullmatch
 from typing import Union
 
-from httpx import HTTPStatusError
+from httpx import HTTPStatusError, codes
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
@@ -17,7 +16,6 @@ from internal_requests import api_service
 
 
 async def set_profile_to_context(
-    update: Update,
     context: ContextTypes.DEFAULT_TYPE,
     profile_info,
 ) -> None:
@@ -46,7 +44,7 @@ async def start(
             await update.effective_message.edit_text(text=templates.ASK_AGE)
             return States.AGE
         raise exc
-    await set_profile_to_context(update, context, profile_info)
+    await set_profile_to_context(context, profile_info)
     await update.effective_message.delete()
     await _look_at_profile(update, context, "", keyboards.PROFILE_KEYBOARD)
     return States.PROFILE
@@ -75,7 +73,7 @@ async def send_question_to_profile_is_visible_in_search(
 
 
 async def send_question_to_edit_profile(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> Union[int, States]:
     """
     Обработка кнопки 'Скрыть из поиска'.
@@ -91,7 +89,7 @@ async def send_question_to_edit_profile(
 
 
 async def send_question_to_back_in_menu(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> Union[int, States]:
     """
     Обработка кнопки 'Вернуться'.
@@ -346,7 +344,7 @@ async def send_received_photos(
     return States.PHOTO
 
 
-async def handle_profile(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def handle_profile(update: Update, _context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Выводит сообщение с заполненным профилем.
     Вызывает метод для отправки запроса на видимость анкеты,
@@ -385,13 +383,13 @@ async def handle_visible(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await api_service.update_user_profile(
             update.effective_chat.id, context.user_data
         )
-    await send_confirmation_request(update, context)
+    await send_profile_saved_notification(update, context)
 
     return ConversationHandler.END
 
 
 async def start_filling_again(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """
     Обработка кнопки 'Заполнить заново.'.
@@ -405,7 +403,7 @@ async def start_filling_again(
 
 
 async def send_question_to_edit_about_myself(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """
     Обработка кнопки 'О себе.'.
@@ -419,7 +417,7 @@ async def send_question_to_edit_about_myself(
 
 
 async def send_question_to_edit_photo(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """
     Обработка кнопки 'Фотографию.'.
@@ -465,7 +463,7 @@ async def handle_edit_about(update: Update, context: ContextTypes.DEFAULT_TYPE) 
             max=templates.MAX_ABOUT_LENGTH
         ),
     ):
-        return States.ABOUT_YOURSEL
+        return States.ABOUT_YOURSELF
     context.user_data[templates.ABOUT_FIELD] = about
     await _look_at_profile(
         update,
@@ -511,12 +509,12 @@ async def send_question_to_profile_is_correct(
             filename=new_file.file_path,
             file_id=file_id,
         )
-    await send_confirmation_request(update, context)
+    await send_profile_saved_notification(update, context)
     return ConversationHandler.END
 
 
 async def send_question_to_cancel_profile_edit(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """
     Спрашивает верна ли анкета.
@@ -532,7 +530,7 @@ async def send_question_to_cancel_profile_edit(
 
 
 async def send_question_to_resume_profile_edit(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """
     Спрашивает верна ли анкета.
@@ -547,12 +545,13 @@ async def send_question_to_resume_profile_edit(
     return States.EDIT
 
 
-async def send_confirmation_request(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
+async def send_profile_saved_notification(
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> None:
     """
-    Отправляет сохраняет профиль в базе данных.
+    Отправляет сообщение о том, что профиль сохранён в БД.
     """
     await update.effective_message.reply_text(
         text=templates.FORM_SAVED,
+        parse_mode=ParseMode.HTML,
     )
