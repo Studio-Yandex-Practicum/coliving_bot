@@ -10,6 +10,7 @@ import conversations.coliving.keyboards as keyboards
 import conversations.coliving.states as states
 import conversations.coliving.templates as templates
 from conversations.coliving.templates import format_coliving_profile_message
+from conversations.menu.callback_funcs import menu
 from general.validators import value_is_in_range_validator
 from internal_requests import api_service
 from internal_requests.entities import Coliving, Image
@@ -164,26 +165,13 @@ async def handle_coliving_transfer_to(
     return ConversationHandler.END
 
 
-async def handle_coliving_go_to_menu(
-    update: Update, _context: ContextTypes.DEFAULT_TYPE
+async def handle_return_to_menu_response(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """Обработка ответа: Вернуться в меню."""
-
-    #############################################################
-    # states.MENU
-    # заглушка
     await update.effective_message.edit_reply_markup()
-    await update.effective_message.reply_text(
-        text=(
-            "Заглушка. По идее здесь переход "
-            "в МЕНЮ на state.MENU"
-            "\n"
-            "\n"
-            "Нажмите /coliving"
-        )
-    )
-    # return states.MENU
-    #############################################################
+    context.user_data.clear()
+    await menu(update, context)
     return ConversationHandler.END
 
 

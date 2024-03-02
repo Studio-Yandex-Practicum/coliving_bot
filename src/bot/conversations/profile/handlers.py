@@ -10,6 +10,7 @@ import conversations.profile.callback_funcs as callback_funcs
 import conversations.profile.templates as templates
 from conversations.menu.buttons import MY_PROFILE_BUTTON
 from conversations.profile.states import States
+from conversations.templates import BTN_LABEL_GO_TO_MENU
 from general.validators import (
     handle_text_input_instead_of_choosing_button,
     handle_text_input_instead_of_send_photo,
@@ -36,8 +37,8 @@ profile_handler: ConversationHandler = ConversationHandler(
                 pattern=rf"^{buttons.EDIT_FORM_BUTTON}",
             ),
             CallbackQueryHandler(
-                callback=callback_funcs.send_question_to_back_in_menu,
-                pattern=rf"^{buttons.BACK_BUTTON}",
+                callback=callback_funcs.handle_return_to_menu_response,
+                pattern=rf"^{BTN_LABEL_GO_TO_MENU}",
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,

@@ -80,7 +80,6 @@ BTN_LABEL_VIEWS = "Просмотры"
 BTN_TRANSFER_TO = "transfer_to"
 BTN_LABEL_TRANSFER_TO = "Передача коливинга"
 BTN_GO_TO_MENU = "go_to_menu"
-BTN_LABEL_GO_TO_MENU = "Вернуться в меню"
 
 LOCATION_CALLBACK_DATA = "select_location"
 
