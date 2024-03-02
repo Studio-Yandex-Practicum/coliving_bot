@@ -37,7 +37,7 @@ profile_handler: ConversationHandler = ConversationHandler(
                 pattern=rf"^{buttons.EDIT_FORM_BUTTON}",
             ),
             CallbackQueryHandler(
-                callback=callback_funcs.send_question_to_back_in_menu,
+                callback=callback_funcs.handle_return_to_menu_response,
                 pattern=rf"^{BTN_LABEL_GO_TO_MENU}",
             ),
             MessageHandler(

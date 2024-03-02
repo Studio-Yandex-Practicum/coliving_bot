@@ -91,14 +91,14 @@ async def send_question_to_edit_profile(
     return States.EDIT
 
 
-async def send_question_to_back_in_menu(
+async def handle_return_to_menu_response(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> Union[int, States]:
     """Обработка ответа: Вернуться в меню."""
 
     await update.effective_message.edit_reply_markup()
+    context.user_data.clear()
     await menu(update, context)
-
     return ConversationHandler.END
 
 

@@ -195,8 +195,8 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 pattern=r"^transfer_to",
             ),
             CallbackQueryHandler(
-                callback=callback_funcs.handle_coliving_go_to_menu,
-                pattern=r"^go_to_menu"
+                callback=callback_funcs.handle_return_to_menu_response,
+                pattern=r"^go_to_menu",
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,

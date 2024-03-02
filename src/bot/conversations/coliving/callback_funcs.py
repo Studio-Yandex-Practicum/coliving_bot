@@ -165,13 +165,13 @@ async def handle_coliving_transfer_to(
     return ConversationHandler.END
 
 
-async def handle_coliving_go_to_menu(
-    update: Update, _context: ContextTypes.DEFAULT_TYPE
+async def handle_return_to_menu_response(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """Обработка ответа: Вернуться в меню."""
     await update.effective_message.edit_reply_markup()
-    await menu(update, _context)
-
+    context.user_data.clear()
+    await menu(update, context)
     return ConversationHandler.END
 
 
