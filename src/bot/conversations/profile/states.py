@@ -1,7 +1,7 @@
 import enum
 
 
-class States(str, enum.Enum):
+class States(int, enum.Enum):
     """Класс, описывающий состояния бота."""
 
     (
