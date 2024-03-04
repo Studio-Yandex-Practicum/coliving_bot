@@ -219,7 +219,9 @@ async def handle_location(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     await update.effective_message.reply_text(text=f"{templates.REPLY_MSG}{location}")
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_ROOM_TYPE,
-        reply_markup=keyboards.ROOM_TYPE_KEYBOARD,
+        reply_markup=common_funcs.combine_keyboards(
+            keyboards.ROOM_TYPE_KEYBOARD, common_keyboards.CANCEL_KEYBOARD
+        ),
     )
     return states.ROOM_TYPE
 
