@@ -7,6 +7,7 @@ from telegram.ext import (
 
 import conversations.profile.buttons as buttons
 import conversations.profile.callback_funcs as callback_funcs
+import conversations.common_functions.common_funcs as common_funcs
 import conversations.profile.templates as templates
 from conversations.menu.buttons import MY_PROFILE_BUTTON
 from conversations.profile.states import States
@@ -167,7 +168,7 @@ profile_handler: ConversationHandler = ConversationHandler(
     },
     fallbacks=[
         CallbackQueryHandler(
-            callback=callback_funcs.cancel,
+            callback=common_funcs.cancel,
             pattern=rf"^{buttons.CANCEL_BUTTON}",
         ),
     ],

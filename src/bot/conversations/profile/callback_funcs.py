@@ -8,6 +8,8 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
 
+import conversations.common_functions.common_funcs as common_funcs
+
 import conversations.profile.buttons as buttons
 import conversations.profile.keyboards as keyboards
 import conversations.profile.templates as templates
@@ -129,7 +131,7 @@ async def handle_age(
     context.user_data[templates.AGE_FIELD] = int(age)
     await update.effective_message.reply_text(
         templates.ASK_SEX,
-        reply_markup=combine_keyboards(
+        reply_markup=common_funcs.combine_keyboards(
             keyboards.SEX_KEYBOARD, keyboards.CANCEL_KEYBOARD
         ),
     )
@@ -179,7 +181,7 @@ async def handle_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     context.user_data[templates.NAME_FIELD] = name
     await update.effective_message.reply_text(
         text=templates.ASK_LOCATION,
-        reply_markup=combine_keyboards(
+        reply_markup=common_funcs.combine_keyboards(
             keyboards.LOCATION_KEYBOARD, keyboards.CANCEL_KEYBOARD
         ),
     )
@@ -554,26 +556,4 @@ async def send_confirmation_request(
     )
 
 
-async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Отменяет текущий диалог."""
-    await update.effective_message.reply_text(
-        text=templates.CANCEL_TEXT,
-    )
-    await update.effective_message.edit_reply_markup()
 
-    return ConversationHandler.END
-
-
-def combine_keyboards(keyboard1, keyboard2):
-    """
-    Объединяет две клавиатуры типа InlineKeyboardMarkup в одну клавиатуру.
-
-    :param keyboard1: Первая клавиатура для объединения.
-    :param keyboard2: Вторая клавиатура для объединения.
-    :return: Объединенная клавиатура типа InlineKeyboardMarkup.
-    """
-    combined_keyboard = InlineKeyboardMarkup(
-        inline_keyboard=[*keyboard1.inline_keyboard, *keyboard2.inline_keyboard]
-    )
-
-    return combined_keyboard
