@@ -11,7 +11,6 @@ import conversations.coliving.templates as templates
 import conversations.common_functions.common_buttons as common_buttons
 import conversations.common_functions.common_funcs as common_funcs
 
-
 coliving_handler: ConversationHandler = ConversationHandler(
     entry_points=[
         CallbackQueryHandler(
