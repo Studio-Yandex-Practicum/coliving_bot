@@ -9,10 +9,9 @@ from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
 
 import conversations.common_functions.common_funcs as common_funcs
-
+import conversations.common_functions.common_keyboards as common_keyboards
 import conversations.profile.buttons as buttons
 import conversations.profile.keyboards as keyboards
-import conversations.common_functions.common_keyboards as common_keyboards
 import conversations.profile.templates as templates
 from conversations.profile.states import States
 from general.validators import value_is_in_range_validator
@@ -555,6 +554,3 @@ async def send_confirmation_request(
     await update.effective_message.reply_text(
         text=templates.FORM_SAVED,
     )
-
-
-

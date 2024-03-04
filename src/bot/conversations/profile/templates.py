@@ -69,5 +69,3 @@ PROFILE_DATA = (
 )
 PROFILE_IS_VISIBLE_TEXT = "Отображается в поиске"
 PROFILE_IS_INVISIBLE_TEXT = "Скрыта из поиска"
-
-

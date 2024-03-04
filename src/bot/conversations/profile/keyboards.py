@@ -86,4 +86,3 @@ FORM_SAVE_OR_EDIT_KEYBOARD = InlineKeyboardMarkup.from_column(
         InlineKeyboardButton(text=EDIT_RESUME_BUTTON, callback_data=EDIT_RESUME_BUTTON),
     )
 )
-

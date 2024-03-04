@@ -1,10 +1,7 @@
 from telegram import InlineKeyboardMarkup, Update
-
 from telegram.ext import ContextTypes, ConversationHandler
 
-
 import conversations.common_functions.common_templates as templates
-
 
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:

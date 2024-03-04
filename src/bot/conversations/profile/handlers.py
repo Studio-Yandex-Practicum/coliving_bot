@@ -5,10 +5,10 @@ from telegram.ext import (
     filters,
 )
 
+import conversations.common_functions.common_buttons as common_buttons
+import conversations.common_functions.common_funcs as common_funcs
 import conversations.profile.buttons as buttons
 import conversations.profile.callback_funcs as callback_funcs
-import conversations.common_functions.common_funcs as common_funcs
-import conversations.common_functions.common_buttons as common_buttons
 import conversations.profile.templates as templates
 from conversations.menu.buttons import MY_PROFILE_BUTTON
 from conversations.profile.states import States

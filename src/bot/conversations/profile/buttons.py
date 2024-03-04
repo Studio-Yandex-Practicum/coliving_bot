@@ -16,4 +16,3 @@ ABOUT_BUTTON = "О себе 🫵🏻"
 NEW_PHOTO_BUTTON = "Фотографию 📸"
 SAVE_PHOTO_BUTTON = "Сохранить фото 📁️"
 SAVE_EDITED_PHOTO_BUTTON = "Сохранить новые фото 📁️"
-
