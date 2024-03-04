@@ -6,6 +6,9 @@ from telegram import InlineKeyboardMarkup, InputMediaPhoto, Update
 from telegram.constants import ParseMode
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
+import conversations.common_functions.common_funcs as common_funcs
+import conversations.common_functions.common_keyboards as common_keyboards
+
 import conversations.coliving.keyboards as keyboards
 import conversations.coliving.states as states
 import conversations.coliving.templates as templates
@@ -29,12 +32,16 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         ] = await api_service.get_coliving_info_by_user(telegram_id=current_chat.id)
     except ColivingNotFound:
         await update.effective_message.edit_text(
-            text=templates.REPLY_MSG_TIME_TO_CREATE_PROFILE
+            text=templates.REPLY_MSG_TIME_TO_CREATE_PROFILE,
         )
         await current_chat.send_message(
             text=templates.REPLY_MSG_ASK_LOCATION,
-            reply_markup=context.bot_data["location_keyboard"],
+            reply_markup=common_funcs.combine_keyboards(
+                context.bot_data["location_keyboard"],
+                common_keyboards.CANCEL_KEYBOARD
+            ),
         )
+
         context.user_data["coliving_info"] = Coliving(host=update.effective_chat.id)
         return states.LOCATION
 
