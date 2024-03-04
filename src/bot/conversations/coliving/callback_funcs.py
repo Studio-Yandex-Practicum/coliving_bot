@@ -250,6 +250,7 @@ async def handle_room_type(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     await update.effective_message.reply_text(text=f"{templates.REPLY_MSG}{room_type}")
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_ABOUT,
+        reply_markup=common_keyboards.CANCEL_KEYBOARD,
     )
     return states.ABOUT_ROOM
 
