@@ -3,7 +3,6 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from .buttons import (
     ABOUT_BUTTON,
     BACK_BUTTON,
-    CANCEL_BUTTON,
     EDIT_CANCEL_BUTTON,
     EDIT_FORM_BUTTON,
     EDIT_RESUME_BUTTON,
@@ -88,6 +87,3 @@ FORM_SAVE_OR_EDIT_KEYBOARD = InlineKeyboardMarkup.from_column(
     )
 )
 
-CANCEL_KEYBOARD = InlineKeyboardMarkup.from_row(
-    button_row=(InlineKeyboardButton(text=CANCEL_BUTTON, callback_data=CANCEL_BUTTON),)
-)
