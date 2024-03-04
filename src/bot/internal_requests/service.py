@@ -159,6 +159,28 @@ class APIService:
         """
         return await self._profile_request(telegram_id, data, method="patch")
 
+    async def delete_coliving_photos(self, coliving_id: int) -> Response:
+        """
+        Удаляет все фотографии, связанные с конкретным коливингом.
+        """
+        endpoint_urn = f"colivings/{coliving_id}/images/"
+        return await self._delete_request(endpoint_urn)
+
+    async def delete_profile_photos(self, telegram_id: int) -> Response:
+        """
+        Удаляет все фотографии профиля пользователя.
+        """
+        endpoint_urn = f"users/{telegram_id}/profile/images/"
+        return await self._delete_request(endpoint_urn)
+
+    async def _delete_request(self, endpoint_urn: str) -> Response:
+        async with AsyncClient() as client:
+            response = await client.delete(
+                urljoin(base=self.base_url, url=endpoint_urn)
+            )
+            response.raise_for_status()
+        return response
+
     async def _profile_request(
         self, telegram_id: int, data: dict, method: str
     ) -> Optional[UserProfile]:

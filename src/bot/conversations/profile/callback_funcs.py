@@ -1,9 +1,8 @@
 from copy import copy
-from http import HTTPStatus as codes
 from re import fullmatch
 from typing import Union
 
-from httpx import HTTPStatusError
+from httpx import HTTPStatusError, codes
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
@@ -13,13 +12,13 @@ import conversations.common_functions.common_keyboards as common_keyboards
 import conversations.profile.buttons as buttons
 import conversations.profile.keyboards as keyboards
 import conversations.profile.templates as templates
+from conversations.menu.callback_funcs import menu
 from conversations.profile.states import States
 from general.validators import value_is_in_range_validator
 from internal_requests import api_service
 
 
 async def set_profile_to_context(
-    update: Update,
     context: ContextTypes.DEFAULT_TYPE,
     profile_info,
 ) -> None:
@@ -53,7 +52,7 @@ async def start(
             return States.AGE
         raise exc
 
-    await set_profile_to_context(update, context, profile_info)
+    await set_profile_to_context(context, profile_info)
     await update.effective_message.delete()
     await _look_at_profile(update, context, "", keyboards.PROFILE_KEYBOARD)
     return States.PROFILE
@@ -82,7 +81,7 @@ async def send_question_to_profile_is_visible_in_search(
 
 
 async def send_question_to_edit_profile(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> Union[int, States]:
     """
     Обработка кнопки 'Скрыть из поиска'.
@@ -97,16 +96,15 @@ async def send_question_to_edit_profile(
     return States.EDIT
 
 
-async def send_question_to_back_in_menu(
+async def handle_return_to_menu_response(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> Union[int, States]:
-    """
-    Обработка кнопки 'Вернуться'.
-    Переводит диалог в состояние MENU.
-    """
-    await _send_chosen_choice_and_remove_buttons(update=update)
+    """Обработка ответа: Вернуться в меню."""
 
-    return ConversationHandler.END  # MENU
+    await update.effective_message.edit_reply_markup()
+    context.user_data.clear()
+    await menu(update, context)
+    return ConversationHandler.END
 
 
 async def handle_age(
@@ -275,17 +273,30 @@ async def _look_at_profile(
         )
         + "\n"
     )
-    received_photos = context.user_data.get(templates.RECEIVED_PHOTOS_FIELD, [])
-    media_group = [InputMediaPhoto(file_id) for file_id in received_photos]
-    await update.effective_chat.send_media_group(
-        media=media_group,
-        caption=message_text,
-        parse_mode=ParseMode.HTML,
-    )
+    new_photos = context.user_data.get("new_photo")
+    received_photo = context.user_data.get(templates.RECEIVED_PHOTOS_FIELD)
+    if new_photos:
+        media_group = [InputMediaPhoto(file_id) for file_id in new_photos]
+        await update.effective_chat.send_media_group(
+            media=media_group, caption=message_text, parse_mode=ParseMode.HTML
+        )
+        context.user_data[templates.RECEIVED_PHOTOS_FIELD] = new_photos.copy()
+        context.user_data["new_photo"] = []
+
+    elif received_photo:
+        media_group = [InputMediaPhoto(file_id) for file_id in received_photo]
+        await update.effective_chat.send_media_group(
+            media=media_group, caption=message_text, parse_mode=ParseMode.HTML
+        )
+    else:
+        # Если фото нет, отправляем только текст
+        await update.effective_chat.send_message(
+            text=message_text, parse_mode=ParseMode.HTML
+        )
+
+    # Отправляем сообщение с вопросом после предварительного просмотра
     await context.bot.send_message(
-        chat_id=chat_id,
-        text=ask_text,
-        reply_markup=keyboard,
+        chat_id=chat_id, text=ask_text, reply_markup=keyboard
     )
 
 
@@ -295,6 +306,7 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     Переводит диалог в состояние CONFIRMATION (анкета верна или нет)
     """
     file_id = update.effective_message.photo[-1].file_id
+
     new_file = await context.bot.get_file(file_id)
     photo_bytearray = await new_file.download_as_bytearray()
     await api_service.save_photo(
@@ -306,6 +318,20 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     received_photos = context.user_data.get(templates.RECEIVED_PHOTOS_FIELD, [])
     received_photos.append(file_id)
     context.user_data[templates.RECEIVED_PHOTOS_FIELD] = received_photos
+
+    return None
+
+
+async def handle_edit_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Обрабатывает загруженную пользователем фотографию.
+    Переводит диалог в состояние CONFIRMATION (анкета верна или нет)
+    """
+
+    file_id = update.effective_message.photo[-1].file_id
+    new_photos = context.user_data.get("new_photo", [])
+    new_photos.append(file_id)
+    context.user_data["new_photo"] = new_photos
 
     return None
 
@@ -331,7 +357,7 @@ async def send_received_photos(
     return States.PHOTO
 
 
-async def handle_profile(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def handle_profile(update: Update, _context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Выводит сообщение с заполненным профилем.
     Вызывает метод для отправки запроса на видимость анкеты,
@@ -370,13 +396,13 @@ async def handle_visible(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await api_service.update_user_profile(
             update.effective_chat.id, context.user_data
         )
-    await send_confirmation_request(update, context)
+    await send_profile_saved_notification(update, context)
 
     return ConversationHandler.END
 
 
 async def start_filling_again(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """
     Обработка кнопки 'Заполнить заново.'.
@@ -391,7 +417,7 @@ async def start_filling_again(
 
 
 async def send_question_to_edit_about_myself(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """
     Обработка кнопки 'О себе.'.
@@ -406,7 +432,7 @@ async def send_question_to_edit_about_myself(
 
 
 async def send_question_to_edit_photo(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """
     Обработка кнопки 'Фотографию.'.
@@ -465,27 +491,6 @@ async def handle_edit_about(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     return States.EDIT_CONFIRMATION
 
 
-async def handle_edit_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """
-    Обрабатывает отредактированную пользователем фотографию.
-    Переводит диалог в состояние EDIT_CONFIRMATION (анкета верна или нет).
-    """
-    file_id = update.effective_message.photo[-1].file_id
-    new_file = await context.bot.get_file(file_id)
-    photo_bytearray = await new_file.download_as_bytearray()
-    await api_service.save_photo(
-        telegram_id=update.effective_chat.id,
-        photo_bytearray=photo_bytearray,
-        filename=new_file.file_path,
-        file_id=file_id,
-    )
-    received_photos = context.user_data.get(templates.RECEIVED_PHOTOS_FIELD, [])
-    received_photos.append(file_id)
-    context.user_data[templates.RECEIVED_PHOTOS_FIELD] = received_photos
-
-    return None
-
-
 async def send_edited_photos(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await update.effective_message.edit_reply_markup()
     await _look_at_profile(
@@ -508,13 +513,23 @@ async def send_question_to_profile_is_correct(
     Либо завершает диалог.
     """
     await _send_chosen_choice_and_remove_buttons(update=update)
+    await api_service.delete_profile_photos(update.effective_chat.id)
     await api_service.update_user_profile(update.effective_chat.id, context.user_data)
-    await send_confirmation_request(update, context)
+    for file_id in context.user_data.get(templates.RECEIVED_PHOTOS_FIELD):
+        new_file = await context.bot.get_file(file_id)
+        photo_bytearray = await new_file.download_as_bytearray()
+        await api_service.save_photo(
+            telegram_id=update.effective_chat.id,
+            photo_bytearray=photo_bytearray,
+            filename=new_file.file_path,
+            file_id=file_id,
+        )
+    await send_profile_saved_notification(update, context)
     return ConversationHandler.END
 
 
 async def send_question_to_cancel_profile_edit(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """
     Спрашивает верна ли анкета.
@@ -530,7 +545,7 @@ async def send_question_to_cancel_profile_edit(
 
 
 async def send_question_to_resume_profile_edit(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """
     Спрашивает верна ли анкета.
@@ -545,12 +560,13 @@ async def send_question_to_resume_profile_edit(
     return States.EDIT
 
 
-async def send_confirmation_request(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
+async def send_profile_saved_notification(
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> None:
     """
-    Отправляет сохраняет профиль в базе данных.
+    Отправляет сообщение о том, что профиль сохранён в БД.
     """
     await update.effective_message.reply_text(
         text=templates.FORM_SAVED,
+        parse_mode=ParseMode.HTML,
     )

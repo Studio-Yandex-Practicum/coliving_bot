@@ -2,6 +2,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 import conversations.coliving.templates as templates
 from conversations.coliving.templates import ROOM_TYPE_CALLBACK_DATA
+from conversations.templates import BTN_LABEL_GO_TO_MENU
 from internal_requests import api_service
 
 CONFIRMATION_KEYBOARD = InlineKeyboardButton(
@@ -116,7 +117,7 @@ COLIVING_PROFILE_KEYBOARD_VISIBLE = InlineKeyboardMarkup.from_column(
             callback_data=templates.BTN_TRANSFER_TO,
         ),
         InlineKeyboardButton(
-            text=templates.BTN_LABEL_GO_TO_MENU, callback_data=templates.BTN_GO_TO_MENU
+            text=BTN_LABEL_GO_TO_MENU, callback_data=templates.BTN_GO_TO_MENU
         ),
     )
 )
@@ -136,7 +137,7 @@ COLIVING_PROFILE_KEYBOARD_NOT_VISIBLE = InlineKeyboardMarkup.from_column(
             callback_data=templates.BTN_TRANSFER_TO,
         ),
         InlineKeyboardButton(
-            text=templates.BTN_LABEL_GO_TO_MENU, callback_data=templates.BTN_GO_TO_MENU
+            text=BTN_LABEL_GO_TO_MENU, callback_data=templates.BTN_GO_TO_MENU
         ),
     )
 )
