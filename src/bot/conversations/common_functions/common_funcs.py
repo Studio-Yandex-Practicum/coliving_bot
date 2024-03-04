@@ -3,7 +3,7 @@ from telegram import InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes, ConversationHandler
 
 
-import conversations.profile.templates as templates
+import conversations.common_functions.common_templates as templates
 
 
 
