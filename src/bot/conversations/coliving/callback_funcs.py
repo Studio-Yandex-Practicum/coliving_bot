@@ -9,6 +9,8 @@ from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 import conversations.coliving.keyboards as keyboards
 import conversations.coliving.states as states
 import conversations.coliving.templates as templates
+import conversations.common_functions.common_funcs as common_funcs
+import conversations.common_functions.common_keyboards as common_keyboards
 from conversations.coliving.templates import format_coliving_profile_message
 from conversations.menu.callback_funcs import menu
 from general.validators import value_is_in_range_validator
@@ -30,12 +32,15 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         ] = await api_service.get_coliving_info_by_user(telegram_id=current_chat.id)
     except ColivingNotFound:
         await update.effective_message.edit_text(
-            text=templates.REPLY_MSG_TIME_TO_CREATE_PROFILE
+            text=templates.REPLY_MSG_TIME_TO_CREATE_PROFILE,
         )
         await current_chat.send_message(
             text=templates.REPLY_MSG_ASK_LOCATION,
-            reply_markup=context.bot_data["location_keyboard"],
+            reply_markup=common_funcs.combine_keyboards(
+                context.bot_data["location_keyboard"], common_keyboards.CANCEL_KEYBOARD
+            ),
         )
+
         context.user_data["coliving_info"] = Coliving(host=update.effective_chat.id)
         return states.LOCATION
 
@@ -200,7 +205,9 @@ async def handle_location(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     await update.effective_message.reply_text(text=f"{templates.REPLY_MSG}{location}")
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_ROOM_TYPE,
-        reply_markup=keyboards.ROOM_TYPE_KEYBOARD,
+        reply_markup=common_funcs.combine_keyboards(
+            keyboards.ROOM_TYPE_KEYBOARD, common_keyboards.CANCEL_KEYBOARD
+        ),
     )
     return states.ROOM_TYPE
 
@@ -229,6 +236,7 @@ async def handle_room_type(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     await update.effective_message.reply_text(text=f"{templates.REPLY_MSG}{room_type}")
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_ABOUT,
+        reply_markup=common_keyboards.CANCEL_KEYBOARD,
     )
     return states.ABOUT_ROOM
 
@@ -248,6 +256,7 @@ async def handle_about_coliving(
     ):
         await update.effective_message.reply_text(
             text=templates.REPLY_MSG_ASK_ABOUT,
+            reply_markup=common_keyboards.CANCEL_KEYBOARD,
         )
         return states.ABOUT_ROOM
 
@@ -257,6 +266,7 @@ async def handle_about_coliving(
     )
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_PRICE,
+        reply_markup=common_keyboards.CANCEL_KEYBOARD,
     )
     return states.PRICE
 
@@ -285,6 +295,7 @@ async def handle_price(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     await update.effective_message.reply_text(text=f"{templates.REPLY_MSG}{price}")
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_PHOTO_SEND,
+        reply_markup=common_keyboards.CANCEL_KEYBOARD,
     )
 
     return states.PHOTO_ROOM
@@ -364,7 +375,9 @@ async def handle_confirm_or_edit_reply_edit_profile(
     await update.effective_message.reply_text(text=f"{templates.REPLY_MSG}{reply}")
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_WHAT_TO_EDIT,
-        reply_markup=keyboards.WHAT_EDIT_PROFILE_KEYBOARD,
+        reply_markup=common_funcs.combine_keyboards(
+            keyboards.WHAT_EDIT_PROFILE_KEYBOARD, common_keyboards.CANCEL_KEYBOARD
+        ),
     )
     return states.EDIT
 
@@ -382,7 +395,10 @@ async def handle_confirm_or_edit_reply_confirm(
     await update.effective_message.reply_text(text=f"{templates.REPLY_MSG}{reply}")
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_TO_SHOW_PROFILE,
-        reply_markup=keyboards.IS_VISIBLE_OR_NOT_PROFILE_KEYBOARD,
+        reply_markup=common_funcs.combine_keyboards(
+            keyboards.IS_VISIBLE_OR_NOT_PROFILE_KEYBOARD,
+            common_keyboards.CANCEL_KEYBOARD,
+        ),
     )
     return states.IS_VISIBLE
 
@@ -413,7 +429,10 @@ async def handle_is_visible_coliving_profile_yes(
     """
     await update.effective_message.edit_reply_markup()
     context.user_data["coliving_info"].is_visible = eval(update.callback_query.data)
-    await update.effective_message.reply_text(text=templates.REPLY_BTN_SHOW)
+    await update.effective_message.reply_text(
+        text=templates.REPLY_BTN_SHOW,
+        reply_markup=common_keyboards.CANCEL_KEYBOARD,
+    )
     return await save_coliving_info_to_db(update, context)
 
 

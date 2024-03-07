@@ -5,6 +5,8 @@ from telegram.ext import (
     filters,
 )
 
+import conversations.common_functions.common_buttons as common_buttons
+import conversations.common_functions.common_funcs as common_funcs
 import conversations.profile.buttons as buttons
 import conversations.profile.callback_funcs as callback_funcs
 import conversations.profile.templates as templates
@@ -166,5 +168,10 @@ profile_handler: ConversationHandler = ConversationHandler(
             ),
         ],
     },
-    fallbacks=[],
+    fallbacks=[
+        CallbackQueryHandler(
+            callback=common_funcs.cancel,
+            pattern=rf"^{common_buttons.CANCEL_BUTTON}",
+        ),
+    ],
 )

@@ -27,8 +27,7 @@ PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
         InlineKeyboardButton(text=HIDE_SEARCH_BUTTON, callback_data="is_visible:False"),
         InlineKeyboardButton(text=EDIT_FORM_BUTTON, callback_data=EDIT_FORM_BUTTON),
         InlineKeyboardButton(
-            text=BTN_LABEL_GO_TO_MENU,
-            callback_data=BTN_LABEL_GO_TO_MENU
+            text=BTN_LABEL_GO_TO_MENU, callback_data=BTN_LABEL_GO_TO_MENU
         ),
     )
 )

@@ -7,6 +7,8 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
 
+import conversations.common_functions.common_funcs as common_funcs
+import conversations.common_functions.common_keyboards as common_keyboards
 import conversations.profile.buttons as buttons
 import conversations.profile.keyboards as keyboards
 import conversations.profile.templates as templates
@@ -42,9 +44,14 @@ async def start(
         )
     except HTTPStatusError as exc:
         if exc.response.status_code == codes.NOT_FOUND:
-            await update.effective_message.edit_text(text=templates.ASK_AGE)
+            await update.effective_message.edit_text(
+                text=templates.ASK_AGE,
+                reply_markup=common_keyboards.CANCEL_KEYBOARD,
+            )
+
             return States.AGE
         raise exc
+
     await set_profile_to_context(context, profile_info)
     await update.effective_message.delete()
     await _look_at_profile(update, context, "", keyboards.PROFILE_KEYBOARD)
@@ -122,7 +129,9 @@ async def handle_age(
     context.user_data[templates.AGE_FIELD] = int(age)
     await update.effective_message.reply_text(
         templates.ASK_SEX,
-        reply_markup=keyboards.SEX_KEYBOARD,
+        reply_markup=common_funcs.combine_keyboards(
+            keyboards.SEX_KEYBOARD, common_keyboards.CANCEL_KEYBOARD
+        ),
     )
 
     return States.SEX
@@ -141,6 +150,7 @@ async def handle_sex(
     context.user_data[templates.SEX_FIELD] = sex.split()[1].capitalize()
     await update.effective_message.reply_text(
         templates.ASK_NAME,
+        reply_markup=common_keyboards.CANCEL_KEYBOARD,
     )
 
     return States.NAME
@@ -169,7 +179,9 @@ async def handle_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     context.user_data[templates.NAME_FIELD] = name
     await update.effective_message.reply_text(
         text=templates.ASK_LOCATION,
-        reply_markup=keyboards.LOCATION_KEYBOARD,
+        reply_markup=common_funcs.combine_keyboards(
+            keyboards.LOCATION_KEYBOARD, common_keyboards.CANCEL_KEYBOARD
+        ),
     )
 
     return States.LOCATION
@@ -186,6 +198,7 @@ async def handle_location(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     context.user_data[templates.LOCATION_FIELD] = location
     await update.effective_message.reply_text(
         text=templates.ASK_ABOUT,
+        reply_markup=common_keyboards.CANCEL_KEYBOARD,
     )
 
     return States.ABOUT_YOURSELF
@@ -397,6 +410,7 @@ async def start_filling_again(
     await _send_chosen_choice_and_remove_buttons(update=update)
     await update.effective_message.reply_text(
         text=templates.ASK_AGE_AGAIN,
+        reply_markup=common_keyboards.CANCEL_KEYBOARD,
     )
 
     return States.AGE
@@ -411,6 +425,7 @@ async def send_question_to_edit_about_myself(
     await _send_chosen_choice_and_remove_buttons(update=update)
     await update.effective_message.reply_text(
         text=templates.ASK_ABOUT,
+        reply_markup=common_keyboards.CANCEL_KEYBOARD,
     )
 
     return States.EDIT_ABOUT_YOURSELF
