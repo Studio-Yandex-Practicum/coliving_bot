@@ -1,7 +1,7 @@
 import enum
 
 
-class States(str, enum.Enum):
+class States(int, enum.Enum):
     """Класс, описывающий состояния бота."""
 
     (
@@ -23,4 +23,4 @@ class States(str, enum.Enum):
         EDIT_CONFIRMATION,
         VISIBLE,
         MENU,
-    ) = range(14)
+    ) = range(18)

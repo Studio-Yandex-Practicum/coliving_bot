@@ -8,7 +8,8 @@ from telegram.ext import (
 import conversations.coliving.callback_funcs as callback_funcs
 import conversations.coliving.states as states
 import conversations.coliving.templates as templates
-from conversations.menu.callback_funcs import menu
+import conversations.common_functions.common_buttons as common_buttons
+import conversations.common_functions.common_funcs as common_funcs
 
 coliving_handler: ConversationHandler = ConversationHandler(
     entry_points=[
@@ -195,12 +196,20 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 callback=callback_funcs.handle_coliving_transfer_to,
                 pattern=r"^transfer_to",
             ),
-            CallbackQueryHandler(callback=menu, pattern=r"^go_to_menu"),
+            CallbackQueryHandler(
+                callback=callback_funcs.handle_return_to_menu_response,
+                pattern=r"^go_to_menu",
+            ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
                 callback_funcs.handle_coliving_text_instead_of_button,
             ),
         ],
     },
-    fallbacks=[],
+    fallbacks=[
+        CallbackQueryHandler(
+            callback=common_funcs.cancel,
+            pattern=rf"^{common_buttons.CANCEL_BUTTON}",
+        ),
+    ],
 )

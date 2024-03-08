@@ -1,16 +1,18 @@
 from telegram.ext import (
     CallbackQueryHandler,
-    CommandHandler,
     ConversationHandler,
     MessageHandler,
     filters,
 )
 
+import conversations.common_functions.common_buttons as common_buttons
+import conversations.common_functions.common_funcs as common_funcs
 import conversations.profile.buttons as buttons
 import conversations.profile.callback_funcs as callback_funcs
 import conversations.profile.templates as templates
 from conversations.menu.buttons import MY_PROFILE_BUTTON
 from conversations.profile.states import States
+from conversations.templates import BTN_LABEL_GO_TO_MENU
 from general.validators import (
     handle_text_input_instead_of_choosing_button,
     handle_text_input_instead_of_send_photo,
@@ -18,7 +20,6 @@ from general.validators import (
 
 profile_handler: ConversationHandler = ConversationHandler(
     entry_points=[
-        CommandHandler(command="profile", callback=callback_funcs.start),
         CallbackQueryHandler(
             pattern=rf"^{MY_PROFILE_BUTTON}$", callback=callback_funcs.start
         ),
@@ -27,19 +28,19 @@ profile_handler: ConversationHandler = ConversationHandler(
         States.PROFILE: [
             CallbackQueryHandler(
                 callback=callback_funcs.send_question_to_profile_is_visible_in_search,
-                pattern=rf"^{buttons.SHOW_SEARCH_BUTTON}",
+                pattern=r"^is_visible:(True|False)$",
             ),
-            CallbackQueryHandler(
-                callback=callback_funcs.send_question_to_profile_is_invisible_in_search,
-                pattern=rf"^{buttons.HIDE_SEARCH_BUTTON}",
-            ),
+            # CallbackQueryHandler(
+            #     callback=callback_funcs.send_question_to_profile_is_invisible_in_search,
+            #     pattern=rf"^{buttons.HIDE_SEARCH_BUTTON}",
+            # ),
             CallbackQueryHandler(
                 callback=callback_funcs.send_question_to_edit_profile,
                 pattern=rf"^{buttons.EDIT_FORM_BUTTON}",
             ),
             CallbackQueryHandler(
-                callback=callback_funcs.send_question_to_back_in_menu,
-                pattern=rf"^{buttons.BACK_BUTTON}",
+                callback=callback_funcs.handle_return_to_menu_response,
+                pattern=rf"^{BTN_LABEL_GO_TO_MENU}",
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -83,6 +84,10 @@ profile_handler: ConversationHandler = ConversationHandler(
             MessageHandler(
                 filters.PHOTO & ~filters.COMMAND, callback_funcs.handle_photo
             ),
+            CallbackQueryHandler(
+                pattern=rf"^{buttons.SAVE_PHOTO_BUTTON}",
+                callback=callback_funcs.send_received_photos,
+            ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
                 handle_text_input_instead_of_send_photo,
@@ -102,7 +107,7 @@ profile_handler: ConversationHandler = ConversationHandler(
             CallbackQueryHandler(
                 callback=callback_funcs.handle_visible,
                 pattern=(
-                    rf"^({buttons.YES_TO_DO_BUTTON}|{buttons.NOT_LOOK_YET_BUTTON})$"
+                    rf"^({buttons.YES_TO_DO_BUTTON}|{buttons.HIDE_SEARCH_BUTTON})$"
                 ),
             ),
             MessageHandler(
@@ -116,28 +121,28 @@ profile_handler: ConversationHandler = ConversationHandler(
                 pattern=rf"^{buttons.FILL_AGAIN_BUTTON}",
             ),
             CallbackQueryHandler(
-                callback=callback_funcs.send_question_to_back_to_profile,
+                callback=callback_funcs.handle_return_to_profile_response,
                 pattern=rf"^{buttons.BACK_BUTTON}",
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.send_question_to_edit_name,
-                pattern=rf"^{buttons.NEW_NAME_NEW_BEGINNING_BUTTON}",
+                pattern=rf"^{buttons.EDIT_NAME_BUTTON}",
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.send_question_to_edit_sex,
-                pattern=rf"^{buttons.SEX_BUTTON}",
+                pattern=rf"^{buttons.EDIT_SEX_BUTTON}",
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.send_question_to_edit_age,
-                pattern=rf"^{buttons.AGE_BUTTON}",
+                pattern=rf"^{buttons.EDIT_AGE_BUTTON}",
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.send_question_to_edit_location,
-                pattern=rf"^{buttons.LOCATION_BUTTON}",
+                pattern=rf"^{buttons.EDIT_LOCATION_BUTTON}",
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.send_question_to_edit_about_myself,
-                pattern=rf"^{buttons.ABOUT_BUTTON}",
+                pattern=rf"^{buttons.EDIT_ABOUT_BUTTON}",
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.send_question_to_edit_photo,
@@ -175,6 +180,10 @@ profile_handler: ConversationHandler = ConversationHandler(
         ],
         States.EDIT_PHOTO: [
             MessageHandler(filters.PHOTO, callback_funcs.handle_edit_photo),
+            CallbackQueryHandler(
+                pattern=rf"^{buttons.SAVE_EDITED_PHOTO_BUTTON}",
+                callback=callback_funcs.send_edited_photos,
+            ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
                 handle_text_input_instead_of_send_photo,
@@ -199,5 +208,10 @@ profile_handler: ConversationHandler = ConversationHandler(
             ),
         ],
     },
-    fallbacks=[],
+    fallbacks=[
+        CallbackQueryHandler(
+            callback=common_funcs.cancel,
+            pattern=rf"^{common_buttons.CANCEL_BUTTON}",
+        ),
+    ],
 )
