@@ -267,7 +267,7 @@ async def _look_at_profile(
         ask_text = templates.ASK_WANT_TO_CHANGE
     message_text = (
         title
-        + "\n"
+        + "\n\n"
         + templates.PROFILE_DATA.format(
             name=context.user_data.get(templates.NAME_FIELD),
             sex=context.user_data.get(templates.SEX_FIELD),
@@ -431,7 +431,7 @@ async def send_question_to_edit_name(
     """
     await _send_chosen_choice_and_remove_buttons(update=update)
     await update.effective_message.reply_text(
-        text=templates.ASK_NEW_NAME,
+        text=templates.ASK_NAME,
     )
 
     return States.EDIT_NAME
@@ -445,7 +445,7 @@ async def send_question_to_edit_sex(
     """
     await _send_chosen_choice_and_remove_buttons(update=update)
     await update.effective_message.reply_text(
-        text=templates.ASK_SEX_AGAIN,
+        text=templates.ASK_SEX,
         reply_markup=keyboards.SEX_KEYBOARD,
         parse_mode=ParseMode.HTML,
     )
@@ -475,7 +475,7 @@ async def send_question_to_edit_location(
     """
     await _send_chosen_choice_and_remove_buttons(update=update)
     await update.effective_message.reply_text(
-        text=templates.ASK_NEW_LOCATION, reply_markup=keyboards.LOCATION_KEYBOARD
+        text=templates.ASK_LOCATION, reply_markup=keyboards.LOCATION_KEYBOARD
     )
 
     return States.EDIT_LOCATION
@@ -504,7 +504,7 @@ async def send_question_to_edit_photo(
     """
     await _send_chosen_choice_and_remove_buttons(update=update)
     await update.effective_chat.send_message(
-        text=templates.ASK_NEW_PHOTO,
+        text=templates.ASK_PHOTO,
         reply_markup=InlineKeyboardMarkup.from_button(
             InlineKeyboardButton(
                 text=buttons.SAVE_EDITED_PHOTO_BUTTON,
