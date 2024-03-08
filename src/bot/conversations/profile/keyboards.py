@@ -1,12 +1,18 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
-from conversations.templates import BTN_LABEL_GO_TO_MENU
-
-from .buttons import (
-    ABOUT_BUTTON,
+from conversations.common_functions.common_templates import (
+    RETURN_BTN_LABEL,
+    RETURN_TO_MENU_BTN_LABEL,
+)
+from conversations.profile.buttons import (
+    EDIT_ABOUT_BUTTON,
+    EDIT_AGE_BUTTON,
     EDIT_CANCEL_BUTTON,
     EDIT_FORM_BUTTON,
+    EDIT_LOCATION_BUTTON,
+    EDIT_NAME_BUTTON,
     EDIT_RESUME_BUTTON,
+    EDIT_SEX_BUTTON,
     FEMALE_BUTTON,
     FILL_AGAIN_BUTTON,
     HIDE_SEARCH_BUTTON,
@@ -27,7 +33,7 @@ PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
         InlineKeyboardButton(text=HIDE_SEARCH_BUTTON, callback_data="is_visible:False"),
         InlineKeyboardButton(text=EDIT_FORM_BUTTON, callback_data=EDIT_FORM_BUTTON),
         InlineKeyboardButton(
-            text=BTN_LABEL_GO_TO_MENU, callback_data=BTN_LABEL_GO_TO_MENU
+            text=RETURN_TO_MENU_BTN_LABEL, callback_data=RETURN_TO_MENU_BTN_LABEL
         ),
     )
 )
@@ -77,8 +83,15 @@ PHOTO_EDIT_KEYBOARD = (
 FORM_EDIT_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         InlineKeyboardButton(text=FILL_AGAIN_BUTTON, callback_data=FILL_AGAIN_BUTTON),
-        InlineKeyboardButton(text=ABOUT_BUTTON, callback_data=ABOUT_BUTTON),
+        InlineKeyboardButton(text=EDIT_ABOUT_BUTTON, callback_data=EDIT_ABOUT_BUTTON),
+        InlineKeyboardButton(text=EDIT_NAME_BUTTON, callback_data=EDIT_NAME_BUTTON),
+        InlineKeyboardButton(text=EDIT_SEX_BUTTON, callback_data=EDIT_SEX_BUTTON),
+        InlineKeyboardButton(text=EDIT_AGE_BUTTON, callback_data=EDIT_AGE_BUTTON),
+        InlineKeyboardButton(
+            text=EDIT_LOCATION_BUTTON, callback_data=EDIT_LOCATION_BUTTON
+        ),
         InlineKeyboardButton(text=NEW_PHOTO_BUTTON, callback_data=NEW_PHOTO_BUTTON),
+        InlineKeyboardButton(text=RETURN_BTN_LABEL, callback_data=RETURN_BTN_LABEL),
     )
 )
 

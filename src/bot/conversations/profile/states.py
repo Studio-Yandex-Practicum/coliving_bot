@@ -7,9 +7,13 @@ class States(int, enum.Enum):
     (
         PROFILE,
         AGE,
+        EDIT_AGE,
         SEX,
+        EDIT_SEX,
         NAME,
+        EDIT_NAME,
         LOCATION,
+        EDIT_LOCATION,
         ABOUT_YOURSELF,
         EDIT_ABOUT_YOURSELF,
         EDIT,
@@ -19,4 +23,4 @@ class States(int, enum.Enum):
         EDIT_CONFIRMATION,
         VISIBLE,
         MENU,
-    ) = range(14)
+    ) = range(18)

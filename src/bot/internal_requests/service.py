@@ -105,7 +105,7 @@ class APIService:
 
     async def update_user_residence(
         self, telegram_id: int, residence_id: Optional[int] = None
-    ) -> dict:
+    ) -> Response:
         """
         Обновляет проживание пользователя,
         позволяя прикрепить его к коливингу или открепить.
@@ -127,9 +127,9 @@ class APIService:
         self, telegram_id: int
     ) -> Optional[UserProfile]:
         """
-        Получение профиля пользователя по идентификатору телеграма.
+        Получение профиля пользователя по идентификатору chat id.
 
-        :param telegram_id: Идентификатор телеграма пользователя.
+        :param telegram_id: chat id пользователя.
         :return: Объект UserProfile или None, если профиль не найден.
         """
         response = await self._get_request(f"users/{telegram_id}/profile/")
@@ -190,7 +190,7 @@ class APIService:
         :param telegram_id: Идентификатор пользователя.
         :param data: Словарь данных для профиля.
         :param method: HTTP-метод ('post' или 'patch').
-        :return: Созданный или обновленный профиль или None, если что-то пошло не так.
+        :return: Созданный или обновленный профиль, или None, если что-то пошло не так.
         """
         endpoint_urn = f"users/{telegram_id}/profile/"
         request_data = {
