@@ -10,9 +10,12 @@ import conversations.common_functions.common_funcs as common_funcs
 import conversations.profile.buttons as buttons
 import conversations.profile.callback_funcs as callback_funcs
 import conversations.profile.templates as templates
+from conversations.common_functions.common_templates import (
+    RETURN_BTN_LABEL,
+    RETURN_TO_MENU_BTN_LABEL,
+)
 from conversations.menu.buttons import MY_PROFILE_BUTTON
 from conversations.profile.states import States
-from conversations.templates import BTN_LABEL_GO_TO_MENU
 from general.validators import (
     handle_text_input_instead_of_choosing_button,
     handle_text_input_instead_of_send_photo,
@@ -40,7 +43,7 @@ profile_handler: ConversationHandler = ConversationHandler(
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.handle_return_to_menu_response,
-                pattern=rf"^{BTN_LABEL_GO_TO_MENU}",
+                pattern=rf"^{RETURN_TO_MENU_BTN_LABEL}",
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -122,7 +125,7 @@ profile_handler: ConversationHandler = ConversationHandler(
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.handle_return_to_profile_response,
-                pattern=rf"^{buttons.BACK_BUTTON}",
+                pattern=rf"^{RETURN_BTN_LABEL}",
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.send_question_to_edit_name,
@@ -159,8 +162,9 @@ profile_handler: ConversationHandler = ConversationHandler(
             )
         ],
         States.EDIT_SEX: [
-            MessageHandler(
-                filters.TEXT & ~filters.COMMAND, callback_funcs.handle_edit_sex
+            CallbackQueryHandler(
+                callback_funcs.handle_edit_sex,
+                rf"^({buttons.MALE_BUTTON}|{buttons.FEMALE_BUTTON})$",
             )
         ],
         States.EDIT_AGE: [
@@ -169,8 +173,9 @@ profile_handler: ConversationHandler = ConversationHandler(
             )
         ],
         States.EDIT_LOCATION: [
-            MessageHandler(
-                filters.TEXT & ~filters.COMMAND, callback_funcs.handle_edit_location
+            CallbackQueryHandler(
+                callback_funcs.handle_edit_location,
+                rf"^({buttons.MSK_BUTTON}|{buttons.SPB_BUTTON})$",
             )
         ],
         States.EDIT_ABOUT_YOURSELF: [
