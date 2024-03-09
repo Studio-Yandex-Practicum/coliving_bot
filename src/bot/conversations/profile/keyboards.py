@@ -24,7 +24,7 @@ from conversations.profile.buttons import (
     SHOW_SEARCH_BUTTON,
     SPB_BUTTON,
     YES_BUTTON,
-    YES_TO_DO_BUTTON,
+    STAY_OPEN_SEARCH_BUTTON,
 )
 
 PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
@@ -67,7 +67,10 @@ FORM_SAVED_KEYBOARD = InlineKeyboardMarkup.from_column(
 
 FORM_VISIBLE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
-        InlineKeyboardButton(text=YES_TO_DO_BUTTON, callback_data=YES_TO_DO_BUTTON),
+        InlineKeyboardButton(
+            text=STAY_OPEN_SEARCH_BUTTON,
+            callback_data=STAY_OPEN_SEARCH_BUTTON
+        ),
         InlineKeyboardButton(text=HIDE_SEARCH_BUTTON, callback_data=HIDE_SEARCH_BUTTON),
     )
 )

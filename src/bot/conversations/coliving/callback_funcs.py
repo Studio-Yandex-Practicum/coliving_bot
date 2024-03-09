@@ -553,7 +553,7 @@ async def handle_what_to_edit_photo_room(
 
     await update.effective_message.edit_reply_markup()
     await update.effective_message.reply_text(
-        text=f"{templates.REPLY_MSG}{templates.BTN_EDIT_PHOTO}"
+        text=f"{templates.REPLY_MSG}{templates.BTN_LABEL_EDIT_PHOTO}"
     )
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_PHOTO_SEND,
