@@ -25,7 +25,7 @@
 
 1. **Python 3.12**  
    Убедитесь, что у вас установлена нужная версия Python или активирована в
-   pyenv.
+   `pyenv`.
 
 2. **Poetry**  
    Зависимости и пакеты управляются через poetry. Убедитесь, что
@@ -48,23 +48,26 @@
    [Документация](https://core.telegram.org/bots/features#botfather)  
    Перед запуском нужно получить **token** у бота
    [@BotFather](https://t.me/BotFather). После того как бот будет
-   зарегестрирован - вам выдадут **token**, его нужно добавить в файл `.env`,
+   зарегистрирован - вам выдадут **token**, его нужно добавить в файл `.env`,
    строку `TOKEN=`. В документе `env.example` она обозначена комментарием.  
    *Про более подробное создание бота читать в приложенной документации.*
 
 5. **Файлы requirements**  
-   Файлы редактировать вручную не нужно. Обновляются через pre-commit хуки (
-   если есть изменение в зависимостях, то список обновится при коммите).
+   Файлы редактировать вручную не нужно. Обновляются через pre-commit хуки (если есть изменение в зависимостях, то список обновится при коммите).
 
 6. **pre-commit**  
    [Документация](https://pre-commit.com/)  
-   При каждом коммите выполняются хуки (автоматизации) перечисленные в
-   .pre-commit-config.yaml. Если не понятно какая ошибка мешает сделать коммит
+   Обязательно выполните команду:
+   ```shell
+   pre-commit install
+   ```
+   При каждом коммите будут выполняться хуки (автоматизации) перечисленные в
+   `.pre-commit-config.yaml`. Если не понятно какая ошибка мешает сделать коммит
    можно запустить хуки вручную и посмотреть ошибки:
 
-```shell
-pre-commit run --all-files
-```
+   ```shell
+   pre-commit run --all-files
+   ```
 ## Стиль кода
 
 Придерживаемся [black style](https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html)
@@ -75,31 +78,34 @@ pre-commit run --all-files
    этим последние изменения
 2. Правила именования веток
 
-- весь новый функционал — feature/название-функционала
-- исправление ошибок — fix/название-багфикса
+   - весь новый функционал — feature/название-функционала
+   - исправление ошибок — fix/название-багфикса  
+   Пример:
+   ```
+   feature/burger-menu
+   fix/bun-issue
+   ```
 
 3. 1 ветка - 1 задача
 
 # Разворачиваем проект в контейнерах
-Создаём `.env` файл в корневой директории проекта и заполняем его по
+1. Создаём `.env` файл в корневой директории проекта и заполняем его по
 образцу `.env.example`
 
-Переходим в директорию `infra/`
+2. Переходим в директорию `infra/`
+   ```shell
+   cd infra/
+   ```
 
-```shell
-cd infra/
-```
+3. Поднимаем контейнеры
+   ```shell
+   docker compose --env-file ../.env -f docker-compose.local.yml up -d
+   ```
 
-Поднимаем контейнеры
-```shell
-docker compose -f docker-compose.dev.yml up -d
-```
-На win: `docker-compose` вместо `docker compose`
-
-При первом запуске можно создать записи в БД о городах командой
-```shell
-docker exec backend python manage.py import_locations
-```
+4. При первом запуске можно создать записи в БД о городах командой
+   ```shell
+   docker exec backend python manage.py import_locations
+   ```
 
 ## Администрирование развёрнутого приложения
 ### Создание суперпользователя
@@ -110,40 +116,36 @@ docker exec -it backend python manage.py createsuperuser
 
 # Разворачиваем проект локально
 
-Устанавливаем зависимости
+1. Устанавливаем зависимости
 
-Создаём `.env` файл в корневой директории проекта и заполняем его по
+2. Создаём `.env` файл в корневой директории проекта и заполняем его по
 образцу `.env.example`
 
-Переходим в директорию `src/backend/`
+3. Переходим в директорию `src/backend/`
+   ```shell
+   cd src/backend/
+   ```
 
-```shell
-cd src/backend/
-```
+4. Применяем миграции
+   ```shell
+   python manage.py migrate
+   ```
 
-Применяем миграции
+5. Загружаем фикстуры (локации)
+   ```shell
+   python manage.py import_locations
+   ```
 
-```shell
-python manage.py migrate
-```
-
-Загружаем фикстуры (локации)
-
-```shell
-python manage.py import_locations
-```
-
-Запускаем *development*-сервер *Django*
-
-```shell
-python manage.py runserver
-```
+6. Запускаем *development*-сервер *Django*
+   ```shell
+   python manage.py runserver
+   ```
 
 > **Note**  
 > Есть возможность изменить используемый файл настроек, определив переменную `DJANGO_SETTINGS_MODULE`,
 > например,
 > ```shell
-> export DJANGO_SETTINGS_MODULE=coliving_bot.settings.dev
+> export DJANGO_SETTINGS_MODULE=coliving_bot.settings.stage
 > ```
 
 Запускаем бота

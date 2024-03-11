@@ -9,9 +9,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 SECRET_KEY = os.getenv("SECRET_KEY", default="secret")
 
-DEBUG = os.getenv("DEBUG", default="True") == "True"
+ALLOWED_HOSTS = ["backend"]
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+DEBUG = os.getenv("DEBUG", default="False") == "True"
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -119,7 +119,6 @@ REST_FRAMEWORK = {
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
-
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Coliving Bot API",
