@@ -262,9 +262,9 @@ async def _look_at_profile(
     Предварительный просмотр профиля.
     """
     chat_id = update.effective_chat.id
-    ask_text = copy(templates.ASK_IS_THAT_RIGHT)
+    ask_text = copy(templates.PROFILE_VIEWING)
     if not ask:
-        ask_text = templates.ASK_WANT_TO_CHANGE
+        ask_text = templates.PROFILE_VIEWING
     message_text = (
         title
         + "\n\n"
