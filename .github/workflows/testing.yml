@@ -1,20 +1,23 @@
-name: Code style checking
+name: Check code style and run tests
 
 on:
+  push:
+    branches:
+      - develop
   pull_request:
     branches:
       - develop
 
 jobs:
-  linter_tests:
+  common_steps:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
         id: setup-python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: 3.12
 
@@ -27,7 +30,7 @@ jobs:
 
       - name: Load cached venv
         id: cached-poetry-dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: .venv
           key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
@@ -39,8 +42,14 @@ jobs:
       - name: Install project
         run: poetry install --no-interaction
 
-      - name: Flake8 checking
-        run: poetry run flake8 --exclude=.venv/ .
+      - name: Run code_style checking
+        run: |
+          poetry run flake8 --exclude=.venv/ .
+          poetry run isort --check-only --skip-gitignore --diff .
 
-      - name: Isort checking
-        run: poetry run isort --check-only --skip-gitignore --diff .
+      - name: Start testing
+        run: |
+          source .venv/bin/activate
+          echo "Current environment: $VIRTUAL_ENV"
+          cd src/backend
+          python manage.py test

@@ -12,15 +12,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="colivingimage",
             name="file_id",
-            field=models.TextField(
-                blank=True, db_index=True, null=True, unique=True
-            ),
+            field=models.TextField(blank=True, db_index=True, null=True, unique=True),
         ),
         migrations.AlterField(
             model_name="profileimage",
             name="file_id",
-            field=models.TextField(
-                blank=True, db_index=True, null=True, unique=True
-            ),
+            field=models.TextField(blank=True, db_index=True, null=True, unique=True),
         ),
     ]

@@ -13,9 +13,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="coliving",
             name="about",
-            field=models.TextField(
-                blank=True, null=True, verbose_name="Описание"
-            ),
+            field=models.TextField(blank=True, null=True, verbose_name="Описание"),
         ),
         migrations.AlterField(
             model_name="coliving",
@@ -29,9 +27,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="profile",
             name="about",
-            field=models.TextField(
-                blank=True, null=True, verbose_name="Описание"
-            ),
+            field=models.TextField(blank=True, null=True, verbose_name="Описание"),
         ),
         migrations.AlterField(
             model_name="profile",

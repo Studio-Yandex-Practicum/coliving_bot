@@ -7,7 +7,7 @@ from django.core.validators import (
 )
 from django.db import models
 
-from .constants import ColivingTypes, Literals, Restrictions, Sex
+from profiles.constants import ColivingTypes, Literals, Restrictions, Sex
 
 
 class Location(models.Model):
@@ -17,6 +17,7 @@ class Location(models.Model):
 
     name = models.TextField(
         verbose_name="Название",
+        unique=True,
     )
 
     class Meta:

@@ -17,10 +17,13 @@ TOKEN = os.getenv("TOKEN")
 LOGS_FOLDER = DATA_PATH / "logs"
 
 # Logger parameters
-LOGGING_LEVEL = logging.getLevelName(os.getenv("LOGGING_LEVEL"))
+LOGGING_LEVEL = logging.getLevelName(os.getenv("LOGGING_LEVEL", "INFO"))
 LOGS_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 LOGS_FILE_PATH = LOGS_FOLDER / "bot.log"
-LOGS_WHEN = "midnight"
-LOGS_INTERVAL = 1
-LOGS_BACKUP_COUNT = 14
-LOGS_ENCODING = "utf-8"
+LOGS_WHEN = os.getenv("LOGS_WHEN", "midnight")
+LOGS_INTERVAL = int(os.getenv("LOGS_INTERVAL", 1))
+LOGS_BACKUP_COUNT = int(os.getenv("LOGS_BACKUP_COUNT", 14))
+LOGS_ENCODING = os.getenv("LOGS_ENCODING", "utf-8")
+
+# Internal requests to backend
+INTERNAL_API_URL = os.getenv("INTERNAL_API_URL", "http://127.0.0.1:8000/api/v1/")

@@ -20,6 +20,7 @@ parts/
 sdist/
 var/
 wheels/
+files/
 share/python-wheels/
 *.egg-info/
 .installed.cfg
@@ -159,12 +160,15 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 .idea/
 
+# VS Code settings folder
+.vscode/
+
+# Ignore macOS .DS_Store files (metadata files that store custom attributes of a folder's contents)
+.DS_Store
+
 # Directories with static and media
 static/
 media/
 
 # Logging data folder
 .data/
-
-# VS Code settings folder
-.vscode/

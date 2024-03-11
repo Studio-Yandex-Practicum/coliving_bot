@@ -6,22 +6,25 @@ from telegram.ext import (
     filters,
 )
 
+import conversations.roommate_search.buttons as buttons
 import conversations.roommate_search.callback_funcs as callbacks
-import conversations.roommate_search.templates as buttons
-
-from .states import RoommateSearchStates as states
-from .validators import handle_text_input_instead_of_choosing_button
+import conversations.roommate_search.states as states
+from conversations.common_functions import common_buttons
+from conversations.menu.buttons import SEARCH_NEIGHBOR_BUTTON
+from conversations.roommate_search.buttons import AGE_RANGE_CALLBACK_PATTERN
+from conversations.roommate_search.validators import (
+    handle_text_input_instead_of_choosing_button,
+)
 
 roommate_search_handler: ConversationHandler = ConversationHandler(
-    entry_points=[CommandHandler("roommate_search", callbacks.start)],
+    entry_points=[
+        CallbackQueryHandler(callbacks.start, rf"^{SEARCH_NEIGHBOR_BUTTON}$")
+    ],
     states={
         states.AGE: [
             CallbackQueryHandler(
                 callback=callbacks.set_age,
-                pattern=rf"^({buttons.AGE_18_23_BTN}|{buttons.AGE_24_29_BTN}|"
-                f"{buttons.AGE_30_35_BTN}|{buttons.AGE_36_40_BTN}|"
-                f"{buttons.AGE_41_45_BTN}|{buttons.AGE_46_50_BTN}|"
-                f"{buttons.AGE_51_55_BTN}|{buttons.AGE_55UP_BTN})$",
+                pattern=AGE_RANGE_CALLBACK_PATTERN,
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -31,7 +34,7 @@ roommate_search_handler: ConversationHandler = ConversationHandler(
         states.LOCATION: [
             CallbackQueryHandler(
                 callback=callbacks.set_location,
-                pattern=rf"^({buttons.MSK_BTN}|{buttons.SPB_BTN})$",
+                pattern=common_buttons.LOCATION_CALLBACK_PATTERN,
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -67,13 +70,13 @@ roommate_search_handler: ConversationHandler = ConversationHandler(
             ),
         ],
         states.PROFILE: [
-            CallbackQueryHandler(
+            MessageHandler(
+                filters=filters.Regex(rf"^{buttons.LIKE_BTN}$"),
                 callback=callbacks.profile_like,
-                pattern=rf"^{buttons.LIKE_BTN}$",
             ),
-            CallbackQueryHandler(
+            MessageHandler(
+                filters=filters.Regex(rf"^{buttons.DISLIKE_BTN}$"),
                 callback=callbacks.next_profile,
-                pattern=rf"^{buttons.DISLIKE_BTN}$",
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -105,5 +108,5 @@ roommate_search_handler: ConversationHandler = ConversationHandler(
             ),
         ],
     },
-    fallbacks=[],
+    fallbacks=[CommandHandler("cancel", callbacks.end_of_search)],
 )
