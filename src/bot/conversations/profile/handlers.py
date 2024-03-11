@@ -5,11 +5,10 @@ from telegram.ext import (
     filters,
 )
 
-import conversations.common_functions.common_buttons as common_buttons
-import conversations.common_functions.common_funcs as common_funcs
 import conversations.profile.buttons as buttons
 import conversations.profile.callback_funcs as callback_funcs
 import conversations.profile.templates as templates
+from conversations.common_functions import common_buttons, common_funcs
 from conversations.common_functions.common_templates import (
     RETURN_BTN_LABEL,
     RETURN_TO_MENU_BTN_LABEL,
@@ -73,7 +72,7 @@ profile_handler: ConversationHandler = ConversationHandler(
         States.LOCATION: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_location,
-                pattern=rf"^({buttons.MSK_BUTTON}|{buttons.SPB_BUTTON})$",
+                pattern=common_buttons.LOCATION_CALLBACK_PATTERN,
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -175,7 +174,7 @@ profile_handler: ConversationHandler = ConversationHandler(
         States.EDIT_LOCATION: [
             CallbackQueryHandler(
                 callback_funcs.handle_edit_location,
-                rf"^({buttons.MSK_BUTTON}|{buttons.SPB_BUTTON})$",
+                common_buttons.LOCATION_CALLBACK_PATTERN,
             )
         ],
         States.EDIT_ABOUT_YOURSELF: [

@@ -21,7 +21,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
         states.LOCATION: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_location,
-                pattern=rf"^{templates.LOCATION_CALLBACK_DATA}:(.+)$",
+                pattern=common_buttons.LOCATION_CALLBACK_PATTERN,
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -31,7 +31,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
         states.ROOM_TYPE: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_room_type,
-                pattern=rf"^{templates.ROOM_TYPE_CALLBACK_DATA}:(.+)$",
+                pattern=common_buttons.ROOM_TYPE_CALLBACK_PATTERN,
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -115,7 +115,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
         states.EDIT_LOCATION: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_edit_location,
-                pattern=rf"^{templates.LOCATION_CALLBACK_DATA}:(.+)",
+                pattern=common_buttons.LOCATION_CALLBACK_PATTERN,
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -125,7 +125,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
         states.EDIT_ROOM_TYPE: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_edit_select_room_type,
-                pattern=rf"^{templates.ROOM_TYPE_CALLBACK_DATA}:(.+)$",
+                pattern=common_buttons.ROOM_TYPE_CALLBACK_PATTERN,
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,

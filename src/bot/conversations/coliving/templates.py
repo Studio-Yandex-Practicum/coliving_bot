@@ -84,9 +84,6 @@ BTN_TRANSFER_TO = "transfer_to"
 BTN_LABEL_TRANSFER_TO = "Передача коливинга"
 BTN_GO_TO_MENU = "go_to_menu"
 
-LOCATION_CALLBACK_DATA = "select_location"
-
-ROOM_TYPE_CALLBACK_DATA = "select_room_type"
 BTN_LABEL_BED_IN_ROOM = "Спальное место"
 BTN_LABEL_ROOM_IN_APPARTMENT = "Комната"
 

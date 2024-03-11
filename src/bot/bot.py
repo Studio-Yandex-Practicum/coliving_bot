@@ -5,6 +5,7 @@ from conversations.coliving.keyboards import create_keyboard_of_locations
 from conversations.menu.callback_funcs import menu, start
 from conversations.menu.keyboards import get_main_menu_commands
 from conversations.profile.handlers import profile_handler
+from conversations.roommate_search.handlers import roommate_search_handler
 from error_handler.callback_funcs import error_handler
 from utils.configs import TOKEN
 
@@ -23,5 +24,6 @@ def create_bot_app() -> Application:
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("menu", menu))
     application.add_handler(handler=profile_handler)
+    application.add_handler(handler=roommate_search_handler)
     application.add_error_handler(error_handler)
     return application

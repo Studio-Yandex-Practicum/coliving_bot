@@ -17,12 +17,10 @@ from conversations.profile.buttons import (
     FILL_AGAIN_BUTTON,
     HIDE_SEARCH_BUTTON,
     MALE_BUTTON,
-    MSK_BUTTON,
     NEW_PHOTO_BUTTON,
     SAVE_EDITED_PHOTO_BUTTON,
     SAVE_PHOTO_BUTTON,
     SHOW_SEARCH_BUTTON,
-    SPB_BUTTON,
     YES_BUTTON,
     YES_TO_DO_BUTTON,
 )
@@ -42,13 +40,6 @@ SEX_KEYBOARD = InlineKeyboardMarkup.from_row(
     button_row=(
         InlineKeyboardButton(text=MALE_BUTTON, callback_data=MALE_BUTTON),
         InlineKeyboardButton(text=FEMALE_BUTTON, callback_data=FEMALE_BUTTON),
-    )
-)
-
-LOCATION_KEYBOARD = InlineKeyboardMarkup.from_column(
-    button_column=(
-        InlineKeyboardButton(text=MSK_BUTTON, callback_data=MSK_BUTTON),
-        InlineKeyboardButton(text=SPB_BUTTON, callback_data=SPB_BUTTON),
     )
 )
 

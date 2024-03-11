@@ -39,3 +39,13 @@ class Coliving:
 class Location:
     id: int
     name: str
+
+
+@dataclass
+class SearchSettings:
+    """Значения фильтров поиска по профилям пользователей."""
+
+    age_min: Optional[int] = field(default=None)
+    age_max: Optional[int] = field(default=None)
+    location: Optional[str] = field(default=None)
+    sex: Optional[str] = field(default=None)
