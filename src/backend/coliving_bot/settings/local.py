@@ -1,5 +1,7 @@
 from .base import *  # noqa
 
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
