@@ -41,7 +41,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             ),
         )
 
-        context.user_data["coliving_info"] = Coliving(host=update.effective_chat.id)
         return states.LOCATION
 
     await update.effective_message.edit_text(text=templates.REPLY_MSG_HELLO)
@@ -90,8 +89,10 @@ async def handle_is_visible_switching(update: Update, context: CallbackContext) 
     callback_data = update.callback_query.data
     await update.effective_message.edit_reply_markup()
     context.user_data["coliving_info"].is_visible = eval(callback_data)
-    await update.effective_message.reply_text(text=templates.REPLY_BTN_HIDE)
-
+    if context.user_data["coliving_info"].is_visible:
+        await update.effective_message.reply_text(text=templates.REPLY_BTN_SHOW)
+    else:
+        await update.effective_message.reply_text(text=templates.REPLY_BTN_HIDE)
     context.user_data["coliving_info"] = await api_service.update_coliving_info(
         coliving=context.user_data["coliving_info"]
     )
@@ -198,7 +199,7 @@ async def handle_location_text_input_instead_of_choosing_button(
 
 async def handle_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Выбор местоположения и запись в контекст."""
-
+    context.user_data["coliving_info"] = Coliving(host=update.effective_chat.id)
     location = update.callback_query.data.split(":")[1]
     await update.effective_message.edit_reply_markup()
     context.user_data["coliving_info"].location = location
