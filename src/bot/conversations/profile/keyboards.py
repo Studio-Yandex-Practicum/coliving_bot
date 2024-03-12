@@ -27,24 +27,25 @@ from conversations.profile.buttons import (
     YES_TO_DO_BUTTON,
 )
 
+PROFILE_DUBLICATE_BUTTONS = [
+    InlineKeyboardButton(text=EDIT_FORM_BUTTON, callback_data=EDIT_FORM_BUTTON),
+    InlineKeyboardButton(
+        text=RETURN_TO_MENU_BTN_LABEL, callback_data=RETURN_TO_MENU_BTN_LABEL
+    ),
+]
+SEARCH_BUTTON = InlineKeyboardButton(
+    text=HIDE_SEARCH_BUTTON, callback_data="is_visible:False"
+)
+HIDE_BUTTON = InlineKeyboardButton(
+    text=SHOW_SEARCH_BUTTON, callback_data="is_visible:True"
+)
+
 PROFILE_KEYBOARD_OPEN_SEARCH = InlineKeyboardMarkup.from_column(
-    button_column=(
-        InlineKeyboardButton(text=HIDE_SEARCH_BUTTON, callback_data="is_visible:False"),
-        InlineKeyboardButton(text=EDIT_FORM_BUTTON, callback_data=EDIT_FORM_BUTTON),
-        InlineKeyboardButton(
-            text=RETURN_TO_MENU_BTN_LABEL, callback_data=RETURN_TO_MENU_BTN_LABEL
-        ),
-    )
+    button_column=(SEARCH_BUTTON, *PROFILE_DUBLICATE_BUTTONS)
 )
 
 PROFILE_KEYBOARD_HIDE_SEARCH = InlineKeyboardMarkup.from_column(
-    button_column=(
-        InlineKeyboardButton(text=SHOW_SEARCH_BUTTON, callback_data="is_visible:True"),
-        InlineKeyboardButton(text=EDIT_FORM_BUTTON, callback_data=EDIT_FORM_BUTTON),
-        InlineKeyboardButton(
-            text=RETURN_TO_MENU_BTN_LABEL, callback_data=RETURN_TO_MENU_BTN_LABEL
-        ),
-    )
+    button_column=(HIDE_BUTTON, *PROFILE_DUBLICATE_BUTTONS)
 )
 
 SEX_KEYBOARD = InlineKeyboardMarkup.from_row(
