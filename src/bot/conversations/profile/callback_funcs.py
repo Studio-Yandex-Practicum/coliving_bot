@@ -56,14 +56,12 @@ async def start(
     await set_profile_to_context(context, profile_info)
     await update.effective_message.delete()
 
-    if profile_info.is_visible is True:
-        await _look_at_profile(
-            update, context, "", keyboards.PROFILE_KEYBOARD_OPEN_SEARCH
-        )
-    else:
-        await _look_at_profile(
-            update, context, "", keyboards.PROFILE_KEYBOARD_HIDE_SEARCH
-        )
+    keyboard = (
+        keyboards.PROFILE_KEYBOARD_OPEN_SEARCH
+        if profile_info.is_visible
+        else keyboards.PROFILE_KEYBOARD_HIDE_SEARCH
+    )
+    await _look_at_profile(update, context, "", keyboard)
 
     return States.PROFILE
 
