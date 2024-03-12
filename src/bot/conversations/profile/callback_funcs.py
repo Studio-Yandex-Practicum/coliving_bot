@@ -55,7 +55,16 @@ async def start(
 
     await set_profile_to_context(context, profile_info)
     await update.effective_message.delete()
-    await _look_at_profile(update, context, "", keyboards.PROFILE_KEYBOARD)
+
+    if profile_info.is_visible is True:
+        await _look_at_profile(
+            update, context, "", keyboards.PROFILE_KEYBOARD_OPEN_SEARCH
+        )
+    else:
+        await _look_at_profile(
+            update, context, "", keyboards.PROFILE_KEYBOARD_HIDE_SEARCH
+        )
+
     return States.PROFILE
 
 
@@ -104,8 +113,19 @@ async def handle_return_to_profile_response(
     Обработка кнопки 'Вернуться'.
     Переводит диалог в состояние PROFILE.
     """
+    profile_info = await api_service.get_user_profile_by_telegram_id(
+        update.effective_chat.id
+    )
+
     await _send_chosen_choice_and_remove_buttons(update=update)
-    await _look_at_profile(update, context, "", keyboards.PROFILE_KEYBOARD)
+    if profile_info.is_visible is True:
+        await _look_at_profile(
+            update, context, "", keyboards.PROFILE_KEYBOARD_OPEN_SEARCH
+        )
+    else:
+        await _look_at_profile(
+            update, context, "", keyboards.PROFILE_KEYBOARD_HIDE_SEARCH
+        )
     return States.PROFILE
 
 

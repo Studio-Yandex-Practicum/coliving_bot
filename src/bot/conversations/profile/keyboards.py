@@ -27,10 +27,19 @@ from conversations.profile.buttons import (
     YES_TO_DO_BUTTON,
 )
 
-PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
+PROFILE_KEYBOARD_OPEN_SEARCH = InlineKeyboardMarkup.from_column(
+    button_column=(
+        InlineKeyboardButton(text=HIDE_SEARCH_BUTTON, callback_data="is_visible:False"),
+        InlineKeyboardButton(text=EDIT_FORM_BUTTON, callback_data=EDIT_FORM_BUTTON),
+        InlineKeyboardButton(
+            text=RETURN_TO_MENU_BTN_LABEL, callback_data=RETURN_TO_MENU_BTN_LABEL
+        ),
+    )
+)
+
+PROFILE_KEYBOARD_HIDE_SEARCH = InlineKeyboardMarkup.from_column(
     button_column=(
         InlineKeyboardButton(text=SHOW_SEARCH_BUTTON, callback_data="is_visible:True"),
-        InlineKeyboardButton(text=HIDE_SEARCH_BUTTON, callback_data="is_visible:False"),
         InlineKeyboardButton(text=EDIT_FORM_BUTTON, callback_data=EDIT_FORM_BUTTON),
         InlineKeyboardButton(
             text=RETURN_TO_MENU_BTN_LABEL, callback_data=RETURN_TO_MENU_BTN_LABEL
