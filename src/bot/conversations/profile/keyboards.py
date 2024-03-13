@@ -1,5 +1,10 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
+from conversations.common_functions.common_buttons import (
+    HIDE_SEARCH_BUTTON,
+    SHOW_SEARCH_BUTTON,
+)
+from conversations.common_functions.common_keyboards import HIDE_BUTTON, SEARCH_BUTTON
 from conversations.common_functions.common_templates import (
     RETURN_BTN_LABEL,
     RETURN_TO_MENU_BTN_LABEL,
@@ -15,16 +20,13 @@ from conversations.profile.buttons import (
     EDIT_SEX_BUTTON,
     FEMALE_BUTTON,
     FILL_AGAIN_BUTTON,
-    HIDE_SEARCH_BUTTON,
     MALE_BUTTON,
     MSK_BUTTON,
     NEW_PHOTO_BUTTON,
     SAVE_EDITED_PHOTO_BUTTON,
     SAVE_PHOTO_BUTTON,
-    SHOW_SEARCH_BUTTON,
     SPB_BUTTON,
     YES_BUTTON,
-    YES_TO_DO_BUTTON,
 )
 
 PROFILE_DUBLICATE_BUTTONS = [
@@ -33,12 +35,6 @@ PROFILE_DUBLICATE_BUTTONS = [
         text=RETURN_TO_MENU_BTN_LABEL, callback_data=RETURN_TO_MENU_BTN_LABEL
     ),
 ]
-SEARCH_BUTTON = InlineKeyboardButton(
-    text=HIDE_SEARCH_BUTTON, callback_data="is_visible:False"
-)
-HIDE_BUTTON = InlineKeyboardButton(
-    text=SHOW_SEARCH_BUTTON, callback_data="is_visible:True"
-)
 
 PROFILE_KEYBOARD_OPEN_SEARCH = InlineKeyboardMarkup.from_column(
     button_column=(SEARCH_BUTTON, *PROFILE_DUBLICATE_BUTTONS)
@@ -77,7 +73,7 @@ FORM_SAVED_KEYBOARD = InlineKeyboardMarkup.from_column(
 
 FORM_VISIBLE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
-        InlineKeyboardButton(text=YES_TO_DO_BUTTON, callback_data=YES_TO_DO_BUTTON),
+        InlineKeyboardButton(text=SHOW_SEARCH_BUTTON, callback_data=SHOW_SEARCH_BUTTON),
         InlineKeyboardButton(text=HIDE_SEARCH_BUTTON, callback_data=HIDE_SEARCH_BUTTON),
     )
 )

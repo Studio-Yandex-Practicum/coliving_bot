@@ -7,6 +7,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto
 from telegram.constants import ParseMode
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
+import conversations.common_functions.common_buttons as common_buttons
 import conversations.common_functions.common_funcs as common_funcs
 import conversations.common_functions.common_keyboards as common_keyboards
 import conversations.profile.buttons as buttons
@@ -414,9 +415,9 @@ async def handle_visible(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     visible = update.callback_query.data
     await update.effective_message.reply_text(text=visible)
     await update.effective_message.edit_reply_markup()
-    if visible == buttons.YES_TO_DO_BUTTON:
+    if visible == common_buttons.SHOW_SEARCH_BUTTON:
         context.user_data[templates.IS_VISIBLE_FIELD] = True
-    elif visible == buttons.HIDE_SEARCH_BUTTON:
+    elif visible == common_buttons.HIDE_SEARCH_BUTTON:
         context.user_data[templates.IS_VISIBLE_FIELD] = False
         await api_service.update_user_profile(
             update.effective_chat.id, context.user_data

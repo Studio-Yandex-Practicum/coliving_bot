@@ -1,4 +1,7 @@
-from conversations.profile.buttons import HIDE_SEARCH_BUTTON, SHOW_SEARCH_BUTTON
+from conversations.common_functions.common_buttons import (
+    HIDE_SEARCH_BUTTON,
+    SHOW_SEARCH_BUTTON,
+)
 
 MIN_AGE = 18
 MAX_AGE = 99
