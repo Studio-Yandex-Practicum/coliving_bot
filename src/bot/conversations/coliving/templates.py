@@ -1,8 +1,5 @@
 from internal_requests.entities import Coliving
 
-COLIVING_START = "coliving"
-COLIVING_START_BTN = "Коливинг"
-
 LOCATION_FIELD = "location"
 ROOM_TYPE_FIELD = "room_type"
 ABOUT_FIELD = "about"
