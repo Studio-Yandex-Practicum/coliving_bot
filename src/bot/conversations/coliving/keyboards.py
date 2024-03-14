@@ -2,6 +2,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 import conversations.coliving.templates as templates
 from conversations.coliving.templates import ROOM_TYPE_CALLBACK_DATA
+from conversations.common_functions.common_keyboards import HIDE_BUTTON, SEARCH_BUTTON
 from conversations.common_functions.common_templates import RETURN_TO_MENU_BTN_LABEL
 from internal_requests import api_service
 
@@ -71,20 +72,10 @@ WHAT_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     )
 )
 
-SHOW_SEARCH_KEYBOARD = InlineKeyboardButton(
-    text=templates.BTN_LABEL_SHOW,
-    callback_data="True",
-)
-
-HIDE_SEARCH_KEYBOARD = InlineKeyboardButton(
-    text=templates.BTN_LABEL_HIDE_SEARCH_KEYBOARD,
-    callback_data="False",
-)
-
 IS_VISIBLE_OR_NOT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
-        SHOW_SEARCH_KEYBOARD,
-        HIDE_SEARCH_KEYBOARD,
+        HIDE_BUTTON,
+        SEARCH_BUTTON,
     )
 )
 
@@ -120,11 +111,11 @@ COLIVING_PROFILE_DUBLICATE_BUTTONS = [
 ]
 
 COLIVING_PROFILE_KEYBOARD_VISIBLE = InlineKeyboardMarkup.from_column(
-    button_column=(HIDE_SEARCH_KEYBOARD, *COLIVING_PROFILE_DUBLICATE_BUTTONS)
+    button_column=(SEARCH_BUTTON, *COLIVING_PROFILE_DUBLICATE_BUTTONS)
 )
 
 COLIVING_PROFILE_KEYBOARD_NOT_VISIBLE = InlineKeyboardMarkup.from_column(
-    button_column=(SHOW_SEARCH_KEYBOARD, *COLIVING_PROFILE_DUBLICATE_BUTTONS)
+    button_column=(HIDE_BUTTON, *COLIVING_PROFILE_DUBLICATE_BUTTONS)
 )
 
 INVITE_ROOMMATES_PROFILE_KEYBOARD = InlineKeyboardButton(

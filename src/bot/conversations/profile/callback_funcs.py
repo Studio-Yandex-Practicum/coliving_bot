@@ -10,6 +10,7 @@ from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 import conversations.common_functions.common_buttons as common_buttons
 import conversations.common_functions.common_funcs as common_funcs
 import conversations.common_functions.common_keyboards as common_keyboards
+import conversations.common_functions.common_templates as common_templates
 import conversations.profile.buttons as buttons
 import conversations.profile.keyboards as keyboards
 import conversations.profile.templates as templates
@@ -78,9 +79,9 @@ async def send_question_to_profile_is_visible_in_search(
     is_visible: bool = eval(update.callback_query.data.split(":")[1])
     context.user_data[templates.IS_VISIBLE_FIELD] = is_visible
     if is_visible:
-        message_text = templates.FORM_IS_VISIBLE
+        message_text = common_templates.FORM_IS_VISIBLE
     else:
-        message_text = templates.FORM_IS_NOT_VISIBLE
+        message_text = common_templates.FORM_IS_NOT_VISIBLE
     await update.effective_message.reply_text(
         text=message_text, parse_mode=ParseMode.HTML
     )
