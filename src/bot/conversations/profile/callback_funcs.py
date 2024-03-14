@@ -262,9 +262,9 @@ async def _look_at_profile(
     Предварительный просмотр профиля.
     """
     chat_id = update.effective_chat.id
-    ask_text = copy(templates.ASK_IS_THAT_RIGHT)
+    ask_text = copy(templates.PROFILE_VIEWING)
     if not ask:
-        ask_text = templates.ASK_WANT_TO_CHANGE
+        ask_text = templates.PROFILE_VIEWING
     message_text = (
         title
         + "\n\n"
@@ -396,7 +396,7 @@ async def handle_visible(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     visible = update.callback_query.data
     await update.effective_message.reply_text(text=visible)
     await update.effective_message.edit_reply_markup()
-    if visible == buttons.YES_TO_DO_BUTTON:
+    if visible == buttons.OPEN_SEARCH_BUTTON:
         context.user_data[templates.IS_VISIBLE_FIELD] = True
     elif visible == buttons.HIDE_SEARCH_BUTTON:
         context.user_data[templates.IS_VISIBLE_FIELD] = False
