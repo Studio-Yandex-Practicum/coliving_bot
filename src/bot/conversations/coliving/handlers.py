@@ -57,6 +57,10 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 filters.PHOTO | filters.TEXT & ~filters.COMMAND,
                 callback_funcs.handle_photo_room,
             ),
+            CallbackQueryHandler(
+                pattern=rf"^{templates.SAVE_PHOTO_BUTTON}",
+                callback=callback_funcs.send_received_room_photos,
+            ),
         ],
         states.CONFIRMATION: [
             CallbackQueryHandler(
@@ -153,6 +157,10 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 filters.PHOTO,
                 callback_funcs.handle_edit_photo_room,
             ),
+            CallbackQueryHandler(
+                pattern=rf"^{templates.SAVE_EDITED_PHOTO_BUTTON}",
+                callback=callback_funcs.send_edited_room_photos,
+            ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
                 callback_funcs.handle_edit_photo_room,
@@ -161,6 +169,24 @@ coliving_handler: ConversationHandler = ConversationHandler(
         states.EDIT_CONFIRMATION: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_edit_profile_confirmation_confirm,
+                pattern=rf"^{templates.BTN_LABEL_CONFIRM}",
+            ),
+            CallbackQueryHandler(
+                callback=callback_funcs.handle_edit_profile_confirmation_cancel,
+                pattern=rf"^{templates.BTN_LABEL_CANCEL_EDIT}",
+            ),
+            CallbackQueryHandler(
+                callback=callback_funcs.handle_edit_profile_confirmation_continue_edit,
+                pattern=rf"^{templates.BTN_LABEL_EDIT_CONTINUE}",
+            ),
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND,
+                callback_funcs.handle_edit_profile_confirmation_text_instead_of_button,
+            ),
+        ],
+        states.EDIT_PHOTO_CONFIRMATION: [
+            CallbackQueryHandler(
+                callback=callback_funcs.handle_edit_photo_room_confirmation_confirm,
                 pattern=rf"^{templates.BTN_LABEL_CONFIRM}",
             ),
             CallbackQueryHandler(

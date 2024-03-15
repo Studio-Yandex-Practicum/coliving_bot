@@ -1,5 +1,3 @@
-import base64
-from pathlib import Path
 from typing import Optional
 
 from telegram import InlineKeyboardMarkup, InputMediaPhoto, Update
@@ -41,6 +39,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             ),
         )
 
+        context.user_data["coliving_info"] = Coliving(host=update.effective_chat.id)
         return states.LOCATION
 
     await update.effective_message.edit_text(text=templates.REPLY_MSG_HELLO)
@@ -199,7 +198,6 @@ async def handle_location_text_input_instead_of_choosing_button(
 
 async def handle_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Выбор местоположения и запись в контекст."""
-    context.user_data["coliving_info"] = Coliving(host=update.effective_chat.id)
     location = update.callback_query.data.split(":")[1]
     await update.effective_message.edit_reply_markup()
     context.user_data["coliving_info"].location = location
@@ -296,38 +294,16 @@ async def handle_price(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     await update.effective_message.reply_text(text=f"{templates.REPLY_MSG}{price}")
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_PHOTO_SEND,
-        reply_markup=common_keyboards.CANCEL_KEYBOARD,
+        reply_markup=keyboards.SAVE_OR_CANCEL_PHOTO_KEYBOARD,
     )
-
     return states.PHOTO_ROOM
 
 
-async def encode_photo_room(
-    update: Update,
-    _context: ContextTypes.DEFAULT_TYPE,
-) -> bytes:
-    """Кодирование изображения"""
-    effective_chat = update.effective_chat
-    path = f"media/{update.effective_chat.id}/photos"
-    Path(path).mkdir(parents=True, exist_ok=True)
-    photo_file = await update.message.photo[-1].get_file()
-    # for i in range(len)
-    await photo_file.download_to_drive(
-        f"{path}/{effective_chat.first_name}_room_photo.jpg"
-    )
-    with open(f"{path}/{effective_chat.first_name}_room_photo.jpg", "rb") as image:
-        return base64.b64encode(image.read())
-    ######################################################
-    # Так загрузит 6 фоток и 6 раз ответит
-
-    # await photo_file.download_to_drive(
-    #     f'{path}/{effective_chat.first_name}_{photo_file.file_unique_id}.jpg'
-    # )
-    ######################################################
-
-
-async def handle_photo_room(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Сохраняет фото."""
+async def handle_photo_room(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Обрабатывает фото.
+    Проверка: нажатие кнопки
+    """
     if update.message.text:
         await update.effective_message.reply_text(text=templates.ERR_PHOTO_NOT_TEXT)
         return states.PHOTO_ROOM
@@ -335,14 +311,8 @@ async def handle_photo_room(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     context.user_data["coliving_info"].images.append(
         Image(file_id=photo.file_id, photo_size=photo)
     )
-    await update.message.reply_text(templates.REPLY_MSG_PHOTO)
-    await _show_coliving_profile(
-        update,
-        context,
-        templates.REPLY_MSG_ASK_TO_CONFIRM,
-        keyboard=keyboards.CONFIRM_OR_EDIT_PROFILE_KEYBOARD,
-    )
-    return states.CONFIRMATION
+
+    return None
 
 
 async def handle_confirm_or_edit_profile_text_instead_of_button(
@@ -430,8 +400,12 @@ async def handle_is_visible_coliving_profile_yes(
     """
     await update.effective_message.edit_reply_markup()
     context.user_data["coliving_info"].is_visible = eval(update.callback_query.data)
+    if context.user_data["coliving_info"].is_visible:
+        respond = templates.REPLY_BTN_SHOW
+    else:
+        respond = templates.REPLY_BTN_HIDE
     await update.effective_message.reply_text(
-        text=templates.REPLY_BTN_SHOW,
+        text=respond,
         reply_markup=common_keyboards.CANCEL_KEYBOARD,
     )
     return await save_coliving_info_to_db(update, context)
@@ -545,19 +519,20 @@ async def handle_what_to_edit_price(
 
 
 async def handle_what_to_edit_photo_room(
-    update: Update, _context: ContextTypes.DEFAULT_TYPE
+    update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """
     Выбор редактируемого поля.
     Обработка ответа: Фото квартиры.
     """
-
     await update.effective_message.edit_reply_markup()
+    context.user_data["coliving_info"].images.clear()
     await update.effective_message.reply_text(
         text=f"{templates.REPLY_MSG}{templates.BTN_EDIT_PHOTO}"
     )
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_PHOTO_SEND,
+        reply_markup=keyboards.SAVE_OR_CANCEL_NEW_PHOTO_KEYBOARD,
     )
     return states.EDIT_PHOTO_ROOM
 
@@ -658,22 +633,21 @@ async def handle_edit_price(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
 async def handle_edit_photo_room(
     update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> int:
-    """Редактирование фото помещения."""
-
+) -> None:
+    """
+    Обрабатывает загруженную пользователем фотографию.
+    Переводит диалог в состояние CONFIRMATION по нажатию кнопки (анкета верна или нет)
+    """
+    new_photo = update.effective_message.photo[-1]
     if update.message.text:
         await update.effective_message.reply_text(text=templates.ERR_PHOTO_NOT_TEXT)
         return states.EDIT_PHOTO_ROOM
 
-    context.user_data[templates.IMAGE_FIELD] = await encode_photo_room(update, context)
-
-    await _show_coliving_profile(
-        update,
-        context,
-        templates.REPLY_MSG_ASK_TO_CONFIRM,
-        keyboards.EDIT_CONFIRMATION_KEYBOARD,
+    context.user_data["coliving_info"].images.append(
+        Image(file_id=new_photo.file_id, photo_size=new_photo)
     )
-    return states.EDIT_CONFIRMATION
+
+    return None
 
 
 async def handle_edit_profile_confirmation_text_instead_of_button(
@@ -772,9 +746,9 @@ async def _show_coliving_profile(
 
     if coliving_info.images:
         media_group = [
-            InputMediaPhoto(media=image.file_id) for image in coliving_info.images
+            InputMediaPhoto(media=image.file_id) for image in coliving_info.images[:5]
         ]
-        await current_chat.send_media_group(media=media_group)
+    await current_chat.send_media_group(media=media_group)
 
     if keyboard is None:
         if coliving_info.is_visible:
@@ -792,3 +766,78 @@ async def _show_coliving_profile(
         parse_mode=ParseMode.HTML,
         reply_markup=keyboard,
     )
+
+
+async def send_received_room_photos(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+) -> int:
+    """
+    Сохранение фотографий
+    """
+    if len(context.user_data["coliving_info"].images) > 5:
+        await update.effective_message.reply_text(text=templates.ERR_PHOTO_LIMIT_TEXT)
+
+    await update.effective_chat.send_message(templates.REPLY_MSG_PHOTO)
+
+    if context.user_data["coliving_info"].images:
+        await update.effective_message.edit_reply_markup()
+        await _show_coliving_profile(
+            update,
+            context,
+            templates.REPLY_MSG_ASK_TO_CONFIRM,
+            keyboards.CONFIRM_OR_EDIT_PROFILE_KEYBOARD,
+        )
+        return states.CONFIRMATION
+
+    await context.bot.answer_callback_query(
+        callback_query_id=update.callback_query.id,
+        text=templates.DONT_SAVE_COLIVING_WITHOUT_PHOTO,
+        show_alert=True,
+    )
+    return states.PHOTO_ROOM
+
+
+async def handle_edit_photo_room_confirmation_confirm(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    coliving: Optional[Coliving] = None,
+) -> int:
+    """Сохранение измененных фотографий коливинга."""
+    coliving_info: Coliving = coliving or context.user_data["coliving_info"]
+    images = context.user_data["coliving_info"].images[:5]
+    await update.effective_message.edit_reply_markup()
+    message = templates.BTN_LABEL_CONFIRM
+    await update.effective_message.reply_text(text=f"{templates.REPLY_MSG}{message}")
+    await api_service.delete_coliving_photos(coliving_info.id, update.effective_chat.id)
+    await api_service.save_coliving_photo(images, coliving_info)
+    await update.effective_message.reply_text(text=templates.REPLY_MSG_PROFILE_SAVED)
+    context.user_data.clear()
+    return ConversationHandler.END
+
+
+async def send_edited_room_photos(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """
+    Подтверждение сохранения измененных фотографий
+    """
+    if len(context.user_data["coliving_info"].images) > 5:
+        await update.effective_message.reply_text(text=templates.ERR_PHOTO_LIMIT_TEXT)
+
+    if context.user_data["coliving_info"].images:
+        await update.effective_message.edit_reply_markup()
+        await _show_coliving_profile(
+            update,
+            context,
+            templates.REPLY_MSG_ASK_TO_CONFIRM,
+            keyboards.EDIT_CONFIRMATION_KEYBOARD,
+        )
+        return states.EDIT_PHOTO_CONFIRMATION
+
+    await context.bot.answer_callback_query(
+        callback_query_id=update.callback_query.id,
+        text=templates.DONT_SAVE_COLIVING_WITHOUT_PHOTO,
+        show_alert=True,
+    )
+    return states.EDIT_PHOTO_ROOM

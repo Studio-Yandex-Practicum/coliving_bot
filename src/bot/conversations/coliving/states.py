@@ -15,4 +15,5 @@
     EDIT_PHOTO_ROOM,
     EDIT_CONFIRMATION,
     EDIT_LOCATION,
-) = range(16)
+    EDIT_PHOTO_CONFIRMATION,
+) = range(17)

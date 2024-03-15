@@ -204,6 +204,25 @@ REPORT_OR_CANCEL_ROOMMATES_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     )
 )
 
+SAVE_OR_CANCEL_PHOTO_KEYBOARD = InlineKeyboardMarkup.from_column(
+    button_column=(
+        InlineKeyboardButton(
+            text=templates.SAVE_PHOTO_BUTTON, callback_data=templates.SAVE_PHOTO_BUTTON
+        ),
+        CANCEL_KEYBOARD,
+    )
+)
+
+SAVE_OR_CANCEL_NEW_PHOTO_KEYBOARD = InlineKeyboardMarkup.from_column(
+    button_column=(
+        InlineKeyboardButton(
+            text=templates.SAVE_EDITED_PHOTO_BUTTON,
+            callback_data=templates.SAVE_EDITED_PHOTO_BUTTON,
+        ),
+        CANCEL_KEYBOARD,
+    )
+)
+
 
 async def create_keyboard_of_locations():
     locations = await api_service.get_locations()
