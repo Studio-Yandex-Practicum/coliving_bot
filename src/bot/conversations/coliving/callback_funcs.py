@@ -11,6 +11,7 @@ import conversations.coliving.states as states
 import conversations.coliving.templates as templates
 import conversations.common_functions.common_funcs as common_funcs
 import conversations.common_functions.common_keyboards as common_keyboards
+import conversations.common_functions.common_templates as common_templates
 from conversations.coliving.templates import format_coliving_profile_message
 from conversations.menu.callback_funcs import menu
 from general.validators import value_is_in_range_validator
@@ -87,10 +88,16 @@ async def handle_coliving_edit(
 
 async def handle_is_visible_switching(update: Update, context: CallbackContext) -> int:
     """Обработка ответа: Скрыть из поиска."""
-    callback_data = update.callback_query.data
     await update.effective_message.edit_reply_markup()
-    context.user_data["coliving_info"].is_visible = eval(callback_data)
-    await update.effective_message.reply_text(text=templates.REPLY_BTN_HIDE)
+    is_visible: bool = eval(update.callback_query.data.split(":")[1])
+    context.user_data["coliving_info"].is_visible = is_visible
+    if is_visible:
+        message_text = common_templates.FORM_IS_VISIBLE
+    else:
+        message_text = common_templates.FORM_IS_NOT_VISIBLE
+    await update.effective_message.reply_text(
+        text=message_text, parse_mode=ParseMode.HTML
+    )
 
     context.user_data["coliving_info"] = await api_service.update_coliving_info(
         coliving=context.user_data["coliving_info"]
@@ -428,7 +435,8 @@ async def handle_is_visible_coliving_profile_yes(
     перевод на стадию сохранения в БД.
     """
     await update.effective_message.edit_reply_markup()
-    context.user_data["coliving_info"].is_visible = eval(update.callback_query.data)
+    is_visible: bool = eval(update.callback_query.data.split(":")[1])
+    context.user_data["coliving_info"].is_visible = is_visible
     await update.effective_message.reply_text(
         text=templates.REPLY_BTN_SHOW,
         reply_markup=common_keyboards.CANCEL_KEYBOARD,

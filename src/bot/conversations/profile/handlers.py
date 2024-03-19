@@ -109,7 +109,8 @@ profile_handler: ConversationHandler = ConversationHandler(
             CallbackQueryHandler(
                 callback=callback_funcs.handle_visible,
                 pattern=(
-                    rf"^({buttons.OPEN_SEARCH_BUTTON}|{buttons.HIDE_SEARCH_BUTTON})$"
+                    rf"^({common_buttons.SHOW_SEARCH_BUTTON}"
+                    rf"|{common_buttons.HIDE_SEARCH_BUTTON})$"
                 ),
             ),
             MessageHandler(
