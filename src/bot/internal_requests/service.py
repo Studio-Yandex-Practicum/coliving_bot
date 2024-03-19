@@ -1,11 +1,17 @@
 import mimetypes
 from dataclasses import asdict
 from typing import List, Optional
-from urllib.parse import urljoin
+from urllib.parse import urlencode, urljoin
 
 from httpx import AsyncClient, Response
 
-from internal_requests.entities import Coliving, Image, Location, UserProfile
+from internal_requests.entities import (
+    Coliving,
+    Image,
+    Location,
+    SearchSettings,
+    UserProfile,
+)
 
 
 class ColivingNotFound(Exception):
@@ -114,15 +120,6 @@ class APIService:
         data = {"residence": residence_id}
         return await self._patch_request(endpoint_urn=endpoint_urn, data=data)
 
-    async def _get_request(self, endpoint_urn: str) -> Response:
-        """
-        Отправляет GET-запрос к указанному эндпоинту.
-        """
-        async with AsyncClient() as client:
-            response = await client.get(urljoin(base=self.base_url, url=endpoint_urn))
-            response.raise_for_status()
-        return response
-
     async def get_user_profile_by_telegram_id(
         self, telegram_id: int
     ) -> Optional[UserProfile]:
@@ -134,6 +131,24 @@ class APIService:
         """
         response = await self._get_request(f"users/{telegram_id}/profile/")
         return UserProfile(**response.json())
+
+    async def get_filtered_user_profiles(
+        self, filters: SearchSettings, viewer: int
+    ) -> List[UserProfile]:
+        """
+        Получение отфильтрованных анкет пользователей.
+
+        :param filters: Значения для query-параметров поиска
+        :param viewer: Telegram ID пользователя, осуществляющего поиск
+        :return: Профили, подходящие по фильтрам
+        """
+        params_dict = {k: v for k, v in asdict(filters).items() if v is not None}
+        search_params = urlencode(params_dict)
+        response = await self._get_request(f"profiles/?{search_params}&viewer={viewer}")
+        result = []
+        for profile in response.json():
+            result.append(UserProfile(**profile))
+        return result
 
     async def create_user_profile(
         self, telegram_id: int, data: dict
@@ -173,12 +188,15 @@ class APIService:
         endpoint_urn = f"users/{telegram_id}/profile/images/"
         return await self._delete_request(endpoint_urn)
 
-    async def _delete_request(self, endpoint_urn: str) -> Response:
-        async with AsyncClient() as client:
-            response = await client.delete(
-                urljoin(base=self.base_url, url=endpoint_urn)
-            )
-            response.raise_for_status()
+    async def send_match_request(self, sender: int, receiver: int) -> Response:
+        """Совершает POST-запрос к эндпоинту создания MatchRequest.
+
+        :param sender: telegram_id отправителя.
+        :param receiver: telegram_id получателя.
+        """
+        endpoint_urn = "match_requests/"
+        data = {"sender": sender, "receiver": receiver}
+        response = await self._post_request(endpoint_urn=endpoint_urn, data=data)
         return response
 
     async def _profile_request(
@@ -206,15 +224,15 @@ class APIService:
         )
         return UserProfile(**response.json())
 
-    async def send_match_request(self, sender: int, receiver: int) -> Response:
-        """Совершает POST-запрос к эндпоинту создания MatchRequest.
-
-        :param sender: telegram_id отправителя.
-        :param receiver: telegram_id получателя.
+    async def _get_request(self, endpoint_urn: str) -> Response:
         """
-        endpoint_urn = "match-requests/"
-        data = {"sender": sender, "receiver": receiver}
-        response = await self._post_request(endpoint_urn=endpoint_urn, data=data)
+        Отправляет GET-запрос к указанному эндпоинту.
+
+        :param endpoint_urn: Относительный URI эндпоинта.
+        """
+        async with AsyncClient() as client:
+            response = await client.get(urljoin(base=self.base_url, url=endpoint_urn))
+            response.raise_for_status()
         return response
 
     async def _post_request(
@@ -258,6 +276,19 @@ class APIService:
                 json=data,
             )
         response.raise_for_status()
+        return response
+
+    async def _delete_request(self, endpoint_urn: str) -> Response:
+        """
+        Отправляет DELETE-запрос к указанному эндпоинту.
+
+        :param endpoint_urn: Относительный URI эндпоинта.
+        """
+        async with AsyncClient() as client:
+            response = await client.delete(
+                urljoin(base=self.base_url, url=endpoint_urn)
+            )
+            response.raise_for_status()
         return response
 
     @staticmethod

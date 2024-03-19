@@ -1,6 +1,6 @@
 from .common_buttons import HIDE_SEARCH_BUTTON, SHOW_SEARCH_BUTTON
 
-CANCEL_TEXT = "Хорошо, вы можете вернуться к этому в любой момент."
+CANCEL_TEXT = "Хорошо, ты можешь вернуться к этому в любой момент."
 RETURN_TO_MENU_BTN_LABEL = "Вернуться в меню ↩️"
 RETURN_BTN_LABEL = "Вернуться ↩️"
 FORM_IS_VISIBLE = (

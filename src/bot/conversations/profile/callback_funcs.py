@@ -207,7 +207,7 @@ async def handle_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     await update.effective_message.reply_text(
         text=templates.ASK_LOCATION,
         reply_markup=common_funcs.combine_keyboards(
-            keyboards.LOCATION_KEYBOARD, common_keyboards.CANCEL_KEYBOARD
+            context.bot_data["location_keyboard"], common_keyboards.CANCEL_KEYBOARD
         ),
     )
 
@@ -279,9 +279,9 @@ async def _look_at_profile(
     Предварительный просмотр профиля.
     """
     chat_id = update.effective_chat.id
-    ask_text = copy(templates.ASK_IS_THAT_RIGHT)
+    ask_text = copy(templates.PROFILE_VIEWING)
     if not ask:
-        ask_text = templates.ASK_WANT_TO_CHANGE
+        ask_text = templates.PROFILE_VIEWING
     message_text = (
         title
         + "\n\n"
@@ -441,7 +441,7 @@ async def start_filling_again(
 
 
 async def send_question_to_edit_name(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """
     Обработка кнопки 'Имя'.
@@ -455,7 +455,7 @@ async def send_question_to_edit_name(
 
 
 async def send_question_to_edit_sex(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """
     Обработка кнопки 'Пол'.
@@ -471,7 +471,7 @@ async def send_question_to_edit_sex(
 
 
 async def send_question_to_edit_age(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """
     Обработка кнопки 'Возраст'.
@@ -492,7 +492,7 @@ async def send_question_to_edit_location(
     """
     await _send_chosen_choice_and_remove_buttons(update=update)
     await update.effective_message.reply_text(
-        text=templates.ASK_LOCATION, reply_markup=keyboards.LOCATION_KEYBOARD
+        text=templates.ASK_LOCATION, reply_markup=context.bot_data["location_keyboard"]
     )
 
     return States.EDIT_LOCATION
@@ -751,7 +751,7 @@ async def _save_response_about_sex(update: Update, context: CallbackContext):
 
 
 async def _save_response_about_location(update, context):
-    location = update.callback_query.data
+    location = update.callback_query.data.split(":")[1]
     await update.effective_message.reply_text(text=location)
     await update.effective_message.edit_reply_markup()
     context.user_data[templates.LOCATION_FIELD] = location

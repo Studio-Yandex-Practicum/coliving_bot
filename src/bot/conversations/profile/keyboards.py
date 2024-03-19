@@ -21,15 +21,13 @@ from conversations.profile.buttons import (
     FEMALE_BUTTON,
     FILL_AGAIN_BUTTON,
     MALE_BUTTON,
-    MSK_BUTTON,
     NEW_PHOTO_BUTTON,
     SAVE_EDITED_PHOTO_BUTTON,
     SAVE_PHOTO_BUTTON,
-    SPB_BUTTON,
     YES_BUTTON,
 )
 
-PROFILE_DUBLICATE_BUTTONS = [
+PROFILE_DUPLICATE_BUTTONS = [
     InlineKeyboardButton(text=EDIT_FORM_BUTTON, callback_data=EDIT_FORM_BUTTON),
     InlineKeyboardButton(
         text=RETURN_TO_MENU_BTN_LABEL, callback_data=RETURN_TO_MENU_BTN_LABEL
@@ -37,24 +35,17 @@ PROFILE_DUBLICATE_BUTTONS = [
 ]
 
 PROFILE_KEYBOARD_OPEN_SEARCH = InlineKeyboardMarkup.from_column(
-    button_column=(SEARCH_BUTTON, *PROFILE_DUBLICATE_BUTTONS)
+    button_column=(SEARCH_BUTTON, *PROFILE_DUPLICATE_BUTTONS)
 )
 
 PROFILE_KEYBOARD_HIDE_SEARCH = InlineKeyboardMarkup.from_column(
-    button_column=(HIDE_BUTTON, *PROFILE_DUBLICATE_BUTTONS)
+    button_column=(HIDE_BUTTON, *PROFILE_DUPLICATE_BUTTONS)
 )
 
 SEX_KEYBOARD = InlineKeyboardMarkup.from_row(
     button_row=(
         InlineKeyboardButton(text=MALE_BUTTON, callback_data=MALE_BUTTON),
         InlineKeyboardButton(text=FEMALE_BUTTON, callback_data=FEMALE_BUTTON),
-    )
-)
-
-LOCATION_KEYBOARD = InlineKeyboardMarkup.from_column(
-    button_column=(
-        InlineKeyboardButton(text=MSK_BUTTON, callback_data=MSK_BUTTON),
-        InlineKeyboardButton(text=SPB_BUTTON, callback_data=SPB_BUTTON),
     )
 )
 
