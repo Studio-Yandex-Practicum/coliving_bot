@@ -315,7 +315,7 @@ async def handle_photo_room(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     return None
 
 
-async def handle_confirm_or_edit_profile_text_instead_of_button(
+async def handle_confirm_or_cancel_profile_text_instead_of_button(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> None:
     """
@@ -330,27 +330,23 @@ async def handle_confirm_or_edit_profile_text_instead_of_button(
         update,
         context,
         templates.REPLY_MSG_ASK_TO_CONFIRM,
-        keyboard=keyboards.CONFIRM_OR_EDIT_PROFILE_KEYBOARD,
+        keyboard=keyboards.CONFIRM_OR_CANCEL_PROFILE_KEYBOARD,
     )
 
 
-async def handle_confirm_or_edit_reply_edit_profile(
-    update: Update, _context: ContextTypes.DEFAULT_TYPE
+async def handle_profile_confirmation_cancel(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
-    """
-    Подтверждение или изменение коливинг профиля.
-    Обработка ответа - изменение коливинг профиля.
-    """
+    """Отмена редактирования коливинг профиля."""
+
     await update.effective_message.edit_reply_markup()
-    reply = templates.BTN_LABEL_EDIT_PROFILE_KEYBOARD
-    await update.effective_message.reply_text(text=f"{templates.REPLY_MSG}{reply}")
+    message = templates.BTN_LABEL_CANCEL_CREATE
+    await update.effective_message.reply_text(text=f"{templates.REPLY_MSG}{message}")
     await update.effective_message.reply_text(
-        text=templates.REPLY_MSG_WHAT_TO_EDIT,
-        reply_markup=common_funcs.combine_keyboards(
-            keyboards.WHAT_EDIT_PROFILE_KEYBOARD, common_keyboards.CANCEL_KEYBOARD
-        ),
+        text=templates.REPLY_MSG_PROFILE_NO_CREATE,
     )
-    return states.EDIT
+    context.user_data.clear()
+    return ConversationHandler.END
 
 
 async def handle_confirm_or_edit_reply_confirm(
@@ -406,7 +402,6 @@ async def handle_is_visible_coliving_profile_yes(
         respond = templates.REPLY_BTN_HIDE
     await update.effective_message.reply_text(
         text=respond,
-        reply_markup=common_keyboards.CANCEL_KEYBOARD,
     )
     return await save_coliving_info_to_db(update, context)
 
@@ -528,7 +523,7 @@ async def handle_what_to_edit_photo_room(
     await update.effective_message.edit_reply_markup()
     context.user_data["coliving_info"].images.clear()
     await update.effective_message.reply_text(
-        text=f"{templates.REPLY_MSG}{templates.BTN_EDIT_PHOTO}"
+        text=f"{templates.REPLY_MSG}{templates.BTN_LABEL_EDIT_PHOTO}"
     )
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_PHOTO_SEND,
@@ -678,7 +673,14 @@ async def handle_edit_profile_confirmation_confirm(
     await update.effective_message.edit_reply_markup()
     message = templates.BTN_LABEL_CONFIRM
     await update.effective_message.reply_text(text=f"{templates.REPLY_MSG}{message}")
-    await api_service.update_coliving_info(coliving=context.user_data["coliving_info"])
+    coliving = context.user_data["coliving_info"]
+    images = context.user_data["coliving_info"].images[:5]
+    # Проверка наличия измененных фото по размеру первой фотографии
+    if images[0].photo_size:
+        await api_service.delete_coliving_photos(coliving.id, update.effective_chat.id)
+        await api_service.save_coliving_photo(images, coliving)
+
+    await api_service.update_coliving_info(coliving)
     await update.effective_message.reply_text(text=templates.REPLY_MSG_PROFILE_SAVED)
     context.user_data.clear()
     return ConversationHandler.END
@@ -775,18 +777,18 @@ async def send_received_room_photos(
     """
     Сохранение фотографий
     """
-    if len(context.user_data["coliving_info"].images) > 5:
+    images = context.user_data["coliving_info"].images
+    if len(images) > 5:
         await update.effective_message.reply_text(text=templates.ERR_PHOTO_LIMIT_TEXT)
 
-    await update.effective_chat.send_message(templates.REPLY_MSG_PHOTO)
-
-    if context.user_data["coliving_info"].images:
+    if images:
+        await update.effective_chat.send_message(templates.REPLY_MSG_PHOTO)
         await update.effective_message.edit_reply_markup()
         await _show_coliving_profile(
             update,
             context,
             templates.REPLY_MSG_ASK_TO_CONFIRM,
-            keyboards.CONFIRM_OR_EDIT_PROFILE_KEYBOARD,
+            keyboards.CONFIRM_OR_CANCEL_PROFILE_KEYBOARD,
         )
         return states.CONFIRMATION
 
@@ -798,34 +800,17 @@ async def send_received_room_photos(
     return states.PHOTO_ROOM
 
 
-async def handle_edit_photo_room_confirmation_confirm(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE,
-    coliving: Optional[Coliving] = None,
-) -> int:
-    """Сохранение измененных фотографий коливинга."""
-    coliving_info: Coliving = coliving or context.user_data["coliving_info"]
-    images = context.user_data["coliving_info"].images[:5]
-    await update.effective_message.edit_reply_markup()
-    message = templates.BTN_LABEL_CONFIRM
-    await update.effective_message.reply_text(text=f"{templates.REPLY_MSG}{message}")
-    await api_service.delete_coliving_photos(coliving_info.id, update.effective_chat.id)
-    await api_service.save_coliving_photo(images, coliving_info)
-    await update.effective_message.reply_text(text=templates.REPLY_MSG_PROFILE_SAVED)
-    context.user_data.clear()
-    return ConversationHandler.END
-
-
 async def send_edited_room_photos(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """
     Подтверждение сохранения измененных фотографий
     """
-    if len(context.user_data["coliving_info"].images) > 5:
+    images = context.user_data["coliving_info"].images
+    if len(images) > 5:
         await update.effective_message.reply_text(text=templates.ERR_PHOTO_LIMIT_TEXT)
 
-    if context.user_data["coliving_info"].images:
+    if images:
         await update.effective_message.edit_reply_markup()
         await _show_coliving_profile(
             update,
@@ -833,7 +818,7 @@ async def send_edited_room_photos(
             templates.REPLY_MSG_ASK_TO_CONFIRM,
             keyboards.EDIT_CONFIRMATION_KEYBOARD,
         )
-        return states.EDIT_PHOTO_CONFIRMATION
+        return states.EDIT_CONFIRMATION
 
     await context.bot.answer_callback_query(
         callback_query_id=update.callback_query.id,

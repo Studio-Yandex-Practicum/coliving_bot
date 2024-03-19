@@ -68,12 +68,12 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 pattern=rf"^{templates.BTN_LABEL_CONFIRM}",
             ),
             CallbackQueryHandler(
-                callback=callback_funcs.handle_confirm_or_edit_reply_edit_profile,
-                pattern=rf"^{templates.BTN_LABEL_EDIT_PROFILE_KEYBOARD}",
+                callback=callback_funcs.handle_profile_confirmation_cancel,
+                pattern=rf"^{templates.BTN_LABEL_CANCEL_CREATE}",
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
-                callback_funcs.handle_confirm_or_edit_profile_text_instead_of_button,
+                callback_funcs.handle_confirm_or_cancel_profile_text_instead_of_button,
             ),
         ],
         states.EDIT: [
@@ -169,24 +169,6 @@ coliving_handler: ConversationHandler = ConversationHandler(
         states.EDIT_CONFIRMATION: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_edit_profile_confirmation_confirm,
-                pattern=rf"^{templates.BTN_LABEL_CONFIRM}",
-            ),
-            CallbackQueryHandler(
-                callback=callback_funcs.handle_edit_profile_confirmation_cancel,
-                pattern=rf"^{templates.BTN_LABEL_CANCEL_EDIT}",
-            ),
-            CallbackQueryHandler(
-                callback=callback_funcs.handle_edit_profile_confirmation_continue_edit,
-                pattern=rf"^{templates.BTN_LABEL_EDIT_CONTINUE}",
-            ),
-            MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
-                callback_funcs.handle_edit_profile_confirmation_text_instead_of_button,
-            ),
-        ],
-        states.EDIT_PHOTO_CONFIRMATION: [
-            CallbackQueryHandler(
-                callback=callback_funcs.handle_edit_photo_room_confirmation_confirm,
                 pattern=rf"^{templates.BTN_LABEL_CONFIRM}",
             ),
             CallbackQueryHandler(

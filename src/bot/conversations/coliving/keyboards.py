@@ -36,10 +36,13 @@ EDIT_PROFILE_KEYBOARD = InlineKeyboardButton(
     callback_data=templates.BTN_LABEL_EDIT_PROFILE_KEYBOARD,
 )
 
-CONFIRM_OR_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
+CONFIRM_OR_CANCEL_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         CONFIRMATION_KEYBOARD,
-        EDIT_PROFILE_KEYBOARD,
+        InlineKeyboardButton(
+            text=templates.BTN_LABEL_CANCEL_CREATE,
+            callback_data=templates.BTN_LABEL_CANCEL_CREATE,
+        ),
     )
 )
 
