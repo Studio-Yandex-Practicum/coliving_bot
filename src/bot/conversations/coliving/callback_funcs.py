@@ -527,7 +527,7 @@ async def handle_what_to_edit_photo_room(
     )
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_PHOTO_SEND,
-        reply_markup=keyboards.SAVE_OR_CANCEL_NEW_PHOTO_KEYBOARD,
+        # reply_markup=keyboards.SAVE_OR_CANCEL_NEW_PHOTO_KEYBOARD,
     )
     return states.EDIT_PHOTO_ROOM
 
@@ -631,16 +631,21 @@ async def handle_edit_photo_room(
 ) -> None:
     """
     Обрабатывает загруженную пользователем фотографию.
-    Переводит диалог в состояние CONFIRMATION по нажатию кнопки (анкета верна или нет)
+    Продолжает диалог по нажатию кнопки (сохранить)
     """
+
     new_photo = update.effective_message.photo[-1]
-    if update.message.text:
+
+    if update.message.text != templates.REPLY_SAVE_PHOTO:
         await update.effective_message.reply_text(text=templates.ERR_PHOTO_NOT_TEXT)
         return states.EDIT_PHOTO_ROOM
 
     context.user_data["coliving_info"].images.append(
         Image(file_id=new_photo.file_id, photo_size=new_photo)
     )
+    # if update.message.media_group_id:
+    #   await update.forward_message
+    #     update.effective_message.reply_text(text="Группа")
 
     return None
 
@@ -777,6 +782,7 @@ async def send_received_room_photos(
     """
     Сохранение фотографий
     """
+
     images = context.user_data["coliving_info"].images
     if len(images) > 5:
         await update.effective_message.reply_text(text=templates.ERR_PHOTO_LIMIT_TEXT)
