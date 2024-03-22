@@ -42,6 +42,8 @@ class LocationList(generics.ListAPIView):
 
 
 class ColivingView(generics.ListCreateAPIView):
+    """Apiview для создания и получения Coliving."""
+
     queryset = (
         Coliving.objects.select_related("location", "host")
         .prefetch_related("images")
