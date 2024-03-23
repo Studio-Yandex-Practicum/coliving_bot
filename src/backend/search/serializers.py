@@ -53,4 +53,4 @@ class MatchRequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MatchRequest
-        fields = ("receiver", "sender")
+        fields = ("receiver", "sender", "status")

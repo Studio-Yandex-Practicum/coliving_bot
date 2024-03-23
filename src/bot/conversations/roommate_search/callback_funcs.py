@@ -147,6 +147,13 @@ async def profile_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         sender=update.effective_chat.id, receiver=current_profile["user"]
     )
 
+    await context.bot.send_message(
+        chat_id=current_profile["user"],
+        text=templates.LIKE_NOTIFICATION,
+        reply_markup=keyboards.ANSWER_LIKE,
+        parse_mode=ParseMode.HTML,
+    )
+
     await update.effective_message.reply_text(
         text=templates.ASK_NEXT_PROFILE,
         reply_markup=keyboards.NEXT_PROFILE,
