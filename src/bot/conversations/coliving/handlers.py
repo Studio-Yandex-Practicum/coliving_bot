@@ -55,7 +55,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
         states.PHOTO_ROOM: [
             MessageHandler(
                 filters.PHOTO | filters.TEXT & ~filters.COMMAND,
-                callback_funcs.handle_photo_room,
+                callback_funcs.handle_add_or_edit_photo_room,
             ),
             CallbackQueryHandler(
                 pattern=rf"^{templates.SAVE_PHOTO_BUTTON}",
@@ -155,7 +155,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
         states.EDIT_PHOTO_ROOM: [
             MessageHandler(
                 filters.PHOTO,
-                callback_funcs.handle_edit_photo_room,
+                callback_funcs.handle_add_or_edit_photo_room,
             ),
             CallbackQueryHandler(
                 pattern=rf"^{templates.SAVE_EDITED_PHOTO_BUTTON}",
@@ -163,7 +163,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
-                callback_funcs.handle_edit_photo_room,
+                callback_funcs.handle_add_or_edit_photo_room,
             ),
         ],
         states.EDIT_CONFIRMATION: [

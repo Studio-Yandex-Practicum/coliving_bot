@@ -299,17 +299,21 @@ async def handle_price(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     return states.PHOTO_ROOM
 
 
-async def handle_photo_room(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def handle_add_or_edit_photo_room(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
     """
-    Обрабатывает фото.
-    Проверка: нажатие кнопки
+    Обрабатывает загруженную пользователем фотографию.
+    Продолжает диалог по нажатию кнопки (сохранить)
     """
+    new_photo = update.effective_message.photo[-1]
+
     if update.message.text:
         await update.effective_message.reply_text(text=templates.ERR_PHOTO_NOT_TEXT)
-        return states.PHOTO_ROOM
-    photo = update.effective_message.photo[-1]
+        return states.EDIT_PHOTO_ROOM
+
     context.user_data["coliving_info"].images.append(
-        Image(file_id=photo.file_id, photo_size=photo)
+        Image(file_id=new_photo.file_id, photo_size=new_photo)
     )
 
     if len(context.user_data["coliving_info"].images) == 5:
@@ -627,29 +631,6 @@ async def handle_edit_price(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         keyboards.EDIT_CONFIRMATION_KEYBOARD,
     )
     return states.EDIT_CONFIRMATION
-
-
-async def handle_edit_photo_room(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> None:
-    """
-    Обрабатывает загруженную пользователем фотографию.
-    Продолжает диалог по нажатию кнопки (сохранить)
-    """
-    new_photo = update.effective_message.photo[-1]
-
-    if update.message.text:
-        await update.effective_message.reply_text(text=templates.ERR_PHOTO_NOT_TEXT)
-        return states.EDIT_PHOTO_ROOM
-
-    context.user_data["coliving_info"].images.append(
-        Image(file_id=new_photo.file_id, photo_size=new_photo)
-    )
-
-    if len(context.user_data["coliving_info"].images) == 5:
-        state = await send_edited_room_photos(update, context)
-        return state
-    return None
 
 
 async def handle_edit_profile_confirmation_text_instead_of_button(
