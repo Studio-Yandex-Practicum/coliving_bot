@@ -66,6 +66,8 @@ REPLY_MSG_ASK_TO_SHOW_PROFILE = (
 REPLY_MSG_PROFILE_NO_CHANGE = "Что ж, анкета осталась как есть."
 REPLY_MSG_START_CREATE_PROFILE = "Для создания профиля введи /coliving."
 REPLY_MSG_PROFILE_SAVED = "Отлично! Изменения сохранены."
+REPLY_MSG_WANT_TO_DELETE = "Ты уверен что хочешь удалить коливинг?"
+REPLY_MSG_PROFILE_DELETED = "Твой коливинг был удален"
 
 BTN_EDIT_PROFILE = "edit_profile"
 BTN_LABEL_EDIT_PROFILE_KEYBOARD = "Изменить профиль коливинга"
@@ -112,6 +114,8 @@ BTN_DELETE_CONFIRM = "confirm_delete"
 BTN_LABEL_DELETE_CONFIRM = "Да, удалить"
 BTN_EDIT_LOCATION = "edit_location"
 BTN_LABEL_EDIT_LOCATION = "Местоположение"
+BTN_LABEL_DELETE_PROFILE_KEYBOARD = "Удалить коливинг"
+BTN_LABEL_DELETE_CANCEL = "Не удалять"
 
 PROFILE_DATA = (
     "<b>Город:</b> {location}\n"

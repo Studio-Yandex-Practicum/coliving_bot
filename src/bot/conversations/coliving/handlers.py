@@ -177,6 +177,20 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 callback_funcs.handle_edit_profile_confirmation_text_instead_of_button,
             ),
         ],
+        states.DELETE_COLIVING: [
+            CallbackQueryHandler(
+                callback=callback_funcs.handle_delete_coliving_confirmation_confirm,
+                pattern=rf"^{templates.BTN_LABEL_DELETE_CONFIRM}",
+            ),
+            CallbackQueryHandler(
+                callback=callback_funcs.handle_delete_coliving_confirmation_cancel,
+                pattern=rf"^{templates.BTN_LABEL_DELETE_CANCEL}",
+            ),
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND,
+                callback_funcs.handle_delete_profile,
+            ),
+        ],
         states.COLIVING: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_coliving_edit,
@@ -196,6 +210,10 @@ coliving_handler: ConversationHandler = ConversationHandler(
             CallbackQueryHandler(
                 callback=callback_funcs.handle_coliving_transfer_to,
                 pattern=r"^transfer_to",
+            ),
+            CallbackQueryHandler(
+                callback=callback_funcs.handle_delete_profile,
+                pattern=rf"^{templates.BTN_LABEL_DELETE_PROFILE_KEYBOARD}",
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.handle_return_to_menu_response,

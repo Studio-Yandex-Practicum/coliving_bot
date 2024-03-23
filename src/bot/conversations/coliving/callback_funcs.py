@@ -799,3 +799,47 @@ async def _show_coliving_profile(
         parse_mode=ParseMode.HTML,
         reply_markup=keyboard,
     )
+
+
+async def handle_delete_profile(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """
+    Выбор р.
+    Обработка ответа: Заполнить заново.
+    """
+    await update.effective_message.edit_reply_markup()
+    await update.effective_message.reply_text(
+        text=templates.REPLY_MSG_WANT_TO_DELETE,
+        reply_markup=keyboards.DELETE_OR_CANCEL_COLIVING_PROFILE_KEYBOARD,
+    )
+    return states.DELETE_COLIVING
+
+
+async def handle_delete_coliving_confirmation_confirm(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """
+    Удаление коливинга
+    """
+    coliving = context.user_data["coliving_info"]
+    await api_service.delete_coliving(coliving.id)
+    context.user_data.clear()
+    await update.effective_message.reply_text(text=templates.REPLY_MSG_PROFILE_DELETED)
+    return ConversationHandler.END
+
+
+async def handle_delete_coliving_confirmation_cancel(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """
+    Отмена удаления коливинга
+    """
+    await update.effective_message.edit_reply_markup()
+    message = templates.BTN_LABEL_DELETE_CANCEL
+    await update.effective_message.reply_text(text=f"{templates.REPLY_MSG}{message}")
+    context.user_data.clear()
+    await update.effective_message.reply_text(
+        text=templates.REPLY_MSG_PROFILE_NO_CHANGE
+    )
+    return ConversationHandler.END

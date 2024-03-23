@@ -51,7 +51,7 @@ class ColivingView(generics.ListCreateAPIView):
     filterset_class = ColivingFilter
 
 
-class ColivingDetailView(generics.RetrieveUpdateAPIView):
+class ColivingDetailView(generics.RetrieveUpdateDestroyAPIView):
     """Apiview для обновления Coliving."""
 
     queryset = Coliving.objects.select_related("location", "host").all()
