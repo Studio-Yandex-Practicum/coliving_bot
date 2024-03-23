@@ -50,6 +50,7 @@ class BaseImageView(generics.ListCreateAPIView):
     def delete(self, request, *args, **kwargs):
         images = self.get_queryset()
         images.delete()
+
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
