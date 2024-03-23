@@ -109,6 +109,10 @@ COLIVING_PROFILE_DUPLICATE_BUTTONS = [
         text=RETURN_TO_MENU_BTN_LABEL, callback_data=templates.BTN_GO_TO_MENU
     ),
     EDIT_PROFILE_KEYBOARD,
+    InlineKeyboardButton(
+        text=templates.BTN_LABEL_DELETE_PROFILE_KEYBOARD,
+        callback_data=templates.BTN_LABEL_DELETE_PROFILE_KEYBOARD,
+    ),
 ]
 
 COLIVING_PROFILE_KEYBOARD_VISIBLE = InlineKeyboardMarkup.from_column(
@@ -177,6 +181,19 @@ REPORT_OR_CANCEL_ROOMMATES_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         REPORT_ROOMMATES_PROFILE_KEYBOARD,
         CANCEL_KEYBOARD,
+    )
+)
+
+DELETE_OR_CANCEL_COLIVING_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
+    button_column=(
+        InlineKeyboardButton(
+            text=templates.BTN_LABEL_DELETE_CONFIRM,
+            callback_data=templates.BTN_LABEL_DELETE_CONFIRM,
+        ),
+        InlineKeyboardButton(
+            text=templates.BTN_LABEL_DELETE_CANCEL,
+            callback_data=templates.BTN_LABEL_DELETE_CANCEL,
+        ),
     )
 )
 

@@ -26,7 +26,9 @@ INSTALLED_APPS = [
     "search.apps.SearchConfig",
     "images.apps.ImagesConfig",
     "drf_spectacular",
+    "django_cleanup.apps.CleanupConfig",
 ]
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
