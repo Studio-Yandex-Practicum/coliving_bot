@@ -41,7 +41,7 @@ class ReportMatchViewTests(APITestCase):
             ProfileTestData(cls.t_users[3], cls.t_names[3], cls.AGE_25, cls.location),
             ProfileTestData(cls.t_users[4], cls.t_names[4], cls.AGE_25, cls.location),
         )
-        test_profiles = [
+        [
             Profile.objects.create(**data._asdict()) for data in profiles_data
         ]
 
