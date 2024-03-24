@@ -1,7 +1,12 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 import conversations.coliving.templates as templates
-from conversations.coliving.templates import ROOM_TYPE_CALLBACK_DATA
+from conversations.common_functions.common_buttons import (
+    LOCATION_PREFIX,
+    ROOM_TYPE_PREFIX,
+)
+from conversations.common_functions.common_keyboards import HIDE_BUTTON, SEARCH_BUTTON
+from conversations.common_functions.common_templates import RETURN_TO_MENU_BTN_LABEL
 from internal_requests import api_service
 
 CONFIRMATION_KEYBOARD = InlineKeyboardButton(
@@ -16,14 +21,12 @@ ROOM_TYPE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         InlineKeyboardButton(
             text=templates.BTN_LABEL_BED_IN_ROOM,
-            callback_data=(
-                f"{ROOM_TYPE_CALLBACK_DATA}:{templates.BTN_LABEL_BED_IN_ROOM}"
-            ),
+            callback_data=(f"{ROOM_TYPE_PREFIX}:{templates.BTN_LABEL_BED_IN_ROOM}"),
         ),
         InlineKeyboardButton(
             text=templates.BTN_LABEL_ROOM_IN_APPARTMENT,
             callback_data=(
-                f"{ROOM_TYPE_CALLBACK_DATA}:{templates.BTN_LABEL_ROOM_IN_APPARTMENT}"
+                f"{ROOM_TYPE_PREFIX}:{templates.BTN_LABEL_ROOM_IN_APPARTMENT}"
             ),
         ),
     )
@@ -70,20 +73,10 @@ WHAT_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     )
 )
 
-SHOW_SEARCH_KEYBOARD = InlineKeyboardButton(
-    text=templates.BTN_LABEL_SHOW,
-    callback_data="True",
-)
-
-HIDE_SEARCH_KEYBOARD = InlineKeyboardButton(
-    text=templates.BTN_LABEL_HIDE_SEARCH_KEYBOARD,
-    callback_data="False",
-)
-
 IS_VISIBLE_OR_NOT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
-        SHOW_SEARCH_KEYBOARD,
-        HIDE_SEARCH_KEYBOARD,
+        HIDE_BUTTON,
+        SEARCH_BUTTON,
     )
 )
 
@@ -101,44 +94,29 @@ EDIT_CONFIRMATION_KEYBOARD = InlineKeyboardMarkup.from_column(
     )
 )
 
+COLIVING_PROFILE_DUPLICATE_BUTTONS = [
+    InlineKeyboardButton(
+        text=templates.BTN_LABEL_ROOMMATES, callback_data=templates.BTN_ROOMMATES
+    ),
+    InlineKeyboardButton(
+        text=templates.BTN_LABEL_VIEWS, callback_data=templates.BTN_VIEWS
+    ),
+    InlineKeyboardButton(
+        text=templates.BTN_LABEL_TRANSFER_TO,
+        callback_data=templates.BTN_TRANSFER_TO,
+    ),
+    InlineKeyboardButton(
+        text=RETURN_TO_MENU_BTN_LABEL, callback_data=templates.BTN_GO_TO_MENU
+    ),
+    EDIT_PROFILE_KEYBOARD,
+]
+
 COLIVING_PROFILE_KEYBOARD_VISIBLE = InlineKeyboardMarkup.from_column(
-    button_column=(
-        EDIT_PROFILE_KEYBOARD,
-        HIDE_SEARCH_KEYBOARD,
-        InlineKeyboardButton(
-            text=templates.BTN_LABEL_ROOMMATES, callback_data=templates.BTN_ROOMMATES
-        ),
-        InlineKeyboardButton(
-            text=templates.BTN_LABEL_VIEWS, callback_data=templates.BTN_VIEWS
-        ),
-        InlineKeyboardButton(
-            text=templates.BTN_LABEL_TRANSFER_TO,
-            callback_data=templates.BTN_TRANSFER_TO,
-        ),
-        InlineKeyboardButton(
-            text=templates.BTN_LABEL_GO_TO_MENU, callback_data=templates.BTN_GO_TO_MENU
-        ),
-    )
+    button_column=(SEARCH_BUTTON, *COLIVING_PROFILE_DUPLICATE_BUTTONS)
 )
 
 COLIVING_PROFILE_KEYBOARD_NOT_VISIBLE = InlineKeyboardMarkup.from_column(
-    button_column=(
-        EDIT_PROFILE_KEYBOARD,
-        SHOW_SEARCH_KEYBOARD,
-        InlineKeyboardButton(
-            text=templates.BTN_LABEL_ROOMMATES, callback_data=templates.BTN_ROOMMATES
-        ),
-        InlineKeyboardButton(
-            text=templates.BTN_LABEL_VIEWS, callback_data=templates.BTN_VIEWS
-        ),
-        InlineKeyboardButton(
-            text=templates.BTN_LABEL_TRANSFER_TO,
-            callback_data=templates.BTN_TRANSFER_TO,
-        ),
-        InlineKeyboardButton(
-            text=templates.BTN_LABEL_GO_TO_MENU, callback_data=templates.BTN_GO_TO_MENU
-        ),
-    )
+    button_column=(HIDE_BUTTON, *COLIVING_PROFILE_DUPLICATE_BUTTONS)
 )
 
 INVITE_ROOMMATES_PROFILE_KEYBOARD = InlineKeyboardButton(
@@ -210,7 +188,7 @@ async def create_keyboard_of_locations():
         button_column.append(
             InlineKeyboardButton(
                 text=location.name,
-                callback_data=f"{templates.LOCATION_CALLBACK_DATA}:{location.name}",
+                callback_data=f"{LOCATION_PREFIX}:{location.name}",
             )
         )
     return InlineKeyboardMarkup.from_column(button_column=button_column)

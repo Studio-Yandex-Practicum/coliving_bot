@@ -1,23 +1,27 @@
 from copy import copy
-from http import HTTPStatus as codes
 from re import fullmatch
-from typing import Union
+from typing import Optional, Union
 
-from httpx import HTTPStatusError
+from httpx import HTTPStatusError, codes
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, Update
 from telegram.constants import ParseMode
-from telegram.ext import ContextTypes, ConversationHandler
+from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
+import conversations.common_functions.common_buttons as common_buttons
+import conversations.common_functions.common_funcs as common_funcs
+import conversations.common_functions.common_keyboards as common_keyboards
+import conversations.common_functions.common_templates as common_templates
 import conversations.profile.buttons as buttons
 import conversations.profile.keyboards as keyboards
 import conversations.profile.templates as templates
+from conversations.coliving.templates import REPLY_MSG
+from conversations.menu.callback_funcs import menu
 from conversations.profile.states import States
 from general.validators import value_is_in_range_validator
 from internal_requests import api_service
 
 
 async def set_profile_to_context(
-    update: Update,
     context: ContextTypes.DEFAULT_TYPE,
     profile_info,
 ) -> None:
@@ -43,12 +47,24 @@ async def start(
         )
     except HTTPStatusError as exc:
         if exc.response.status_code == codes.NOT_FOUND:
-            await update.effective_message.edit_text(text=templates.ASK_AGE)
+            await update.effective_message.edit_text(
+                text=templates.ASK_AGE,
+                reply_markup=common_keyboards.CANCEL_KEYBOARD,
+            )
+
             return States.AGE
         raise exc
-    await set_profile_to_context(update, context, profile_info)
+
+    await set_profile_to_context(context, profile_info)
     await update.effective_message.delete()
-    await _look_at_profile(update, context, "", keyboards.PROFILE_KEYBOARD)
+
+    keyboard = (
+        keyboards.PROFILE_KEYBOARD_OPEN_SEARCH
+        if profile_info.is_visible
+        else keyboards.PROFILE_KEYBOARD_HIDE_SEARCH
+    )
+    await _look_at_profile(update, context, "", keyboard)
+
     return States.PROFILE
 
 
@@ -63,9 +79,9 @@ async def send_question_to_profile_is_visible_in_search(
     is_visible: bool = eval(update.callback_query.data.split(":")[1])
     context.user_data[templates.IS_VISIBLE_FIELD] = is_visible
     if is_visible:
-        message_text = templates.FORM_IS_VISIBLE
+        message_text = common_templates.FORM_IS_VISIBLE
     else:
-        message_text = templates.FORM_IS_NOT_VISIBLE
+        message_text = common_templates.FORM_IS_NOT_VISIBLE
     await update.effective_message.reply_text(
         text=message_text, parse_mode=ParseMode.HTML
     )
@@ -75,7 +91,7 @@ async def send_question_to_profile_is_visible_in_search(
 
 
 async def send_question_to_edit_profile(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> Union[int, States]:
     """
     Обработка кнопки 'Скрыть из поиска'.
@@ -90,16 +106,35 @@ async def send_question_to_edit_profile(
     return States.EDIT
 
 
-async def send_question_to_back_in_menu(
+async def handle_return_to_profile_response(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> Union[int, States]:
     """
     Обработка кнопки 'Вернуться'.
-    Переводит диалог в состояние MENU.
+    Переводит диалог в состояние PROFILE.
     """
-    await _send_chosen_choice_and_remove_buttons(update=update)
 
-    return ConversationHandler.END  # MENU
+    await _send_chosen_choice_and_remove_buttons(update=update)
+    if context.user_data[templates.IS_VISIBLE_FIELD] is True:
+        await _look_at_profile(
+            update, context, "", keyboards.PROFILE_KEYBOARD_OPEN_SEARCH
+        )
+    else:
+        await _look_at_profile(
+            update, context, "", keyboards.PROFILE_KEYBOARD_HIDE_SEARCH
+        )
+    return States.PROFILE
+
+
+async def handle_return_to_menu_response(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> Union[int, States]:
+    """Обработка ответа: Вернуться в меню."""
+
+    await update.effective_message.edit_reply_markup()
+    context.user_data.clear()
+    await menu(update, context)
+    return ConversationHandler.END
 
 
 async def handle_age(
@@ -124,7 +159,9 @@ async def handle_age(
     context.user_data[templates.AGE_FIELD] = int(age)
     await update.effective_message.reply_text(
         templates.ASK_SEX,
-        reply_markup=keyboards.SEX_KEYBOARD,
+        reply_markup=common_funcs.combine_keyboards(
+            keyboards.SEX_KEYBOARD, common_keyboards.CANCEL_KEYBOARD
+        ),
     )
 
     return States.SEX
@@ -137,12 +174,10 @@ async def handle_sex(
     Обрабатывает введенный пользователем пол.
     Переводит диалог в состояние NAME (ввод имени пользователя).
     """
-    sex = update.callback_query.data
-    await update.effective_message.reply_text(text=sex)
-    await update.effective_message.edit_reply_markup()
-    context.user_data[templates.SEX_FIELD] = sex.split()[1].capitalize()
+    await _save_response_about_sex(update, context)
     await update.effective_message.reply_text(
         templates.ASK_NAME,
+        reply_markup=common_keyboards.CANCEL_KEYBOARD,
     )
 
     return States.NAME
@@ -171,7 +206,9 @@ async def handle_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     context.user_data[templates.NAME_FIELD] = name
     await update.effective_message.reply_text(
         text=templates.ASK_LOCATION,
-        reply_markup=keyboards.LOCATION_KEYBOARD,
+        reply_markup=common_funcs.combine_keyboards(
+            context.bot_data["location_keyboard"], common_keyboards.CANCEL_KEYBOARD
+        ),
     )
 
     return States.LOCATION
@@ -182,12 +219,10 @@ async def handle_location(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     Обрабатывает введенное пользователем желаемое место жительства.
     Переводит диалог в состояние ABOUT_YOURSELF (ввод информации о себе).
     """
-    location = update.callback_query.data
-    await update.effective_message.reply_text(text=location)
-    await update.effective_message.edit_reply_markup()
-    context.user_data[templates.LOCATION_FIELD] = location
+    await _save_response_about_location(update, context)
     await update.effective_message.reply_text(
         text=templates.ASK_ABOUT,
+        reply_markup=common_keyboards.CANCEL_KEYBOARD,
     )
 
     return States.ABOUT_YOURSELF
@@ -244,12 +279,12 @@ async def _look_at_profile(
     Предварительный просмотр профиля.
     """
     chat_id = update.effective_chat.id
-    ask_text = copy(templates.ASK_IS_THAT_RIGHT)
+    ask_text = copy(templates.PROFILE_VIEWING)
     if not ask:
-        ask_text = templates.ASK_WANT_TO_CHANGE
+        ask_text = templates.PROFILE_VIEWING
     message_text = (
         title
-        + "\n"
+        + "\n\n"
         + templates.PROFILE_DATA.format(
             name=context.user_data.get(templates.NAME_FIELD),
             sex=context.user_data.get(templates.SEX_FIELD),
@@ -262,17 +297,30 @@ async def _look_at_profile(
         )
         + "\n"
     )
-    received_photos = context.user_data.get(templates.RECEIVED_PHOTOS_FIELD, [])
-    media_group = [InputMediaPhoto(file_id) for file_id in received_photos]
-    await update.effective_chat.send_media_group(
-        media=media_group,
-        caption=message_text,
-        parse_mode=ParseMode.HTML,
-    )
+    new_photos = context.user_data.get("new_photo")
+    received_photo = context.user_data.get(templates.RECEIVED_PHOTOS_FIELD)
+    if new_photos:
+        media_group = [InputMediaPhoto(file_id) for file_id in new_photos]
+        await update.effective_chat.send_media_group(
+            media=media_group, caption=message_text, parse_mode=ParseMode.HTML
+        )
+        context.user_data[templates.RECEIVED_PHOTOS_FIELD] = new_photos.copy()
+        context.user_data["new_photo"] = []
+
+    elif received_photo:
+        media_group = [InputMediaPhoto(file_id) for file_id in received_photo]
+        await update.effective_chat.send_media_group(
+            media=media_group, caption=message_text, parse_mode=ParseMode.HTML
+        )
+    else:
+        # Если фото нет, отправляем только текст
+        await update.effective_chat.send_message(
+            text=message_text, parse_mode=ParseMode.HTML
+        )
+
+    # Отправляем сообщение с вопросом после предварительного просмотра
     await context.bot.send_message(
-        chat_id=chat_id,
-        text=ask_text,
-        reply_markup=keyboard,
+        chat_id=chat_id, text=ask_text, reply_markup=keyboard
     )
 
 
@@ -282,6 +330,7 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     Переводит диалог в состояние CONFIRMATION (анкета верна или нет)
     """
     file_id = update.effective_message.photo[-1].file_id
+
     new_file = await context.bot.get_file(file_id)
     photo_bytearray = await new_file.download_as_bytearray()
     await api_service.save_photo(
@@ -293,6 +342,20 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     received_photos = context.user_data.get(templates.RECEIVED_PHOTOS_FIELD, [])
     received_photos.append(file_id)
     context.user_data[templates.RECEIVED_PHOTOS_FIELD] = received_photos
+
+    return None
+
+
+async def handle_edit_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Обрабатывает загруженную пользователем фотографию.
+    Переводит диалог в состояние CONFIRMATION (анкета верна или нет)
+    """
+
+    file_id = update.effective_message.photo[-1].file_id
+    new_photos = context.user_data.get("new_photo", [])
+    new_photos.append(file_id)
+    context.user_data["new_photo"] = new_photos
 
     return None
 
@@ -318,7 +381,7 @@ async def send_received_photos(
     return States.PHOTO
 
 
-async def handle_profile(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def handle_profile(update: Update, _context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Выводит сообщение с заполненным профилем.
     Вызывает метод для отправки запроса на видимость анкеты,
@@ -350,20 +413,20 @@ async def handle_visible(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     visible = update.callback_query.data
     await update.effective_message.reply_text(text=visible)
     await update.effective_message.edit_reply_markup()
-    if visible == buttons.YES_TO_DO_BUTTON:
+    if visible == common_buttons.SHOW_SEARCH_BUTTON:
         context.user_data[templates.IS_VISIBLE_FIELD] = True
-    elif visible == buttons.HIDE_SEARCH_BUTTON:
+    elif visible == common_buttons.HIDE_SEARCH_BUTTON:
         context.user_data[templates.IS_VISIBLE_FIELD] = False
         await api_service.update_user_profile(
             update.effective_chat.id, context.user_data
         )
-    await send_confirmation_request(update, context)
+    await send_profile_saved_notification(update, context)
 
     return ConversationHandler.END
 
 
 async def start_filling_again(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """
     Обработка кнопки 'Заполнить заново.'.
@@ -371,13 +434,72 @@ async def start_filling_again(
     await _send_chosen_choice_and_remove_buttons(update=update)
     await update.effective_message.reply_text(
         text=templates.ASK_AGE_AGAIN,
+        reply_markup=common_keyboards.CANCEL_KEYBOARD,
     )
 
     return States.AGE
 
 
-async def send_question_to_edit_about_myself(
+async def send_question_to_edit_name(
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """
+    Обработка кнопки 'Имя'.
+    """
+    await _send_chosen_choice_and_remove_buttons(update=update)
+    await update.effective_message.reply_text(
+        text=templates.ASK_NAME,
+    )
+
+    return States.EDIT_NAME
+
+
+async def send_question_to_edit_sex(
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """
+    Обработка кнопки 'Пол'.
+    """
+    await _send_chosen_choice_and_remove_buttons(update=update)
+    await update.effective_message.reply_text(
+        text=templates.ASK_SEX,
+        reply_markup=keyboards.SEX_KEYBOARD,
+        parse_mode=ParseMode.HTML,
+    )
+
+    return States.EDIT_SEX
+
+
+async def send_question_to_edit_age(
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """
+    Обработка кнопки 'Возраст'.
+    """
+    await _send_chosen_choice_and_remove_buttons(update=update)
+    await update.effective_message.reply_text(
+        text=templates.ASK_AGE_AGAIN,
+    )
+
+    return States.EDIT_AGE
+
+
+async def send_question_to_edit_location(
     update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """
+    Обработка кнопки 'Место проживания'.
+    """
+    await _send_chosen_choice_and_remove_buttons(update=update)
+    await update.effective_message.reply_text(
+        text=templates.ASK_LOCATION, reply_markup=context.bot_data["location_keyboard"]
+    )
+
+    return States.EDIT_LOCATION
+
+
+async def send_question_to_edit_about_myself(
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """
     Обработка кнопки 'О себе.'.
@@ -385,20 +507,21 @@ async def send_question_to_edit_about_myself(
     await _send_chosen_choice_and_remove_buttons(update=update)
     await update.effective_message.reply_text(
         text=templates.ASK_ABOUT,
+        reply_markup=common_keyboards.CANCEL_KEYBOARD,
     )
 
     return States.EDIT_ABOUT_YOURSELF
 
 
 async def send_question_to_edit_photo(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """
     Обработка кнопки 'Фотографию.'.
     """
     await _send_chosen_choice_and_remove_buttons(update=update)
     await update.effective_chat.send_message(
-        text=templates.ASK_NEW_PHOTO,
+        text=templates.ASK_PHOTO,
         reply_markup=InlineKeyboardMarkup.from_button(
             InlineKeyboardButton(
                 text=buttons.SAVE_EDITED_PHOTO_BUTTON,
@@ -410,15 +533,103 @@ async def send_question_to_edit_photo(
     return States.EDIT_PHOTO
 
 
-async def _send_chosen_choice_and_remove_buttons(update: Update) -> None:
+async def handle_edit_name(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> Optional[int]:
     """
-    Удаление предыдущей клавиатуры.
-    Спрашивает что пользователь хочет изменить.
+    Обрабатывает отредактированное пользователем имя.
+    Переводит диалог в состояние EDIT_CONFIRMATION (анкета верна или нет).
     """
-    callback_query = update.callback_query
-    choice_text = callback_query.data
-    await callback_query.message.edit_reply_markup()
-    await callback_query.message.reply_text(text=choice_text)
+    name = update.message.text.strip()
+    if not fullmatch(templates.NAME_PATTERN, name):
+        await update.effective_message.reply_text(text=templates.NAME_SYMBOL_ERROR_MSG)
+        return States.NAME
+    if not await value_is_in_range_validator(
+        update=update,
+        context=context,
+        value=len(name),
+        min=templates.MIN_NAME_LENGTH,
+        max=templates.MAX_NAME_LENGTH,
+        message=templates.NAME_LENGHT_ERROR_MSG.format(
+            min=templates.MIN_NAME_LENGTH, max=templates.MAX_NAME_LENGTH
+        ),
+    ):
+        return None
+    context.user_data[templates.NAME_FIELD] = name
+    await _look_at_profile(
+        update,
+        context,
+        templates.LOOK_AT_FORM_SECOND,
+        keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
+        True,
+    )
+
+    return States.EDIT_CONFIRMATION
+
+
+async def handle_edit_sex(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """
+    Обрабатывает отредактированную информацию касательно пола.
+    Переводит диалог в состояние EDIT_CONFIRMATION (анкета верна или нет).
+    """
+    await _save_response_about_sex(update, context)
+    await _look_at_profile(
+        update,
+        context,
+        templates.LOOK_AT_FORM_SECOND,
+        keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
+        True,
+    )
+
+    return States.EDIT_CONFIRMATION
+
+
+async def handle_edit_age(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """
+    Обрабатывает отредактированный возраст.
+    Переводит диалог в состояние EDIT_CONFIRMATION (анкета верна или нет).
+    """
+    age = update.message.text
+    if not await value_is_in_range_validator(
+        update=update,
+        context=context,
+        value=age,
+        min=templates.MIN_AGE,
+        max=templates.MAX_AGE,
+        message=templates.AGE_ERROR_MSG.format(
+            min=templates.MIN_AGE, max=templates.MAX_AGE
+        ),
+    ):
+        return States.AGE
+    context.user_data[templates.AGE_FIELD] = int(age)
+    await _look_at_profile(
+        update,
+        context,
+        templates.LOOK_AT_FORM_SECOND,
+        keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
+        True,
+    )
+
+    return States.EDIT_CONFIRMATION
+
+
+async def handle_edit_location(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """
+    Обрабатывает отредактированный город.
+    Переводит диалог в состояние EDIT_CONFIRMATION (анкета верна или нет).
+    """
+    await _save_response_about_location(update, context)
+    await _look_at_profile(
+        update,
+        context,
+        templates.LOOK_AT_FORM_SECOND,
+        keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
+        True,
+    )
+
+    return States.EDIT_CONFIRMATION
 
 
 async def handle_edit_about(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -450,27 +661,6 @@ async def handle_edit_about(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     return States.EDIT_CONFIRMATION
 
 
-async def handle_edit_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """
-    Обрабатывает отредактированную пользователем фотографию.
-    Переводит диалог в состояние EDIT_CONFIRMATION (анкета верна или нет).
-    """
-    file_id = update.effective_message.photo[-1].file_id
-    new_file = await context.bot.get_file(file_id)
-    photo_bytearray = await new_file.download_as_bytearray()
-    await api_service.save_photo(
-        telegram_id=update.effective_chat.id,
-        photo_bytearray=photo_bytearray,
-        filename=new_file.file_path,
-        file_id=file_id,
-    )
-    received_photos = context.user_data.get(templates.RECEIVED_PHOTOS_FIELD, [])
-    received_photos.append(file_id)
-    context.user_data[templates.RECEIVED_PHOTOS_FIELD] = received_photos
-
-    return None
-
-
 async def send_edited_photos(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await update.effective_message.edit_reply_markup()
     await _look_at_profile(
@@ -493,13 +683,23 @@ async def send_question_to_profile_is_correct(
     Либо завершает диалог.
     """
     await _send_chosen_choice_and_remove_buttons(update=update)
+    await api_service.delete_profile_photos(update.effective_chat.id)
     await api_service.update_user_profile(update.effective_chat.id, context.user_data)
-    await send_confirmation_request(update, context)
+    for file_id in context.user_data.get(templates.RECEIVED_PHOTOS_FIELD):
+        new_file = await context.bot.get_file(file_id)
+        photo_bytearray = await new_file.download_as_bytearray()
+        await api_service.save_photo(
+            telegram_id=update.effective_chat.id,
+            photo_bytearray=photo_bytearray,
+            filename=new_file.file_path,
+            file_id=file_id,
+        )
+    await send_profile_saved_notification(update, context)
     return ConversationHandler.END
 
 
 async def send_question_to_cancel_profile_edit(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """
     Спрашивает верна ли анкета.
@@ -515,7 +715,7 @@ async def send_question_to_cancel_profile_edit(
 
 
 async def send_question_to_resume_profile_edit(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """
     Спрашивает верна ли анкета.
@@ -530,12 +730,39 @@ async def send_question_to_resume_profile_edit(
     return States.EDIT
 
 
-async def send_confirmation_request(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
+async def send_profile_saved_notification(
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> None:
     """
-    Отправляет сохраняет профиль в базе данных.
+    Отправляет сообщение о том, что профиль сохранён в БД.
     """
     await update.effective_message.reply_text(
         text=templates.FORM_SAVED,
+        parse_mode=ParseMode.HTML,
     )
+
+
+async def _save_response_about_sex(update: Update, context: CallbackContext):
+    """Сохраняет полученный ответ про пол пользователя в контекст."""
+    sex = update.callback_query.data
+    await update.effective_message.reply_text(text=sex)
+    await update.effective_message.edit_reply_markup()
+    context.user_data[templates.SEX_FIELD] = sex.split()[1].capitalize()
+
+
+async def _save_response_about_location(update, context):
+    location = update.callback_query.data.split(":")[1]
+    await update.effective_message.reply_text(text=location)
+    await update.effective_message.edit_reply_markup()
+    context.user_data[templates.LOCATION_FIELD] = location
+
+
+async def _send_chosen_choice_and_remove_buttons(update: Update) -> None:
+    """
+    Удаление предыдущей клавиатуры.
+    Спрашивает что пользователь хочет изменить.
+    """
+    callback_query = update.callback_query
+    choice_text = callback_query.data
+    await callback_query.message.edit_reply_markup()
+    await callback_query.message.reply_text(text=f"{REPLY_MSG}{choice_text}")

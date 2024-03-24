@@ -8,6 +8,11 @@ from telegram.ext import (
 import conversations.profile.buttons as buttons
 import conversations.profile.callback_funcs as callback_funcs
 import conversations.profile.templates as templates
+from conversations.common_functions import common_buttons, common_funcs
+from conversations.common_functions.common_templates import (
+    RETURN_BTN_LABEL,
+    RETURN_TO_MENU_BTN_LABEL,
+)
 from conversations.menu.buttons import MY_PROFILE_BUTTON
 from conversations.profile.states import States
 from general.validators import (
@@ -36,8 +41,8 @@ profile_handler: ConversationHandler = ConversationHandler(
                 pattern=rf"^{buttons.EDIT_FORM_BUTTON}",
             ),
             CallbackQueryHandler(
-                callback=callback_funcs.send_question_to_back_in_menu,
-                pattern=rf"^{buttons.BACK_BUTTON}",
+                callback=callback_funcs.handle_return_to_menu_response,
+                pattern=rf"^{RETURN_TO_MENU_BTN_LABEL}",
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -67,7 +72,7 @@ profile_handler: ConversationHandler = ConversationHandler(
         States.LOCATION: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_location,
-                pattern=rf"^({buttons.MSK_BUTTON}|{buttons.SPB_BUTTON})$",
+                pattern=common_buttons.LOCATION_CALLBACK_PATTERN,
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -104,7 +109,8 @@ profile_handler: ConversationHandler = ConversationHandler(
             CallbackQueryHandler(
                 callback=callback_funcs.handle_visible,
                 pattern=(
-                    rf"^({buttons.YES_TO_DO_BUTTON}|{buttons.HIDE_SEARCH_BUTTON})$"
+                    rf"^({common_buttons.SHOW_SEARCH_BUTTON}"
+                    rf"|{common_buttons.HIDE_SEARCH_BUTTON})$"
                 ),
             ),
             MessageHandler(
@@ -118,8 +124,28 @@ profile_handler: ConversationHandler = ConversationHandler(
                 pattern=rf"^{buttons.FILL_AGAIN_BUTTON}",
             ),
             CallbackQueryHandler(
+                callback=callback_funcs.handle_return_to_profile_response,
+                pattern=rf"^{RETURN_BTN_LABEL}",
+            ),
+            CallbackQueryHandler(
+                callback=callback_funcs.send_question_to_edit_name,
+                pattern=rf"^{buttons.EDIT_NAME_BUTTON}",
+            ),
+            CallbackQueryHandler(
+                callback=callback_funcs.send_question_to_edit_sex,
+                pattern=rf"^{buttons.EDIT_SEX_BUTTON}",
+            ),
+            CallbackQueryHandler(
+                callback=callback_funcs.send_question_to_edit_age,
+                pattern=rf"^{buttons.EDIT_AGE_BUTTON}",
+            ),
+            CallbackQueryHandler(
+                callback=callback_funcs.send_question_to_edit_location,
+                pattern=rf"^{buttons.EDIT_LOCATION_BUTTON}",
+            ),
+            CallbackQueryHandler(
                 callback=callback_funcs.send_question_to_edit_about_myself,
-                pattern=rf"^{buttons.ABOUT_BUTTON}",
+                pattern=rf"^{buttons.EDIT_ABOUT_BUTTON}",
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.send_question_to_edit_photo,
@@ -129,6 +155,28 @@ profile_handler: ConversationHandler = ConversationHandler(
                 filters.TEXT & ~filters.COMMAND,
                 handle_text_input_instead_of_choosing_button,
             ),
+        ],
+        States.EDIT_NAME: [
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND, callback_funcs.handle_edit_name
+            )
+        ],
+        States.EDIT_SEX: [
+            CallbackQueryHandler(
+                callback_funcs.handle_edit_sex,
+                rf"^({buttons.MALE_BUTTON}|{buttons.FEMALE_BUTTON})$",
+            )
+        ],
+        States.EDIT_AGE: [
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND, callback_funcs.handle_edit_age
+            )
+        ],
+        States.EDIT_LOCATION: [
+            CallbackQueryHandler(
+                callback_funcs.handle_edit_location,
+                common_buttons.LOCATION_CALLBACK_PATTERN,
+            )
         ],
         States.EDIT_ABOUT_YOURSELF: [
             MessageHandler(
@@ -165,5 +213,10 @@ profile_handler: ConversationHandler = ConversationHandler(
             ),
         ],
     },
-    fallbacks=[],
+    fallbacks=[
+        CallbackQueryHandler(
+            callback=common_funcs.cancel,
+            pattern=rf"^{common_buttons.CANCEL_BUTTON}",
+        ),
+    ],
 )

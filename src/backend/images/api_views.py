@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import SAFE_METHODS
+from rest_framework.response import Response
 
 from profiles.models import Coliving, Profile, UserFromTelegram
 
@@ -20,6 +21,8 @@ from .serializers import (
 class BaseImageView(generics.ListCreateAPIView):
     """
     Базовый вью-класс объектов 'ProfileImage', 'ColivingImage'.
+    Позволяет получать список изображений, создавать новые,
+    получать детали по конкретному изображению и удалять их.
     """
 
     def _get_telegram_user(self) -> UserFromTelegram:
@@ -43,6 +46,11 @@ class BaseImageView(generics.ListCreateAPIView):
         if not telegram_user_colivings.exists():
             raise NotFound(detail="Коливинг не найден", code=status.HTTP_404_NOT_FOUND)
         return telegram_user_colivings.first()
+
+    def delete(self, request, *args, **kwargs):
+        images = self.get_queryset()
+        images.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ProfileImageView(BaseImageView):

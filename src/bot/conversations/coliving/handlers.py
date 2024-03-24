@@ -8,19 +8,21 @@ from telegram.ext import (
 import conversations.coliving.callback_funcs as callback_funcs
 import conversations.coliving.states as states
 import conversations.coliving.templates as templates
-from conversations.menu.callback_funcs import menu
+import conversations.common_functions.common_buttons as common_buttons
+import conversations.common_functions.common_funcs as common_funcs
+from conversations.menu.buttons import COLIVING_BUTTON
 
 coliving_handler: ConversationHandler = ConversationHandler(
     entry_points=[
         CallbackQueryHandler(
-            pattern=rf"^{templates.COLIVING_START_BTN}$", callback=callback_funcs.start
+            pattern=rf"^{COLIVING_BUTTON}$", callback=callback_funcs.start
         ),
     ],
     states={
         states.LOCATION: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_location,
-                pattern=rf"^{templates.LOCATION_CALLBACK_DATA}:(.+)$",
+                pattern=common_buttons.LOCATION_CALLBACK_PATTERN,
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -30,7 +32,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
         states.ROOM_TYPE: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_room_type,
-                pattern=rf"^{templates.ROOM_TYPE_CALLBACK_DATA}:(.+)$",
+                pattern=common_buttons.ROOM_TYPE_CALLBACK_PATTERN,
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -104,7 +106,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
         states.IS_VISIBLE: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_is_visible_coliving_profile_yes,
-                pattern=r"^(True|False)$",
+                pattern=r"^is_visible:(True|False)$",
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -114,7 +116,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
         states.EDIT_LOCATION: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_edit_location,
-                pattern=rf"^{templates.LOCATION_CALLBACK_DATA}:(.+)",
+                pattern=common_buttons.LOCATION_CALLBACK_PATTERN,
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -124,7 +126,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
         states.EDIT_ROOM_TYPE: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_edit_select_room_type,
-                pattern=rf"^{templates.ROOM_TYPE_CALLBACK_DATA}:(.+)$",
+                pattern=common_buttons.ROOM_TYPE_CALLBACK_PATTERN,
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -182,7 +184,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.handle_is_visible_switching,
-                pattern=r"^(False|True)$",
+                pattern=r"^is_visible:(True|False)$",
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.handle_coliving_roommates,
@@ -195,12 +197,20 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 callback=callback_funcs.handle_coliving_transfer_to,
                 pattern=r"^transfer_to",
             ),
-            CallbackQueryHandler(callback=menu, pattern=r"^go_to_menu"),
+            CallbackQueryHandler(
+                callback=callback_funcs.handle_return_to_menu_response,
+                pattern=r"^go_to_menu",
+            ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
                 callback_funcs.handle_coliving_text_instead_of_button,
             ),
         ],
     },
-    fallbacks=[],
+    fallbacks=[
+        CallbackQueryHandler(
+            callback=common_funcs.cancel,
+            pattern=rf"^{common_buttons.CANCEL_BUTTON}",
+        ),
+    ],
 )
