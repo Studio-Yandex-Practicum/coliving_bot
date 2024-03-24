@@ -25,62 +25,60 @@ class ReportMatchViewTests(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        t_users = [
-            UserFromTelegram.objects.create(telegram_id=id) for id in range(0, 6)
+        cls.t_users = [
+            UserFromTelegram.objects.create(telegram_id=id) for id in range(1, 6)
         ]
-        t_names = [f"test_{x}" for x in range(0, 6)]
-        cls.location = Location.objects.create(name="location")
-
+        cls.t_names = [f"test_{x}" for x in range(1, 6)]
+        cls.location = Location.objects.create(name=cls.L_T)
         ProfileTestData = namedtuple(
             "ProfileTestData", ["user", cls.NAME_T, cls.AGE_T, cls.L_T]
         )
 
         profiles_data = (
-            ProfileTestData(t_users[0], t_names[0], cls.AGE_25, cls.location),
-            ProfileTestData(t_users[1], t_names[1], cls.AGE_25, cls.location),
-            ProfileTestData(t_users[2], t_names[2], cls.AGE_25, cls.location),
-            ProfileTestData(t_users[3], t_names[3], cls.AGE_25, cls.location),
-            ProfileTestData(t_users[4], t_names[4], cls.AGE_25, cls.location),
-            ProfileTestData(t_users[5], t_names[5], cls.AGE_25, cls.location),
+            ProfileTestData(cls.t_users[0], cls.t_names[0], cls.AGE_25, cls.location),
+            ProfileTestData(cls.t_users[1], cls.t_names[1], cls.AGE_25, cls.location),
+            ProfileTestData(cls.t_users[2], cls.t_names[2], cls.AGE_25, cls.location),
+            ProfileTestData(cls.t_users[3], cls.t_names[3], cls.AGE_25, cls.location),
+            ProfileTestData(cls.t_users[4], cls.t_names[4], cls.AGE_25, cls.location),
         )
         test_profiles = [
             Profile.objects.create(**data._asdict()) for data in profiles_data
         ]
 
         cls.match_1 = MatchRequest.objects.create(
-            sender=test_profiles[1],
-            receiver=test_profiles[2],
+            sender=cls.t_users[0],
+            receiver=cls.t_users[1],
             status=MatchStatuses.is_match,
         )
         cls.match_3 = MatchRequest.objects.create(
-            sender=test_profiles[3],
-            receiver=test_profiles[1],
+            sender=cls.t_users[2],
+            receiver=cls.t_users[0],
             status=MatchStatuses.is_match,
         )
         cls.negative_match = MatchRequest.objects.create(
-            sender=test_profiles[5],
-            receiver=test_profiles[4],
+            sender=cls.t_users[4],
+            receiver=cls.t_users[3],
             status=MatchStatuses.is_rejected,
         )
 
         cls.report_data = {
-            "reporter": test_profiles[1].pk,
-            "reported_user": test_profiles[2].pk,
+            "reporter": cls.t_users[0].id,
+            "reported_user": cls.t_users[1].id,
             "text": cls.REPORT_TEXT,
             "category": cls.CATEGORY_TEXT,
         }
 
         cls.expected_match_data_for_user_1 = [
-            {cls.TID_T: t_users[2].pk, cls.NAME_T: t_names[2], cls.AGE_T: cls.AGE_25},
-            {cls.TID_T: t_users[3].pk, cls.NAME_T: t_names[3], cls.AGE_T: cls.AGE_25},
+            {cls.TID_T: 2, cls.NAME_T: cls.t_names[1], cls.AGE_T: cls.AGE_25},
+            {cls.TID_T: 3, cls.NAME_T: cls.t_names[2], cls.AGE_T: cls.AGE_25},
         ]
 
         cls.expected_match_data_for_user_2 = [
-            {cls.TID_T: t_users[1].pk, cls.NAME_T: t_names[1], cls.AGE_T: cls.AGE_25}
+            {cls.TID_T: 1, cls.NAME_T: cls.t_names[0], cls.AGE_T: cls.AGE_25}
         ]
 
         cls.expected_match_data_for_user_3 = [
-            {cls.TID_T: t_users[1].pk, cls.NAME_T: t_names[1], cls.AGE_T: cls.AGE_25}
+            {cls.TID_T: 1, cls.NAME_T: cls.t_names[0], cls.AGE_T: cls.AGE_25}
         ]
 
         cls.global_match_data = {
@@ -110,10 +108,10 @@ class ReportMatchViewTests(APITestCase):
     def test_invalid_reported_user(self):
         """Тест создания жалобы на несуществующиего пользователя."""
         invalid_data = {
-            "reporter": self.test_profiles[1].id,
+            "reporter": self.t_users[0].id,
             "reported_user": 99999,
-            "text": self.REPORT_TEXT,
-            "category": self.CATEGORY_TEXT,
+            "text": "test_text_2",
+            "category": "Категория 2",
         }
         response = self.client.post(self.URL_REVERSE, invalid_data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -121,21 +119,21 @@ class ReportMatchViewTests(APITestCase):
     def test_invalid_data(self):
         """Тест создания жалобы с некорректными данными."""
         invalid_data = {
-            "reporter": self.test_profiles[1].id,
-            "reported_user": self.test_profiles[2].id,
+            "reporter": self.t_users[0].id,
+            "reported_user": self.t_users[1].id,
             "text": 999999,
             "category": True,
         }
-        response = self.client.post(reverse("api-v1:search:report"), invalid_data)
+        response = self.client.post(self.URL_REVERSE, invalid_data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_required_param_is_absent(self):
         """Тест создания жалобы без обязательных параметров"""
         invalid_data = {
-            "reporter": self.test_profiles[1].id,
-            "reported_user": self.test_profiles[2].id,
+            "reporter": self.t_users[0].id,
+            "reported_user": self.t_users[1].id,
         }
-        response = self.client.post(reverse("api-v1:search:report"), invalid_data)
+        response = self.client.post(self.URL_REVERSE, invalid_data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_invalid_methods_report(self):
@@ -143,7 +141,7 @@ class ReportMatchViewTests(APITestCase):
         methods = ["get", "put", "patch", "delete"]
         for method in methods:
             with self.subTest(method=method):
-                response = self.client.generic(method, reverse("api-v1:search:report"))
+                response = self.client.generic(method, self.URL_REVERSE)
                 self.assertEqual(
                     response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED
                 )
@@ -153,14 +151,16 @@ class ReportMatchViewTests(APITestCase):
         response = self.client.get(
             reverse(
                 "api-v1:search:matched-users",
-                kwargs={self.TID_T: self.test_profiles[1].id},
+                kwargs={self.TID_T: self.t_users[0].id},
             )
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_get_match_for_invalid_user(self):
         """Тест получения мэтчей для несуществующего пользователя."""
-        response = self.client.get(self.URL_REVERSE, kwargs={self.TID_T: 99999})
+        response = self.client.get(
+            reverse("api-v1:search:matched-users", kwargs={self.TID_T: 99999})
+        )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_invalid_methods_match(self):
@@ -170,8 +170,10 @@ class ReportMatchViewTests(APITestCase):
             with self.subTest(method=method):
                 response = self.client.generic(
                     method,
-                    self.URL_REVERSE,
-                    kwargs={self.TID_T: self.test_profiles[1].id},
+                    reverse(
+                        "api-v1:search:matched-users",
+                        kwargs={self.TID_T: self.t_users[0].id},
+                    ),
                 )
                 self.assertEqual(
                     response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED
@@ -182,7 +184,10 @@ class ReportMatchViewTests(APITestCase):
         for telegram_id, data in self.global_match_data.items():
             with self.subTest(id=telegram_id, data=data):
                 response = self.client.get(
-                    self.URL_REVERSE, kwargs={self.TID_T: telegram_id}
+                    reverse(
+                        "api-v1:search:matched-users",
+                        kwargs={self.TID_T: telegram_id},
+                    )
                 )
                 self.assertEqual(response.json(), data)
 
