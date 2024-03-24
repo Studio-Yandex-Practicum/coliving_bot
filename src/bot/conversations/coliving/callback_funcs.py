@@ -707,12 +707,6 @@ async def handle_edit_profile_confirmation_cancel(
         text=templates.REPLY_MSG_PROFILE_NO_CHANGE,
     )
     context.user_data.clear()
-    ########################################
-    # Куда отправить?
-    await update.effective_message.reply_text(
-        text=templates.REPLY_MSG_START_CREATE_PROFILE,
-    )
-    ########################################
     return ConversationHandler.END
 
 
