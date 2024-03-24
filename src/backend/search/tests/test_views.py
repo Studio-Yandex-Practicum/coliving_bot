@@ -25,13 +25,15 @@ class ReportMatchViewTests(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        t_users = [UserFromTelegram.objects.create(
-                                        telegram_id=id) for id in range(0, 6)]
-        t_names = [f'test_{x}' for x in range(0, 6)]
+        t_users = [
+            UserFromTelegram.objects.create(telegram_id=id) for id in range(0, 6)
+        ]
+        t_names = [f"test_{x}" for x in range(0, 6)]
         cls.location = Location.objects.create(name="location")
 
-        ProfileTestData = namedtuple("ProfileTestData",
-                                     ["user", cls.NAME_T, cls.AGE_T, cls.L_T])
+        ProfileTestData = namedtuple(
+            "ProfileTestData", ["user", cls.NAME_T, cls.AGE_T, cls.L_T]
+        )
 
         profiles_data = (
             ProfileTestData(t_users[0], t_names[0], cls.AGE_25, cls.location),
@@ -40,10 +42,10 @@ class ReportMatchViewTests(APITestCase):
             ProfileTestData(t_users[3], t_names[3], cls.AGE_25, cls.location),
             ProfileTestData(t_users[4], t_names[4], cls.AGE_25, cls.location),
             ProfileTestData(t_users[5], t_names[5], cls.AGE_25, cls.location),
-            )
+        )
         test_profiles = [
             Profile.objects.create(**data._asdict()) for data in profiles_data
-            ]
+        ]
 
         cls.match_1 = MatchRequest.objects.create(
             sender=test_profiles[1],
@@ -167,9 +169,10 @@ class ReportMatchViewTests(APITestCase):
         for method in methods:
             with self.subTest(method=method):
                 response = self.client.generic(
-                                method,
-                                self.URL_REVERSE,
-                                kwargs={self.TID_T: self.test_profiles[1].id})
+                    method,
+                    self.URL_REVERSE,
+                    kwargs={self.TID_T: self.test_profiles[1].id},
+                )
                 self.assertEqual(
                     response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED
                 )
@@ -178,8 +181,9 @@ class ReportMatchViewTests(APITestCase):
         """Тест на корректный вывод данных мэтчей."""
         for telegram_id, data in self.global_match_data.items():
             with self.subTest(id=telegram_id, data=data):
-                response = self.client.get(self.URL_REVERSE,
-                                           kwargs={self.TID_T: telegram_id})
+                response = self.client.get(
+                    self.URL_REVERSE, kwargs={self.TID_T: telegram_id}
+                )
                 self.assertEqual(response.json(), data)
 
 
@@ -192,15 +196,17 @@ class ProfileSearchViewTests(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        test_users = [UserFromTelegram.objects.create(
-                                        telegram_id=id) for id in range(0, 11)]
-        p_names = [f'Name_{x}' for x in range(0, 11)]
+        test_users = [
+            UserFromTelegram.objects.create(telegram_id=id) for id in range(0, 11)
+        ]
+        p_names = [f"Name_{x}" for x in range(0, 11)]
 
         cls.location_m = Location.objects.create(name=cls.LOCATION_M_NAME)
         cls.location_s = Location.objects.create(name=cls.LOCATION_S_NAME)
 
-        ProfileTestData = namedtuple("ProfileTestData",
-                                     ["user", "name", "age", "location", "sex"])
+        ProfileTestData = namedtuple(
+            "ProfileTestData", ["user", "name", "age", "location", "sex"]
+        )
         profiles_data = (
             ProfileTestData(test_users[0], p_names[0], 18, cls.location_m, Sex.MAN),
             ProfileTestData(test_users[1], p_names[1], 21, cls.location_m, Sex.MAN),
@@ -213,7 +219,7 @@ class ProfileSearchViewTests(APITestCase):
             ProfileTestData(test_users[8], p_names[8], 41, cls.location_s, Sex.WOMAN),
             ProfileTestData(test_users[9], p_names[9], 42, cls.location_s, Sex.WOMAN),
             ProfileTestData(test_users[10], p_names[10], 44, cls.location_s, Sex.WOMAN),
-            )
+        )
         test_profiles = [
             Profile.objects.create(**data._asdict()) for data in profiles_data
         ]
