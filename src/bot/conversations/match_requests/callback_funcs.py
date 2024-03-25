@@ -1,23 +1,14 @@
-from dataclasses import asdict
-
-from telegram import (
-    InlineKeyboardMarkup,
-    InputMediaPhoto,
-    Message,
-    ReplyKeyboardRemove,
-    Update,
-)
+from telegram import Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
 
+import conversations.match_requests.buttons as buttons
 import conversations.match_requests.keyboards as keyboards
 import conversations.match_requests.states as states
 import conversations.match_requests.templates as templates
-import conversations.match_requests.buttons as buttons
-
 from internal_requests import api_service
-#from internal_requests.entities import SearchSettings, UserProfile
 
+# from internal_requests.entities import SearchSettings, UserProfile
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -52,7 +43,7 @@ async def show_profile(
     context: ContextTypes.DEFAULT_TYPE,
     sender_id,
     receiver_id,
-    ) -> int:
+) -> int:
     """
     Отправляем сообщение с профилем отправителя
     лайка получателю
@@ -71,7 +62,9 @@ async def show_profile(
     return sender_profile
 
 
-async def link_sender_to_reciver(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def link_sender_to_reciver(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
     """
     Обрабатывает ЛАЙК на профиль Sender.
     Посылает запрос в API на изменение
