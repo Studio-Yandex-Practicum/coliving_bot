@@ -10,9 +10,10 @@ from telegram import (
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
 
+import conversations.common_functions.common_funcs as common_funcs
 import conversations.roommate_search.keyboards as keyboards
-import conversations.roommate_search.states as states
 import conversations.roommate_search.templates as templates
+from conversations.roommate_search.states import States
 from internal_requests import api_service
 from internal_requests.entities import SearchSettings, UserProfile
 
@@ -23,6 +24,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     Проверяет, был ли настроен поиск ранее и, в зависимости от проверки,
     переводит либо в состояние подтверждения настроек, либо в настройку поиска.
     """
+
+    check = await common_funcs.profile_exist_check(update, context)
+
+    if check == ConversationHandler.END:
+        return ConversationHandler.END
+
     search_settings = context.user_data.get("search_settings")
     if search_settings:
         await _message_edit(
@@ -33,7 +40,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             text=templates.ASK_SEARCH_SETTINGS,
             reply_markup=keyboards.SEARCH_SETTINGS_KEYBOARD,
         )
-        return states.SEARCH_SETTINGS
+        return States.SEARCH_SETTINGS
     state = await edit_settings(update, context)
     return state
 
@@ -62,7 +69,7 @@ async def edit_settings(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         text=templates.ASK_LOCATION,
         keyboard=context.bot_data["location_keyboard"],
     )
-    return states.LOCATION
+    return States.LOCATION
 
 
 async def set_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -77,7 +84,7 @@ async def set_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         text=templates.ASK_SEX,
         keyboard=keyboards.SEX_KEYBOARD,
     )
-    return states.SEX
+    return States.SEX
 
 
 async def set_sex(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -91,7 +98,7 @@ async def set_sex(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         text=templates.ASK_AGE,
         keyboard=keyboards.AGE_KEYBOARD,
     )
-    return states.AGE
+    return States.AGE
 
 
 async def set_age(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -121,7 +128,7 @@ async def set_age(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         text=templates.ASK_SEARCH_SETTINGS,
         reply_markup=keyboards.SEARCH_SETTINGS_KEYBOARD,
     )
-    return states.SEARCH_SETTINGS
+    return States.SEARCH_SETTINGS
 
 
 async def next_profile(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -152,7 +159,7 @@ async def profile_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         reply_markup=keyboards.NEXT_PROFILE,
         parse_mode=ParseMode.HTML,
     )
-    return states.NEXT_PROFILE
+    return States.NEXT_PROFILE
 
 
 async def end_of_search(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -204,14 +211,14 @@ async def _get_next_user_profile(
                 reply_markup=keyboards.PROFILE_KEYBOARD,
                 parse_mode=ParseMode.HTML,
             )
-        return states.PROFILE
+        return States.PROFILE
 
     await update.effective_message.reply_text(
         text=templates.NO_MATCHES,
         reply_markup=keyboards.NO_MATCHES_KEYBOARD,
         parse_mode=ParseMode.HTML,
     )
-    return states.NO_MATCHES
+    return States.NO_MATCHES
 
 
 async def _message_edit(
