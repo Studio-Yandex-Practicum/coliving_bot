@@ -42,10 +42,20 @@ class Location:
 
 
 @dataclass
-class SearchSettings:
+class ProfileSearchSettings:
     """Значения фильтров поиска по профилям пользователей."""
 
     age_min: Optional[int] = field(default=None)
     age_max: Optional[int] = field(default=None)
     location: Optional[str] = field(default=None)
     sex: Optional[str] = field(default=None)
+
+
+@dataclass
+class ColivingSearchSettings:
+    """Значения фильтров поиска по объявлениям коливингов."""
+
+    room_type: Optional[str] = field(default=None)
+    cost_min: Optional[int] = field(default=None)
+    cost_max: Optional[int] = field(default=None)
+    location: Optional[str] = field(default=None)

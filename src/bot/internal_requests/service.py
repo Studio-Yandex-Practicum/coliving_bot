@@ -7,9 +7,10 @@ from httpx import AsyncClient, Response
 
 from internal_requests.entities import (
     Coliving,
+    ColivingSearchSettings,
     Image,
     Location,
-    SearchSettings,
+    ProfileSearchSettings,
     UserProfile,
 )
 
@@ -136,7 +137,7 @@ class APIService:
         return UserProfile(**response.json())
 
     async def get_filtered_user_profiles(
-        self, filters: SearchSettings, viewer: int
+        self, filters: ProfileSearchSettings, viewer: int
     ) -> List[UserProfile]:
         """
         Получение отфильтрованных анкет пользователей.
@@ -151,6 +152,26 @@ class APIService:
         result = []
         for profile in response.json():
             result.append(UserProfile(**profile))
+        return result
+
+    async def get_filtered_colivings(
+        self, filters: ColivingSearchSettings, viewer: int
+    ) -> List[Coliving]:
+        """
+        Получение отфильтрованных объявлений коливинга.
+
+        :param filters: Значения для query-параметров поиска
+        :param viewer: Telegram ID пользователя, осуществляющего поиск
+        :return: Коливинги, подходящие по фильтрам
+        """
+        params_dict = {k: v for k, v in asdict(filters).items() if v is not None}
+        search_params = urlencode(params_dict)
+        response = await self._get_request(
+            f"colivings/?{search_params}&viewer={viewer}"
+        )
+        result = []
+        for coliving in response.json():
+            result.append(Coliving(**coliving))
         return result
 
     async def create_user_profile(
