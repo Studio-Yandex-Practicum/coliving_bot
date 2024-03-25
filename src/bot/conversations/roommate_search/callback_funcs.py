@@ -10,25 +10,21 @@ from telegram import (
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
 
-import conversations.common_functions.common_funcs as common_funcs
 import conversations.roommate_search.keyboards as keyboards
 import conversations.roommate_search.templates as templates
+from conversations.common_functions.common_funcs import profile_required
 from conversations.roommate_search.states import States
 from internal_requests import api_service
 from internal_requests.entities import SearchSettings, UserProfile
 
 
+@profile_required
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Начало ветви общения по поиску соседа.
     Проверяет, был ли настроен поиск ранее и, в зависимости от проверки,
     переводит либо в состояние подтверждения настроек, либо в настройку поиска.
     """
-
-    check = await common_funcs.profile_exist_check(update, context)
-
-    if check == ConversationHandler.END:
-        return ConversationHandler.END
 
     search_settings = context.user_data.get("search_settings")
     if search_settings:
