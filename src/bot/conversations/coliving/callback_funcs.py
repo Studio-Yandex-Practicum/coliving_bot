@@ -7,11 +7,11 @@ from telegram.constants import ParseMode
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
 import conversations.coliving.keyboards as keyboards
-import conversations.coliving.states as states
 import conversations.coliving.templates as templates
 import conversations.common_functions.common_funcs as common_funcs
 import conversations.common_functions.common_keyboards as common_keyboards
 import conversations.common_functions.common_templates as common_templates
+from conversations.coliving.states import States
 from conversations.coliving.templates import format_coliving_profile_message
 from conversations.menu.callback_funcs import menu
 from general.validators import value_is_in_range_validator
@@ -26,6 +26,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     Перевод на создание коливинг профиля или его просмотр.
     """
     current_chat = update.effective_chat
+
+    check = await common_funcs.profile_exist_check(update, context)
+
+    if check == ConversationHandler.END:
+        return ConversationHandler.END
 
     try:
         context.user_data[
@@ -43,7 +48,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         )
 
         context.user_data["coliving_info"] = Coliving(host=update.effective_chat.id)
-        return states.LOCATION
+        return States.LOCATION
 
     await update.effective_message.edit_text(text=templates.REPLY_MSG_HELLO)
     await _show_coliving_profile(
@@ -51,7 +56,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         context=context,
         ask_to_confirm=False,
     )
-    return states.COLIVING
+    return States.COLIVING
 
 
 async def handle_coliving_text_instead_of_button(
@@ -67,7 +72,7 @@ async def handle_coliving_text_instead_of_button(
     )
 
     await _show_coliving_profile(update, context, ask_to_confirm=False)
-    return states.COLIVING
+    return States.COLIVING
 
 
 async def handle_coliving_edit(
@@ -83,7 +88,7 @@ async def handle_coliving_edit(
         text=templates.REPLY_MSG_WHAT_TO_EDIT,
         reply_markup=keyboards.WHAT_EDIT_PROFILE_KEYBOARD,
     )
-    return states.EDIT
+    return States.EDIT
 
 
 async def handle_is_visible_switching(update: Update, context: CallbackContext) -> int:
@@ -109,7 +114,7 @@ async def handle_is_visible_switching(update: Update, context: CallbackContext) 
         ask_to_confirm=False,
     )
 
-    return states.COLIVING
+    return States.COLIVING
 
 
 async def handle_coliving_roommates(
@@ -216,7 +221,7 @@ async def handle_location(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             keyboards.ROOM_TYPE_KEYBOARD, common_keyboards.CANCEL_KEYBOARD
         ),
     )
-    return states.ROOM_TYPE
+    return States.ROOM_TYPE
 
 
 async def handle_room_type_text_input_instead_of_choosing_button(
@@ -245,7 +250,7 @@ async def handle_room_type(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         text=templates.REPLY_MSG_ASK_ABOUT,
         reply_markup=common_keyboards.CANCEL_KEYBOARD,
     )
-    return states.ABOUT_ROOM
+    return States.ABOUT_ROOM
 
 
 async def handle_about_coliving(
@@ -265,7 +270,7 @@ async def handle_about_coliving(
             text=templates.REPLY_MSG_ASK_ABOUT,
             reply_markup=common_keyboards.CANCEL_KEYBOARD,
         )
-        return states.ABOUT_ROOM
+        return States.ABOUT_ROOM
 
     context.user_data["coliving_info"].about = about_coliving
     await update.effective_message.reply_text(
@@ -275,7 +280,7 @@ async def handle_about_coliving(
         text=templates.REPLY_MSG_ASK_PRICE,
         reply_markup=common_keyboards.CANCEL_KEYBOARD,
     )
-    return states.PRICE
+    return States.PRICE
 
 
 async def handle_price(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -296,7 +301,7 @@ async def handle_price(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
             min=templates.MIN_PRICE, max=templates.MAX_PRICE
         ),
     ):
-        return states.PRICE
+        return States.PRICE
 
     context.user_data["coliving_info"].price = price
     await update.effective_message.reply_text(text=f"{templates.REPLY_MSG}{price}")
@@ -305,7 +310,7 @@ async def handle_price(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         reply_markup=common_keyboards.CANCEL_KEYBOARD,
     )
 
-    return states.PHOTO_ROOM
+    return States.PHOTO_ROOM
 
 
 async def encode_photo_room(
@@ -336,7 +341,7 @@ async def handle_photo_room(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     """Сохраняет фото."""
     if update.message.text:
         await update.effective_message.reply_text(text=templates.ERR_PHOTO_NOT_TEXT)
-        return states.PHOTO_ROOM
+        return States.PHOTO_ROOM
     photo = update.effective_message.photo[-1]
     context.user_data["coliving_info"].images.append(
         Image(file_id=photo.file_id, photo_size=photo)
@@ -348,7 +353,7 @@ async def handle_photo_room(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         templates.REPLY_MSG_ASK_TO_CONFIRM,
         keyboard=keyboards.CONFIRM_OR_EDIT_PROFILE_KEYBOARD,
     )
-    return states.CONFIRMATION
+    return States.CONFIRMATION
 
 
 async def handle_confirm_or_edit_profile_text_instead_of_button(
@@ -386,7 +391,7 @@ async def handle_confirm_or_edit_reply_edit_profile(
             keyboards.WHAT_EDIT_PROFILE_KEYBOARD, common_keyboards.CANCEL_KEYBOARD
         ),
     )
-    return states.EDIT
+    return States.EDIT
 
 
 async def handle_confirm_or_edit_reply_confirm(
@@ -407,7 +412,7 @@ async def handle_confirm_or_edit_reply_confirm(
             common_keyboards.CANCEL_KEYBOARD,
         ),
     )
-    return states.IS_VISIBLE
+    return States.IS_VISIBLE
 
 
 async def repeat_question_about_coliving_visibility(
@@ -476,7 +481,7 @@ async def handle_what_to_edit_fill_again(
         text=templates.REPLY_MSG_ASK_LOCATION,
         reply_markup=context.bot_data["location_keyboard"],
     )
-    return states.LOCATION
+    return States.LOCATION
 
 
 async def handle_what_to_edit_location(
@@ -495,7 +500,7 @@ async def handle_what_to_edit_location(
         text=templates.REPLY_MSG_ASK_LOCATION,
         reply_markup=context.bot_data["location_keyboard"],
     )
-    return states.EDIT_LOCATION
+    return States.EDIT_LOCATION
 
 
 async def handle_what_to_edit_room_type(
@@ -513,7 +518,7 @@ async def handle_what_to_edit_room_type(
         text=templates.REPLY_MSG_ASK_ROOM_TYPE,
         reply_markup=keyboards.ROOM_TYPE_KEYBOARD,
     )
-    return states.EDIT_ROOM_TYPE
+    return States.EDIT_ROOM_TYPE
 
 
 async def handle_what_to_edit_about_room(
@@ -531,7 +536,7 @@ async def handle_what_to_edit_about_room(
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_ABOUT,
     )
-    return states.EDIT_ABOUT_ROOM
+    return States.EDIT_ABOUT_ROOM
 
 
 async def handle_what_to_edit_price(
@@ -548,7 +553,7 @@ async def handle_what_to_edit_price(
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_PRICE,
     )
-    return states.EDIT_PRICE
+    return States.EDIT_PRICE
 
 
 async def handle_what_to_edit_photo_room(
@@ -566,7 +571,7 @@ async def handle_what_to_edit_photo_room(
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_PHOTO_SEND,
     )
-    return states.EDIT_PHOTO_ROOM
+    return States.EDIT_PHOTO_ROOM
 
 
 async def handle_edit_location(
@@ -584,7 +589,7 @@ async def handle_edit_location(
         templates.REPLY_MSG_ASK_TO_CONFIRM,
         keyboards.EDIT_CONFIRMATION_KEYBOARD,
     )
-    return states.EDIT_CONFIRMATION
+    return States.EDIT_CONFIRMATION
 
 
 async def handle_edit_select_room_type(
@@ -601,7 +606,7 @@ async def handle_edit_select_room_type(
         templates.REPLY_MSG_ASK_TO_CONFIRM,
         keyboards.EDIT_CONFIRMATION_KEYBOARD,
     )
-    return states.EDIT_CONFIRMATION
+    return States.EDIT_CONFIRMATION
 
 
 async def handle_edit_about_coliving(
@@ -621,7 +626,7 @@ async def handle_edit_about_coliving(
         await update.effective_message.reply_text(
             text=templates.REPLY_MSG_ASK_ABOUT,
         )
-        return states.EDIT_ABOUT_ROOM
+        return States.EDIT_ABOUT_ROOM
 
     context.user_data["coliving_info"].about = about_coliving
     await update.effective_message.reply_text(
@@ -633,7 +638,7 @@ async def handle_edit_about_coliving(
         templates.REPLY_MSG_ASK_TO_CONFIRM,
         keyboards.EDIT_CONFIRMATION_KEYBOARD,
     )
-    return states.EDIT_CONFIRMATION
+    return States.EDIT_CONFIRMATION
 
 
 async def handle_edit_price(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -650,7 +655,7 @@ async def handle_edit_price(update: Update, context: ContextTypes.DEFAULT_TYPE) 
             min=templates.MIN_PRICE, max=templates.MAX_PRICE
         ),
     ):
-        return states.EDIT_PRICE
+        return States.EDIT_PRICE
 
     context.user_data["coliving_info"].price = edit_price
     await update.effective_message.reply_text(text=f"{templates.REPLY_MSG}{edit_price}")
@@ -660,7 +665,7 @@ async def handle_edit_price(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         templates.REPLY_MSG_ASK_TO_CONFIRM,
         keyboards.EDIT_CONFIRMATION_KEYBOARD,
     )
-    return states.EDIT_CONFIRMATION
+    return States.EDIT_CONFIRMATION
 
 
 async def handle_edit_photo_room(
@@ -670,7 +675,7 @@ async def handle_edit_photo_room(
 
     if update.message.text:
         await update.effective_message.reply_text(text=templates.ERR_PHOTO_NOT_TEXT)
-        return states.EDIT_PHOTO_ROOM
+        return States.EDIT_PHOTO_ROOM
 
     context.user_data[templates.IMAGE_FIELD] = await encode_photo_room(update, context)
 
@@ -680,7 +685,7 @@ async def handle_edit_photo_room(
         templates.REPLY_MSG_ASK_TO_CONFIRM,
         keyboards.EDIT_CONFIRMATION_KEYBOARD,
     )
-    return states.EDIT_CONFIRMATION
+    return States.EDIT_CONFIRMATION
 
 
 async def handle_edit_profile_confirmation_text_instead_of_button(
@@ -750,7 +755,7 @@ async def handle_edit_profile_confirmation_continue_edit(
         text=templates.REPLY_MSG_WHAT_TO_EDIT,
         reply_markup=keyboards.WHAT_EDIT_PROFILE_KEYBOARD,
     )
-    return states.EDIT
+    return States.EDIT
 
 
 async def save_coliving_info_to_db(
