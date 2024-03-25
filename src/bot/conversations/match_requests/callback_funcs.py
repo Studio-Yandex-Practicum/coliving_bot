@@ -2,7 +2,7 @@ from telegram import Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
 
-import conversations.match_requests.buttons as buttons
+# import conversations.match_requests.buttons as buttons
 import conversations.match_requests.keyboards as keyboards
 import conversations.match_requests.states as states
 import conversations.match_requests.templates as templates
@@ -24,18 +24,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     sender_id = update.effective_chat.id
     callback_data = update.callback_query.data
+    receiver_id = callback_data.split("_")[2]
 
-    if callback_data.startswith(buttons.SEE_PROFILE):
-        receiver_id = callback_data.split("_")[2]
+    await show_profile(
+        context,
+        sender_id,
+        receiver_id,
+    )
 
-        await show_profile(
-            update,
-            context,
-            sender_id,
-            receiver_id,
-        )
-
-    await update.callback_query.answer()
     return states.PROFILE
 
 
@@ -98,3 +94,11 @@ async def link_sender_to_reciver(
     )
 
     return ConversationHandler.END
+
+
+async def deslike_to_sender(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """
+    Обрабатывает ДИЗЛАЙК на профиль Sender.
+    Потом придумаем, как быть в таком случае
+    """
+    pass
