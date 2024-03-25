@@ -10,11 +10,12 @@ import conversations.coliving.states as states
 import conversations.coliving.templates as templates
 import conversations.common_functions.common_buttons as common_buttons
 import conversations.common_functions.common_funcs as common_funcs
+from conversations.menu.buttons import COLIVING_BUTTON
 
 coliving_handler: ConversationHandler = ConversationHandler(
     entry_points=[
         CallbackQueryHandler(
-            pattern=rf"^{templates.COLIVING_START_BTN}$", callback=callback_funcs.start
+            pattern=rf"^{COLIVING_BUTTON}$", callback=callback_funcs.start
         ),
     ],
     states={
@@ -109,7 +110,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
         states.IS_VISIBLE: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_is_visible_coliving_profile_yes,
-                pattern=r"^(True|False)$",
+                pattern=r"^is_visible:(True|False)$",
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -191,7 +192,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.handle_is_visible_switching,
-                pattern=r"^(False|True)$",
+                pattern=r"^is_visible:(True|False)$",
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.handle_coliving_roommates,

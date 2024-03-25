@@ -7,12 +7,14 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto
 from telegram.constants import ParseMode
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
+import conversations.common_functions.common_buttons as common_buttons
 import conversations.common_functions.common_funcs as common_funcs
 import conversations.common_functions.common_keyboards as common_keyboards
+import conversations.common_functions.common_templates as common_templates
 import conversations.profile.buttons as buttons
 import conversations.profile.keyboards as keyboards
 import conversations.profile.templates as templates
-from conversations.coliving.templates import REPLY_MSG
+from conversations.common_functions.common_templates import RESPONSE_PREFIX
 from conversations.menu.callback_funcs import menu
 from conversations.profile.states import States
 from general.validators import value_is_in_range_validator
@@ -55,7 +57,14 @@ async def start(
 
     await set_profile_to_context(context, profile_info)
     await update.effective_message.delete()
-    await _look_at_profile(update, context, "", keyboards.PROFILE_KEYBOARD)
+
+    keyboard = (
+        keyboards.PROFILE_KEYBOARD_OPEN_SEARCH
+        if profile_info.is_visible
+        else keyboards.PROFILE_KEYBOARD_HIDE_SEARCH
+    )
+    await _look_at_profile(update, context, "", keyboard)
+
     return States.PROFILE
 
 
@@ -70,9 +79,9 @@ async def send_question_to_profile_is_visible_in_search(
     is_visible: bool = eval(update.callback_query.data.split(":")[1])
     context.user_data[templates.IS_VISIBLE_FIELD] = is_visible
     if is_visible:
-        message_text = templates.FORM_IS_VISIBLE
+        message_text = common_templates.FORM_IS_VISIBLE
     else:
-        message_text = templates.FORM_IS_NOT_VISIBLE
+        message_text = common_templates.FORM_IS_NOT_VISIBLE
     await update.effective_message.reply_text(
         text=message_text, parse_mode=ParseMode.HTML
     )
@@ -104,8 +113,16 @@ async def handle_return_to_profile_response(
     Обработка кнопки 'Вернуться'.
     Переводит диалог в состояние PROFILE.
     """
+
     await _send_chosen_choice_and_remove_buttons(update=update)
-    await _look_at_profile(update, context, "", keyboards.PROFILE_KEYBOARD)
+    if context.user_data[templates.IS_VISIBLE_FIELD] is True:
+        await _look_at_profile(
+            update, context, "", keyboards.PROFILE_KEYBOARD_OPEN_SEARCH
+        )
+    else:
+        await _look_at_profile(
+            update, context, "", keyboards.PROFILE_KEYBOARD_HIDE_SEARCH
+        )
     return States.PROFILE
 
 
@@ -262,9 +279,9 @@ async def _look_at_profile(
     Предварительный просмотр профиля.
     """
     chat_id = update.effective_chat.id
-    ask_text = copy(templates.ASK_IS_THAT_RIGHT)
+    ask_text = copy(templates.PROFILE_VIEWING)
     if not ask:
-        ask_text = templates.ASK_WANT_TO_CHANGE
+        ask_text = templates.PROFILE_VIEWING
     message_text = (
         title
         + "\n\n"
@@ -396,9 +413,9 @@ async def handle_visible(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     visible = update.callback_query.data
     await update.effective_message.reply_text(text=visible)
     await update.effective_message.edit_reply_markup()
-    if visible == buttons.YES_TO_DO_BUTTON:
+    if visible == common_buttons.SHOW_SEARCH_BUTTON:
         context.user_data[templates.IS_VISIBLE_FIELD] = True
-    elif visible == buttons.HIDE_SEARCH_BUTTON:
+    elif visible == common_buttons.HIDE_SEARCH_BUTTON:
         context.user_data[templates.IS_VISIBLE_FIELD] = False
         await api_service.update_user_profile(
             update.effective_chat.id, context.user_data
@@ -748,4 +765,6 @@ async def _send_chosen_choice_and_remove_buttons(update: Update) -> None:
     callback_query = update.callback_query
     choice_text = callback_query.data
     await callback_query.message.edit_reply_markup()
-    await callback_query.message.reply_text(text=f"{REPLY_MSG}{choice_text}")
+    await callback_query.message.reply_text(
+        text=f"{RESPONSE_PREFIX}{choice_text}", parse_mode=ParseMode.HTML
+    )
