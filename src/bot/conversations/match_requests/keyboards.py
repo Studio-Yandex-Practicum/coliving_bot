@@ -19,7 +19,6 @@ VIEW_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     )
 )
 
-
 SEARCH_SETTINGS_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         InlineKeyboardButton(

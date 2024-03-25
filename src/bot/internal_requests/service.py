@@ -199,6 +199,23 @@ class APIService:
         response = await self._post_request(endpoint_urn=endpoint_urn, data=data)
         return response
 
+    async def change_match_request_status(
+        self,
+        sender: int,
+        receiver: int,
+        status: bool,
+    ) -> Response:
+        """Совершает PATCH-запрос к эндпоинту изменения MatchRequest.
+
+        :param sender: telegram_id отправителя.
+        :param receiver: telegram_id получателя.
+        :param status: match_request status
+        """
+        endpoint_urn = "match_requests/"
+        data = {"sender": sender, "receiver": receiver, "status": status}
+        response = await self._patch_request(endpoint_urn=endpoint_urn, data=data)
+        return response
+
     async def _profile_request(
         self, telegram_id: int, data: dict, method: str
     ) -> Optional[UserProfile]:

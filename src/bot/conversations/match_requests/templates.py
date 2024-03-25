@@ -33,7 +33,12 @@ END_OF_SEARCH = (
     "А если нет, помни, что ты всегда можешь начать поиск заново."
 )
 LIKE_NOTIFICATION = "Кто-то хочет стать твоим соседом, посмотрим?"
+SENDER_PROFILE = "Смотрим анкету {sender_profile.name}"
 BUTTON_ERROR_MSG = "Выбери соответствующий вариант."
+SEND_SENDER = "Приветствуем будущего соседа {sender_id}"
+SEND_RECIVER = (
+    "Приветствуем будущего соседа {reciver_id},\n" "Ему тоже понравилась твоя анкета!"
+)
 
 
 def format_search_settings_message(filters: SearchSettings) -> str:
