@@ -63,8 +63,8 @@ class ColivingView(generics.ListCreateAPIView):
             except ObjectDoesNotExist:
                 raise NotFound("Такого пользователя не существует.")
 
-            excl_list = Profile.objects.filter(
-                Q(user=user) | Q(viewers=user)
+            excl_list = Coliving.objects.filter(
+                Q(host=user) | Q(viewers=user)
             ).values_list("pk", flat=True)
             queryset = queryset.exclude(pk__in=excl_list)
 

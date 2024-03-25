@@ -210,3 +210,107 @@ class UserResidenceUpdateAPITestCase(APITestCase):
         response = self.client.patch(url, data)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class ColivingSearchAPITest(APITestCase):
+    """Тесты проверки логики поиска коливинга."""
+
+    URL = reverse("api-v1:profiles:colivings-list")
+    MSK_LOCATION_NAME = "Москва"
+    SPB_LOCATION_NAME = "Санкт-Петербург"
+    NON_EXISTING_VIEWER_ID = 20
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.host = UserFromTelegram.objects.create(telegram_id=5)
+        cls.viewer = UserFromTelegram.objects.create(telegram_id=10)
+        msk_location = Location.objects.create(name=cls.MSK_LOCATION_NAME)
+        cls.coliving_1 = Coliving.objects.create(
+            location=msk_location,
+            price=Restrictions.PRICE_MAX - 1000,
+            room_type=ColivingTypes.ROOM,
+            host=cls.host,
+        )
+        cls.coliving_2 = Coliving.objects.create(
+            location=msk_location,
+            price=Restrictions.PRICE_MAX - 100,
+            room_type=ColivingTypes.PLACE,
+            host=cls.host,
+        )
+
+    def test_valid_request(self):
+        response = self.client.get(
+            self.URL,
+            {
+                "location": self.MSK_LOCATION_NAME,
+                "max_price": Restrictions.PRICE_MAX,
+                "min_price": Restrictions.PRICE_MIN,
+                "room_type": self.coliving_2.room_type,
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["id"], self.coliving_2.id)
+
+    def test_empty_result(self):
+        response = self.client.get(
+            self.URL,
+            {
+                "location": self.SPB_LOCATION_NAME,
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            len(response.data), 0, f"Ожидался пустой список, получено: {response.data}"
+        )
+
+    def test_hosted_coliving_absent(self):
+        response = self.client.get(
+            self.URL,
+            {
+                "location": self.coliving_1.location,
+                "max_price": self.coliving_1.price + 1,
+                "min_price": self.coliving_1.price - 1,
+                "room_type": self.coliving_1.room_type,
+                "viewer": self.host.telegram_id,
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            len(response.data),
+            0,
+            f"Был получен коливинг, который организовал viewer: {response.data}",
+        )
+
+    def test_viewed_content_absent(self):
+        self.coliving_1.viewers.add(self.viewer)
+        response = self.client.get(
+            self.URL,
+            {
+                "location": self.coliving_1.location,
+                "max_price": self.coliving_1.price + 1,
+                "min_price": self.coliving_1.price - 1,
+                "room_type": self.coliving_1.room_type,
+                "viewer": self.viewer.telegram_id,
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            len(response.data),
+            0,
+            f"Был получен уже просмотренный коливинг: {response.data}",
+        )
+
+    def test_non_existing_viewer(self):
+        response = self.client.get(
+            self.URL,
+            {
+                "viewer": self.NON_EXISTING_VIEWER_ID,
+            },
+        )
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_404_NOT_FOUND,
+            "Неверный статус при запросе с несуществующим viewer.",
+        )
+        self.assertEqual(response.data["detail"], "Такого пользователя не существует.")
