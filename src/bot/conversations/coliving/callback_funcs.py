@@ -13,6 +13,7 @@ import conversations.common_functions.common_keyboards as common_keyboards
 import conversations.common_functions.common_templates as common_templates
 from conversations.coliving.states import States
 from conversations.coliving.templates import format_coliving_profile_message
+from conversations.common_functions.common_funcs import profile_required
 from conversations.menu.callback_funcs import menu
 from general.validators import value_is_in_range_validator
 from internal_requests import api_service
@@ -20,17 +21,13 @@ from internal_requests.entities import Coliving, Image
 from internal_requests.service import ColivingNotFound
 
 
+@profile_required
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Первое сообщение от бота после нажатия кнопки Коливинг в меню.
     Перевод на создание коливинг профиля или его просмотр.
     """
     current_chat = update.effective_chat
-
-    check = await common_funcs.profile_exist_check(update, context)
-
-    if check == ConversationHandler.END:
-        return ConversationHandler.END
 
     try:
         context.user_data[
