@@ -10,3 +10,6 @@ FORM_IS_VISIBLE = (
 FORM_IS_NOT_VISIBLE = (
     f"{RESPONSE_PREFIX}{HIDE_SEARCH_BUTTON}\nТеперь твоя анкета не видна в поиске."
 )
+CREATE_USER_FIRST = (
+    'Сначала необходимо создать профиль. Для этого перейди в раздел "Моя анкета"'
+)

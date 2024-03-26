@@ -21,7 +21,7 @@ ROOM_TYPE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         InlineKeyboardButton(
             text=templates.BTN_LABEL_BED_IN_ROOM,
-            callback_data=(f"{ROOM_TYPE_PREFIX}:{templates.BTN_LABEL_BED_IN_ROOM}"),
+            callback_data=f"{ROOM_TYPE_PREFIX}:{templates.BTN_LABEL_BED_IN_ROOM}",
         ),
         InlineKeyboardButton(
             text=templates.BTN_LABEL_ROOM_IN_APARTMENT,
