@@ -1,11 +1,5 @@
 (
-    AGE,
-    LOCATION,
-    NEXT_PROFILE,
-    NO_MATCHES,
     PROFILE,
-    SEX,
-    SEARCH_SETTINGS,
     IS_PENDING,
     IS_MATCHED,
-) = range(9)
+) = range(3)

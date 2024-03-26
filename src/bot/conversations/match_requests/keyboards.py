@@ -19,39 +19,10 @@ VIEW_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     )
 )
 
-SEARCH_SETTINGS_KEYBOARD = InlineKeyboardMarkup.from_column(
-    button_column=(
-        InlineKeyboardButton(
-            text=buttons.OK_SETTINGS_BTN, callback_data=buttons.OK_SETTINGS_BTN
-        ),
-        InlineKeyboardButton(
-            text=buttons.EDIT_SETTINGS_BTN,
-            callback_data=buttons.EDIT_SETTINGS_BTN,
-        ),
-    )
-)
-
 PROFILE_KEYBOARD = ReplyKeyboardMarkup.from_row(
     button_row=(
         KeyboardButton(text=buttons.LIKE_BTN),
         KeyboardButton(text=buttons.DISLIKE_BTN),
     ),
     resize_keyboard=True,
-)
-
-NO_MATCHES_KEYBOARD = InlineKeyboardMarkup.from_column(
-    button_column=(
-        InlineKeyboardButton(text=buttons.WAIT_BTN, callback_data=buttons.WAIT_BTN),
-        InlineKeyboardButton(
-            text=buttons.EDIT_SETTINGS_BTN,
-            callback_data=buttons.EDIT_SETTINGS_BTN,
-        ),
-    )
-)
-
-NEXT_PROFILE = InlineKeyboardMarkup.from_column(
-    button_column=(
-        InlineKeyboardButton(text=buttons.YES_BTN, callback_data=buttons.YES_BTN),
-        InlineKeyboardButton(text=buttons.NO_BTN, callback_data=buttons.NO_BTN),
-    )
 )
