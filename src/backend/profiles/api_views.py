@@ -2,6 +2,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
 
 from profiles.filters import ColivingFilter
+from profiles.mixins import DestroyWithMediaColivingRemovalMixin
 from profiles.models import Coliving, Location, Profile, UserFromTelegram
 from profiles.serializers import (
     ColivingSerializer,
@@ -12,7 +13,9 @@ from profiles.serializers import (
 
 
 class ProfileView(
-    generics.CreateAPIView, generics.RetrieveAPIView, generics.UpdateAPIView
+    generics.CreateAPIView,
+    generics.RetrieveAPIView,
+    generics.UpdateAPIView,
 ):
     """
     Вью-класс для отображения, сохранения и обновления объектов 'Profile'.
@@ -51,7 +54,9 @@ class ColivingView(generics.ListCreateAPIView):
     filterset_class = ColivingFilter
 
 
-class ColivingDetailView(generics.RetrieveUpdateDestroyAPIView):
+class ColivingDetailView(
+    DestroyWithMediaColivingRemovalMixin, generics.RetrieveUpdateDestroyAPIView
+):
     """Apiview для обновления Coliving."""
 
     queryset = Coliving.objects.select_related("location", "host").all()
