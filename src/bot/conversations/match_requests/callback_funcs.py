@@ -96,7 +96,7 @@ async def link_sender_to_reciver(
     return ConversationHandler.END
 
 
-async def deslike_to_sender(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def dislike_to_sender(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Обрабатывает ДИЗЛАЙК на профиль Sender.
     Потом придумаем, как быть в таком случае

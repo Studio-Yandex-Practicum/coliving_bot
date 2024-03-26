@@ -28,7 +28,7 @@ match_requests_handler: ConversationHandler = ConversationHandler(
             ),
             MessageHandler(
                 filters=filters.Regex(rf"^{buttons.DISLIKE_BTN}$"),
-                callback=callbacks.deslike_to_sender,
+                callback=callbacks.dislike_to_sender,
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
