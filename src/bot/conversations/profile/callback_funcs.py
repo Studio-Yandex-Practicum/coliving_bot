@@ -14,7 +14,7 @@ import conversations.common_functions.common_templates as common_templates
 import conversations.profile.buttons as buttons
 import conversations.profile.keyboards as keyboards
 import conversations.profile.templates as templates
-from conversations.coliving.templates import REPLY_MSG
+from conversations.common_functions.common_templates import RESPONSE_PREFIX
 from conversations.menu.callback_funcs import menu
 from conversations.profile.states import States
 from general.validators import value_is_in_range_validator
@@ -765,4 +765,6 @@ async def _send_chosen_choice_and_remove_buttons(update: Update) -> None:
     callback_query = update.callback_query
     choice_text = callback_query.data
     await callback_query.message.edit_reply_markup()
-    await callback_query.message.reply_text(text=f"{REPLY_MSG}{choice_text}")
+    await callback_query.message.reply_text(
+        text=f"{RESPONSE_PREFIX}{choice_text}", parse_mode=ParseMode.HTML
+    )

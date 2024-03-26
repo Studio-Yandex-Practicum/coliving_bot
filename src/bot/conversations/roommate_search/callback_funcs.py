@@ -15,7 +15,7 @@ import conversations.roommate_search.templates as templates
 from conversations.common_functions.common_funcs import profile_required
 from conversations.roommate_search.states import States
 from internal_requests import api_service
-from internal_requests.entities import SearchSettings, UserProfile
+from internal_requests.entities import ProfileSearchSettings, UserProfile
 
 
 @profile_required
@@ -74,7 +74,7 @@ async def set_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     Переводит в состояние выбора пола соседа.
     """
     location = update.callback_query.data.split(":")[1]
-    context.user_data["search_settings"] = SearchSettings(location=location)
+    context.user_data["search_settings"] = ProfileSearchSettings(location=location)
     await _message_edit(
         message=update.effective_message,
         text=templates.ASK_SEX,
