@@ -1,5 +1,3 @@
-import os
-import shutil
 from typing import Type
 
 from django.db.models import QuerySet
@@ -9,8 +7,7 @@ from rest_framework.exceptions import NotFound
 from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
 
-from coliving_bot.settings.base import MEDIA_ROOT
-from profiles.mixins import DestroyWithMediaColivingRemovalMixin
+from profiles.mixins import DestroyWithMediaColivingRemovalMixin, delete_profile_folder
 from profiles.models import Coliving, Profile, UserFromTelegram
 
 from .models import ColivingImage, ProfileImage
@@ -53,6 +50,11 @@ class BaseImageView(
             raise NotFound(detail="Коливинг не найден", code=status.HTTP_404_NOT_FOUND)
         return telegram_user_colivings.first()
 
+    def delete(self, request, *args, **kwargs):
+        images = self.get_queryset()
+        images.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class ProfileImageView(BaseImageView):
     """
@@ -85,14 +87,8 @@ class ProfileImageView(BaseImageView):
 
     def delete(self, request, *args, **kwargs):
         images = self.get_queryset()
-        images_dir = "profiles"
-        profile = get_object_or_404(
-            Profile, user__telegram_id=self.kwargs.get("telegram_id")
-        )
-        profile_id = str(profile.id)
-        path = os.path.join(MEDIA_ROOT, images_dir, profile_id)
+        delete_profile_folder(self)
         images.delete()
-        shutil.rmtree(path)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
