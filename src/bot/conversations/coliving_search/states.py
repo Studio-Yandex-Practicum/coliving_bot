@@ -1,0 +1,10 @@
+(
+    COLIVING,
+    COST_MAX,
+    COST_MIN,
+    LOCATION,
+    NEXT_COLIVING,
+    NO_MATCHES,
+    ROOM_TYPE,
+    SEARCH_SETTINGS,
+) = range(8)
