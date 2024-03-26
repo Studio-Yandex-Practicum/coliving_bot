@@ -72,13 +72,9 @@ async def link_sender_to_reciver(
     current_profile = context.user_data.get("current_profile")
     sender_id = update.effective_chat.id
     receiver_id = current_profile["user"]
-    status_match_request = "is_matched"
-    status = status_match_request
-
-    await api_service.change_match_request_status(
+    await api_service.send_match_request(
         sender_id=sender_id,
         receiver_id=receiver_id,
-        status=status,
     )
 
     await context.bot.send_message(
