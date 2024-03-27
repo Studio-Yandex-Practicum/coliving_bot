@@ -187,7 +187,7 @@ async def coliving_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     """
     current_coliving = context.user_data.get("current_coliving")
     await api_service.send_match_request(
-        sender=update.effective_chat.id, receiver=current_coliving["id"]
+        sender=update.effective_chat.id, receiver=current_coliving["host"]
     )
 
     await update.effective_message.reply_text(
