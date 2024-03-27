@@ -433,11 +433,11 @@ async def start_filling_again(
     """
     await _send_chosen_choice_and_remove_buttons(update=update)
     await update.effective_message.reply_text(
-        text=templates.ASK_AGE_AGAIN,
+        text=templates.ASK_NAME_AGAIN,
         reply_markup=common_keyboards.CANCEL_KEYBOARD,
     )
 
-    return States.AGE
+    return States.NAME
 
 
 async def send_question_to_edit_name(
@@ -448,7 +448,7 @@ async def send_question_to_edit_name(
     """
     await _send_chosen_choice_and_remove_buttons(update=update)
     await update.effective_message.reply_text(
-        text=templates.ASK_NAME,
+        text=templates.ASK_NAME_AGAIN,
     )
 
     return States.EDIT_NAME
@@ -478,7 +478,7 @@ async def send_question_to_edit_age(
     """
     await _send_chosen_choice_and_remove_buttons(update=update)
     await update.effective_message.reply_text(
-        text=templates.ASK_AGE_AGAIN,
+        text=templates.ASK_AGE,
     )
 
     return States.EDIT_AGE
@@ -543,7 +543,7 @@ async def handle_edit_name(
     name = update.message.text.strip()
     if not fullmatch(templates.NAME_PATTERN, name):
         await update.effective_message.reply_text(text=templates.NAME_SYMBOL_ERROR_MSG)
-        return States.NAME
+        return States.EDIT_NAME
     if not await value_is_in_range_validator(
         update=update,
         context=context,
@@ -600,7 +600,7 @@ async def handle_edit_age(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             min=templates.MIN_AGE, max=templates.MAX_AGE
         ),
     ):
-        return States.AGE
+        return States.EDIT_AGE
     context.user_data[templates.AGE_FIELD] = int(age)
     await _look_at_profile(
         update,
@@ -648,7 +648,7 @@ async def handle_edit_about(update: Update, context: ContextTypes.DEFAULT_TYPE) 
             max=templates.MAX_ABOUT_LENGTH
         ),
     ):
-        return States.ABOUT_YOURSELF
+        return States.EDIT_ABOUT_YOURSELF
     context.user_data[templates.ABOUT_FIELD] = about
     await _look_at_profile(
         update,
