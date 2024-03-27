@@ -7,4 +7,5 @@
     NO_MATCHES,
     ROOM_TYPE,
     SEARCH_SETTINGS,
-) = range(8)
+    MENU,
+) = range(9)

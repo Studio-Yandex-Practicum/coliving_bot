@@ -9,11 +9,11 @@ from telegram.ext import (
 import conversations.coliving_search.buttons as buttons
 import conversations.coliving_search.callback_funcs as callbacks
 import conversations.coliving_search.states as states
-from conversations.common_functions import common_buttons
-from conversations.menu.buttons import SEARCH_COLIVING_BUTTON
 from conversations.coliving_search.validators import (
     handle_text_input_instead_of_choosing_button,
 )
+from conversations.common_functions import common_buttons
+from conversations.menu.buttons import SEARCH_COLIVING_BUTTON
 
 coliving_search_handler: ConversationHandler = ConversationHandler(
     entry_points=[
@@ -35,18 +35,14 @@ coliving_search_handler: ConversationHandler = ConversationHandler(
                 filters.Regex(r"^(\d*)$") & ~filters.COMMAND,
                 callbacks.set_cost_min,
             ),
-            MessageHandler(
-                filters.TEXT & ~filters.COMMAND, callbacks.set_cost_min
-            ),
+            MessageHandler(filters.TEXT & ~filters.COMMAND, callbacks.set_cost_min),
         ],
         states.COST_MAX: [
             MessageHandler(
                 filters.Regex(r"^(\d*)$") & ~filters.COMMAND,
                 callbacks.set_cost_max,
             ),
-            MessageHandler(
-                filters.TEXT & ~filters.COMMAND, callbacks.set_cost_max
-            ),
+            MessageHandler(filters.TEXT & ~filters.COMMAND, callbacks.set_cost_max),
         ],
         states.LOCATION: [
             CallbackQueryHandler(
@@ -64,7 +60,7 @@ coliving_search_handler: ConversationHandler = ConversationHandler(
                 pattern=rf"^{buttons.YES_BTN}$",
             ),
             CallbackQueryHandler(
-                callback=callbacks.end_of_search,
+                callback=callbacks.handle_return_to_menu_response,
                 pattern=rf"^{buttons.TO_MENU_BTN}$",
             ),
             MessageHandler(
@@ -74,7 +70,7 @@ coliving_search_handler: ConversationHandler = ConversationHandler(
         ],
         states.NO_MATCHES: [
             CallbackQueryHandler(
-                callback=callbacks.end_of_search,
+                callback=callbacks.handle_return_to_menu_response,
                 pattern=rf"^{buttons.WAIT_BTN}$",
             ),
             CallbackQueryHandler(
@@ -115,5 +111,5 @@ coliving_search_handler: ConversationHandler = ConversationHandler(
             ),
         ],
     },
-    fallbacks=[CommandHandler("cancel", callbacks.end_of_search)],
+    fallbacks=[CommandHandler("menu", callbacks.handle_return_to_menu_response)],
 )

@@ -22,12 +22,10 @@ SEARCH_SETTINGS_KEYBOARD = InlineKeyboardMarkup.from_column(
 ROOM_TYPE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         InlineKeyboardButton(
-            text=buttons.TYPE_ROOM_BTN,
-            callback_data=buttons.TYPE_ROOM_BTN
+            text=buttons.TYPE_ROOM_BTN, callback_data=buttons.TYPE_ROOM_BTN
         ),
         InlineKeyboardButton(
-            text=buttons.TYPE_BED_BTN,
-            callback_data=buttons.TYPE_BED_BTN
+            text=buttons.TYPE_BED_BTN, callback_data=buttons.TYPE_BED_BTN
         ),
     )
 )
@@ -54,8 +52,7 @@ NEXT_COLIVING = InlineKeyboardMarkup.from_column(
     button_column=(
         InlineKeyboardButton(text=buttons.YES_BTN, callback_data=buttons.YES_BTN),
         InlineKeyboardButton(
-            text=buttons.TO_MENU_BTN,
-            callback_data=buttons.TO_MENU_BTN
+            text=buttons.TO_MENU_BTN, callback_data=buttons.TO_MENU_BTN
         ),
     )
 )

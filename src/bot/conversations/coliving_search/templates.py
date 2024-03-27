@@ -32,7 +32,7 @@ ASK_NEXT_COLIVING = (
     "тебе придет уведомление.\nХочешь продолжить поиск?"
 )
 NO_MATCHES = (
-    "К сожалению, больше нет подходящих тебе объявлений :(.\n"
+    "К сожалению, больше нет подходящих тебе объявлений :(\n"
     "Ты можешь подождать, пока они появятся или изменить критерии для поиска:"
 )
 END_OF_SEARCH = (
@@ -41,9 +41,7 @@ END_OF_SEARCH = (
 )
 LIKE_NOTIFICATION = "Кто-то хочет пригласить тебя в коливинг, посмотрим?"
 
-ERR_MSG_ABOUT_COST = (
-    "Введи число от {min} до {max}:"
-)
+ERR_MSG_ABOUT_COST = "Введи число от {min} до {max}:"
 
 BUTTON_ERROR_MSG = "Выбери соответствующий вариант."
 
@@ -55,6 +53,6 @@ def format_search_settings_message(filters: ColivingSearchSettings) -> str:
 
     <b>Город:</b> {filters.location}
     <b>Тип жилья:</b> {filters.room_type}
-    <b>Цена от:</b> {filters.cost_min} <b> до </b> {filters.cost_max}
+    <b>Цена от:</b> {filters.min_price} <b> до </b> {filters.max_price}
     """
     return result

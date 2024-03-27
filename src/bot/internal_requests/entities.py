@@ -56,6 +56,6 @@ class ColivingSearchSettings:
     """Значения фильтров поиска по объявлениям коливингов."""
 
     room_type: Optional[str] = field(default=None)
-    cost_min: Optional[int] = field(default=None)
-    cost_max: Optional[int] = field(default=None)
+    min_price: Optional[int] = field(default=None)
+    max_price: Optional[int] = field(default=None)
     location: Optional[str] = field(default=None)

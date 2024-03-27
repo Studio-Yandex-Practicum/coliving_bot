@@ -1,4 +1,5 @@
 from dataclasses import asdict
+from typing import List
 
 from telegram import (
     InlineKeyboardMarkup,
@@ -14,7 +15,7 @@ import conversations.coliving_search.keyboards as keyboards
 import conversations.coliving_search.states as states
 import conversations.coliving_search.templates as templates
 import conversations.common_functions.common_keyboards as common_keyboards
-import conversations.common_functions.common_templates as common_templates
+from conversations.menu.callback_funcs import menu
 from general.validators import value_is_in_range_validator
 from internal_requests import api_service
 from internal_requests.entities import Coliving, ColivingSearchSettings
@@ -61,12 +62,12 @@ async def edit_settings(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     """
     await _clear_coliving_search_context(context)
 
-    await update.effective_message.reply_text(text=templates.SEARCH_START)
     await _message_edit(
         message=update.effective_message,
-        text=templates.ASK_LOCATION,
+        text=f"{templates.SEARCH_START}\n{templates.ASK_LOCATION}",
         keyboard=context.bot_data["location_keyboard"],
     )
+
     return states.LOCATION
 
 
@@ -95,9 +96,7 @@ async def set_room_type(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         message=update.effective_message,
         text=templates.ASK_PRICE,
     )
-    await update.effective_message.reply_text(
-        text=templates.ASK_MIN_PRICE
-    )
+    await update.effective_message.reply_text(text=templates.ASK_MIN_PRICE)
 
     return states.COST_MIN
 
@@ -107,33 +106,26 @@ async def set_cost_min(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     Устанавливает минимальную стоимость в настройках поиска.
     Переводит в состояние выбора максимальной стоимости.
     """
-    cost_min = update.message.text
+    min_price = update.message.text
     if not await value_is_in_range_validator(
         update,
         context,
-        int(cost_min),
+        int(min_price),
         min=templates.MIN_COST,
         max=templates.MAX_COST,
         message=templates.ERR_MSG_ABOUT_COST.format(
-            min=templates.MIN_COST,
-            max=templates.MAX_COST
+            min=templates.MIN_COST, max=templates.MAX_COST
         ),
     ):
-
         await update.effective_message.reply_text(
-               text=templates.ASK_MIN_PRICE,
-               reply_markup=common_keyboards.CANCEL_KEYBOARD,
-           )
+            text=templates.ASK_MIN_PRICE,
+            reply_markup=common_keyboards.CANCEL_KEYBOARD,
+        )
         return states.COST_MIN
 
-    context.user_data["search_settings"].cost_min = cost_min
-    await update.effective_message.reply_text(
-        text=f"{common_templates.RESPONSE_PREFIX}{cost_min}",
-        parse_mode=ParseMode.HTML,
-    )
+    context.user_data["search_settings"].min_price = min_price
     await update.effective_message.reply_text(
         text=templates.ASK_MAX_PRICE,
-        reply_markup=common_keyboards.CANCEL_KEYBOARD,
     )
     return states.COST_MAX
 
@@ -143,35 +135,29 @@ async def set_cost_max(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     Устанавливает максимальную стоимость в настройках поиска.
     Переводит в состояние подтверждения настроек поиска.
     """
-    cost_max = update.message.text
-    cost_min = int(context.user_data["search_settings"].cost_min)
+    max_price = update.message.text
+    min_price = int(context.user_data["search_settings"].min_price)
     if not await value_is_in_range_validator(
         update,
         context,
-        int(cost_max),
-        min=cost_min,
+        int(max_price),
+        min=min_price,
         max=templates.MAX_COST,
         message=templates.ERR_MSG_ABOUT_COST.format(
-            min=cost_min,
-            max=templates.MAX_COST
+            min=min_price, max=templates.MAX_COST
         ),
     ):
-
         await update.effective_message.reply_text(
-               text=templates.ASK_MAX_PRICE,
-               reply_markup=common_keyboards.CANCEL_KEYBOARD,
-           )
+            text=templates.ASK_MAX_PRICE,
+        )
         return states.COST_MAX
 
-    context.user_data["search_settings"].cost_max = cost_max
-    await update.effective_message.reply_text(
-        text=f"{common_templates.RESPONSE_PREFIX}{cost_max}",
-        parse_mode=ParseMode.HTML,
-    )
+    context.user_data["search_settings"].max_price = max_price
     search_settings = context.user_data.get("search_settings")
 
     await update.effective_message.reply_text(
         text=templates.format_search_settings_message(search_settings),
+        parse_mode=ParseMode.HTML,
     )
 
     await update.effective_message.reply_text(
@@ -201,7 +187,7 @@ async def coliving_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     """
     current_coliving = context.user_data.get("current_coliving")
     await api_service.send_match_request(
-        sender=update.effective_chat.id, receiver=current_coliving["host"]
+        sender=update.effective_chat.id, receiver=current_coliving["id"]
     )
 
     await update.effective_message.reply_text(
@@ -212,29 +198,14 @@ async def coliving_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     return states.NEXT_COLIVING
 
 
-async def end_of_search(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """
-    Заканчивает ветку общения по поиску коливинга.
-    """
-    if update.callback_query:
-        await update.effective_message.delete()
-    await update.effective_chat.send_message(
-        text=templates.END_OF_SEARCH,
-        reply_markup=ReplyKeyboardRemove(),
-        parse_mode=ParseMode.HTML,
-    )
-    await _clear_coliving_search_context(context)
-    return ConversationHandler.END
-
-
 async def _get_next_coliving(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
-    colivings: list[Coliving],
+    colivings: List[Coliving],
 ) -> int:
     """
-    Функция для получения и вывода для оценки пользователю анкеты из списка анкет.
-    Если анкеты заканчиваются - перевод в соответствующие состояние.
+    Функция для получения и вывода для оценки пользователю объявления из списка
+     объявлений. Если объявления заканчиваются - перевод в соответствующие состояние.
     """
     if update.callback_query:
         await update.effective_message.delete()
@@ -248,7 +219,7 @@ async def _get_next_coliving(
         coliving = asdict(colivings.pop())
         context.user_data["current_coliving"] = coliving
         context.user_data["colivings"] = colivings
-        images = coliving.pop("images")
+        images = coliving.get("images", [])
         message_text = templates.COLIVING_DATA.format(**coliving)
         if images:
             media_group = [InputMediaPhoto(file_id) for file_id in images]
@@ -268,7 +239,25 @@ async def _get_next_coliving(
         reply_markup=keyboards.NO_MATCHES_KEYBOARD,
         parse_mode=ParseMode.HTML,
     )
+
     return states.NO_MATCHES
+
+
+async def handle_return_to_menu_response(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """
+    Обработка ответа: Ждать.
+    """
+    await _clear_coliving_search_context(context)
+    await update.effective_message.delete()
+    await update.effective_chat.send_message(
+        text=templates.END_OF_SEARCH,
+        reply_markup=ReplyKeyboardRemove(),
+        parse_mode=ParseMode.HTML,
+    )
+    await menu(update, context)
+    return ConversationHandler.END
 
 
 async def _message_edit(
