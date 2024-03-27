@@ -343,6 +343,10 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     received_photos.append(file_id)
     context.user_data[templates.RECEIVED_PHOTOS_FIELD] = received_photos
 
+    if len(received_photos) == 3:
+        state = await send_received_photos(update, context)
+        return state
+
     return None
 
 
@@ -357,6 +361,10 @@ async def handle_edit_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     new_photos.append(file_id)
     context.user_data["new_photo"] = new_photos
 
+    if len(new_photos) == 3:
+        state = await send_edited_photos(update, context)
+        return state
+
     return None
 
 
@@ -364,7 +372,6 @@ async def send_received_photos(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     if context.user_data.get(templates.RECEIVED_PHOTOS_FIELD):
-        await update.effective_message.edit_reply_markup()
         await _look_at_profile(
             update,
             context,
@@ -662,7 +669,6 @@ async def handle_edit_about(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
 
 async def send_edited_photos(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    await update.effective_message.edit_reply_markup()
     await _look_at_profile(
         update,
         context,
