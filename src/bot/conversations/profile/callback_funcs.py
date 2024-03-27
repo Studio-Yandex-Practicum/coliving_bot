@@ -48,11 +48,11 @@ async def start(
     except HTTPStatusError as exc:
         if exc.response.status_code == codes.NOT_FOUND:
             await update.effective_message.edit_text(
-                text=templates.ASK_AGE,
+                text=templates.ASK_NAME,
                 reply_markup=common_keyboards.CANCEL_KEYBOARD,
             )
 
-            return States.AGE
+            return States.NAME
         raise exc
 
     await set_profile_to_context(context, profile_info)
@@ -137,6 +137,35 @@ async def handle_return_to_menu_response(
     return ConversationHandler.END
 
 
+async def handle_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """
+    Обрабатывает введенное пользователем имя.
+    Переводит диалог в состояние LOCATION (ввод места проживания).
+    """
+    name = update.message.text.strip()
+    if not fullmatch(templates.NAME_PATTERN, name):
+        await update.effective_message.reply_text(text=templates.NAME_SYMBOL_ERROR_MSG)
+        return States.NAME
+    if not await value_is_in_range_validator(
+        update=update,
+        context=context,
+        value=len(name),
+        min=templates.MIN_NAME_LENGTH,
+        max=templates.MAX_NAME_LENGTH,
+        message=templates.NAME_LENGHT_ERROR_MSG.format(
+            min=templates.MIN_NAME_LENGTH, max=templates.MAX_NAME_LENGTH
+        ),
+    ):
+        return States.NAME
+    context.user_data[templates.NAME_FIELD] = name
+    await update.effective_message.reply_text(
+        text=templates.ASK_AGE,
+        reply_markup=common_keyboards.CANCEL_KEYBOARD,
+    )
+
+    return States.AGE
+
+
 async def handle_age(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> Union[int, States]:
@@ -176,36 +205,7 @@ async def handle_sex(
     """
     await _save_response_about_sex(update, context)
     await update.effective_message.reply_text(
-        templates.ASK_NAME,
-        reply_markup=common_keyboards.CANCEL_KEYBOARD,
-    )
-
-    return States.NAME
-
-
-async def handle_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """
-    Обрабатывает введенное пользователем имя.
-    Переводит диалог в состояние LOCATION (ввод места проживания).
-    """
-    name = update.message.text.strip()
-    if not fullmatch(templates.NAME_PATTERN, name):
-        await update.effective_message.reply_text(text=templates.NAME_SYMBOL_ERROR_MSG)
-        return States.NAME
-    if not await value_is_in_range_validator(
-        update=update,
-        context=context,
-        value=len(name),
-        min=templates.MIN_NAME_LENGTH,
-        max=templates.MAX_NAME_LENGTH,
-        message=templates.NAME_LENGHT_ERROR_MSG.format(
-            min=templates.MIN_NAME_LENGTH, max=templates.MAX_NAME_LENGTH
-        ),
-    ):
-        return States.NAME
-    context.user_data[templates.NAME_FIELD] = name
-    await update.effective_message.reply_text(
-        text=templates.ASK_LOCATION,
+        templates.ASK_LOCATION,
         reply_markup=common_funcs.combine_keyboards(
             context.bot_data["location_keyboard"], common_keyboards.CANCEL_KEYBOARD
         ),
