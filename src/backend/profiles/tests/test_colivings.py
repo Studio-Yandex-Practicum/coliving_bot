@@ -310,7 +310,10 @@ class ColivingSearchAPITest(APITestCase):
         )
         self.assertEqual(
             response.status_code,
-            status.HTTP_404_NOT_FOUND,
+            status.HTTP_200_OK,
             "Неверный статус при запросе с несуществующим viewer.",
         )
-        self.assertEqual(response.data["detail"], "Такого пользователя не существует.")
+        self.assertEqual(
+            response.data["detail"],
+            "При несуществующем пользователе - он должен игнорироваться.",
+        )
