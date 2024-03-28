@@ -73,12 +73,6 @@ async def edit_settings(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         reply_markup=context.bot_data["location_keyboard"],
         parse_mode=ParseMode.HTML,
     )
-    # await _message_edit(
-    #     message=update.effective_message,
-    #     text=f"{templates.SEARCH_START}\n{templates.ASK_LOCATION}",
-    #     keyboard=context.bot_data["location_keyboard"],
-    # )
-
     return states.LOCATION
 
 
