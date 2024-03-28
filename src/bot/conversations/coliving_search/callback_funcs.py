@@ -38,6 +38,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             reply_markup=keyboards.SEARCH_SETTINGS_KEYBOARD,
         )
         return states.SEARCH_SETTINGS
+
     state = await edit_settings(update, context)
     return state
 
@@ -96,7 +97,10 @@ async def set_room_type(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         message=update.effective_message,
         text=templates.ASK_PRICE,
     )
-    await update.effective_message.reply_text(text=templates.ASK_MIN_PRICE)
+    await update.effective_message.reply_text(
+        text=templates.ASK_MIN_PRICE,
+        reply_markup=common_keyboards.CANCEL_KEYBOARD,
+    )
 
     return states.COST_MIN
 
@@ -126,6 +130,7 @@ async def set_cost_min(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     context.user_data["search_settings"].min_price = min_price
     await update.effective_message.reply_text(
         text=templates.ASK_MAX_PRICE,
+        reply_markup=common_keyboards.CANCEL_KEYBOARD,
     )
     return states.COST_MAX
 
@@ -149,6 +154,7 @@ async def set_cost_max(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     ):
         await update.effective_message.reply_text(
             text=templates.ASK_MAX_PRICE,
+            reply_markup=common_keyboards.CANCEL_KEYBOARD,
         )
         return states.COST_MAX
 

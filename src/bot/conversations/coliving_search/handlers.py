@@ -1,6 +1,5 @@
 from telegram.ext import (
     CallbackQueryHandler,
-    CommandHandler,
     ConversationHandler,
     MessageHandler,
     filters,
@@ -9,10 +8,11 @@ from telegram.ext import (
 import conversations.coliving_search.buttons as buttons
 import conversations.coliving_search.callback_funcs as callbacks
 import conversations.coliving_search.states as states
+import conversations.common_functions.common_buttons as common_buttons
+import conversations.common_functions.common_funcs as common_funcs
 from conversations.coliving_search.validators import (
     handle_text_input_instead_of_choosing_button,
 )
-from conversations.common_functions import common_buttons
 from conversations.menu.buttons import SEARCH_COLIVING_BUTTON
 
 coliving_search_handler: ConversationHandler = ConversationHandler(
@@ -71,7 +71,7 @@ coliving_search_handler: ConversationHandler = ConversationHandler(
         states.NO_MATCHES: [
             CallbackQueryHandler(
                 callback=callbacks.handle_return_to_menu_response,
-                pattern=rf"^{buttons.WAIT_BTN}$",
+                pattern=rf"^{buttons.TO_MENU_BTN}$",
             ),
             CallbackQueryHandler(
                 callback=callbacks.edit_settings,
@@ -105,11 +105,20 @@ coliving_search_handler: ConversationHandler = ConversationHandler(
                 callback=callbacks.edit_settings,
                 pattern=rf"^{buttons.EDIT_SETTINGS_BTN}$",
             ),
+            CallbackQueryHandler(
+                callback=callbacks.handle_return_to_menu_response,
+                pattern=rf"^{buttons.TO_MENU_BTN}$",
+            ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
                 handle_text_input_instead_of_choosing_button,
             ),
         ],
     },
-    fallbacks=[CommandHandler("menu", callbacks.handle_return_to_menu_response)],
+    fallbacks=[
+        CallbackQueryHandler(
+            callback=common_funcs.cancel,
+            pattern=rf"^{common_buttons.CANCEL_BUTTON}",
+        ),
+    ],
 )

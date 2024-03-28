@@ -16,6 +16,9 @@ SEARCH_SETTINGS_KEYBOARD = InlineKeyboardMarkup.from_column(
             text=buttons.EDIT_SETTINGS_BTN,
             callback_data=buttons.EDIT_SETTINGS_BTN,
         ),
+        InlineKeyboardButton(
+            text=buttons.TO_MENU_BTN, callback_data=buttons.TO_MENU_BTN
+        ),
     )
 )
 
@@ -40,7 +43,9 @@ COLIVING_KEYBOARD = ReplyKeyboardMarkup.from_row(
 
 NO_MATCHES_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
-        InlineKeyboardButton(text=buttons.WAIT_BTN, callback_data=buttons.WAIT_BTN),
+        InlineKeyboardButton(
+            text=buttons.TO_MENU_BTN, callback_data=buttons.TO_MENU_BTN
+        ),
         InlineKeyboardButton(
             text=buttons.EDIT_SETTINGS_BTN,
             callback_data=buttons.EDIT_SETTINGS_BTN,
