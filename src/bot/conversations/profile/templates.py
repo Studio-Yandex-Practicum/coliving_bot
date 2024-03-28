@@ -64,6 +64,7 @@ ABOUT_MAX_LEN_ERROR_MSG = (
     "Описание не должно содержать более {max} символов. Попробуй еще раз:"
 )
 PHOTO_ERROR_MESSAGE = "Отправь фото."
+ERR_PHOTO_NOT_TEXT = "Отправь до 3 фотографий для своего профиля."
 PROFILE_DATA = (
     "<b>Имя:</b> {name}\n"
     "<b>Пол:</b> {sex}\n"

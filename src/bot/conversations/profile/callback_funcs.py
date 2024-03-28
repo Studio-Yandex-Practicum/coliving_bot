@@ -329,6 +329,7 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     Обрабатывает загруженную пользователем фотографию.
     Переводит диалог в состояние CONFIRMATION (анкета верна или нет)
     """
+
     file_id = update.effective_message.photo[-1].file_id
 
     new_file = await context.bot.get_file(file_id)
@@ -357,6 +358,7 @@ async def handle_edit_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     """
 
     file_id = update.effective_message.photo[-1].file_id
+
     new_photos = context.user_data.get("new_photo", [])
     new_photos.append(file_id)
     context.user_data["new_photo"] = new_photos
@@ -689,17 +691,18 @@ async def send_question_to_profile_is_correct(
     Либо завершает диалог.
     """
     await _send_chosen_choice_and_remove_buttons(update=update)
-    await api_service.delete_profile_photos(update.effective_chat.id)
     await api_service.update_user_profile(update.effective_chat.id, context.user_data)
-    for file_id in context.user_data.get(templates.RECEIVED_PHOTOS_FIELD):
-        new_file = await context.bot.get_file(file_id)
-        photo_bytearray = await new_file.download_as_bytearray()
-        await api_service.save_photo(
-            telegram_id=update.effective_chat.id,
-            photo_bytearray=photo_bytearray,
-            filename=new_file.file_path,
-            file_id=file_id,
-        )
+    if len(context.user_data.get(templates.RECEIVED_PHOTOS_FIELD)) != 0:
+        await api_service.delete_profile_photos(update.effective_chat.id)
+        for file_id in context.user_data.get(templates.RECEIVED_PHOTOS_FIELD):
+            new_file = await context.bot.get_file(file_id)
+            photo_bytearray = await new_file.download_as_bytearray()
+            await api_service.save_photo(
+                telegram_id=update.effective_chat.id,
+                photo_bytearray=photo_bytearray,
+                filename=new_file.file_path,
+                file_id=file_id,
+            )
     await send_profile_saved_notification(update, context)
     return ConversationHandler.END
 
