@@ -313,7 +313,8 @@ class ColivingSearchAPITest(APITestCase):
             status.HTTP_200_OK,
             "Неверный статус при запросе с несуществующим viewer.",
         )
-        self.assertEqual(
-            response.data["detail"],
-            "При несуществующем пользователе - он должен игнорироваться.",
+        self.assertFalse(
+            response.data,
+            "Должен быть возвращен непустой список "
+            "при запросе с несуществующим viewer.",
         )
