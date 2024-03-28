@@ -110,7 +110,7 @@ async def set_cost_min(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     if not await value_is_in_range_validator(
         update,
         context,
-        int(min_price),
+        min_price,
         min=templates.MIN_COST,
         max=templates.MAX_COST,
         message=templates.ERR_MSG_ABOUT_COST.format(
@@ -140,7 +140,7 @@ async def set_cost_max(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     if not await value_is_in_range_validator(
         update,
         context,
-        int(max_price),
+        max_price,
         min=min_price,
         max=templates.MAX_COST,
         message=templates.ERR_MSG_ABOUT_COST.format(

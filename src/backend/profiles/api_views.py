@@ -2,7 +2,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
-from rest_framework.exceptions import NotFound
 
 from profiles.filters import ColivingFilter
 from profiles.models import Coliving, Location, Profile, UserFromTelegram
@@ -61,7 +60,7 @@ class ColivingView(generics.ListCreateAPIView):
             try:
                 user = UserFromTelegram.objects.get(telegram_id=viewer)
             except ObjectDoesNotExist:
-                raise NotFound("Такого пользователя не существует.")
+                user = None
 
             excl_list = Coliving.objects.filter(
                 Q(host=user) | Q(viewers=user)
