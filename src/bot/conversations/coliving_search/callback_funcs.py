@@ -62,12 +62,22 @@ async def edit_settings(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     Переводит в состояние выбора локации.
     """
     await _clear_coliving_search_context(context)
-
-    await _message_edit(
-        message=update.effective_message,
-        text=f"{templates.SEARCH_START}\n{templates.ASK_LOCATION}",
-        keyboard=context.bot_data["location_keyboard"],
+    await update.effective_message.delete()
+    await update.effective_chat.send_message(
+        text=templates.SEARCH_START,
+        reply_markup=ReplyKeyboardRemove(),
+        parse_mode=ParseMode.HTML,
     )
+    await update.effective_message.reply_text(
+        text=templates.ASK_LOCATION,
+        reply_markup=context.bot_data["location_keyboard"],
+        parse_mode=ParseMode.HTML,
+    )
+    # await _message_edit(
+    #     message=update.effective_message,
+    #     text=f"{templates.SEARCH_START}\n{templates.ASK_LOCATION}",
+    #     keyboard=context.bot_data["location_keyboard"],
+    # )
 
     return states.LOCATION
 
