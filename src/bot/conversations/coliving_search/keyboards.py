@@ -37,6 +37,7 @@ COLIVING_KEYBOARD = ReplyKeyboardMarkup.from_row(
     button_row=(
         KeyboardButton(text=buttons.LIKE_BTN),
         KeyboardButton(text=buttons.DISLIKE_BTN),
+        KeyboardButton(text=buttons.TO_MENU_BTN),
     ),
     resize_keyboard=True,
 )

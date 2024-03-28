@@ -253,7 +253,7 @@ async def handle_return_to_menu_response(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """
-    Обработка ответа: Ждать.
+    Обработка ответа: Выйти в меню.
     """
     await _clear_coliving_search_context(context)
     await update.effective_message.delete()

@@ -92,6 +92,10 @@ coliving_search_handler: ConversationHandler = ConversationHandler(
                 callback=callbacks.next_coliving,
             ),
             MessageHandler(
+                filters=filters.Regex(rf"^{buttons.TO_MENU_BTN}$"),
+                callback=callbacks.handle_return_to_menu_response,
+            ),
+            MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
                 handle_text_input_instead_of_choosing_button,
             ),
