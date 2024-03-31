@@ -1,3 +1,4 @@
+from conversations.common_functions.common_templates import RESPONSE_PREFIX
 from internal_requests.entities import Coliving
 
 LOCATION_FIELD = "location"
@@ -25,23 +26,26 @@ ERR_MSG_ABOUT_MAX_LEN = (
 ERR_MSG_PRICE = "Введи цену от {min} до {max}."
 ERR_NEED_TO_SELECT_BTN = "Выбери необходимый вариант из меню."
 ERR_PHOTO_NOT_TEXT = "Отправь до 5 фотографий своего коливинга."
+ERR_PHOTO_LIMIT_TEXT = "Вы отправили более 5 фотографий сохранены будут только первые 5"
 
+DONT_SAVE_COLIVING_WITHOUT_PHOTO = "Нельзя сохранить коливинг без фото."
 REPLY_MSG_HELLO = "Привет! Давай проверим твой коливинг:"
 REPLY_MSG_TIME_TO_CREATE_PROFILE = (
     "У тебя ещё не создан коливинг! " "\n" "Самое время его создать!"
 )
 REPLY_MSG_ASK_LOCATION = "Где организован коливинг?"
-REPLY_MSG = "Твой ответ:"
 REPLY_MSG_WHAT_TO_EDIT = "Что хочешь изменить?"
 REPLY_BTN_HIDE = (
-    "Твой ответ: Скрыть из поиска"
+    f"{RESPONSE_PREFIX}Скрыть из поиска"
     "\n"
     "\n"
     "Анкета скрыта из поиска. "
     "Не забудь открыть анкету для поиска позже, "
     "чтобы найти соседей."
 )
-REPLY_BTN_SHOW = "Твой ответ: Показать в поиске" "\n" "\n" "Анкета доступна для поиска."
+REPLY_BTN_SHOW = (
+    f"{RESPONSE_PREFIX}Показать в поиске" "\n" "\n" "Анкета доступна для поиска."
+)
 REPLY_MSG_ASK_ROOM_TYPE = "Что сдаётся в аренду в твоём коливинге?"
 REPLY_MSG_ASK_ABOUT = (
     "Расскажи о своём коливинге. Как называется?"
@@ -58,6 +62,7 @@ REPLY_MSG_ASK_PHOTO_SEND = (
     " где будут жить твои соседи. Можно загрузить до 5 фотографий."
 )
 REPLY_MSG_PHOTO = "Какой классный коливинг получается 🫠. Он выглядит так: "
+REPLY_MSG_PHOTO_RECEIVE = "\nЖелаете сохранить фотографии?"
 REPLY_MSG_ASK_TO_CONFIRM = "\nВсё верно?"
 REPLY_MSG_TITLE = "Сейчас анкета коливинга выглядит так: \n\n"
 REPLY_MSG_ASK_TO_SHOW_PROFILE = (
@@ -66,15 +71,12 @@ REPLY_MSG_ASK_TO_SHOW_PROFILE = (
 REPLY_MSG_PROFILE_NO_CHANGE = "Что ж, анкета осталась как есть."
 REPLY_MSG_START_CREATE_PROFILE = "Для создания профиля введи /coliving."
 REPLY_MSG_PROFILE_SAVED = "Отлично! Изменения сохранены."
+REPLY_MSG_PROFILE_NO_CREATE = "Создание коливинга отменено."
+REPLY_SAVE_PHOTO = "save"
 REPLY_MSG_WANT_TO_DELETE = "Ты уверен что хочешь удалить коливинг?"
-REPLY_MSG_PROFILE_DELETED = "Твой коливинг был удален"
+REPLY_MSG_PROFILE_DELETED = "Твой коливинг был удален."
 
-BTN_EDIT_PROFILE = "edit_profile"
-BTN_LABEL_EDIT_PROFILE_KEYBOARD = "Изменить профиль коливинга"
-BTN_HIDE = "hide"
-BTN_LABEL_HIDE_SEARCH_KEYBOARD = "Скрыть из поиска 🚫"
-BTN_SHOW = "show"
-BTN_LABEL_SHOW = "Показать в поиске 🔍"
+BTN_LABEL_EDIT_PROFILE_KEYBOARD = "Изменить анкету ✏️"
 BTN_ROOMMATES = "roommates_profiles"
 BTN_LABEL_ROOMMATES = "Посмотреть анкеты соседей"
 BTN_VIEWS = "views"
@@ -84,12 +86,13 @@ BTN_LABEL_TRANSFER_TO = "Передача коливинга"
 BTN_GO_TO_MENU = "go_to_menu"
 
 BTN_LABEL_BED_IN_ROOM = "Спальное место"
-BTN_LABEL_ROOM_IN_APPARTMENT = "Комната"
+BTN_LABEL_ROOM_IN_APARTMENT = "Комната"
 
 BTN_CONFIRM = "confirm"
-BTN_LABEL_CONFIRM = "Да, подтвердить"
+BTN_LABEL_CONFIRM = "Да, подтвердить ✅"
 BTN_CANCEL = "cancel"
 BTN_LABEL_CANCEL = "Отменить"
+BTN_LABEL_CANCEL_CREATE = "Отменить создание коливинга ❌"
 BTN_CANCEL_EDIT = "cancel"
 BTN_LABEL_CANCEL_EDIT = "Отменить редактирование ❌"
 BTN_FILL_AGAIN = "edit_fill_again"
@@ -110,12 +113,13 @@ BTN_DELETE_ROOMMATES = "delete_roommate"
 BTN_LABEL_DELETE_ROOMMATES = "Удалить из коливинга"
 BTN_REPORT_ROOMMATES = "report_to"
 BTN_LABEL_REPORT_ROOMMATES = "Пожаловаться на пользователя"
-BTN_DELETE_CONFIRM = "confirm_delete"
-BTN_LABEL_DELETE_CONFIRM = "Да, удалить"
 BTN_EDIT_LOCATION = "edit_location"
 BTN_LABEL_EDIT_LOCATION = "Местоположение"
-BTN_LABEL_DELETE_PROFILE_KEYBOARD = "Удалить коливинг"
-BTN_LABEL_DELETE_CANCEL = "Не удалять"
+SAVE_PHOTO_BUTTON = "Сохранить фото 📁️"
+SAVE_EDITED_PHOTO_BUTTON = "Сохранить новые фото 📁️"
+BTN_LABEL_DELETE_PROFILE_KEYBOARD = "Удалить коливинг 🗑️"
+BTN_LABEL_DELETE_CONFIRM = "Да, удалить ✅"
+BTN_LABEL_DELETE_CANCEL = "Нет, оставить ❌"
 
 PROFILE_DATA = (
     "<b>Город:</b> {location}\n"

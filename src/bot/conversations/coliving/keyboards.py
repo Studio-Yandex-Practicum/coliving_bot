@@ -21,12 +21,12 @@ ROOM_TYPE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         InlineKeyboardButton(
             text=templates.BTN_LABEL_BED_IN_ROOM,
-            callback_data=(f"{ROOM_TYPE_PREFIX}:{templates.BTN_LABEL_BED_IN_ROOM}"),
+            callback_data=f"{ROOM_TYPE_PREFIX}:{templates.BTN_LABEL_BED_IN_ROOM}",
         ),
         InlineKeyboardButton(
-            text=templates.BTN_LABEL_ROOM_IN_APPARTMENT,
+            text=templates.BTN_LABEL_ROOM_IN_APARTMENT,
             callback_data=(
-                f"{ROOM_TYPE_PREFIX}:{templates.BTN_LABEL_ROOM_IN_APPARTMENT}"
+                f"{ROOM_TYPE_PREFIX}:{templates.BTN_LABEL_ROOM_IN_APARTMENT}"
             ),
         ),
     )
@@ -37,10 +37,13 @@ EDIT_PROFILE_KEYBOARD = InlineKeyboardButton(
     callback_data=templates.BTN_LABEL_EDIT_PROFILE_KEYBOARD,
 )
 
-CONFIRM_OR_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
+CONFIRM_OR_CANCEL_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         CONFIRMATION_KEYBOARD,
-        EDIT_PROFILE_KEYBOARD,
+        InlineKeyboardButton(
+            text=templates.BTN_LABEL_CANCEL_CREATE,
+            callback_data=templates.BTN_LABEL_CANCEL_CREATE,
+        ),
     )
 )
 
@@ -105,13 +108,13 @@ COLIVING_PROFILE_DUPLICATE_BUTTONS = [
         text=templates.BTN_LABEL_TRANSFER_TO,
         callback_data=templates.BTN_TRANSFER_TO,
     ),
-    InlineKeyboardButton(
-        text=RETURN_TO_MENU_BTN_LABEL, callback_data=templates.BTN_GO_TO_MENU
-    ),
     EDIT_PROFILE_KEYBOARD,
     InlineKeyboardButton(
         text=templates.BTN_LABEL_DELETE_PROFILE_KEYBOARD,
         callback_data=templates.BTN_LABEL_DELETE_PROFILE_KEYBOARD,
+    ),
+    InlineKeyboardButton(
+        text=RETURN_TO_MENU_BTN_LABEL, callback_data=templates.BTN_GO_TO_MENU
     ),
 ]
 
@@ -153,7 +156,8 @@ REPORT_ROOMMATES_PROFILE_KEYBOARD = InlineKeyboardButton(
 )
 
 CONFIRMATION_DELETE_KEYBOARD = InlineKeyboardButton(
-    text=templates.BTN_LABEL_DELETE_CONFIRM, callback_data=templates.BTN_DELETE_CONFIRM
+    text=templates.BTN_LABEL_DELETE_CONFIRM,
+    callback_data=templates.BTN_LABEL_DELETE_CONFIRM,
 )
 
 ROOMMATES_INVITE_REPORT_KEYBOARD = InlineKeyboardMarkup.from_column(
@@ -180,6 +184,25 @@ CONFIRM_ROOMMATES_INVITE_KEYBOARD = InlineKeyboardMarkup.from_column(
 REPORT_OR_CANCEL_ROOMMATES_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         REPORT_ROOMMATES_PROFILE_KEYBOARD,
+        CANCEL_KEYBOARD,
+    )
+)
+
+SAVE_OR_CANCEL_PHOTO_KEYBOARD = InlineKeyboardMarkup.from_column(
+    button_column=(
+        InlineKeyboardButton(
+            text=templates.SAVE_PHOTO_BUTTON, callback_data=templates.SAVE_PHOTO_BUTTON
+        ),
+        CANCEL_KEYBOARD,
+    )
+)
+
+SAVE_OR_CANCEL_NEW_PHOTO_KEYBOARD = InlineKeyboardMarkup.from_column(
+    button_column=(
+        InlineKeyboardButton(
+            text=templates.SAVE_EDITED_PHOTO_BUTTON,
+            callback_data=templates.SAVE_EDITED_PHOTO_BUTTON,
+        ),
         CANCEL_KEYBOARD,
     )
 )
