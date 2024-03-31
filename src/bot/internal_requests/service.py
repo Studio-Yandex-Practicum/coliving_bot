@@ -198,6 +198,13 @@ class APIService:
         """
         return await self._profile_request(telegram_id, data, method="patch")
 
+    async def delete_coliving(self, coliving_id: int) -> Response:
+        """
+        Удаляет профиль коливинга.
+        """
+        endpoint_urn = f"colivings/{coliving_id}/"
+        return await self._delete_request(endpoint_urn)
+
     async def delete_coliving_photos(
         self, coliving_id: int, telegram_id: int
     ) -> Response:
