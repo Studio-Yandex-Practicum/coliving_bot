@@ -18,10 +18,10 @@ class ReportMatchViewTests(APITestCase):
     AGE_25 = 25
     REPORT_TEXT = "test_text"
     CATEGORY_TEXT = "Категория 1"
-    TID_T = "telegram_id"
-    AGE_T = "age"
-    L_T = "location"
-    NAME_T = "name"
+    TELEGR_ID_TXT = "telegram_id"
+    AGE_TXT = "age"
+    LOCATION_TXT = "location"
+    NAME_TXT = "name"
 
     @classmethod
     def setUpTestData(cls):
@@ -29,9 +29,9 @@ class ReportMatchViewTests(APITestCase):
             UserFromTelegram.objects.create(telegram_id=id) for id in range(1, 6)
         ]
         cls.t_names = [f"test_{x}" for x in range(1, 6)]
-        cls.location = Location.objects.create(name=cls.L_T)
+        cls.location = Location.objects.create(name=cls.LOCATION_TXT)
         ProfileTestData = namedtuple(
-            "ProfileTestData", ["user", cls.NAME_T, cls.AGE_T, cls.L_T]
+            "ProfileTestData", ["user", cls.NAME_TXT, cls.AGE_TXT, cls.LOCATION_TXT]
         )
 
         profiles_data = (
@@ -67,16 +67,32 @@ class ReportMatchViewTests(APITestCase):
         }
 
         cls.expected_match_data_for_user_1 = [
-            {cls.TID_T: 2, cls.NAME_T: cls.t_names[1], cls.AGE_T: cls.AGE_25},
-            {cls.TID_T: 3, cls.NAME_T: cls.t_names[2], cls.AGE_T: cls.AGE_25},
+            {
+                cls.TELEGR_ID_TXT: 2,
+                cls.NAME_TXT: cls.t_names[1],
+                cls.AGE_TXT: cls.AGE_25,
+            },
+            {
+                cls.TELEGR_ID_TXT: 3,
+                cls.NAME_TXT: cls.t_names[2],
+                cls.AGE_TXT: cls.AGE_25,
+            },
         ]
 
         cls.expected_match_data_for_user_2 = [
-            {cls.TID_T: 1, cls.NAME_T: cls.t_names[0], cls.AGE_T: cls.AGE_25}
+            {
+                cls.TELEGR_ID_TXT: 1,
+                cls.NAME_TXT: cls.t_names[0],
+                cls.AGE_TXT: cls.AGE_25,
+            }
         ]
 
         cls.expected_match_data_for_user_3 = [
-            {cls.TID_T: 1, cls.NAME_T: cls.t_names[0], cls.AGE_T: cls.AGE_25}
+            {
+                cls.TELEGR_ID_TXT: 1,
+                cls.NAME_TXT: cls.t_names[0],
+                cls.AGE_TXT: cls.AGE_25,
+            }
         ]
 
         cls.global_match_data = {
@@ -149,7 +165,7 @@ class ReportMatchViewTests(APITestCase):
         response = self.client.get(
             reverse(
                 "api-v1:search:matched-users",
-                kwargs={self.TID_T: self.t_users[0].id},
+                kwargs={self.TELEGR_ID_TXT: self.t_users[0].id},
             )
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -157,7 +173,7 @@ class ReportMatchViewTests(APITestCase):
     def test_get_match_for_invalid_user(self):
         """Тест получения мэтчей для несуществующего пользователя."""
         response = self.client.get(
-            reverse("api-v1:search:matched-users", kwargs={self.TID_T: 99999})
+            reverse("api-v1:search:matched-users", kwargs={self.TELEGR_ID_TXT: 99999})
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -170,7 +186,7 @@ class ReportMatchViewTests(APITestCase):
                     method,
                     reverse(
                         "api-v1:search:matched-users",
-                        kwargs={self.TID_T: self.t_users[0].id},
+                        kwargs={self.TELEGR_ID_TXT: self.t_users[0].id},
                     ),
                 )
                 self.assertEqual(
@@ -184,7 +200,7 @@ class ReportMatchViewTests(APITestCase):
                 response = self.client.get(
                     reverse(
                         "api-v1:search:matched-users",
-                        kwargs={self.TID_T: telegram_id},
+                        kwargs={self.TELEGR_ID_TXT: telegram_id},
                     )
                 )
                 self.assertEqual(response.json(), data)
