@@ -324,11 +324,14 @@ async def _look_at_profile(
     )
 
 
-async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def handle_photo(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> Optional[int]:
     """
     Обрабатывает загруженную пользователем фотографию.
     Переводит диалог в состояние CONFIRMATION (анкета верна или нет)
     """
+
     file_id = update.effective_message.photo[-1].file_id
 
     new_file = await context.bot.get_file(file_id)
@@ -343,28 +346,38 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     received_photos.append(file_id)
     context.user_data[templates.RECEIVED_PHOTOS_FIELD] = received_photos
 
+    if len(received_photos) == 3:
+        state = await send_received_photos(update, context)
+        return state
+
     return None
 
 
-async def handle_edit_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def handle_edit_photo(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> Optional[int]:
     """
     Обрабатывает загруженную пользователем фотографию.
     Переводит диалог в состояние CONFIRMATION (анкета верна или нет)
     """
 
     file_id = update.effective_message.photo[-1].file_id
+
     new_photos = context.user_data.get("new_photo", [])
     new_photos.append(file_id)
     context.user_data["new_photo"] = new_photos
+
+    if len(new_photos) == 3:
+        state = await send_edited_photos(update, context)
+        return state
 
     return None
 
 
 async def send_received_photos(
     update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> int:
+) -> Optional[int]:
     if context.user_data.get(templates.RECEIVED_PHOTOS_FIELD):
-        await update.effective_message.edit_reply_markup()
         await _look_at_profile(
             update,
             context,
@@ -373,12 +386,11 @@ async def send_received_photos(
             True,
         )
         return States.CONFIRMATION
-    await context.bot.answer_callback_query(
-        callback_query_id=update.callback_query.id,
+    await update.callback_query.answer(
         text=templates.DONT_SAVE_WITHOUT_PHOTO,
         show_alert=True,
     )
-    return States.PHOTO
+    return None
 
 
 async def handle_profile(update: Update, _context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -661,17 +673,23 @@ async def handle_edit_about(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     return States.EDIT_CONFIRMATION
 
 
-async def send_edited_photos(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    await update.effective_message.edit_reply_markup()
-    await _look_at_profile(
-        update,
-        context,
-        templates.LOOK_AT_FORM_THIRD,
-        keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
-        True,
+async def send_edited_photos(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> Optional[int]:
+    if context.user_data.get("new_photo"):
+        await _look_at_profile(
+            update,
+            context,
+            templates.LOOK_AT_FORM_THIRD,
+            keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
+            True,
+        )
+        return States.EDIT_CONFIRMATION
+    await update.callback_query.answer(
+        text=templates.DONT_SAVE_WITHOUT_PHOTO,
+        show_alert=True,
     )
-
-    return States.EDIT_CONFIRMATION
+    return None
 
 
 async def send_question_to_profile_is_correct(
@@ -683,17 +701,18 @@ async def send_question_to_profile_is_correct(
     Либо завершает диалог.
     """
     await _send_chosen_choice_and_remove_buttons(update=update)
-    await api_service.delete_profile_photos(update.effective_chat.id)
     await api_service.update_user_profile(update.effective_chat.id, context.user_data)
-    for file_id in context.user_data.get(templates.RECEIVED_PHOTOS_FIELD):
-        new_file = await context.bot.get_file(file_id)
-        photo_bytearray = await new_file.download_as_bytearray()
-        await api_service.save_photo(
-            telegram_id=update.effective_chat.id,
-            photo_bytearray=photo_bytearray,
-            filename=new_file.file_path,
-            file_id=file_id,
-        )
+    if len(context.user_data.get(templates.RECEIVED_PHOTOS_FIELD)) != 0:
+        await api_service.delete_profile_photos(update.effective_chat.id)
+        for file_id in context.user_data.get(templates.RECEIVED_PHOTOS_FIELD):
+            new_file = await context.bot.get_file(file_id)
+            photo_bytearray = await new_file.download_as_bytearray()
+            await api_service.save_photo(
+                telegram_id=update.effective_chat.id,
+                photo_bytearray=photo_bytearray,
+                filename=new_file.file_path,
+                file_id=file_id,
+            )
     await send_profile_saved_notification(update, context)
     return ConversationHandler.END
 
