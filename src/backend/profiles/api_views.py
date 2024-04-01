@@ -5,6 +5,7 @@ from rest_framework import generics
 from rest_framework.exceptions import NotFound
 
 from profiles.filters import ColivingFilter
+from profiles.mixins import DestroyWithMediaRemovalMixin
 from profiles.models import Coliving, Location, Profile, UserFromTelegram
 from profiles.serializers import (
     ColivingSerializer,
@@ -15,7 +16,9 @@ from profiles.serializers import (
 
 
 class ProfileView(
-    generics.CreateAPIView, generics.RetrieveAPIView, generics.UpdateAPIView
+    generics.CreateAPIView,
+    generics.RetrieveAPIView,
+    generics.UpdateAPIView,
 ):
     """
     Вью-класс для отображения, сохранения и обновления объектов 'Profile'.
@@ -71,7 +74,9 @@ class ColivingView(generics.ListCreateAPIView):
         return queryset.filter(is_visible=True)
 
 
-class ColivingDetailView(generics.RetrieveUpdateAPIView):
+class ColivingDetailView(
+    DestroyWithMediaRemovalMixin, generics.RetrieveUpdateDestroyAPIView
+):
     """Apiview для обновления Coliving."""
 
     queryset = Coliving.objects.select_related("location", "host").all()
