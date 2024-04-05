@@ -82,7 +82,7 @@ async def send_question_to_profile_is_visible_in_search(
     else:
         message_text = common_templates.FORM_IS_NOT_VISIBLE
     await update.effective_message.reply_text(
-        text=message_text,  # parse_mode=ParseMode.HTML
+        text=message_text,
     )
     await api_service.update_user_profile(update.effective_chat.id, context.user_data)
 
