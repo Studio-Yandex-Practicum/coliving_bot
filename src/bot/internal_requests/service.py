@@ -321,7 +321,9 @@ class APIService:
     async def _parse_response_to_coliving(response_json: object) -> Coliving:
         """Парсит полученный json, упаковывая в датакласс Coliving."""
         if not isinstance(response_json, dict):
-            ValueError("Возможно было получено несколько записей, ожидалась одна.")
+            raise ValueError(
+                "Возможно было получено несколько записей, ожидалась одна."
+            )
         images = response_json.pop("images")
         coliving_info = Coliving(**response_json)
         if images:
