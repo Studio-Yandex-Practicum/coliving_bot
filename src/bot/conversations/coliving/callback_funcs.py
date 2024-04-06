@@ -138,10 +138,10 @@ async def handle_coliving_roommates(
     return ConversationHandler.END
 
 
-async def handle_coliving_views(
+async def handle_assign_roommate(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
-    """Обработка ответа: Просмотры."""
+    """Обработка ответа: Прикрепить жильца."""
     #############################################################
     # запрос к API
     # заглушка

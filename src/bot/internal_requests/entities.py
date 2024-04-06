@@ -17,6 +17,12 @@ class UserProfile:
 
 
 @dataclass
+class MatchedUser:
+    user: int
+    name: str
+
+
+@dataclass
 class Image:
     file_id: str
     bytes: Optional[bytes] = field(default=None)
