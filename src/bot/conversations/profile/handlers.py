@@ -86,9 +86,9 @@ profile_handler: ConversationHandler = ConversationHandler(
             MessageHandler(
                 filters.PHOTO & ~filters.COMMAND, callback_funcs.handle_photo
             ),
-            CallbackQueryHandler(
-                pattern=rf"^{buttons.SAVE_PHOTO_BUTTON}",
-                callback=callback_funcs.send_received_photos,
+            MessageHandler(
+                filters.Regex(rf"{buttons.SAVE_PHOTO_BUTTON}") & ~filters.COMMAND,
+                callback_funcs.send_received_photos,
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -185,9 +185,11 @@ profile_handler: ConversationHandler = ConversationHandler(
         ],
         States.EDIT_PHOTO: [
             MessageHandler(filters.PHOTO, callback_funcs.handle_edit_photo),
-            CallbackQueryHandler(
-                pattern=rf"^{buttons.SAVE_EDITED_PHOTO_BUTTON}",
-                callback=callback_funcs.send_edited_photos,
+            MessageHandler(
+                filters.Regex(
+                    rf"{buttons.SAVE_EDITED_PHOTO_BUTTON}"
+                    ) & ~filters.COMMAND,
+                callback_funcs.send_edited_photos,
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,

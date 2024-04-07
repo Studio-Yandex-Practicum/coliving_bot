@@ -1,5 +1,9 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-
+from telegram import (
+    InlineKeyboardButton,
+    KeyboardButton,
+    InlineKeyboardMarkup,
+    ReplyKeyboardMarkup
+)
 import conversations.coliving.templates as templates
 from conversations.common_functions.common_buttons import (
     LOCATION_PREFIX,
@@ -188,22 +192,21 @@ REPORT_OR_CANCEL_ROOMMATES_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     )
 )
 
-SAVE_OR_CANCEL_PHOTO_KEYBOARD = InlineKeyboardMarkup.from_column(
+SAVE_OR_CANCEL_PHOTO_KEYBOARD = ReplyKeyboardMarkup.from_column(
     button_column=(
-        InlineKeyboardButton(
-            text=templates.SAVE_PHOTO_BUTTON, callback_data=templates.SAVE_PHOTO_BUTTON
+        KeyboardButton(
+            text=templates.SAVE_PHOTO_BUTTON
         ),
-        CANCEL_KEYBOARD,
+        CANCEL_KEYBOARD
     )
 )
 
-SAVE_OR_CANCEL_NEW_PHOTO_KEYBOARD = InlineKeyboardMarkup.from_column(
+SAVE_OR_CANCEL_NEW_PHOTO_KEYBOARD = ReplyKeyboardMarkup.from_column(
     button_column=(
-        InlineKeyboardButton(
+        KeyboardButton(
             text=templates.SAVE_EDITED_PHOTO_BUTTON,
-            callback_data=templates.SAVE_EDITED_PHOTO_BUTTON,
         ),
-        CANCEL_KEYBOARD,
+        CANCEL_KEYBOARD
     )
 )
 

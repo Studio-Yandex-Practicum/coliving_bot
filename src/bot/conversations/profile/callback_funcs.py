@@ -3,7 +3,7 @@ from re import fullmatch
 from typing import Optional, Union
 
 from httpx import HTTPStatusError, codes
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, Update
+from telegram import ReplyKeyboardRemove, InputMediaPhoto, Update
 from telegram.constants import ParseMode
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
@@ -258,12 +258,8 @@ async def handle_about(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         context.user_data[templates.IS_VISIBLE_FIELD] = True
     await update.effective_chat.send_message(
         text=templates.ASK_PHOTO,
-        reply_markup=InlineKeyboardMarkup.from_button(
-            InlineKeyboardButton(
-                text=buttons.SAVE_PHOTO_BUTTON, callback_data=buttons.SAVE_PHOTO_BUTTON
-            )
-        ),
-    ),
+        reply_markup=keyboards.PHOTO_KEYBOARD
+        )
 
     return States.PHOTO
 
@@ -385,10 +381,13 @@ async def send_received_photos(
             keyboards.FORM_SAVED_KEYBOARD,
             True,
         )
+        await update.effective_message.reply_text(
+            text=templates.ASK_FORM_VISIBLE,
+            reply_markup=ReplyKeyboardRemove(),
+        )
         return States.CONFIRMATION
-    await update.callback_query.answer(
-        text=templates.DONT_SAVE_WITHOUT_PHOTO,
-        show_alert=True,
+    await update.effective_message.reply_text(
+        text=templates.DONT_SAVE_WITHOUT_PHOTO
     )
     return None
 
@@ -534,14 +533,8 @@ async def send_question_to_edit_photo(
     await _send_chosen_choice_and_remove_buttons(update=update)
     await update.effective_chat.send_message(
         text=templates.ASK_PHOTO,
-        reply_markup=InlineKeyboardMarkup.from_button(
-            InlineKeyboardButton(
-                text=buttons.SAVE_EDITED_PHOTO_BUTTON,
-                callback_data=buttons.SAVE_EDITED_PHOTO_BUTTON,
-            )
-        ),
+        reply_markup=keyboards.PHOTO_EDIT_KEYBOARD
     )
-
     return States.EDIT_PHOTO
 
 
@@ -684,10 +677,13 @@ async def send_edited_photos(
             keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
             True,
         )
+        await update.effective_message.reply_text(
+            text=templates.ASK_FORM_VISIBLE,
+            reply_markup=ReplyKeyboardRemove(),
+        )
         return States.EDIT_CONFIRMATION
-    await update.callback_query.answer(
+    await update.effective_message.reply_text(
         text=templates.DONT_SAVE_WITHOUT_PHOTO,
-        show_alert=True,
     )
     return None
 
