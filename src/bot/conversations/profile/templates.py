@@ -4,6 +4,7 @@ MIN_NAME_LENGTH = 3
 MAX_NAME_LENGTH = 30
 MIN_ABOUT_LENGTH = 0
 MAX_ABOUT_LENGTH = 1000
+PHOTO_MAX_NUMBER = 3
 NAME_PATTERN = "^[А-Яа-яA-Za-z'-]+$"
 AGE_PATTERN = "^([0-9]{3})$"
 
@@ -62,7 +63,7 @@ ABOUT_MAX_LEN_ERROR_MSG = (
     "Описание не должно содержать более {max} символов. Попробуй еще раз:"
 )
 PHOTO_ERROR_MESSAGE = "Отправь фото."
-ERR_PHOTO_NOT_TEXT = "Отправь до 3 фотографий для своего профиля."
+ERR_PHOTO_NOT_TEXT = f"Отправь до {PHOTO_MAX_NUMBER} фотографий для своего профиля."
 PROFILE_DATA = (
     "<b>Имя:</b> {name}\n"
     "<b>Пол:</b> {sex}\n"

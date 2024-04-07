@@ -2,12 +2,41 @@ from functools import wraps
 
 from httpx import HTTPStatusError, codes
 from telegram import InlineKeyboardMarkup, Update
+from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
 
 import conversations.common_functions.common_templates as templates
+from conversations.common_functions.common_keyboards import VISIBILITY_BUTTONS
 from internal_requests import api_service
 
 
+def add_response_prefix(func):
+    """
+    Декоратор для отправки сообщения пользователю в следующем формате:
+    'Твой ответ: <введенный пользователем текст/текст выбранной кнопки>'
+
+    """
+
+    @wraps(func)
+    async def wrapper(update, context, *args, **kwargs):
+        if update.message:
+            user_response = update.message.text
+        elif update.callback_query:
+            user_response = update.callback_query.data
+            if ":" in user_response:
+                user_response = (
+                    VISIBILITY_BUTTONS.get(user_response) or user_response.split(":")[1]
+                )
+        await update.effective_chat.send_message(
+            text=f"{templates.RESPONSE_PREFIX}{user_response}\n",
+            parse_mode=ParseMode.HTML,
+        )
+        return await func(update, context, *args, **kwargs)
+
+    return wrapper
+
+
+@add_response_prefix
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Отменяет текущий диалог."""
     await update.effective_message.reply_text(

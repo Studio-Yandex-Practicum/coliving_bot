@@ -6,6 +6,11 @@ CANCEL_KEYBOARD = InlineKeyboardMarkup.from_row(
     button_row=(InlineKeyboardButton(text=CANCEL_BUTTON, callback_data=CANCEL_BUTTON),)
 )
 
+VISIBILITY_BUTTONS = {
+    "is_visible:False": HIDE_SEARCH_BUTTON,
+    "is_visible:True": SHOW_SEARCH_BUTTON,
+}
+
 SEARCH_BUTTON = InlineKeyboardButton(
     text=HIDE_SEARCH_BUTTON, callback_data="is_visible:False"
 )
