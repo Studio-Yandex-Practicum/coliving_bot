@@ -10,9 +10,9 @@ from internal_requests.entities import (
     ColivingSearchSettings,
     Image,
     Location,
+    MatchedUser,
     ProfileSearchSettings,
     UserProfile,
-    MatchedUser,
 )
 
 
