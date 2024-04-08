@@ -1,6 +1,6 @@
 from typing import Optional
 
-from telegram import InlineKeyboardMarkup, ReplyKeyboardRemove, InputMediaPhoto, Update
+from telegram import InlineKeyboardMarkup, InputMediaPhoto, ReplyKeyboardRemove, Update
 from telegram.constants import ParseMode
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 

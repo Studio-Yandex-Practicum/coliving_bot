@@ -1,9 +1,10 @@
 from telegram import (
     InlineKeyboardButton,
-    KeyboardButton,
     InlineKeyboardMarkup,
-    ReplyKeyboardMarkup
+    KeyboardButton,
+    ReplyKeyboardMarkup,
 )
+
 import conversations.coliving.templates as templates
 from conversations.common_functions.common_buttons import (
     LOCATION_PREFIX,

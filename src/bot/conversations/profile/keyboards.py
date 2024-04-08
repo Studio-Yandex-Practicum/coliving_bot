@@ -1,9 +1,10 @@
 from telegram import (
     InlineKeyboardButton,
-    KeyboardButton,
     InlineKeyboardMarkup,
-    ReplyKeyboardMarkup
+    KeyboardButton,
+    ReplyKeyboardMarkup,
 )
+
 from conversations.common_functions.common_buttons import (
     HIDE_SEARCH_BUTTON,
     SHOW_SEARCH_BUTTON,
@@ -30,7 +31,6 @@ from conversations.profile.buttons import (
     SAVE_PHOTO_BUTTON,
     YES_BUTTON,
 )
-
 
 PROFILE_DUPLICATE_BUTTONS = [
     InlineKeyboardButton(text=EDIT_FORM_BUTTON, callback_data=EDIT_FORM_BUTTON),

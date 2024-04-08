@@ -3,7 +3,7 @@ from re import fullmatch
 from typing import Optional, Union
 
 from httpx import HTTPStatusError, codes
-from telegram import ReplyKeyboardRemove, InputMediaPhoto, Update
+from telegram import InputMediaPhoto, ReplyKeyboardRemove, Update
 from telegram.constants import ParseMode
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
