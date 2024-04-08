@@ -126,7 +126,8 @@ class APIService:
         return await self._patch_request(endpoint_urn=endpoint_urn, data=data)
 
     async def get_potential_roommates(
-        self, telegram_id: int,
+        self,
+        telegram_id: int,
     ) -> List[MatchedUser]:
         """
         Выводит список потенциальных жильцов

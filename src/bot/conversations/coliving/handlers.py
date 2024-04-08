@@ -214,7 +214,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.handle_assign_roommate,
-                pattern=r"^assign_roommate"
+                pattern=r"^assign_roommate",
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.handle_coliving_transfer_to,

@@ -103,7 +103,7 @@ COLIVING_PROFILE_DUPLICATE_BUTTONS = [
     ),
     InlineKeyboardButton(
         text=templates.BTN_LABEL_ASSIGN_ROOMMATE,
-        callback_data=templates.BTN_ASSIGN_ROOMMATE
+        callback_data=templates.BTN_ASSIGN_ROOMMATE,
     ),
     InlineKeyboardButton(
         text=templates.BTN_LABEL_TRANSFER_TO,
