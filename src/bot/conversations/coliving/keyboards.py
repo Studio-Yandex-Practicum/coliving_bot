@@ -194,7 +194,8 @@ REPORT_OR_CANCEL_ROOMMATES_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
 )
 
 SAVE_OR_CANCEL_PHOTO_KEYBOARD = ReplyKeyboardMarkup.from_column(
-    button_column=(KeyboardButton(text=templates.SAVE_PHOTO_BUTTON), CANCEL_KEYBOARD)
+    button_column=(KeyboardButton(text=templates.SAVE_PHOTO_BUTTON), CANCEL_KEYBOARD),
+    resize_keyboard=True,
 )
 
 SAVE_OR_CANCEL_NEW_PHOTO_KEYBOARD = ReplyKeyboardMarkup.from_column(
@@ -203,7 +204,8 @@ SAVE_OR_CANCEL_NEW_PHOTO_KEYBOARD = ReplyKeyboardMarkup.from_column(
             text=templates.SAVE_EDITED_PHOTO_BUTTON,
         ),
         CANCEL_KEYBOARD,
-    )
+    ),
+    resize_keyboard=True,
 )
 
 DELETE_OR_CANCEL_COLIVING_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(

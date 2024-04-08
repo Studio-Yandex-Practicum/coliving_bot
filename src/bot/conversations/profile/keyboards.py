@@ -54,7 +54,9 @@ SEX_KEYBOARD = InlineKeyboardMarkup.from_row(
     )
 )
 
-PHOTO_KEYBOARD = ReplyKeyboardMarkup.from_button(KeyboardButton(text=SAVE_PHOTO_BUTTON))
+PHOTO_KEYBOARD = ReplyKeyboardMarkup.from_button(
+    KeyboardButton(text=SAVE_PHOTO_BUTTON), resize_keyboard=True
+)
 
 FORM_SAVED_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
@@ -71,7 +73,7 @@ FORM_VISIBLE_KEYBOARD = InlineKeyboardMarkup.from_column(
 )
 
 PHOTO_EDIT_KEYBOARD = ReplyKeyboardMarkup.from_button(
-    KeyboardButton(text=SAVE_EDITED_PHOTO_BUTTON)
+    KeyboardButton(text=SAVE_EDITED_PHOTO_BUTTON), resize_keyboard=True
 )
 
 FORM_EDIT_KEYBOARD = InlineKeyboardMarkup.from_column(
