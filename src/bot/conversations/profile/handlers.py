@@ -186,9 +186,8 @@ profile_handler: ConversationHandler = ConversationHandler(
         States.EDIT_PHOTO: [
             MessageHandler(filters.PHOTO, callback_funcs.handle_edit_photo),
             MessageHandler(
-                filters.Regex(
-                    rf"{buttons.SAVE_EDITED_PHOTO_BUTTON}"
-                    ) & ~filters.COMMAND,
+                filters.Regex(rf"{buttons.SAVE_EDITED_PHOTO_BUTTON}")
+                & ~filters.COMMAND,
                 callback_funcs.send_edited_photos,
             ),
             MessageHandler(

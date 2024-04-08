@@ -64,7 +64,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND, callback_funcs.handle_cancel
-            )
+            ),
         ],
         States.CONFIRMATION: [
             CallbackQueryHandler(
@@ -162,9 +162,8 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 callback_funcs.handle_edit_photo_room,
             ),
             MessageHandler(
-                filters.Regex(
-                    rf"^{templates.SAVE_EDITED_PHOTO_BUTTON}"
-                    ) & ~filters.COMMAND,
+                filters.Regex(rf"^{templates.SAVE_EDITED_PHOTO_BUTTON}")
+                & ~filters.COMMAND,
                 callback_funcs.send_edited_room_photos,
             ),
             MessageHandler(

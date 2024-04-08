@@ -257,9 +257,8 @@ async def handle_about(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         )
         context.user_data[templates.IS_VISIBLE_FIELD] = True
     await update.effective_chat.send_message(
-        text=templates.ASK_PHOTO,
-        reply_markup=keyboards.PHOTO_KEYBOARD
-        )
+        text=templates.ASK_PHOTO, reply_markup=keyboards.PHOTO_KEYBOARD
+    )
 
     return States.PHOTO
 
@@ -386,9 +385,7 @@ async def send_received_photos(
             reply_markup=ReplyKeyboardRemove(),
         )
         return States.CONFIRMATION
-    await update.effective_message.reply_text(
-        text=templates.DONT_SAVE_WITHOUT_PHOTO
-    )
+    await update.effective_message.reply_text(text=templates.DONT_SAVE_WITHOUT_PHOTO)
     return None
 
 
@@ -532,8 +529,7 @@ async def send_question_to_edit_photo(
     """
     await _send_chosen_choice_and_remove_buttons(update=update)
     await update.effective_chat.send_message(
-        text=templates.ASK_PHOTO,
-        reply_markup=keyboards.PHOTO_EDIT_KEYBOARD
+        text=templates.ASK_PHOTO, reply_markup=keyboards.PHOTO_EDIT_KEYBOARD
     )
     return States.EDIT_PHOTO
 

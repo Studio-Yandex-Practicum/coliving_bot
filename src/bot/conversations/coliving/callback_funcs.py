@@ -181,9 +181,7 @@ async def handle_coliving_transfer_to(
     return ConversationHandler.END
 
 
-async def handle_cancel(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> int:
+async def handle_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Обработка ответа: Отменить"""
     await update.effective_message.reply_text(
         text=common_templates.CANCEL_TEXT,
