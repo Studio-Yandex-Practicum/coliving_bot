@@ -3,6 +3,8 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
+from telegram.constants import ParseMode
+from telegram.ext import Defaults
 
 load_dotenv()
 
@@ -12,6 +14,8 @@ DATA_PATH = BASE_DIR.parent / ".data"
 
 # Telegram BOT token
 TOKEN = os.getenv("TOKEN")
+# Default settings for Telegram BOT
+DEFAULTS = Defaults(parse_mode=ParseMode.HTML)
 
 # Logs folder path
 LOGS_FOLDER = DATA_PATH / "logs"

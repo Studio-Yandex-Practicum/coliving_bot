@@ -1,4 +1,6 @@
-from telegram.ext import Application, ApplicationBuilder, CommandHandler
+from typing import Optional
+
+from telegram.ext import Application, ApplicationBuilder, CommandHandler, Defaults
 
 from conversations.coliving.handlers import coliving_handler
 from conversations.coliving.keyboards import create_keyboard_of_locations
@@ -16,9 +18,13 @@ async def post_init(application: Application) -> None:
     application.bot_data["location_keyboard"] = await create_keyboard_of_locations()
 
 
-def create_bot_app() -> Application:
+def create_bot_app(defaults: Optional[Defaults] = None) -> Application:
     application: Application = (
-        ApplicationBuilder().token(TOKEN).post_init(post_init).build()
+        ApplicationBuilder()
+        .token(TOKEN)
+        .defaults(defaults)
+        .post_init(post_init)
+        .build()
     )
     application.add_handler(handler=coliving_handler)
     application.add_handler(CommandHandler("start", start))

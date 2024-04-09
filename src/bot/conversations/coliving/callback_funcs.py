@@ -1,7 +1,6 @@
 from typing import Optional
 
 from telegram import InlineKeyboardMarkup, InputMediaPhoto, Update
-from telegram.constants import ParseMode
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
 import conversations.coliving.keyboards as keyboards
@@ -81,7 +80,6 @@ async def handle_coliving_edit(
             f"{common_templates.RESPONSE_PREFIX}"
             f"{templates.BTN_LABEL_EDIT_PROFILE_KEYBOARD}"
         ),
-        parse_mode=ParseMode.HTML,
     )
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_WHAT_TO_EDIT,
@@ -100,7 +98,7 @@ async def handle_is_visible_switching(update: Update, context: CallbackContext) 
     else:
         message_text = common_templates.FORM_IS_NOT_VISIBLE
     await update.effective_message.reply_text(
-        text=message_text, parse_mode=ParseMode.HTML
+        text=message_text,
     )
 
     context.user_data["coliving_info"] = await api_service.update_coliving_info(
@@ -213,7 +211,7 @@ async def handle_location(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     await update.effective_message.edit_reply_markup()
     context.user_data["coliving_info"].location = location
     await update.effective_message.reply_text(
-        text=f"{common_templates.RESPONSE_PREFIX}{location}", parse_mode=ParseMode.HTML
+        text=f"{common_templates.RESPONSE_PREFIX}{location}",
     )
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_ROOM_TYPE,
@@ -246,7 +244,7 @@ async def handle_room_type(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     room_type = update.callback_query.data.split(":")[1]
     context.user_data["coliving_info"].room_type = room_type
     await update.effective_message.reply_text(
-        text=f"{common_templates.RESPONSE_PREFIX}{room_type}", parse_mode=ParseMode.HTML
+        text=f"{common_templates.RESPONSE_PREFIX}{room_type}",
     )
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_ABOUT,
@@ -277,7 +275,6 @@ async def handle_about_coliving(
     context.user_data["coliving_info"].about = about_coliving
     await update.effective_message.reply_text(
         text=f"{common_templates.RESPONSE_PREFIX}{about_coliving}",
-        parse_mode=ParseMode.HTML,
     )
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_PRICE,
@@ -308,7 +305,7 @@ async def handle_price(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
 
     context.user_data["coliving_info"].price = price
     await update.effective_message.reply_text(
-        text=f"{common_templates.RESPONSE_PREFIX}{price}", parse_mode=ParseMode.HTML
+        text=f"{common_templates.RESPONSE_PREFIX}{price}",
     )
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_PHOTO_SEND,
@@ -367,7 +364,7 @@ async def handle_profile_confirmation_cancel(
     await update.effective_message.edit_reply_markup()
     message = templates.BTN_LABEL_CANCEL_CREATE
     await update.effective_message.reply_text(
-        text=f"{common_templates.RESPONSE_PREFIX}{message}", parse_mode=ParseMode.HTML
+        text=f"{common_templates.RESPONSE_PREFIX}{message}",
     )
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_PROFILE_NO_CREATE,
@@ -387,7 +384,7 @@ async def handle_confirm_or_edit_reply_confirm(
     await update.effective_message.edit_reply_markup()
     reply = templates.BTN_LABEL_CONFIRM
     await update.effective_message.reply_text(
-        text=f"{common_templates.RESPONSE_PREFIX}{reply}", parse_mode=ParseMode.HTML
+        text=f"{common_templates.RESPONSE_PREFIX}{reply}",
     )
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_TO_SHOW_PROFILE,
@@ -430,7 +427,7 @@ async def handle_is_visible_coliving_profile_yes(
         respond = templates.REPLY_BTN_SHOW
     else:
         respond = templates.REPLY_BTN_HIDE
-    await update.effective_message.reply_text(text=respond, parse_mode=ParseMode.HTML)
+    await update.effective_message.reply_text(text=respond)
     return await save_coliving_info_to_db(update, context)
 
 
@@ -460,7 +457,6 @@ async def handle_what_to_edit_fill_again(
     await update.effective_message.edit_reply_markup()
     await update.effective_message.reply_text(
         text=f"{common_templates.RESPONSE_PREFIX}{templates.BTN_LABEL_FILL_AGAIN}",
-        parse_mode=ParseMode.HTML,
     )
     context.user_data.clear()
     await update.effective_chat.send_message(
@@ -481,7 +477,6 @@ async def handle_what_to_edit_location(
     await update.effective_message.edit_reply_markup()
     await update.effective_message.reply_text(
         text=f"{common_templates.RESPONSE_PREFIX}{templates.BTN_LABEL_EDIT_LOCATION}",
-        parse_mode=ParseMode.HTML,
     )
     await update.effective_chat.send_message(
         text=templates.REPLY_MSG_ASK_LOCATION,
@@ -500,7 +495,6 @@ async def handle_what_to_edit_room_type(
     await update.effective_message.edit_reply_markup()
     await update.effective_message.reply_text(
         text=f"{common_templates.RESPONSE_PREFIX}{templates.BTN_LABEL_EDIT_ROOM_TYPE}",
-        parse_mode=ParseMode.HTML,
     )
     await update.effective_chat.send_message(
         text=templates.REPLY_MSG_ASK_ROOM_TYPE,
@@ -520,7 +514,6 @@ async def handle_what_to_edit_about_room(
     await update.effective_message.edit_reply_markup()
     await update.effective_message.reply_text(
         text=f"{common_templates.RESPONSE_PREFIX}{templates.BTN_LABEL_EDIT_ABOUT_ROOM}",
-        parse_mode=ParseMode.HTML,
     )
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_ABOUT,
@@ -538,7 +531,6 @@ async def handle_what_to_edit_price(
     await update.effective_message.edit_reply_markup()
     await update.effective_message.reply_text(
         text=f"{common_templates.RESPONSE_PREFIX}{templates.BTN_LABEL_EDIT_PRICE}",
-        parse_mode=ParseMode.HTML,
     )
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_PRICE,
@@ -557,7 +549,6 @@ async def handle_what_to_edit_photo_room(
     context.user_data["coliving_info"].images.clear()
     await update.effective_message.reply_text(
         text=f"{common_templates.RESPONSE_PREFIX}{templates.BTN_LABEL_EDIT_PHOTO}",
-        parse_mode=ParseMode.HTML,
     )
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_PHOTO_SEND,
@@ -575,7 +566,7 @@ async def handle_edit_location(
     await update.effective_message.edit_reply_markup()
     context.user_data["coliving_info"].location = location
     await update.effective_message.reply_text(
-        text=f"{common_templates.RESPONSE_PREFIX}{location}", parse_mode=ParseMode.HTML
+        text=f"{common_templates.RESPONSE_PREFIX}{location}",
     )
     await _show_coliving_profile(
         update,
@@ -594,7 +585,7 @@ async def handle_edit_select_room_type(
     await update.effective_message.edit_reply_markup()
     context.user_data["coliving_info"].room_type = room_type
     await update.effective_message.reply_text(
-        text=f"{common_templates.RESPONSE_PREFIX}{room_type}", parse_mode=ParseMode.HTML
+        text=f"{common_templates.RESPONSE_PREFIX}{room_type}",
     )
     await _show_coliving_profile(
         update,
@@ -627,7 +618,6 @@ async def handle_edit_about_coliving(
     context.user_data["coliving_info"].about = about_coliving
     await update.effective_message.reply_text(
         text=f"{common_templates.RESPONSE_PREFIX}{about_coliving}",
-        parse_mode=ParseMode.HTML,
     )
     await _show_coliving_profile(
         update,
@@ -657,7 +647,6 @@ async def handle_edit_price(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     context.user_data["coliving_info"].price = edit_price
     await update.effective_message.reply_text(
         text=f"{common_templates.RESPONSE_PREFIX}{edit_price}",
-        parse_mode=ParseMode.HTML,
     )
     await _show_coliving_profile(
         update,
@@ -719,7 +708,7 @@ async def handle_edit_profile_confirmation_confirm(
     await update.effective_message.edit_reply_markup()
     message = templates.BTN_LABEL_CONFIRM
     await update.effective_message.reply_text(
-        text=f"{common_templates.RESPONSE_PREFIX}{message}", parse_mode=ParseMode.HTML
+        text=f"{common_templates.RESPONSE_PREFIX}{message}",
     )
     coliving = context.user_data["coliving_info"]
     images = context.user_data["coliving_info"].images[:5]
@@ -742,7 +731,7 @@ async def handle_edit_profile_confirmation_cancel(
     await update.effective_message.edit_reply_markup()
     message = templates.BTN_LABEL_CANCEL_EDIT
     await update.effective_message.reply_text(
-        text=f"{common_templates.RESPONSE_PREFIX}{message}", parse_mode=ParseMode.HTML
+        text=f"{common_templates.RESPONSE_PREFIX}{message}",
     )
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_PROFILE_NO_CHANGE,
@@ -759,7 +748,7 @@ async def handle_edit_profile_confirmation_continue_edit(
     await update.effective_message.edit_reply_markup()
     message = templates.BTN_LABEL_EDIT_CONTINUE
     await update.effective_message.reply_text(
-        text=f"{common_templates.RESPONSE_PREFIX}{message}", parse_mode=ParseMode.HTML
+        text=f"{common_templates.RESPONSE_PREFIX}{message}",
     )
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_WHAT_TO_EDIT,
@@ -811,7 +800,6 @@ async def _show_coliving_profile(
 
     await current_chat.send_message(
         text=message_text,
-        parse_mode=ParseMode.HTML,
         reply_markup=keyboard,
     )
 
@@ -893,7 +881,6 @@ async def handle_delete_coliving_confirmation_confirm(
     await update.effective_message.edit_reply_markup()
     await update.effective_message.reply_text(
         text=f"{common_templates.RESPONSE_PREFIX}{update.callback_query.data}",
-        parse_mode=ParseMode.HTML,
     )
     coliving = context.user_data["coliving_info"]
     await api_service.delete_coliving(coliving.id)
@@ -911,7 +898,7 @@ async def handle_delete_coliving_confirmation_cancel(
     await update.effective_message.edit_reply_markup()
     answer = templates.BTN_LABEL_DELETE_CANCEL
     await update.effective_message.reply_text(
-        text=f"{common_templates.RESPONSE_PREFIX}{answer}", parse_mode=ParseMode.HTML
+        text=f"{common_templates.RESPONSE_PREFIX}{answer}",
     )
     context.user_data.clear()
     await update.effective_message.reply_text(

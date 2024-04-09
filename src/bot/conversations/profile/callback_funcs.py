@@ -4,7 +4,6 @@ from typing import Optional, Union
 
 from httpx import HTTPStatusError, codes
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, Update
-from telegram.constants import ParseMode
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
 import conversations.common_functions.common_buttons as common_buttons
@@ -83,7 +82,7 @@ async def send_question_to_profile_is_visible_in_search(
     else:
         message_text = common_templates.FORM_IS_NOT_VISIBLE
     await update.effective_message.reply_text(
-        text=message_text, parse_mode=ParseMode.HTML
+        text=message_text,
     )
     await api_service.update_user_profile(update.effective_chat.id, context.user_data)
 
@@ -302,7 +301,8 @@ async def _look_at_profile(
     if new_photos:
         media_group = [InputMediaPhoto(file_id) for file_id in new_photos]
         await update.effective_chat.send_media_group(
-            media=media_group, caption=message_text, parse_mode=ParseMode.HTML
+            media=media_group,
+            caption=message_text,
         )
         context.user_data[templates.RECEIVED_PHOTOS_FIELD] = new_photos.copy()
         context.user_data["new_photo"] = []
@@ -310,13 +310,12 @@ async def _look_at_profile(
     elif received_photo:
         media_group = [InputMediaPhoto(file_id) for file_id in received_photo]
         await update.effective_chat.send_media_group(
-            media=media_group, caption=message_text, parse_mode=ParseMode.HTML
+            media=media_group,
+            caption=message_text,
         )
     else:
         # Если фото нет, отправляем только текст
-        await update.effective_chat.send_message(
-            text=message_text, parse_mode=ParseMode.HTML
-        )
+        await update.effective_chat.send_message(text=message_text)
 
     # Отправляем сообщение с вопросом после предварительного просмотра
     await context.bot.send_message(
@@ -476,7 +475,6 @@ async def send_question_to_edit_sex(
     await update.effective_message.reply_text(
         text=templates.ASK_SEX,
         reply_markup=keyboards.SEX_KEYBOARD,
-        parse_mode=ParseMode.HTML,
     )
 
     return States.EDIT_SEX
@@ -757,7 +755,6 @@ async def send_profile_saved_notification(
     """
     await update.effective_message.reply_text(
         text=templates.FORM_SAVED,
-        parse_mode=ParseMode.HTML,
     )
 
 
@@ -785,5 +782,5 @@ async def _send_chosen_choice_and_remove_buttons(update: Update) -> None:
     choice_text = callback_query.data
     await callback_query.message.edit_reply_markup()
     await callback_query.message.reply_text(
-        text=f"{RESPONSE_PREFIX}{choice_text}", parse_mode=ParseMode.HTML
+        text=f"{RESPONSE_PREFIX}{choice_text}",
     )
