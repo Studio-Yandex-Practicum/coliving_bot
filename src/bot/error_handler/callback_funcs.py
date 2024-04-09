@@ -2,7 +2,6 @@ import logging
 
 from httpx import HTTPStatusError
 from telegram import Update
-from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
 from error_handler.templates import ERROR_MESSAGE_TEMPLATE, LOGGING_MESSAGE_TEMPLATE
@@ -24,9 +23,7 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> N
     message = ERROR_MESSAGE_TEMPLATE.format(error=context.error)
 
     if isinstance(update, Update):
-        await update.effective_chat.send_message(
-            text=message, parse_mode=ParseMode.HTML
-        )
+        await update.effective_chat.send_message(text=message)
 
 
 async def _add_http_status_error_content(context, error_text):

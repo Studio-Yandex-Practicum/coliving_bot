@@ -1,7 +1,6 @@
 from typing import Optional
 
 from telegram import InlineKeyboardMarkup, InputMediaPhoto, Update
-from telegram.constants import ParseMode
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
 import conversations.coliving.keyboards as keyboards
@@ -23,7 +22,6 @@ from internal_requests.service import ColivingNotFound
 
 
 @profile_required
-@add_response_prefix
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Первое сообщение от бота после нажатия кнопки Коливинг в меню.
@@ -100,7 +98,7 @@ async def handle_is_visible_switching(update: Update, context: CallbackContext) 
     else:
         message_text = common_templates.FORM_IS_NOT_VISIBLE
     await update.effective_message.reply_text(
-        text=message_text, parse_mode=ParseMode.HTML
+        text=message_text,
     )
 
     context.user_data["coliving_info"] = await api_service.update_coliving_info(
@@ -138,10 +136,10 @@ async def handle_coliving_roommates(
     return ConversationHandler.END
 
 
-async def handle_coliving_views(
+async def handle_assign_roommate(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
-    """Обработка ответа: Просмотры."""
+    """Обработка ответа: Прикрепить жильца."""
     #############################################################
     # запрос к API
     # заглушка
@@ -254,7 +252,6 @@ async def handle_room_type(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     return States.ABOUT_ROOM
 
 
-@add_response_prefix
 async def handle_about_coliving(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -283,7 +280,6 @@ async def handle_about_coliving(
     return States.PRICE
 
 
-@add_response_prefix
 async def handle_price(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Ввод цены за спальное место коливинг профиля
@@ -333,7 +329,6 @@ async def handle_photo_room(
     if len(context.user_data["coliving_info"].images) == templates.PHOTO_MAX_NUMBER:
         state = await send_received_room_photos(update, context)
         return state
-    return None  # А здесь надо None возвращать????
 
 
 async def handle_confirm_or_cancel_profile_text_instead_of_button(
@@ -424,7 +419,7 @@ async def handle_is_visible_coliving_profile_yes(
         respond = templates.REPLY_BTN_SHOW
     else:
         respond = templates.REPLY_BTN_HIDE
-    await update.effective_message.reply_text(text=respond, parse_mode=ParseMode.HTML)
+    await update.effective_message.reply_text(text=respond)
     return await save_coliving_info_to_db(update, context)
 
 
@@ -497,7 +492,6 @@ async def handle_what_to_edit_room_type(
     return States.EDIT_ROOM_TYPE
 
 
-@add_response_prefix
 async def handle_what_to_edit_about_room(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -514,7 +508,6 @@ async def handle_what_to_edit_about_room(
     return States.EDIT_ABOUT_ROOM
 
 
-@add_response_prefix
 async def handle_what_to_edit_price(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -530,7 +523,6 @@ async def handle_what_to_edit_price(
     return States.EDIT_PRICE
 
 
-@add_response_prefix
 async def handle_what_to_edit_photo_room(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -585,7 +577,6 @@ async def handle_edit_select_room_type(
     return States.EDIT_CONFIRMATION
 
 
-@add_response_prefix
 async def handle_edit_about_coliving(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -616,7 +607,6 @@ async def handle_edit_about_coliving(
     return States.EDIT_CONFIRMATION
 
 
-@add_response_prefix
 async def handle_edit_price(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Редактирование цены коливинга."""
 
@@ -782,7 +772,6 @@ async def _show_coliving_profile(
 
     await current_chat.send_message(
         text=message_text,
-        parse_mode=ParseMode.HTML,
         reply_markup=keyboard,
     )
 

@@ -165,6 +165,9 @@ cython_debug/
 
 # Ignore macOS .DS_Store files (metadata files that store custom attributes of a folder's contents)
 .DS_Store
+.AppleDouble
+.LSOverride
+
 
 # Directories with static and media
 static/
