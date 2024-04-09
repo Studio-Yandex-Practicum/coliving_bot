@@ -1,11 +1,11 @@
 MIN_AGE = 18
 MAX_AGE = 99
-MIN_NAME_LENGTH = 3
+MIN_NAME_LENGTH = 2
 MAX_NAME_LENGTH = 30
 MIN_ABOUT_LENGTH = 0
 MAX_ABOUT_LENGTH = 1000
-NAME_PATTERN = "^[А-Яа-яA-Za-z'-]+$"
-AGE_PATTERN = "^([0-9]{3})$"
+NAME_PATTERN = r"^[А-Яа-яA-Za-z\s'-]+$"
+AGE_PATTERN = r"^([0-9]{3})$"
 
 AGE_FIELD = "age"
 SEX_FIELD = "sex"
