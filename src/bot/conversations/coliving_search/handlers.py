@@ -1,37 +1,50 @@
 from telegram.ext import (
     CallbackQueryHandler,
-    CommandHandler,
     ConversationHandler,
     MessageHandler,
     filters,
 )
 
-import conversations.roommate_search.buttons as buttons
-import conversations.roommate_search.callback_funcs as callbacks
-from conversations.common_functions import common_buttons
-from conversations.menu.buttons import SEARCH_NEIGHBOR_BUTTON
-from conversations.roommate_search.buttons import AGE_RANGE_CALLBACK_PATTERN
-from conversations.roommate_search.states import States
-from conversations.roommate_search.validators import (
+import conversations.coliving_search.buttons as buttons
+import conversations.coliving_search.callback_funcs as callbacks
+import conversations.coliving_search.states as states
+import conversations.common_functions.common_buttons as common_buttons
+import conversations.common_functions.common_funcs as common_funcs
+from conversations.coliving_search.validators import (
     handle_text_input_instead_of_choosing_button,
 )
+from conversations.menu.buttons import SEARCH_COLIVING_BUTTON
 
-roommate_search_handler: ConversationHandler = ConversationHandler(
+coliving_search_handler: ConversationHandler = ConversationHandler(
     entry_points=[
-        CallbackQueryHandler(callbacks.start, rf"^{SEARCH_NEIGHBOR_BUTTON}$")
+        CallbackQueryHandler(callbacks.start, rf"^{SEARCH_COLIVING_BUTTON}$")
     ],
     states={
-        States.AGE: [
+        states.ROOM_TYPE: [
             CallbackQueryHandler(
-                callback=callbacks.set_age,
-                pattern=AGE_RANGE_CALLBACK_PATTERN,
+                callback=callbacks.set_room_type,
+                pattern=rf"^({buttons.TYPE_ROOM_BTN}|{buttons.TYPE_BED_BTN})$",
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
                 handle_text_input_instead_of_choosing_button,
             ),
         ],
-        States.LOCATION: [
+        states.COST_MIN: [
+            MessageHandler(
+                filters.Regex(r"^(\d*)$") & ~filters.COMMAND,
+                callbacks.set_cost_min,
+            ),
+            MessageHandler(filters.TEXT & ~filters.COMMAND, callbacks.set_cost_min),
+        ],
+        states.COST_MAX: [
+            MessageHandler(
+                filters.Regex(r"^(\d*)$") & ~filters.COMMAND,
+                callbacks.set_cost_max,
+            ),
+            MessageHandler(filters.TEXT & ~filters.COMMAND, callbacks.set_cost_max),
+        ],
+        states.LOCATION: [
             CallbackQueryHandler(
                 callback=callbacks.set_location,
                 pattern=common_buttons.LOCATION_CALLBACK_PATTERN,
@@ -41,24 +54,24 @@ roommate_search_handler: ConversationHandler = ConversationHandler(
                 handle_text_input_instead_of_choosing_button,
             ),
         ],
-        States.NEXT_PROFILE: [
+        states.NEXT_COLIVING: [
             CallbackQueryHandler(
-                callback=callbacks.next_profile,
+                callback=callbacks.next_coliving,
                 pattern=rf"^{buttons.YES_BTN}$",
             ),
             CallbackQueryHandler(
-                callback=callbacks.end_of_search,
-                pattern=rf"^{buttons.NO_BTN}$",
+                callback=callbacks.handle_return_to_menu_response,
+                pattern=rf"^{buttons.TO_MENU_BTN}$",
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
                 handle_text_input_instead_of_choosing_button,
             ),
         ],
-        States.NO_MATCHES: [
+        states.NO_MATCHES: [
             CallbackQueryHandler(
-                callback=callbacks.end_of_search,
-                pattern=rf"^{buttons.WAIT_BTN}$",
+                callback=callbacks.handle_return_to_menu_response,
+                pattern=rf"^{buttons.TO_MENU_BTN}$",
             ),
             CallbackQueryHandler(
                 callback=callbacks.edit_settings,
@@ -69,31 +82,25 @@ roommate_search_handler: ConversationHandler = ConversationHandler(
                 handle_text_input_instead_of_choosing_button,
             ),
         ],
-        States.PROFILE: [
+        states.COLIVING: [
             MessageHandler(
                 filters=filters.Regex(rf"^{buttons.LIKE_BTN}$"),
-                callback=callbacks.profile_like,
+                callback=callbacks.coliving_like,
             ),
             MessageHandler(
                 filters=filters.Regex(rf"^{buttons.DISLIKE_BTN}$"),
-                callback=callbacks.next_profile,
+                callback=callbacks.next_coliving,
+            ),
+            MessageHandler(
+                filters=filters.Regex(rf"^{buttons.TO_MENU_BTN}$"),
+                callback=callbacks.handle_return_to_menu_response,
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
                 handle_text_input_instead_of_choosing_button,
             ),
         ],
-        States.SEX: [
-            CallbackQueryHandler(
-                callback=callbacks.set_sex,
-                pattern=rf"^({buttons.MALE_BTN}|{buttons.FEMALE_BTN})$",
-            ),
-            MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
-                handle_text_input_instead_of_choosing_button,
-            ),
-        ],
-        States.SEARCH_SETTINGS: [
+        states.SEARCH_SETTINGS: [
             CallbackQueryHandler(
                 callback=callbacks.ok_settings,
                 pattern=rf"^{buttons.OK_SETTINGS_BTN}$",
@@ -102,11 +109,20 @@ roommate_search_handler: ConversationHandler = ConversationHandler(
                 callback=callbacks.edit_settings,
                 pattern=rf"^{buttons.EDIT_SETTINGS_BTN}$",
             ),
+            CallbackQueryHandler(
+                callback=callbacks.handle_return_to_menu_response,
+                pattern=rf"^{buttons.TO_MENU_BTN}$",
+            ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
                 handle_text_input_instead_of_choosing_button,
             ),
         ],
     },
-    fallbacks=[CommandHandler("cancel", callbacks.end_of_search)],
+    fallbacks=[
+        CallbackQueryHandler(
+            callback=common_funcs.cancel,
+            pattern=rf"^{common_buttons.CANCEL_BUTTON}",
+        ),
+    ],
 )

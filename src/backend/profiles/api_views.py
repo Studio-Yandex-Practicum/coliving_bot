@@ -1,7 +1,10 @@
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
 
 from profiles.filters import ColivingFilter
+from profiles.mixins import DestroyWithMediaRemovalMixin
 from profiles.models import Coliving, Location, Profile, UserFromTelegram
 from profiles.serializers import (
     ColivingSerializer,
@@ -12,7 +15,9 @@ from profiles.serializers import (
 
 
 class ProfileView(
-    generics.CreateAPIView, generics.RetrieveAPIView, generics.UpdateAPIView
+    generics.CreateAPIView,
+    generics.RetrieveAPIView,
+    generics.UpdateAPIView,
 ):
     """
     Вью-класс для отображения, сохранения и обновления объектов 'Profile'.
@@ -50,8 +55,27 @@ class ColivingView(generics.ListCreateAPIView):
     filter_backends = [DjangoFilterBackend]
     filterset_class = ColivingFilter
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
 
-class ColivingDetailView(generics.RetrieveUpdateAPIView):
+        viewer = self.request.query_params.get("viewer", None)
+        if viewer:
+            try:
+                user = UserFromTelegram.objects.get(telegram_id=viewer)
+            except ObjectDoesNotExist:
+                user = None
+
+            excl_list = Coliving.objects.filter(
+                Q(host=user) | Q(viewers=user)
+            ).values_list("pk", flat=True)
+            queryset = queryset.exclude(pk__in=excl_list)
+
+        return queryset.filter(is_visible=True)
+
+
+class ColivingDetailView(
+    DestroyWithMediaRemovalMixin, generics.RetrieveUpdateDestroyAPIView
+):
     """Apiview для обновления Coliving."""
 
     queryset = Coliving.objects.select_related("location", "host").all()

@@ -5,6 +5,7 @@ from conversations.common_functions.common_buttons import (
     LOCATION_PREFIX,
     ROOM_TYPE_PREFIX,
 )
+from conversations.common_functions.common_keyboards import HIDE_BUTTON, SEARCH_BUTTON
 from conversations.common_functions.common_templates import RETURN_TO_MENU_BTN_LABEL
 from internal_requests import api_service
 
@@ -20,12 +21,12 @@ ROOM_TYPE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         InlineKeyboardButton(
             text=templates.BTN_LABEL_BED_IN_ROOM,
-            callback_data=(f"{ROOM_TYPE_PREFIX}:{templates.BTN_LABEL_BED_IN_ROOM}"),
+            callback_data=f"{ROOM_TYPE_PREFIX}:{templates.BTN_LABEL_BED_IN_ROOM}",
         ),
         InlineKeyboardButton(
-            text=templates.BTN_LABEL_ROOM_IN_APPARTMENT,
+            text=templates.BTN_LABEL_ROOM_IN_APARTMENT,
             callback_data=(
-                f"{ROOM_TYPE_PREFIX}:{templates.BTN_LABEL_ROOM_IN_APPARTMENT}"
+                f"{ROOM_TYPE_PREFIX}:{templates.BTN_LABEL_ROOM_IN_APARTMENT}"
             ),
         ),
     )
@@ -36,10 +37,13 @@ EDIT_PROFILE_KEYBOARD = InlineKeyboardButton(
     callback_data=templates.BTN_LABEL_EDIT_PROFILE_KEYBOARD,
 )
 
-CONFIRM_OR_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
+CONFIRM_OR_CANCEL_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         CONFIRMATION_KEYBOARD,
-        EDIT_PROFILE_KEYBOARD,
+        InlineKeyboardButton(
+            text=templates.BTN_LABEL_CANCEL_CREATE,
+            callback_data=templates.BTN_LABEL_CANCEL_CREATE,
+        ),
     )
 )
 
@@ -72,20 +76,10 @@ WHAT_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     )
 )
 
-SHOW_SEARCH_KEYBOARD = InlineKeyboardButton(
-    text=templates.BTN_LABEL_SHOW,
-    callback_data="True",
-)
-
-HIDE_SEARCH_KEYBOARD = InlineKeyboardButton(
-    text=templates.BTN_LABEL_HIDE_SEARCH_KEYBOARD,
-    callback_data="False",
-)
-
 IS_VISIBLE_OR_NOT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
-        SHOW_SEARCH_KEYBOARD,
-        HIDE_SEARCH_KEYBOARD,
+        HIDE_BUTTON,
+        SEARCH_BUTTON,
     )
 )
 
@@ -103,44 +97,34 @@ EDIT_CONFIRMATION_KEYBOARD = InlineKeyboardMarkup.from_column(
     )
 )
 
+COLIVING_PROFILE_DUPLICATE_BUTTONS = [
+    InlineKeyboardButton(
+        text=templates.BTN_LABEL_ROOMMATES, callback_data=templates.BTN_ROOMMATES
+    ),
+    InlineKeyboardButton(
+        text=templates.BTN_LABEL_ASSIGN_ROOMMATE,
+        callback_data=templates.BTN_ASSIGN_ROOMMATE,
+    ),
+    InlineKeyboardButton(
+        text=templates.BTN_LABEL_TRANSFER_TO,
+        callback_data=templates.BTN_TRANSFER_TO,
+    ),
+    EDIT_PROFILE_KEYBOARD,
+    InlineKeyboardButton(
+        text=templates.BTN_LABEL_DELETE_PROFILE_KEYBOARD,
+        callback_data=templates.BTN_LABEL_DELETE_PROFILE_KEYBOARD,
+    ),
+    InlineKeyboardButton(
+        text=RETURN_TO_MENU_BTN_LABEL, callback_data=templates.BTN_GO_TO_MENU
+    ),
+]
+
 COLIVING_PROFILE_KEYBOARD_VISIBLE = InlineKeyboardMarkup.from_column(
-    button_column=(
-        EDIT_PROFILE_KEYBOARD,
-        HIDE_SEARCH_KEYBOARD,
-        InlineKeyboardButton(
-            text=templates.BTN_LABEL_ROOMMATES, callback_data=templates.BTN_ROOMMATES
-        ),
-        InlineKeyboardButton(
-            text=templates.BTN_LABEL_VIEWS, callback_data=templates.BTN_VIEWS
-        ),
-        InlineKeyboardButton(
-            text=templates.BTN_LABEL_TRANSFER_TO,
-            callback_data=templates.BTN_TRANSFER_TO,
-        ),
-        InlineKeyboardButton(
-            text=RETURN_TO_MENU_BTN_LABEL, callback_data=templates.BTN_GO_TO_MENU
-        ),
-    )
+    button_column=(SEARCH_BUTTON, *COLIVING_PROFILE_DUPLICATE_BUTTONS)
 )
 
 COLIVING_PROFILE_KEYBOARD_NOT_VISIBLE = InlineKeyboardMarkup.from_column(
-    button_column=(
-        EDIT_PROFILE_KEYBOARD,
-        SHOW_SEARCH_KEYBOARD,
-        InlineKeyboardButton(
-            text=templates.BTN_LABEL_ROOMMATES, callback_data=templates.BTN_ROOMMATES
-        ),
-        InlineKeyboardButton(
-            text=templates.BTN_LABEL_VIEWS, callback_data=templates.BTN_VIEWS
-        ),
-        InlineKeyboardButton(
-            text=templates.BTN_LABEL_TRANSFER_TO,
-            callback_data=templates.BTN_TRANSFER_TO,
-        ),
-        InlineKeyboardButton(
-            text=RETURN_TO_MENU_BTN_LABEL, callback_data=templates.BTN_GO_TO_MENU
-        ),
-    )
+    button_column=(HIDE_BUTTON, *COLIVING_PROFILE_DUPLICATE_BUTTONS)
 )
 
 INVITE_ROOMMATES_PROFILE_KEYBOARD = InlineKeyboardButton(
@@ -173,7 +157,8 @@ REPORT_ROOMMATES_PROFILE_KEYBOARD = InlineKeyboardButton(
 )
 
 CONFIRMATION_DELETE_KEYBOARD = InlineKeyboardButton(
-    text=templates.BTN_LABEL_DELETE_CONFIRM, callback_data=templates.BTN_DELETE_CONFIRM
+    text=templates.BTN_LABEL_DELETE_CONFIRM,
+    callback_data=templates.BTN_LABEL_DELETE_CONFIRM,
 )
 
 ROOMMATES_INVITE_REPORT_KEYBOARD = InlineKeyboardMarkup.from_column(
@@ -201,6 +186,38 @@ REPORT_OR_CANCEL_ROOMMATES_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         REPORT_ROOMMATES_PROFILE_KEYBOARD,
         CANCEL_KEYBOARD,
+    )
+)
+
+SAVE_OR_CANCEL_PHOTO_KEYBOARD = InlineKeyboardMarkup.from_column(
+    button_column=(
+        InlineKeyboardButton(
+            text=templates.SAVE_PHOTO_BUTTON, callback_data=templates.SAVE_PHOTO_BUTTON
+        ),
+        CANCEL_KEYBOARD,
+    )
+)
+
+SAVE_OR_CANCEL_NEW_PHOTO_KEYBOARD = InlineKeyboardMarkup.from_column(
+    button_column=(
+        InlineKeyboardButton(
+            text=templates.SAVE_EDITED_PHOTO_BUTTON,
+            callback_data=templates.SAVE_EDITED_PHOTO_BUTTON,
+        ),
+        CANCEL_KEYBOARD,
+    )
+)
+
+DELETE_OR_CANCEL_COLIVING_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
+    button_column=(
+        InlineKeyboardButton(
+            text=templates.BTN_LABEL_DELETE_CONFIRM,
+            callback_data=templates.BTN_LABEL_DELETE_CONFIRM,
+        ),
+        InlineKeyboardButton(
+            text=templates.BTN_LABEL_DELETE_CANCEL,
+            callback_data=templates.BTN_LABEL_DELETE_CANCEL,
+        ),
     )
 )
 

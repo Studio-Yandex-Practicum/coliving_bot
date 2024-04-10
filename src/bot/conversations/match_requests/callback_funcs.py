@@ -1,5 +1,4 @@
 from telegram import Update
-from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
 
 # import conversations.match_requests.buttons as buttons
@@ -80,13 +79,11 @@ async def link_sender_to_reciver(
     await context.bot.send_message(
         chat_id=sender_id,
         text=templates.SEND_RECIVER,
-        parse_mode=ParseMode.HTML,
     )
 
     await context.bot.send_message(
         chat_id=receiver_id,
         text=templates.SEND_SENDER,
-        parse_mode=ParseMode.HTML,
     )
 
     return ConversationHandler.END

@@ -7,9 +7,11 @@ from httpx import AsyncClient, Response
 
 from internal_requests.entities import (
     Coliving,
+    ColivingSearchSettings,
     Image,
     Location,
-    SearchSettings,
+    MatchedUser,
+    ProfileSearchSettings,
     UserProfile,
 )
 
@@ -67,23 +69,26 @@ class APIService:
     async def save_coliving_info(self, coliving: Coliving) -> Coliving:
         """Запрос на сохранение коливинга в БД."""
         endpoint_urn = "colivings/"
-        images = coliving.images.copy()
+        images = coliving.images[:5].copy()
         coliving.images.clear()
         data = asdict(coliving)
         response = await self._post_request(endpoint_urn=endpoint_urn, data=data)
         created_coliving = await self._parse_response_to_coliving(response.json())
+        await self.save_coliving_photo(images, created_coliving)
+        return created_coliving
+
+    async def save_coliving_photo(self, images, coliving: Coliving) -> int:
+        """Запрос на сохранение фото коливинга в БД."""
         for image in images:
             file = await image.photo_size.get_file()
             photo_bytearray = await file.download_as_bytearray()
             await self.save_photo(
-                telegram_id=created_coliving.host,
+                telegram_id=coliving.host,
                 photo_bytearray=photo_bytearray,
                 filename=file.file_path,
                 file_id=image.file_id,
-                coliving_id=created_coliving.id,
+                coliving_id=coliving.id,
             )
-            created_coliving.images.append(Image(file_id=image.file_id))
-        return created_coliving
 
     async def get_coliving_info_by_user(self, telegram_id: int) -> Coliving:
         """
@@ -120,6 +125,22 @@ class APIService:
         data = {"residence": residence_id}
         return await self._patch_request(endpoint_urn=endpoint_urn, data=data)
 
+    async def get_potential_roommates(
+        self,
+        telegram_id: int,
+    ) -> List[MatchedUser]:
+        """
+        Выводит список потенциальных жильцов
+        для данного коливинга - всех пользователей,
+        у кого есть мэтч с данным telegram_id.
+        """
+        endpoint_urn = f"users/{telegram_id}/matches/"
+        response = await self._get_request(endpoint_urn=endpoint_urn)
+        result = []
+        for matched_user in response.json():
+            result.append(MatchedUser(**matched_user))
+        return result
+
     async def get_user_profile_by_telegram_id(
         self, telegram_id: int
     ) -> Optional[UserProfile]:
@@ -133,7 +154,7 @@ class APIService:
         return UserProfile(**response.json())
 
     async def get_filtered_user_profiles(
-        self, filters: SearchSettings, viewer: int
+        self, filters: ProfileSearchSettings, viewer: int
     ) -> List[UserProfile]:
         """
         Получение отфильтрованных анкет пользователей.
@@ -148,6 +169,26 @@ class APIService:
         result = []
         for profile in response.json():
             result.append(UserProfile(**profile))
+        return result
+
+    async def get_filtered_colivings(
+        self, filters: ColivingSearchSettings, viewer: int
+    ) -> List[Coliving]:
+        """
+        Получение отфильтрованных объявлений коливинга.
+
+        :param filters: Значения для query-параметров поиска
+        :param viewer: Telegram ID пользователя, осуществляющего поиск
+        :return: Коливинги, подходящие по фильтрам
+        """
+        params_dict = {k: v for k, v in asdict(filters).items() if v is not None}
+        search_params = urlencode(params_dict)
+        response = await self._get_request(
+            f"colivings/?{search_params}&viewer={viewer}"
+        )
+        result = []
+        for coliving in response.json():
+            result.append(Coliving(**coliving))
         return result
 
     async def create_user_profile(
@@ -174,11 +215,20 @@ class APIService:
         """
         return await self._profile_request(telegram_id, data, method="patch")
 
-    async def delete_coliving_photos(self, coliving_id: int) -> Response:
+    async def delete_coliving(self, coliving_id: int) -> Response:
+        """
+        Удаляет профиль коливинга.
+        """
+        endpoint_urn = f"colivings/{coliving_id}/"
+        return await self._delete_request(endpoint_urn)
+
+    async def delete_coliving_photos(
+        self, coliving_id: int, telegram_id: int
+    ) -> Response:
         """
         Удаляет все фотографии, связанные с конкретным коливингом.
         """
-        endpoint_urn = f"colivings/{coliving_id}/images/"
+        endpoint_urn = f"users/{telegram_id}/colivings/{coliving_id}/images/"
         return await self._delete_request(endpoint_urn)
 
     async def delete_profile_photos(self, telegram_id: int) -> Response:
@@ -312,7 +362,9 @@ class APIService:
     async def _parse_response_to_coliving(response_json: object) -> Coliving:
         """Парсит полученный json, упаковывая в датакласс Coliving."""
         if not isinstance(response_json, dict):
-            ValueError("Возможно было получено несколько записей, ожидалась одна.")
+            raise ValueError(
+                "Возможно было получено несколько записей, ожидалась одна."
+            )
         images = response_json.pop("images")
         coliving_info = Coliving(**response_json)
         if images:

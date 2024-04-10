@@ -6,19 +6,20 @@ from telegram.ext import (
 )
 
 import conversations.coliving.callback_funcs as callback_funcs
-import conversations.coliving.states as states
 import conversations.coliving.templates as templates
 import conversations.common_functions.common_buttons as common_buttons
 import conversations.common_functions.common_funcs as common_funcs
+from conversations.coliving.states import States
+from conversations.menu.buttons import COLIVING_BUTTON
 
 coliving_handler: ConversationHandler = ConversationHandler(
     entry_points=[
         CallbackQueryHandler(
-            pattern=rf"^{templates.COLIVING_START_BTN}$", callback=callback_funcs.start
+            pattern=rf"^{COLIVING_BUTTON}$", callback=callback_funcs.start
         ),
     ],
     states={
-        states.LOCATION: [
+        States.LOCATION: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_location,
                 pattern=common_buttons.LOCATION_CALLBACK_PATTERN,
@@ -28,7 +29,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 callback_funcs.handle_location_text_input_instead_of_choosing_button,
             ),
         ],
-        states.ROOM_TYPE: [
+        States.ROOM_TYPE: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_room_type,
                 pattern=common_buttons.ROOM_TYPE_CALLBACK_PATTERN,
@@ -38,12 +39,12 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 callback_funcs.handle_room_type_text_input_instead_of_choosing_button,
             ),
         ],
-        states.ABOUT_ROOM: [
+        States.ABOUT_ROOM: [
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND, callback_funcs.handle_about_coliving
             ),
         ],
-        states.PRICE: [
+        States.PRICE: [
             MessageHandler(
                 filters.Regex(r"^(\d*)$") & ~filters.COMMAND,
                 callback_funcs.handle_price,
@@ -52,27 +53,31 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 filters.TEXT & ~filters.COMMAND, callback_funcs.handle_price
             ),
         ],
-        states.PHOTO_ROOM: [
+        States.PHOTO_ROOM: [
             MessageHandler(
                 filters.PHOTO | filters.TEXT & ~filters.COMMAND,
                 callback_funcs.handle_photo_room,
             ),
+            CallbackQueryHandler(
+                pattern=rf"^{templates.SAVE_PHOTO_BUTTON}",
+                callback=callback_funcs.send_received_room_photos,
+            ),
         ],
-        states.CONFIRMATION: [
+        States.CONFIRMATION: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_confirm_or_edit_reply_confirm,
                 pattern=rf"^{templates.BTN_LABEL_CONFIRM}",
             ),
             CallbackQueryHandler(
-                callback=callback_funcs.handle_confirm_or_edit_reply_edit_profile,
-                pattern=rf"^{templates.BTN_LABEL_EDIT_PROFILE_KEYBOARD}",
+                callback=callback_funcs.handle_profile_confirmation_cancel,
+                pattern=rf"^{templates.BTN_LABEL_CANCEL_CREATE}",
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
-                callback_funcs.handle_confirm_or_edit_profile_text_instead_of_button,
+                callback_funcs.handle_confirm_or_cancel_profile_text_instead_of_button,
             ),
         ],
-        states.EDIT: [
+        States.EDIT: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_what_to_edit_fill_again,
                 pattern=rf"^{templates.BTN_LABEL_FILL_AGAIN}",
@@ -102,17 +107,17 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 callback_funcs.handle_what_to_edit_text_instead_of_button,
             ),
         ],
-        states.IS_VISIBLE: [
+        States.IS_VISIBLE: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_is_visible_coliving_profile_yes,
-                pattern=r"^(True|False)$",
+                pattern=r"^is_visible:(True|False)$",
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
                 callback_funcs.repeat_question_about_coliving_visibility,
             ),
         ],
-        states.EDIT_LOCATION: [
+        States.EDIT_LOCATION: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_edit_location,
                 pattern=common_buttons.LOCATION_CALLBACK_PATTERN,
@@ -122,7 +127,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 callback_funcs.handle_location_text_input_instead_of_choosing_button,
             ),
         ],
-        states.EDIT_ROOM_TYPE: [
+        States.EDIT_ROOM_TYPE: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_edit_select_room_type,
                 pattern=common_buttons.ROOM_TYPE_CALLBACK_PATTERN,
@@ -132,13 +137,13 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 callback_funcs.handle_room_type_text_input_instead_of_choosing_button,
             ),
         ],
-        states.EDIT_ABOUT_ROOM: [
+        States.EDIT_ABOUT_ROOM: [
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
                 callback_funcs.handle_edit_about_coliving,
             ),
         ],
-        states.EDIT_PRICE: [
+        States.EDIT_PRICE: [
             MessageHandler(
                 filters.Regex(r"^(\d*)$") & ~filters.COMMAND,
                 callback_funcs.handle_edit_price,
@@ -148,17 +153,21 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 callback_funcs.handle_edit_price,
             ),
         ],
-        states.EDIT_PHOTO_ROOM: [
+        States.EDIT_PHOTO_ROOM: [
             MessageHandler(
                 filters.PHOTO,
                 callback_funcs.handle_edit_photo_room,
+            ),
+            CallbackQueryHandler(
+                pattern=rf"^{templates.SAVE_EDITED_PHOTO_BUTTON}",
+                callback=callback_funcs.send_edited_room_photos,
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
                 callback_funcs.handle_edit_photo_room,
             ),
         ],
-        states.EDIT_CONFIRMATION: [
+        States.EDIT_CONFIRMATION: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_edit_profile_confirmation_confirm,
                 pattern=rf"^{templates.BTN_LABEL_CONFIRM}",
@@ -176,25 +185,44 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 callback_funcs.handle_edit_profile_confirmation_text_instead_of_button,
             ),
         ],
-        states.COLIVING: [
+        States.DELETE_COLIVING: [
+            CallbackQueryHandler(
+                callback=callback_funcs.handle_delete_coliving_confirmation_confirm,
+                pattern=rf"^{templates.BTN_LABEL_DELETE_CONFIRM}",
+            ),
+            CallbackQueryHandler(
+                callback=callback_funcs.handle_delete_coliving_confirmation_cancel,
+                pattern=rf"^{templates.BTN_LABEL_DELETE_CANCEL}",
+            ),
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND,
+                callback_funcs.handle_delete_profile,
+            ),
+        ],
+        States.COLIVING: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_coliving_edit,
                 pattern=rf"^{templates.BTN_LABEL_EDIT_PROFILE_KEYBOARD}",
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.handle_is_visible_switching,
-                pattern=r"^(False|True)$",
+                pattern=r"^is_visible:(True|False)$",
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.handle_coliving_roommates,
                 pattern=r"^roommates_profiles",
             ),
             CallbackQueryHandler(
-                callback=callback_funcs.handle_coliving_views, pattern=r"^views"
+                callback=callback_funcs.handle_assign_roommate,
+                pattern=r"^assign_roommate",
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.handle_coliving_transfer_to,
                 pattern=r"^transfer_to",
+            ),
+            CallbackQueryHandler(
+                callback=callback_funcs.handle_delete_profile,
+                pattern=rf"^{templates.BTN_LABEL_DELETE_PROFILE_KEYBOARD}",
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.handle_return_to_menu_response,

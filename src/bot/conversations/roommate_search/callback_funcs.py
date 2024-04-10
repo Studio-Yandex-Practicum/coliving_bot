@@ -7,22 +7,24 @@ from telegram import (
     ReplyKeyboardRemove,
     Update,
 )
-from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
 
 import conversations.roommate_search.keyboards as keyboards
-import conversations.roommate_search.states as states
 import conversations.roommate_search.templates as templates
+from conversations.common_functions.common_funcs import profile_required
+from conversations.roommate_search.states import States
 from internal_requests import api_service
-from internal_requests.entities import SearchSettings, UserProfile
+from internal_requests.entities import ProfileSearchSettings, UserProfile
 
 
+@profile_required
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Начало ветви общения по поиску соседа.
     Проверяет, был ли настроен поиск ранее и, в зависимости от проверки,
     переводит либо в состояние подтверждения настроек, либо в настройку поиска.
     """
+
     search_settings = context.user_data.get("search_settings")
     if search_settings:
         await _message_edit(
@@ -33,7 +35,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             text=templates.ASK_SEARCH_SETTINGS,
             reply_markup=keyboards.SEARCH_SETTINGS_KEYBOARD,
         )
-        return states.SEARCH_SETTINGS
+        return States.SEARCH_SETTINGS
     state = await edit_settings(update, context)
     return state
 
@@ -62,7 +64,7 @@ async def edit_settings(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         text=templates.ASK_LOCATION,
         keyboard=context.bot_data["location_keyboard"],
     )
-    return states.LOCATION
+    return States.LOCATION
 
 
 async def set_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -71,13 +73,13 @@ async def set_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     Переводит в состояние выбора пола соседа.
     """
     location = update.callback_query.data.split(":")[1]
-    context.user_data["search_settings"] = SearchSettings(location=location)
+    context.user_data["search_settings"] = ProfileSearchSettings(location=location)
     await _message_edit(
         message=update.effective_message,
         text=templates.ASK_SEX,
         keyboard=keyboards.SEX_KEYBOARD,
     )
-    return states.SEX
+    return States.SEX
 
 
 async def set_sex(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -91,7 +93,7 @@ async def set_sex(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         text=templates.ASK_AGE,
         keyboard=keyboards.AGE_KEYBOARD,
     )
-    return states.AGE
+    return States.AGE
 
 
 async def set_age(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -121,7 +123,7 @@ async def set_age(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         text=templates.ASK_SEARCH_SETTINGS,
         reply_markup=keyboards.SEARCH_SETTINGS_KEYBOARD,
     )
-    return states.SEARCH_SETTINGS
+    return States.SEARCH_SETTINGS
 
 
 async def next_profile(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -154,22 +156,19 @@ async def profile_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     await context.bot.send_message(
         chat_id=sender_id,
         text=templates.SEND_LIKE,
-        parse_mode=ParseMode.HTML,
     )
 
     await context.bot.send_message(
         chat_id=receiver_id,
         text=templates.LIKE_NOTIFICATION,
         reply_markup=keyboards.LIKE_PROFILE,
-        parse_mode=ParseMode.HTML,
     )
 
     await update.effective_message.reply_text(
         text=templates.ASK_NEXT_PROFILE,
         reply_markup=keyboards.NEXT_PROFILE,
-        parse_mode=ParseMode.HTML,
     )
-    return states.NEXT_PROFILE
+    return States.NEXT_PROFILE
 
 
 async def end_of_search(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -181,7 +180,6 @@ async def end_of_search(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     await update.effective_chat.send_message(
         text=templates.END_OF_SEARCH,
         reply_markup=ReplyKeyboardRemove(),
-        parse_mode=ParseMode.HTML,
     )
     await _clear_roommate_search_context(context)
     return ConversationHandler.END
@@ -203,7 +201,6 @@ async def _get_next_user_profile(
             await update.effective_chat.send_message(
                 text=templates.SEARCH_INTRO,
                 reply_markup=keyboards.PROFILE_KEYBOARD,
-                parse_mode=ParseMode.HTML,
             )
         profile = asdict(user_profiles.pop())
         context.user_data["current_profile"] = profile
@@ -213,22 +210,21 @@ async def _get_next_user_profile(
         if images:
             media_group = [InputMediaPhoto(file_id) for file_id in images]
             await update.effective_chat.send_media_group(
-                media=media_group, caption=message_text, parse_mode=ParseMode.HTML
+                media=media_group,
+                caption=message_text,
             )
         else:
             await update.effective_chat.send_message(
                 text=message_text,
                 reply_markup=keyboards.PROFILE_KEYBOARD,
-                parse_mode=ParseMode.HTML,
             )
-        return states.PROFILE
+        return States.PROFILE
 
     await update.effective_message.reply_text(
         text=templates.NO_MATCHES,
         reply_markup=keyboards.NO_MATCHES_KEYBOARD,
-        parse_mode=ParseMode.HTML,
     )
-    return states.NO_MATCHES
+    return States.NO_MATCHES
 
 
 async def _message_edit(
@@ -239,7 +235,7 @@ async def _message_edit(
     """
     Функция для изменения текста и клавиатуры сообщения с ParseMode.HTML.
     """
-    await message.edit_text(text=text, reply_markup=keyboard, parse_mode=ParseMode.HTML)
+    await message.edit_text(text=text, reply_markup=keyboard)
 
 
 async def _clear_roommate_search_context(context):

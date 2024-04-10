@@ -1,4 +1,4 @@
-from internal_requests.entities import SearchSettings
+from internal_requests.entities import ProfileSearchSettings
 
 PROFILE_DATA = """
 <b>Имя:</b> {name}
@@ -37,7 +37,7 @@ SEND_LIKE = "Вы только что лайкнули {reciver_id.name}"
 BUTTON_ERROR_MSG = "Выбери соответствующий вариант."
 
 
-def format_search_settings_message(filters: SearchSettings) -> str:
+def format_search_settings_message(filters: ProfileSearchSettings) -> str:
     """Формирует сообщение с настройками поиска."""
     result = f"""
     <b>Текущие настройки поиска соседа:</b>

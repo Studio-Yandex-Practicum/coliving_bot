@@ -14,86 +14,103 @@ from search.models import MatchRequest, UserReport
 class ReportMatchViewTests(APITestCase):
     """Тесты для UserReportCreateView и MatchedUsersListView."""
 
-    empty_match_data = []
+    URL_REVERSE = reverse("api-v1:search:report")
+    AGE_25 = 25
+    REPORT_TEXT = "test_text"
+    CATEGORY_TEXT = "Категория 1"
+    TELEGR_ID_TXT = "telegram_id"
+    AGE_TXT = "age"
+    LOCATION_TXT = "location"
+    NAME_TXT = "name"
 
     @classmethod
     def setUpTestData(cls):
-        cls.test_user_1 = UserFromTelegram.objects.create(telegram_id=1)
-        cls.test_user_2 = UserFromTelegram.objects.create(telegram_id=2)
-        cls.test_user_3 = UserFromTelegram.objects.create(telegram_id=3)
-        cls.test_user_4 = UserFromTelegram.objects.create(telegram_id=4)
-        cls.test_user_5 = UserFromTelegram.objects.create(telegram_id=5)
-        cls.location = Location.objects.create(name="location")
-        cls.profile_1 = Profile.objects.create(
-            user=cls.test_user_1, name="test_1", age=25, location=cls.location
-        )
-        cls.profile_2 = Profile.objects.create(
-            user=cls.test_user_2, name="test_2", age=25, location=cls.location
-        )
-        cls.profile_3 = Profile.objects.create(
-            user=cls.test_user_3, name="test_3", age=25, location=cls.location
-        )
-        cls.profile_4 = Profile.objects.create(
-            user=cls.test_user_4, name="test_4", age=25, location=cls.location
-        )
-        cls.profile_5 = Profile.objects.create(
-            user=cls.test_user_5, name="test_5", age=25, location=cls.location
+        cls.t_users = [
+            UserFromTelegram.objects.create(telegram_id=id) for id in range(1, 6)
+        ]
+        cls.t_names = [f"test_{x}" for x in range(1, 6)]
+        cls.location = Location.objects.create(name=cls.LOCATION_TXT)
+        ProfileTestData = namedtuple(
+            "ProfileTestData", ["user", cls.NAME_TXT, cls.AGE_TXT, cls.LOCATION_TXT]
         )
 
+        profiles_data = (
+            ProfileTestData(cls.t_users[0], cls.t_names[0], cls.AGE_25, cls.location),
+            ProfileTestData(cls.t_users[1], cls.t_names[1], cls.AGE_25, cls.location),
+            ProfileTestData(cls.t_users[2], cls.t_names[2], cls.AGE_25, cls.location),
+            ProfileTestData(cls.t_users[3], cls.t_names[3], cls.AGE_25, cls.location),
+            ProfileTestData(cls.t_users[4], cls.t_names[4], cls.AGE_25, cls.location),
+        )
+        [Profile.objects.create(**data._asdict()) for data in profiles_data]
+
         cls.match_1 = MatchRequest.objects.create(
-            sender=cls.test_user_1,
-            receiver=cls.test_user_2,
+            sender=cls.t_users[0],
+            receiver=cls.t_users[1],
             status=MatchStatuses.is_match,
         )
         cls.match_3 = MatchRequest.objects.create(
-            sender=cls.test_user_3,
-            receiver=cls.test_user_1,
+            sender=cls.t_users[2],
+            receiver=cls.t_users[0],
             status=MatchStatuses.is_match,
         )
         cls.negative_match = MatchRequest.objects.create(
-            sender=cls.test_user_5,
-            receiver=cls.test_user_4,
+            sender=cls.t_users[4],
+            receiver=cls.t_users[3],
             status=MatchStatuses.is_rejected,
         )
 
         cls.report_data = {
-            "reporter": cls.test_user_1.id,
-            "reported_user": cls.test_user_2.id,
-            "text": "test_text",
-            "category": "Категория 1",
+            "reporter": cls.t_users[0].id,
+            "reported_user": cls.t_users[1].id,
+            "text": cls.REPORT_TEXT,
+            "category": cls.CATEGORY_TEXT,
         }
 
         cls.expected_match_data_for_user_1 = [
-            {"telegram_id": 2, "name": "test_2", "age": 25},
-            {"telegram_id": 3, "name": "test_3", "age": 25},
+            {
+                cls.TELEGR_ID_TXT: 2,
+                cls.NAME_TXT: cls.t_names[1],
+                cls.AGE_TXT: cls.AGE_25,
+            },
+            {
+                cls.TELEGR_ID_TXT: 3,
+                cls.NAME_TXT: cls.t_names[2],
+                cls.AGE_TXT: cls.AGE_25,
+            },
         ]
 
         cls.expected_match_data_for_user_2 = [
-            {"telegram_id": 1, "name": "test_1", "age": 25}
+            {
+                cls.TELEGR_ID_TXT: 1,
+                cls.NAME_TXT: cls.t_names[0],
+                cls.AGE_TXT: cls.AGE_25,
+            }
         ]
 
         cls.expected_match_data_for_user_3 = [
-            {"telegram_id": 1, "name": "test_1", "age": 25}
+            {
+                cls.TELEGR_ID_TXT: 1,
+                cls.NAME_TXT: cls.t_names[0],
+                cls.AGE_TXT: cls.AGE_25,
+            }
         ]
-
-        cls.empty_match_data = []
 
         cls.global_match_data = {
             1: cls.expected_match_data_for_user_1,
             2: cls.expected_match_data_for_user_2,
             3: cls.expected_match_data_for_user_3,
-            4: cls.empty_match_data,
-            5: cls.empty_match_data,
+            4: [],
+            5: [],
         }
 
     def test_report_create(self):
         """Тест создания жалобы."""
-        response = self.client.post(reverse("api-v1:search:report"), self.report_data)
+        response = self.client.post(self.URL_REVERSE, self.report_data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_report_in_database(self):
         """Тест наличия жалобы в базе данных после создания."""
-        self.client.post(reverse("api-v1:search:report"), self.report_data)
+        self.client.post(self.URL_REVERSE, self.report_data)
         created_report = UserReport.objects.filter(
             reporter=self.report_data["reporter"],
             reported_user=self.report_data["reported_user"],
@@ -105,32 +122,32 @@ class ReportMatchViewTests(APITestCase):
     def test_invalid_reported_user(self):
         """Тест создания жалобы на несуществующиего пользователя."""
         invalid_data = {
-            "reporter": self.test_user_1.id,
+            "reporter": self.t_users[0].id,
             "reported_user": 99999,
             "text": "test_text_2",
             "category": "Категория 2",
         }
-        response = self.client.post(reverse("api-v1:search:report"), invalid_data)
+        response = self.client.post(self.URL_REVERSE, invalid_data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_invalid_data(self):
         """Тест создания жалобы с некорректными данными."""
         invalid_data = {
-            "reporter": self.test_user_1.id,
-            "reported_user": self.test_user_2.id,
+            "reporter": self.t_users[0].id,
+            "reported_user": self.t_users[1].id,
             "text": 999999,
             "category": True,
         }
-        response = self.client.post(reverse("api-v1:search:report"), invalid_data)
+        response = self.client.post(self.URL_REVERSE, invalid_data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_required_param_is_absent(self):
         """Тест создания жалобы без обязательных параметров"""
         invalid_data = {
-            "reporter": self.test_user_1.id,
-            "reported_user": self.test_user_2.id,
+            "reporter": self.t_users[0].id,
+            "reported_user": self.t_users[1].id,
         }
-        response = self.client.post(reverse("api-v1:search:report"), invalid_data)
+        response = self.client.post(self.URL_REVERSE, invalid_data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_invalid_methods_report(self):
@@ -138,7 +155,7 @@ class ReportMatchViewTests(APITestCase):
         methods = ["get", "put", "patch", "delete"]
         for method in methods:
             with self.subTest(method=method):
-                response = self.client.generic(method, reverse("api-v1:search:report"))
+                response = self.client.generic(method, self.URL_REVERSE)
                 self.assertEqual(
                     response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED
                 )
@@ -148,7 +165,7 @@ class ReportMatchViewTests(APITestCase):
         response = self.client.get(
             reverse(
                 "api-v1:search:matched-users",
-                kwargs={"telegram_id": self.test_user_1.id},
+                kwargs={self.TELEGR_ID_TXT: self.t_users[0].id},
             )
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -156,7 +173,7 @@ class ReportMatchViewTests(APITestCase):
     def test_get_match_for_invalid_user(self):
         """Тест получения мэтчей для несуществующего пользователя."""
         response = self.client.get(
-            reverse("api-v1:search:matched-users", kwargs={"telegram_id": 99999})
+            reverse("api-v1:search:matched-users", kwargs={self.TELEGR_ID_TXT: 99999})
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -169,7 +186,7 @@ class ReportMatchViewTests(APITestCase):
                     method,
                     reverse(
                         "api-v1:search:matched-users",
-                        kwargs={"telegram_id": self.test_user_1.id},
+                        kwargs={self.TELEGR_ID_TXT: self.t_users[0].id},
                     ),
                 )
                 self.assertEqual(
@@ -183,7 +200,7 @@ class ReportMatchViewTests(APITestCase):
                 response = self.client.get(
                     reverse(
                         "api-v1:search:matched-users",
-                        kwargs={"telegram_id": telegram_id},
+                        kwargs={self.TELEGR_ID_TXT: telegram_id},
                     )
                 )
                 self.assertEqual(response.json(), data)
@@ -201,6 +218,7 @@ class ProfileSearchViewTests(APITestCase):
         test_users = [
             UserFromTelegram.objects.create(telegram_id=id) for id in range(0, 11)
         ]
+        p_names = [f"Name_{x}" for x in range(0, 11)]
 
         cls.location_m = Location.objects.create(name=cls.LOCATION_M_NAME)
         cls.location_s = Location.objects.create(name=cls.LOCATION_S_NAME)
@@ -209,17 +227,17 @@ class ProfileSearchViewTests(APITestCase):
             "ProfileTestData", ["user", "name", "age", "location", "sex"]
         )
         profiles_data = (
-            ProfileTestData(test_users[0], "Name_0", 18, cls.location_m, Sex.MAN),
-            ProfileTestData(test_users[1], "Name_1", 21, cls.location_m, Sex.MAN),
-            ProfileTestData(test_users[2], "Name_2", 25, cls.location_m, Sex.MAN),
-            ProfileTestData(test_users[3], "Name_3", 28, cls.location_m, Sex.MAN),
-            ProfileTestData(test_users[4], "Name_4", 32, cls.location_m, Sex.WOMAN),
-            ProfileTestData(test_users[5], "Name_5", 34, cls.location_m, Sex.WOMAN),
-            ProfileTestData(test_users[6], "Name_6", 36, cls.location_s, Sex.MAN),
-            ProfileTestData(test_users[7], "Name_7", 38, cls.location_s, Sex.MAN),
-            ProfileTestData(test_users[8], "Name_8", 41, cls.location_s, Sex.WOMAN),
-            ProfileTestData(test_users[9], "Name_9", 42, cls.location_s, Sex.WOMAN),
-            ProfileTestData(test_users[10], "Name_10", 44, cls.location_s, Sex.WOMAN),
+            ProfileTestData(test_users[0], p_names[0], 18, cls.location_m, Sex.MAN),
+            ProfileTestData(test_users[1], p_names[1], 21, cls.location_m, Sex.MAN),
+            ProfileTestData(test_users[2], p_names[2], 25, cls.location_m, Sex.MAN),
+            ProfileTestData(test_users[3], p_names[3], 28, cls.location_m, Sex.MAN),
+            ProfileTestData(test_users[4], p_names[4], 32, cls.location_m, Sex.WOMAN),
+            ProfileTestData(test_users[5], p_names[5], 34, cls.location_m, Sex.WOMAN),
+            ProfileTestData(test_users[6], p_names[6], 36, cls.location_s, Sex.MAN),
+            ProfileTestData(test_users[7], p_names[7], 38, cls.location_s, Sex.MAN),
+            ProfileTestData(test_users[8], p_names[8], 41, cls.location_s, Sex.WOMAN),
+            ProfileTestData(test_users[9], p_names[9], 42, cls.location_s, Sex.WOMAN),
+            ProfileTestData(test_users[10], p_names[10], 44, cls.location_s, Sex.WOMAN),
         )
         test_profiles = [
             Profile.objects.create(**data._asdict()) for data in profiles_data

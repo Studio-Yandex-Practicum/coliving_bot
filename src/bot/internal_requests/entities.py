@@ -17,6 +17,12 @@ class UserProfile:
 
 
 @dataclass
+class MatchedUser:
+    user: int
+    name: str
+
+
+@dataclass
 class Image:
     file_id: str
     bytes: Optional[bytes] = field(default=None)
@@ -42,10 +48,20 @@ class Location:
 
 
 @dataclass
-class SearchSettings:
+class ProfileSearchSettings:
     """Значения фильтров поиска по профилям пользователей."""
 
     age_min: Optional[int] = field(default=None)
     age_max: Optional[int] = field(default=None)
     location: Optional[str] = field(default=None)
     sex: Optional[str] = field(default=None)
+
+
+@dataclass
+class ColivingSearchSettings:
+    """Значения фильтров поиска по объявлениям коливингов."""
+
+    room_type: Optional[str] = field(default=None)
+    min_price: Optional[int] = field(default=None)
+    max_price: Optional[int] = field(default=None)
+    location: Optional[str] = field(default=None)
