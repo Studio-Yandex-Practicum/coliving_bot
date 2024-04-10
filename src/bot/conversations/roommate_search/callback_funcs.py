@@ -141,12 +141,27 @@ async def profile_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     """
     Обрабатывает ЛАЙК на профиль соседа.
     Посылает POST запрос в API на добавление MatchRequest,
+    отправляет уведомление sender о том, что лайк поставлен,
     отправляет уведомление другому пользователю о лайке
     и переводит в состояние продолжения поиска.
     """
     current_profile = context.user_data.get("current_profile")
+    sender_id = update.effective_chat.id
+    receiver_id = current_profile["user"]
     await api_service.send_match_request(
-        sender=update.effective_chat.id, receiver=current_profile["user"]
+        sender_id=sender_id,
+        receiver_id=receiver_id,
+    )
+
+    await context.bot.send_message(
+        chat_id=sender_id,
+        text=templates.SEND_LIKE,
+    )
+
+    await context.bot.send_message(
+        chat_id=receiver_id,
+        text=templates.LIKE_NOTIFICATION,
+        reply_markup=keyboards.LIKE_PROFILE,
     )
 
     await update.effective_message.reply_text(
