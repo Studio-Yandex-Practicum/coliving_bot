@@ -27,7 +27,6 @@ class ProfileAPITestCase(APITestCase):
     VISIBLE_TXT = "is_visible"
     PAREN_TXT = "Парень"
     KLASSNIY_TXT = "Классный"
-    JSON_TXT = "json"
 
     @classmethod
     def setUpTestData(cls):
@@ -62,7 +61,6 @@ class ProfileAPITestCase(APITestCase):
         response = self.client.post(
             reverse(self.VIEW_LINK, args=[TEST_TELEGRAM_ID]),
             data,
-            format=self.JSON_TXT,
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assert_profile_data(response, TEST_TELEGRAM_ID, data)
@@ -78,7 +76,6 @@ class ProfileAPITestCase(APITestCase):
         response = self.client.post(
             reverse(self.VIEW_LINK, args=[TEST_TELEGRAM_ID]),
             data,
-            format=self.JSON_TXT,
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertFalse(
@@ -128,7 +125,6 @@ class ProfileAPITestCase(APITestCase):
                         args=[EXISTING_PROFILE_TELEGRAM_ID],
                     ),
                     data,
-                    format=self.JSON_TXT,
                 )
                 self.assertEqual(response.status_code, status.HTTP_200_OK)
                 self.assert_profile_data(response, EXISTING_PROFILE_TELEGRAM_ID)
@@ -143,7 +139,6 @@ class ProfileAPITestCase(APITestCase):
         response = self.client.patch(
             reverse(self.VIEW_LINK, args=[EXISTING_PROFILE_TELEGRAM_ID]),
             data,
-            format=self.JSON_TXT,
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIsInstance(response.data[self.LOCATION_TXT][0], ErrorDetail)
