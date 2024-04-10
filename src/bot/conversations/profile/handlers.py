@@ -9,10 +9,6 @@ import conversations.profile.buttons as buttons
 import conversations.profile.callback_funcs as callback_funcs
 import conversations.profile.templates as templates
 from conversations.common_functions import common_buttons, common_funcs
-from conversations.common_functions.common_templates import (
-    RETURN_BTN_LABEL,
-    RETURN_TO_MENU_BTN_LABEL,
-)
 from conversations.menu.buttons import MY_PROFILE_BUTTON
 from conversations.profile.states import States
 from general.validators import (
@@ -42,7 +38,7 @@ profile_handler: ConversationHandler = ConversationHandler(
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.handle_return_to_menu_response,
-                pattern=rf"^{RETURN_TO_MENU_BTN_LABEL}",
+                pattern=rf"^{common_buttons.RETURN_TO_MENU_BTN_LABEL}",
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -125,7 +121,7 @@ profile_handler: ConversationHandler = ConversationHandler(
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.handle_return_to_profile_response,
-                pattern=rf"^{RETURN_BTN_LABEL}",
+                pattern=rf"^{common_buttons.RETURN_BTN_LABEL}",
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.send_question_to_edit_name,

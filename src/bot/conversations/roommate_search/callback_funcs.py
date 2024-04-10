@@ -11,10 +11,7 @@ from telegram.ext import ContextTypes, ConversationHandler
 
 import conversations.roommate_search.keyboards as keyboards
 import conversations.roommate_search.templates as templates
-from conversations.common_functions.common_funcs import (
-    add_response_prefix,
-    profile_required,
-)
+from conversations.common_functions.common_funcs import profile_required
 from conversations.roommate_search.states import States
 from internal_requests import api_service
 from internal_requests.entities import ProfileSearchSettings, UserProfile
@@ -43,7 +40,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     return state
 
 
-@add_response_prefix
 async def ok_settings(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Вызывается при подтверждении настроек поиска.
@@ -57,7 +53,6 @@ async def ok_settings(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     return state
 
 
-@add_response_prefix
 async def edit_settings(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Запускает процесс настройки поиска при запросе на изменение.
@@ -72,7 +67,6 @@ async def edit_settings(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     return States.LOCATION
 
 
-@add_response_prefix
 async def set_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Устанавливает локацию в настройках поиска.
@@ -88,7 +82,6 @@ async def set_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     return States.SEX
 
 
-@add_response_prefix
 async def set_sex(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Устанавливает пол соседа в настройках поиска.
@@ -103,7 +96,6 @@ async def set_sex(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     return States.AGE
 
 
-@add_response_prefix
 async def set_age(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Устанавливает возраст соседа в настройках поиска.
@@ -134,7 +126,6 @@ async def set_age(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     return States.SEARCH_SETTINGS
 
 
-@add_response_prefix
 async def next_profile(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Обрабатывает переход на следующий профиль соседа.
@@ -146,7 +137,6 @@ async def next_profile(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     return state
 
 
-@add_response_prefix
 async def profile_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Обрабатывает ЛАЙК на профиль соседа.
