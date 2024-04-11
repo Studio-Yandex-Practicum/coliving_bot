@@ -38,13 +38,11 @@ BUTTON_ERROR_MSG = "Выбери соответствующий вариант."
 
 def format_search_settings_message(filters: ProfileSearchSettings) -> str:
     """Формирует сообщение с настройками поиска."""
-    if filters.sex is None:
-        filters.sex = "Неважно"
     result = f"""
     <b>Текущие настройки поиска соседа:</b>
 
     <b>Город:</b> {filters.location}
-    <b>Пол соседа:</b> {filters.sex}
+    <b>Пол соседа:</b> {filters.sex if filters.sex is not None else "Неважно"}
     """
     if filters.age_max is None:
         result += f"<b>Возраст:</b> >{filters.age_min}"
