@@ -38,6 +38,8 @@ BUTTON_ERROR_MSG = "Выбери соответствующий вариант."
 
 def format_search_settings_message(filters: ProfileSearchSettings) -> str:
     """Формирует сообщение с настройками поиска."""
+    if filters.sex is None:
+        filters.sex = "Неважно"
     result = f"""
     <b>Текущие настройки поиска соседа:</b>
 
