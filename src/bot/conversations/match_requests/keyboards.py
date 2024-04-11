@@ -13,7 +13,7 @@ import conversations.match_requests.buttons as buttons
 VIEW_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         InlineKeyboardButton(
-            text=buttons.PROFILE_BTN, callback_data=buttons.PROFILE_BTN
+            text=buttons.SEE_PROFILE_BNT, callback_data=buttons.SEE_PROFILE_BNT
         ),
         InlineKeyboardButton(text=buttons.WAIT_BTN, callback_data=buttons.WAIT_BTN),
     )

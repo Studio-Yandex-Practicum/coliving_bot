@@ -42,7 +42,7 @@ async def show_profile(
     """
     Отправляем сообщение с профилем отправителя
     лайка получателю
-    (send sender_profile to reciver):
+    (send sender_profile to receiver):
     - находим анкету
     - отправляем анету отправителя лайка получателю
     """
@@ -51,39 +51,40 @@ async def show_profile(
 
     await context.bot.send_message(
         chat_id=receiver_id,
-        text=templates.SENDER_PROFILE,
+        text=templates.SENDER_PROFILE.format(sender_profile=sender_profile),
         reply_markup=keyboards.PROFILE_KEYBOARD,
     )
     return sender_profile
 
 
-async def link_sender_to_reciver(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
+async def link_sender_to_receiver(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
 ) -> int:
     """
     Обрабатывает ЛАЙК на профиль Sender.
     Посылает запрос в API на изменение
     MatchRequest.status=is_matched,
-    отправляет уведомление Sender с контактами Reciver,
-    отправляет уведомление Reciver с контактами Sender
+    отправляет уведомление Sender с контактами Receiver,
+    отправляет уведомление Receiver с контактами Sender
     и переводит в состояние завершения поиска.
     """
     current_profile = context.user_data.get("current_profile")
     sender_id = update.effective_chat.id
     receiver_id = current_profile["user"]
     await api_service.send_match_request(
-        sender_id=sender_id,
-        receiver_id=receiver_id,
+        sender=sender_id,
+        receiver=receiver_id,
     )
 
     await context.bot.send_message(
         chat_id=sender_id,
-        text=templates.SEND_RECIVER,
+        text=templates.SEND_RECEIVER.format(sender_id=sender_id),
     )
 
     await context.bot.send_message(
         chat_id=receiver_id,
-        text=templates.SEND_SENDER,
+        text=templates.SEND_SENDER.format(receiver_id=receiver_id),
     )
 
     return ConversationHandler.END

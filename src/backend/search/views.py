@@ -83,6 +83,8 @@ class MatchRequestView(generics.CreateAPIView):
         match = MatchRequest.objects.filter(
             sender__telegram_id=receiver, receiver__telegram_id=sender
         )
+        if match.status == MatchStatuses.is_pending:
+            return None
         if match:
             match.update(status=MatchStatuses.is_match)
         else:

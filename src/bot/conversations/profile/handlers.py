@@ -30,7 +30,7 @@ profile_handler: ConversationHandler = ConversationHandler(
             ),
             # CallbackQueryHandler(
             #     callback=callback_funcs.send_question_to_profile_is_invisible_in_search,
-            #     pattern=rf"^{buttons.HIDE_SEARCH_BUTTON}",
+            #     pattern=rf"^{buttons.HIDE_SEARCH_BUTTON}|",
             # ),
             CallbackQueryHandler(
                 callback=callback_funcs.send_question_to_edit_profile,

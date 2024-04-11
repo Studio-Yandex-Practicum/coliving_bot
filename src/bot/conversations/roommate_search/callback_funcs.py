@@ -148,14 +148,15 @@ async def profile_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     current_profile = context.user_data.get("current_profile")
     sender_id = update.effective_chat.id
     receiver_id = current_profile["user"]
+
     await api_service.send_match_request(
-        sender_id=sender_id,
-        receiver_id=receiver_id,
+        sender=sender_id,
+        receiver=receiver_id,
     )
 
     await context.bot.send_message(
         chat_id=sender_id,
-        text=templates.SEND_LIKE,
+        text=templates.SEND_LIKE.format(receiver_name=current_profile["name"]),
     )
 
     await context.bot.send_message(

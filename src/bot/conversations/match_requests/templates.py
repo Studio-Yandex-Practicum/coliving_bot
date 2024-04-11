@@ -1,4 +1,4 @@
-from internal_requests.entities import SearchSettings
+from internal_requests.entities import ProfileSearchSettings
 
 END_OF_SEARCH = (
     "Надеюсь, ты смог найти себе соседа.\n"
@@ -8,12 +8,12 @@ LIKE_NOTIFICATION = "Кто-то хочет стать твоим соседом
 SENDER_PROFILE = "Смотрим анкету {sender_profile.name}"
 BUTTON_ERROR_MSG = "Выбери соответствующий вариант."
 SEND_SENDER = "Приветствуем будущего соседа {sender_id}"
-SEND_RECIVER = (
-    "Приветствуем будущего соседа {reciver_id},\n" "Ему тоже понравилась твоя анкета!"
+SEND_RECEIVER = (
+    "Приветствуем будущего соседа {receiver_id},\n" "Ему тоже понравилась твоя анкета!"
 )
 
 
-def format_search_settings_message(filters: SearchSettings) -> str:
+def format_search_settings_message(filters: ProfileSearchSettings) -> str:
     """Формирует сообщение с настройками поиска."""
     result = f"""
     <b>Текущие настройки поиска соседа:</b>

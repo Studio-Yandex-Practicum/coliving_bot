@@ -1,6 +1,5 @@
-from telegram.ext import (
+from telegram.ext import (  # CommandHandler,
     CallbackQueryHandler,
-    CommandHandler,
     ConversationHandler,
     MessageHandler,
     filters,
@@ -9,8 +8,7 @@ from telegram.ext import (
 import conversations.match_requests.buttons as buttons
 import conversations.match_requests.callback_funcs as callbacks
 import conversations.match_requests.states as states
-
-# from conversations.common_functions import common_buttons
+from conversations.common_functions import common_buttons, common_funcs
 from conversations.roommate_search.buttons import SEE_PROFILE
 
 # from conversations.roommate_search.buttons import AGE_RANGE_CALLBACK_PATTERN
@@ -24,7 +22,7 @@ match_requests_handler: ConversationHandler = ConversationHandler(
         states.PROFILE: [
             MessageHandler(
                 filters=filters.Regex(rf"^{buttons.LIKE_BTN}$"),
-                callback=callbacks.link_sender_to_reciver,
+                callback=callbacks.link_sender_to_receiver,
             ),
             MessageHandler(
                 filters=filters.Regex(rf"^{buttons.DISLIKE_BTN}$"),
@@ -36,5 +34,12 @@ match_requests_handler: ConversationHandler = ConversationHandler(
             ),
         ],
     },
-    fallbacks=[CommandHandler("cancel", callbacks.end_of_search)],
+    # заглушка
+    fallbacks=[
+        CallbackQueryHandler(
+            callback=common_funcs.cancel,
+            pattern=rf"^{common_buttons.CANCEL_BUTTON}",
+        )
+    ],
+    #  fallbacks=[CommandHandler("cancel", callbacks.)],
 )
