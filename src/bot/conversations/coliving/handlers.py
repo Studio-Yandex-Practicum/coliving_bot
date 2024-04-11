@@ -112,7 +112,10 @@ coliving_handler: ConversationHandler = ConversationHandler(
         States.IS_VISIBLE: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_is_visible_coliving_profile_yes,
-                pattern=r"^is_visible:(True|False)$",
+                pattern=(
+                    rf"^({common_buttons.SHOW_SEARCH_BUTTON}"
+                    rf"|{common_buttons.HIDE_SEARCH_BUTTON})$"
+                ),
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -208,7 +211,10 @@ coliving_handler: ConversationHandler = ConversationHandler(
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.handle_is_visible_switching,
-                pattern=r"^is_visible:(True|False)$",
+                pattern=(
+                    rf"^({common_buttons.SHOW_SEARCH_BUTTON}"
+                    rf"|{common_buttons.HIDE_SEARCH_BUTTON})$"
+                ),
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.handle_coliving_roommates,

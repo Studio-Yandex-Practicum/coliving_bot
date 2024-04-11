@@ -12,8 +12,10 @@ VISIBILITY_BUTTONS = {
 }
 
 SEARCH_BUTTON = InlineKeyboardButton(
-    text=HIDE_SEARCH_BUTTON, callback_data="is_visible:False"
+    text=SHOW_SEARCH_BUTTON,
+    callback_data=SHOW_SEARCH_BUTTON,
 )
 HIDE_BUTTON = InlineKeyboardButton(
-    text=SHOW_SEARCH_BUTTON, callback_data="is_visible:True"
+    text=HIDE_SEARCH_BUTTON,
+    callback_data=HIDE_SEARCH_BUTTON,
 )

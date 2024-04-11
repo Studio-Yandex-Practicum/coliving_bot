@@ -26,12 +26,11 @@ profile_handler: ConversationHandler = ConversationHandler(
         States.PROFILE: [
             CallbackQueryHandler(
                 callback=callback_funcs.send_question_to_profile_is_visible_in_search,
-                pattern=r"^is_visible:(True|False)$",
+                pattern=(
+                    rf"^({common_buttons.SHOW_SEARCH_BUTTON}"
+                    rf"|{common_buttons.HIDE_SEARCH_BUTTON})$"
+                ),
             ),
-            # CallbackQueryHandler(
-            #     callback=callback_funcs.send_question_to_profile_is_invisible_in_search,
-            #     pattern=rf"^{buttons.HIDE_SEARCH_BUTTON}",
-            # ),
             CallbackQueryHandler(
                 callback=callback_funcs.send_question_to_edit_profile,
                 pattern=rf"^{buttons.EDIT_FORM_BUTTON}",

@@ -72,5 +72,3 @@ PROFILE_DATA = (
     "<b>О себе:</b> {about}\n"
     "<b>Видимость анкеты:</b> {is_visible}\n"
 )
-PROFILE_IS_VISIBLE_TEXT = "Отображается в поиске"
-PROFILE_IS_INVISIBLE_TEXT = "Скрыта из поиска"

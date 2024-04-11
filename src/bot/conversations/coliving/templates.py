@@ -1,3 +1,7 @@
+from conversations.common_functions.common_templates import (
+    PROFILE_IS_HIDDEN_TEXT,
+    PROFILE_IS_VISIBLE_TEXT,
+)
 from internal_requests.entities import Coliving
 
 LOCATION_FIELD = "location"
@@ -16,9 +20,6 @@ MAX_PRICE = 1000000
 PHOTO_MAX_NUMBER = 5
 
 DEFAULT_ERROR_MESSAGE = "Некорректный ввод."
-
-IS_VISIBLE_YES = "\nАнкета видна в поиске."
-IS_VISIBLE_NO = "\nАнкета скрыта из поиска."
 
 ERR_MSG_ABOUT_MAX_LEN = (
     "Описание не должно содержать более {max} символов. Попробуй ещё раз:"
@@ -80,19 +81,20 @@ PROFILE_DATA = (
     "<b>Тип аренды:</b> {room_type}\n"
     "<b>Описание:</b> {about}\n"
     "<b>Стоимость:</b> {price} р./мес.\n"
+    "<b>Видимость анкеты:</b> {is_visible}\n"
 )
 
 
 async def format_coliving_profile_message(coliving_info: Coliving) -> str:
+    is_visible = (
+        PROFILE_IS_VISIBLE_TEXT if coliving_info.is_visible else PROFILE_IS_HIDDEN_TEXT
+    )
+
     result = REPLY_MSG_TITLE + PROFILE_DATA.format(
         location=coliving_info.location,
         room_type=coliving_info.room_type,
         about=coliving_info.about,
         price=coliving_info.price,
+        is_visible=is_visible,
     )
-    if isinstance(coliving_info.is_visible, bool):
-        if coliving_info.is_visible:
-            result += IS_VISIBLE_YES
-        else:
-            result += IS_VISIBLE_NO
     return result

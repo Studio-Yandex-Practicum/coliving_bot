@@ -6,7 +6,6 @@ from httpx import HTTPStatusError, codes
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, Update
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
-import conversations.common_functions.common_buttons as common_buttons
 import conversations.common_functions.common_funcs as common_funcs
 import conversations.common_functions.common_keyboards as common_keyboards
 import conversations.common_functions.common_templates as common_templates
@@ -58,9 +57,9 @@ async def start(
     await update.effective_message.delete()
 
     keyboard = (
-        keyboards.PROFILE_KEYBOARD_OPEN_SEARCH
+        keyboards.VISIBLE_PROFILE_KEYBOARD
         if profile_info.is_visible
-        else keyboards.PROFILE_KEYBOARD_HIDE_SEARCH
+        else keyboards.HIDDEN_PROFILE_KEYBOARD
     )
     await _look_at_profile(update, context, "", keyboard)
 
@@ -75,20 +74,17 @@ async def send_question_to_profile_is_visible_in_search(
     Обработка кнопки 'Показать в поиске'.
     Завершает диалог.
     """
-
+    visibility_choice: bool = await common_funcs.get_visibility_choice(update=update)
     await update.effective_message.edit_reply_markup()
 
-    is_visible: bool = eval(update.callback_query.data.split(":")[1])
+    message_text = common_templates.VISIBILITY_MSG_OPTNS[visibility_choice]
 
-    context.user_data[templates.IS_VISIBLE_FIELD] = is_visible
-    if is_visible:
-        message_text = common_templates.FORM_IS_VISIBLE
-    else:
-        message_text = common_templates.FORM_IS_NOT_VISIBLE
-    await update.effective_message.reply_text(
-        text=message_text,
+    context.user_data[templates.IS_VISIBLE_FIELD] = visibility_choice
+
+    await update.effective_message.reply_text(text=message_text)
+    await api_service.update_user_profile(
+        telegram_id=update.effective_chat.id, data=context.user_data
     )
-    await api_service.update_user_profile(update.effective_chat.id, context.user_data)
 
     return ConversationHandler.END
 
@@ -98,7 +94,7 @@ async def send_question_to_edit_profile(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> Union[int, States]:
     """
-    Обработка кнопки 'Скрыть из поиска'.
+    Обработка кнопки 'Изменить анкету'.
     Переводит диалог в состояние EDIT.
     """
     await update.callback_query.message.edit_reply_markup()
@@ -123,13 +119,9 @@ async def handle_return_to_profile_response(
     await update.effective_message.edit_reply_markup()
 
     if context.user_data[templates.IS_VISIBLE_FIELD] is True:
-        await _look_at_profile(
-            update, context, "", keyboards.PROFILE_KEYBOARD_OPEN_SEARCH
-        )
+        await _look_at_profile(update, context, "", keyboards.VISIBLE_PROFILE_KEYBOARD)
     else:
-        await _look_at_profile(
-            update, context, "", keyboards.PROFILE_KEYBOARD_HIDE_SEARCH
-        )
+        await _look_at_profile(update, context, "", keyboards.HIDDEN_PROFILE_KEYBOARD)
     return States.PROFILE
 
 
@@ -148,7 +140,7 @@ async def handle_return_to_menu_response(
 async def handle_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Обрабатывает введенное пользователем имя.
-    Переводит диалог в состояние LOCATION (ввод места проживания).
+    Переводит диалог в состояние AGE (ввод возраста).
     """
     name = update.message.text.strip()
     if not fullmatch(templates.NAME_PATTERN, name):
@@ -212,7 +204,7 @@ async def handle_sex(
 ) -> Union[int, States]:
     """
     Обрабатывает введенный пользователем пол.
-    Переводит диалог в состояние NAME (ввод имени пользователя).
+    Переводит диалог в состояние LOCATION (ввод места пользователя).
     """
     await _save_response_about_sex(update, context)
     await update.effective_message.reply_text(
@@ -303,9 +295,9 @@ async def _look_at_profile(
             age=context.user_data.get(templates.AGE_FIELD),
             location=context.user_data.get(templates.LOCATION_FIELD),
             about=context.user_data.get(templates.ABOUT_FIELD),
-            is_visible=templates.PROFILE_IS_VISIBLE_TEXT
+            is_visible=common_templates.PROFILE_IS_VISIBLE_TEXT
             if context.user_data.get(templates.IS_VISIBLE_FIELD)
-            else templates.PROFILE_IS_INVISIBLE_TEXT,
+            else common_templates.PROFILE_IS_HIDDEN_TEXT,
         )
         + "\n"
     )
@@ -437,17 +429,15 @@ async def handle_visible(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     Делает анкету видимой или нет.
     Переводит диалог в состояние END (сохранение анкеты).
     """
-    visible = update.callback_query.data
-
+    visibility_choice: bool = await common_funcs.get_visibility_choice(update=update)
     await update.effective_message.edit_reply_markup()
 
-    if visible == common_buttons.SHOW_SEARCH_BUTTON:
-        context.user_data[templates.IS_VISIBLE_FIELD] = True
-    elif visible == common_buttons.HIDE_SEARCH_BUTTON:
-        context.user_data[templates.IS_VISIBLE_FIELD] = False
-        await api_service.update_user_profile(
-            update.effective_chat.id, context.user_data
-        )
+    context.user_data[templates.IS_VISIBLE_FIELD] = visibility_choice
+
+    await api_service.update_user_profile(
+        telegram_id=update.effective_chat.id,
+        data=context.user_data,
+    )
     await send_profile_saved_notification(update, context)
 
     return ConversationHandler.END
