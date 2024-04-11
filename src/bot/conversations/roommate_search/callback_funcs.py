@@ -88,7 +88,8 @@ async def set_sex(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     Устанавливает пол соседа в настройках поиска.
     Переводит в состояние выбора возраста.
     """
-    context.user_data["search_settings"].sex = update.callback_query.data
+    sex = update.callback_query.data
+    context.user_data["search_settings"].sex = sex if sex != "Неважно" else None
     await _message_edit(
         message=update.effective_message,
         text=templates.ASK_AGE,
