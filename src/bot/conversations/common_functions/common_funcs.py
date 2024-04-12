@@ -5,9 +5,36 @@ from telegram import InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes, ConversationHandler
 
 import conversations.common_functions.common_templates as templates
+from conversations.common_functions.common_buttons import (
+    HIDE_SEARCH_BUTTON,
+    SHOW_SEARCH_BUTTON,
+)
 from internal_requests import api_service
 
 
+def add_response_prefix(func):
+    """
+    Декоратор для отправки сообщения пользователю в следующем формате:
+    'Твой ответ: <текст выбранной кнопки>'
+
+    """
+
+    @wraps(func)
+    async def wrapper(update, context, *args, **kwargs):
+        if update.callback_query:
+            user_response = update.callback_query.data
+            if ":" in user_response:
+                user_response = user_response.split(":")[1]
+
+            await update.effective_chat.send_message(
+                text=f"{templates.RESPONSE_PREFIX}{user_response}\n",
+            )
+        return await func(update, context, *args, **kwargs)
+
+    return wrapper
+
+
+@add_response_prefix
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Отменяет текущий диалог."""
     await update.effective_message.reply_text(
@@ -58,3 +85,20 @@ def profile_required(func):
         return await func(update, context, *args, **kwargs)
 
     return wrapper
+
+
+async def get_visibility_choice(update: Update) -> bool:
+    """ "
+    Обрабатывает нажатие кнопок 'Показать в поиске/Скрыть из поиска'
+    и возвращает True для 'Показать в поиске'
+    и False для 'Скрыть из поиска'.
+
+    """
+    visibility_btn = update.callback_query.data
+
+    visibility_options = {
+        SHOW_SEARCH_BUTTON: True,
+        HIDE_SEARCH_BUTTON: False,
+    }
+
+    return visibility_options[visibility_btn]

@@ -4,8 +4,9 @@ MIN_NAME_LENGTH = 2
 MAX_NAME_LENGTH = 30
 MIN_ABOUT_LENGTH = 0
 MAX_ABOUT_LENGTH = 1000
-NAME_PATTERN = r"^[А-Яа-яA-Za-z\s'-]+$"
-AGE_PATTERN = r"^([0-9]{3})$"
+PHOTO_MAX_NUMBER = 3
+NAME_PATTERN = "^[А-Яа-яA-Za-z'-]+$"
+AGE_PATTERN = "^([0-9]{3})$"
 
 AGE_FIELD = "age"
 SEX_FIELD = "sex"
@@ -62,7 +63,7 @@ ABOUT_MAX_LEN_ERROR_MSG = (
     "Описание не должно содержать более {max} символов. Попробуй еще раз:"
 )
 PHOTO_ERROR_MESSAGE = "Отправь фото."
-ERR_PHOTO_NOT_TEXT = "Отправь до 3 фотографий для своего профиля."
+ERR_PHOTO_NOT_TEXT = f"Отправь до {PHOTO_MAX_NUMBER} фотографий для своего профиля."
 PROFILE_DATA = (
     "<b>Имя:</b> {name}\n"
     "<b>Пол:</b> {sex}\n"
@@ -71,5 +72,3 @@ PROFILE_DATA = (
     "<b>О себе:</b> {about}\n"
     "<b>Видимость анкеты:</b> {is_visible}\n"
 )
-PROFILE_IS_VISIBLE_TEXT = "Отображается в поиске"
-PROFILE_IS_INVISIBLE_TEXT = "Скрыта из поиска"
