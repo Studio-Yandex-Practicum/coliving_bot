@@ -86,7 +86,11 @@ roommate_search_handler: ConversationHandler = ConversationHandler(
         States.SEX: [
             CallbackQueryHandler(
                 callback=callbacks.set_sex,
-                pattern=rf"^({buttons.MALE_BTN}|{buttons.FEMALE_BTN})$",
+                pattern=(
+                    rf"^({buttons.MALE_BTN}"
+                    f"|{buttons.FEMALE_BTN}"
+                    f"|{buttons.ANY_GENDER_BTN})$"
+                ),
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,

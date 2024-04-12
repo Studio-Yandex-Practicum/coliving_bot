@@ -42,7 +42,7 @@ def format_search_settings_message(filters: ProfileSearchSettings) -> str:
     <b>Текущие настройки поиска соседа:</b>
 
     <b>Город:</b> {filters.location}
-    <b>Пол соседа:</b> {filters.sex}
+    <b>Пол соседа:</b> {filters.sex if filters.sex is not None else "Неважно"}
     """
     if filters.age_max is None:
         result += f"<b>Возраст:</b> >{filters.age_min}"
