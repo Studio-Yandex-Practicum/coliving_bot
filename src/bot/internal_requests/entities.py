@@ -38,7 +38,7 @@ class Coliving:
     about: Optional[str] = field(default=None)
     id: Optional[int] = field(default=None)
     host: Optional[int] = field(default=None)
-    is_visible: Optional[str] = field(default=True)
+    is_visible: Optional[bool] = field(default=True)
 
 
 @dataclass
