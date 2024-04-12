@@ -90,13 +90,13 @@ async def handle_coliving_edit(
 @add_response_prefix
 async def handle_is_visible_switching(update: Update, context: CallbackContext) -> int:
     """Обработка ответа: Скрыть из поиска."""
+    visibility_choice: bool = await common_funcs.get_visibility_choice(update=update)
     await update.effective_message.edit_reply_markup()
-    is_visible: bool = eval(update.callback_query.data.split(":")[1])
-    context.user_data["coliving_info"].is_visible = is_visible
-    if is_visible:
-        message_text = common_templates.FORM_IS_VISIBLE
-    else:
-        message_text = common_templates.FORM_IS_NOT_VISIBLE
+
+    context.user_data["coliving_info"].is_visible = visibility_choice
+
+    message_text = common_templates.VISIBILITY_MSG_OPTNS[visibility_choice]
+
     await update.effective_message.reply_text(
         text=message_text,
     )
@@ -412,14 +412,14 @@ async def handle_is_visible_coliving_profile_yes(
     Обработка ответа: показать профиль в поиске и
     перевод на стадию сохранения в БД.
     """
+    visibility_choice: bool = await common_funcs.get_visibility_choice(update=update)
     await update.effective_message.edit_reply_markup()
-    is_visible: bool = eval(update.callback_query.data.split(":")[1])
-    context.user_data["coliving_info"].is_visible = is_visible
-    if is_visible:
-        respond = templates.REPLY_BTN_SHOW
-    else:
-        respond = templates.REPLY_BTN_HIDE
-    await update.effective_message.reply_text(text=respond)
+
+    context.user_data["coliving_info"].is_visible = visibility_choice
+
+    message_text = common_templates.VISIBILITY_MSG_OPTNS[visibility_choice]
+
+    await update.effective_message.reply_text(text=message_text)
     return await save_coliving_info_to_db(update, context)
 
 

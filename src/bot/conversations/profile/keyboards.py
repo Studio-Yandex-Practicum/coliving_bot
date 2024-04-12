@@ -32,12 +32,12 @@ PROFILE_DUPLICATE_BUTTONS = [
     ),
 ]
 
-PROFILE_KEYBOARD_OPEN_SEARCH = InlineKeyboardMarkup.from_column(
-    button_column=(SEARCH_BUTTON, *PROFILE_DUPLICATE_BUTTONS)
+VISIBLE_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
+    button_column=(HIDE_BUTTON, *PROFILE_DUPLICATE_BUTTONS)
 )
 
-PROFILE_KEYBOARD_HIDE_SEARCH = InlineKeyboardMarkup.from_column(
-    button_column=(HIDE_BUTTON, *PROFILE_DUPLICATE_BUTTONS)
+HIDDEN_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
+    button_column=(SEARCH_BUTTON, *PROFILE_DUPLICATE_BUTTONS)
 )
 
 SEX_KEYBOARD = InlineKeyboardMarkup.from_row(
