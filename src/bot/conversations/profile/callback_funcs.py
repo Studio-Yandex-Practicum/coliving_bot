@@ -380,10 +380,6 @@ async def send_received_photos(
             keyboards.FORM_SAVED_KEYBOARD,
             True,
         )
-        await update.effective_message.reply_text(
-            text=templates.ASK_FORM_VISIBLE,
-            reply_markup=ReplyKeyboardRemove(),
-        )
         return States.CONFIRMATION
     await update.effective_message.reply_text(text=templates.DONT_SAVE_WITHOUT_PHOTO)
     return None
