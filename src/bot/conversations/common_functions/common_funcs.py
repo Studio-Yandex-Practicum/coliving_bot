@@ -1,7 +1,7 @@
 from functools import wraps
 
 from httpx import HTTPStatusError, codes
-from telegram import Update
+from telegram import ReplyKeyboardRemove, Update
 from telegram.ext import ContextTypes, ConversationHandler
 
 import conversations.common_functions.common_templates as templates
@@ -34,11 +34,11 @@ def add_response_prefix(func):
     return wrapper
 
 
-@add_response_prefix
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Отменяет текущий диалог."""
     await update.effective_message.reply_text(
         text=templates.CANCEL_TEXT,
+        reply_markup=ReplyKeyboardRemove(),
     )
     context.user_data.clear()
 

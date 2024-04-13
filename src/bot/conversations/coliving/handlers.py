@@ -58,12 +58,12 @@ coliving_handler: ConversationHandler = ConversationHandler(
         ],
         States.PHOTO_ROOM: [
             MessageHandler(
-                filters.PHOTO | filters.TEXT & ~filters.COMMAND,
+                filters.PHOTO,
                 callback_funcs.handle_photo_room,
             ),
-            CallbackQueryHandler(
-                pattern=rf"^{buttons.SAVE_PHOTO_BUTTON}",
-                callback=callback_funcs.send_received_room_photos,
+            MessageHandler(
+                filters.Regex(rf"{buttons.SAVE_PHOTO_BUTTON}") & ~filters.COMMAND,
+                callback_funcs.send_received_room_photos,
             ),
         ],
         States.CONFIRMATION: [
@@ -164,13 +164,10 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 filters.PHOTO,
                 callback_funcs.handle_edit_photo_room,
             ),
-            CallbackQueryHandler(
-                pattern=rf"^{buttons.SAVE_EDITED_PHOTO_BUTTON}",
-                callback=callback_funcs.send_edited_room_photos,
-            ),
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
-                callback_funcs.handle_edit_photo_room,
+                filters.Regex(rf"^{buttons.SAVE_EDITED_PHOTO_BUTTON}")
+                & ~filters.COMMAND,
+                callback_funcs.send_edited_room_photos,
             ),
         ],
         States.EDIT_CONFIRMATION: [

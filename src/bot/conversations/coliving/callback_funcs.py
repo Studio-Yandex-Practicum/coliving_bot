@@ -1,6 +1,6 @@
 from typing import Optional
 
-from telegram import InlineKeyboardMarkup, InputMediaPhoto, Update
+from telegram import InlineKeyboardMarkup, InputMediaPhoto, ReplyKeyboardRemove, Update
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
 import conversations.coliving.keyboards as keyboards
@@ -475,6 +475,7 @@ async def handle_what_to_edit_room_type(
     return States.EDIT_ROOM_TYPE
 
 
+@add_response_prefix
 async def handle_what_to_edit_about_room(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -491,6 +492,7 @@ async def handle_what_to_edit_about_room(
     return States.EDIT_ABOUT_ROOM
 
 
+@add_response_prefix
 async def handle_what_to_edit_price(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -506,6 +508,7 @@ async def handle_what_to_edit_price(
     return States.EDIT_PRICE
 
 
+@add_response_prefix
 async def handle_what_to_edit_photo_room(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -770,7 +773,10 @@ async def send_received_room_photos(
     images = context.user_data["coliving_info"].images
 
     if images:
-        await update.effective_chat.send_message(templates.REPLY_MSG_PHOTO)
+        await update.effective_message.reply_text(
+            text=templates.REPLY_MSG_PHOTO,
+            reply_markup=ReplyKeyboardRemove(),
+        )
         await _show_coliving_profile(
             update,
             context,
@@ -778,12 +784,7 @@ async def send_received_room_photos(
             keyboards.CONFIRM_OR_CANCEL_PROFILE_KEYBOARD,
         )
         return States.CONFIRMATION
-
-    await context.bot.answer_callback_query(
-        callback_query_id=update.callback_query.id,
-        text=templates.DONT_SAVE_COLIVING_WITHOUT_PHOTO,
-        show_alert=True,
-    )
+    await update.effective_chat.send_message(templates.DONT_SAVE_COLIVING_WITHOUT_PHOTO)
     return States.PHOTO_ROOM
 
 
@@ -796,6 +797,10 @@ async def send_edited_room_photos(
     images = context.user_data["coliving_info"].images
 
     if images:
+        await update.effective_message.reply_text(
+            text=templates.REPLY_MSG_PHOTO,
+            reply_markup=ReplyKeyboardRemove(),
+        )
         await _show_coliving_profile(
             update,
             context,
@@ -803,12 +808,7 @@ async def send_edited_room_photos(
             keyboards.EDIT_CONFIRMATION_KEYBOARD,
         )
         return States.EDIT_CONFIRMATION
-
-    await context.bot.answer_callback_query(
-        callback_query_id=update.callback_query.id,
-        text=templates.DONT_SAVE_COLIVING_WITHOUT_PHOTO,
-        show_alert=True,
-    )
+    await update.effective_chat.send_message(templates.DONT_SAVE_COLIVING_WITHOUT_PHOTO)
     return States.EDIT_PHOTO_ROOM
 
 
