@@ -7,7 +7,6 @@ from telegram import (
     ReplyKeyboardRemove,
     Update,
 )
-from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
 
 import conversations.roommate_search.keyboards as keyboards
@@ -88,7 +87,8 @@ async def set_sex(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     Устанавливает пол соседа в настройках поиска.
     Переводит в состояние выбора возраста.
     """
-    context.user_data["search_settings"].sex = update.callback_query.data
+    sex = update.callback_query.data
+    context.user_data["search_settings"].sex = sex if sex != "Неважно" else None
     await _message_edit(
         message=update.effective_message,
         text=templates.ASK_AGE,
@@ -153,7 +153,6 @@ async def profile_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     await update.effective_message.reply_text(
         text=templates.ASK_NEXT_PROFILE,
         reply_markup=keyboards.NEXT_PROFILE,
-        parse_mode=ParseMode.HTML,
     )
     return States.NEXT_PROFILE
 
@@ -167,7 +166,6 @@ async def end_of_search(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     await update.effective_chat.send_message(
         text=templates.END_OF_SEARCH,
         reply_markup=ReplyKeyboardRemove(),
-        parse_mode=ParseMode.HTML,
     )
     await _clear_roommate_search_context(context)
     return ConversationHandler.END
@@ -189,7 +187,6 @@ async def _get_next_user_profile(
             await update.effective_chat.send_message(
                 text=templates.SEARCH_INTRO,
                 reply_markup=keyboards.PROFILE_KEYBOARD,
-                parse_mode=ParseMode.HTML,
             )
         profile = asdict(user_profiles.pop())
         context.user_data["current_profile"] = profile
@@ -199,20 +196,19 @@ async def _get_next_user_profile(
         if images:
             media_group = [InputMediaPhoto(file_id) for file_id in images]
             await update.effective_chat.send_media_group(
-                media=media_group, caption=message_text, parse_mode=ParseMode.HTML
+                media=media_group,
+                caption=message_text,
             )
         else:
             await update.effective_chat.send_message(
                 text=message_text,
                 reply_markup=keyboards.PROFILE_KEYBOARD,
-                parse_mode=ParseMode.HTML,
             )
         return States.PROFILE
 
     await update.effective_message.reply_text(
         text=templates.NO_MATCHES,
         reply_markup=keyboards.NO_MATCHES_KEYBOARD,
-        parse_mode=ParseMode.HTML,
     )
     return States.NO_MATCHES
 
@@ -225,7 +221,7 @@ async def _message_edit(
     """
     Функция для изменения текста и клавиатуры сообщения с ParseMode.HTML.
     """
-    await message.edit_text(text=text, reply_markup=keyboard, parse_mode=ParseMode.HTML)
+    await message.edit_text(text=text, reply_markup=keyboard)
 
 
 async def _clear_roommate_search_context(context):

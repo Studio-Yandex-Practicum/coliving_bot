@@ -17,6 +17,12 @@ class UserProfile:
 
 
 @dataclass
+class MatchedUser:
+    user: int
+    name: str
+
+
+@dataclass
 class Image:
     file_id: str
     bytes: Optional[bytes] = field(default=None)
@@ -32,7 +38,7 @@ class Coliving:
     about: Optional[str] = field(default=None)
     id: Optional[int] = field(default=None)
     host: Optional[int] = field(default=None)
-    is_visible: Optional[str] = field(default=None)
+    is_visible: Optional[bool] = field(default=True)
 
 
 @dataclass
@@ -56,6 +62,6 @@ class ColivingSearchSettings:
     """Значения фильтров поиска по объявлениям коливингов."""
 
     room_type: Optional[str] = field(default=None)
-    cost_min: Optional[int] = field(default=None)
-    cost_max: Optional[int] = field(default=None)
+    min_price: Optional[int] = field(default=None)
+    max_price: Optional[int] = field(default=None)
     location: Optional[str] = field(default=None)

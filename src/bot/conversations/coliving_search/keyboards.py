@@ -5,8 +5,7 @@ from telegram import (
     ReplyKeyboardMarkup,
 )
 
-import conversations.roommate_search.buttons as buttons
-from conversations.roommate_search.buttons import AGE_BUTTONS
+import conversations.coliving_search.buttons as buttons
 
 SEARCH_SETTINGS_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
@@ -17,30 +16,37 @@ SEARCH_SETTINGS_KEYBOARD = InlineKeyboardMarkup.from_column(
             text=buttons.EDIT_SETTINGS_BTN,
             callback_data=buttons.EDIT_SETTINGS_BTN,
         ),
-    )
-)
-
-SEX_KEYBOARD = InlineKeyboardMarkup.from_column(
-    button_column=(
-        InlineKeyboardButton(text=buttons.MALE_BTN, callback_data=buttons.MALE_BTN),
-        InlineKeyboardButton(text=buttons.FEMALE_BTN, callback_data=buttons.FEMALE_BTN),
         InlineKeyboardButton(
-            text=buttons.ANY_GENDER_BTN, callback_data=buttons.ANY_GENDER_BTN
+            text=buttons.TO_MENU_BTN, callback_data=buttons.TO_MENU_BTN
         ),
     )
 )
 
-PROFILE_KEYBOARD = ReplyKeyboardMarkup.from_row(
+ROOM_TYPE_KEYBOARD = InlineKeyboardMarkup.from_column(
+    button_column=(
+        InlineKeyboardButton(
+            text=buttons.TYPE_ROOM_BTN, callback_data=buttons.TYPE_ROOM_BTN
+        ),
+        InlineKeyboardButton(
+            text=buttons.TYPE_BED_BTN, callback_data=buttons.TYPE_BED_BTN
+        ),
+    )
+)
+
+COLIVING_KEYBOARD = ReplyKeyboardMarkup.from_row(
     button_row=(
         KeyboardButton(text=buttons.LIKE_BTN),
         KeyboardButton(text=buttons.DISLIKE_BTN),
+        KeyboardButton(text=buttons.TO_MENU_BTN),
     ),
     resize_keyboard=True,
 )
 
 NO_MATCHES_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
-        InlineKeyboardButton(text=buttons.WAIT_BTN, callback_data=buttons.WAIT_BTN),
+        InlineKeyboardButton(
+            text=buttons.TO_MENU_BTN, callback_data=buttons.TO_MENU_BTN
+        ),
         InlineKeyboardButton(
             text=buttons.EDIT_SETTINGS_BTN,
             callback_data=buttons.EDIT_SETTINGS_BTN,
@@ -48,19 +54,11 @@ NO_MATCHES_KEYBOARD = InlineKeyboardMarkup.from_column(
     )
 )
 
-NEXT_PROFILE = InlineKeyboardMarkup.from_column(
+NEXT_COLIVING = InlineKeyboardMarkup.from_column(
     button_column=(
         InlineKeyboardButton(text=buttons.YES_BTN, callback_data=buttons.YES_BTN),
-        InlineKeyboardButton(text=buttons.NO_BTN, callback_data=buttons.NO_BTN),
+        InlineKeyboardButton(
+            text=buttons.TO_MENU_BTN, callback_data=buttons.TO_MENU_BTN
+        ),
     )
-)
-
-AGE_KEYBOARD = InlineKeyboardMarkup(
-    [
-        [
-            InlineKeyboardButton(text=age, callback_data=age)
-            for age in AGE_BUTTONS[i : i + 2]
-        ]
-        for i in range(0, len(AGE_BUTTONS), 2)
-    ]
 )
