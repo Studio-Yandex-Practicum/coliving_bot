@@ -68,7 +68,7 @@ PROFILE_DATA = (
     "<b>Имя:</b> {name}\n"
     "<b>Пол:</b> {sex}\n"
     "<b>Возраст:</b> {age}\n"
-    "<b>Место проживания:</b> {location}\n"
+    "<b>Место поиска:</b> {location}\n"
     "<b>О себе:</b> {about}\n"
     "<b>Видимость анкеты:</b> {is_visible}\n"
 )

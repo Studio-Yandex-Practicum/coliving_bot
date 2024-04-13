@@ -1,5 +1,6 @@
 from telegram.ext import (
     CallbackQueryHandler,
+    CommandHandler,
     ConversationHandler,
     MessageHandler,
     filters,
@@ -243,9 +244,9 @@ coliving_handler: ConversationHandler = ConversationHandler(
         ],
     },
     fallbacks=[
-        CallbackQueryHandler(
-            callback=common_funcs.cancel,
-            pattern=rf"^{common_buttons.CANCEL_BUTTON}",
+        CommandHandler(
+            "cancel",
+            common_funcs.cancel,
         ),
     ],
 )
