@@ -24,6 +24,9 @@ SEX_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         InlineKeyboardButton(text=buttons.MALE_BTN, callback_data=buttons.MALE_BTN),
         InlineKeyboardButton(text=buttons.FEMALE_BTN, callback_data=buttons.FEMALE_BTN),
+        InlineKeyboardButton(
+            text=buttons.ANY_GENDER_BTN, callback_data=buttons.ANY_GENDER_BTN
+        ),
     )
 )
 

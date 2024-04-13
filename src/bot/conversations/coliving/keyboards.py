@@ -1,8 +1,12 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    KeyboardButton,
+    ReplyKeyboardMarkup,
+)
 
 import conversations.coliving.buttons as buttons
 from conversations.common_functions.common_buttons import (
-    CANCEL_BUTTON,
     LOCATION_PREFIX,
     RETURN_TO_MENU_BTN_LABEL,
     ROOM_TYPE_PREFIX,
@@ -12,11 +16,6 @@ from internal_requests import api_service
 
 CONFIRMATION_KEYBOARD = InlineKeyboardButton(
     text=buttons.BTN_LABEL_CONFIRM, callback_data=buttons.BTN_LABEL_CONFIRM
-)
-
-CANCEL_KEYBOARD = InlineKeyboardButton(
-    text=CANCEL_BUTTON,
-    callback_data=CANCEL_BUTTON,
 )
 
 ROOM_TYPE_KEYBOARD = InlineKeyboardMarkup.from_column(
@@ -177,36 +176,23 @@ ROOMMATES_INVITE_REPORT_KEYBOARD = InlineKeyboardMarkup.from_column(
 )
 
 CONFIRM_ROOMMATES_INVITE_KEYBOARD = InlineKeyboardMarkup.from_column(
-    button_column=(
-        CONFIRMATION_KEYBOARD,
-        CANCEL_KEYBOARD,
-    )
+    button_column=(CONFIRMATION_KEYBOARD,)
 )
 
 REPORT_OR_CANCEL_ROOMMATES_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
-    button_column=(
-        REPORT_ROOMMATES_PROFILE_KEYBOARD,
-        CANCEL_KEYBOARD,
-    )
+    button_column=(REPORT_ROOMMATES_PROFILE_KEYBOARD,)
 )
 
-SAVE_OR_CANCEL_PHOTO_KEYBOARD = InlineKeyboardMarkup.from_column(
-    button_column=(
-        InlineKeyboardButton(
-            text=buttons.SAVE_PHOTO_BUTTON, callback_data=buttons.SAVE_PHOTO_BUTTON
-        ),
-        CANCEL_KEYBOARD,
-    )
+SAVE_OR_CANCEL_PHOTO_KEYBOARD = ReplyKeyboardMarkup.from_button(
+    button=KeyboardButton(text=buttons.SAVE_PHOTO_BUTTON),
+    resize_keyboard=True,
 )
 
-SAVE_OR_CANCEL_NEW_PHOTO_KEYBOARD = InlineKeyboardMarkup.from_column(
-    button_column=(
-        InlineKeyboardButton(
-            text=buttons.SAVE_EDITED_PHOTO_BUTTON,
-            callback_data=buttons.SAVE_EDITED_PHOTO_BUTTON,
-        ),
-        CANCEL_KEYBOARD,
-    )
+SAVE_OR_CANCEL_NEW_PHOTO_KEYBOARD = ReplyKeyboardMarkup.from_button(
+    button=KeyboardButton(
+        text=buttons.SAVE_EDITED_PHOTO_BUTTON,
+    ),
+    resize_keyboard=True,
 )
 
 DELETE_OR_CANCEL_COLIVING_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(

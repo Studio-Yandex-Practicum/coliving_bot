@@ -3,11 +3,10 @@ from re import fullmatch
 from typing import Optional, Union
 
 from httpx import HTTPStatusError, codes
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, Update
+from telegram import InputMediaPhoto, Update
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
 import conversations.common_functions.common_funcs as common_funcs
-import conversations.common_functions.common_keyboards as common_keyboards
 import conversations.common_functions.common_templates as common_templates
 import conversations.profile.buttons as buttons
 import conversations.profile.keyboards as keyboards
@@ -45,10 +44,7 @@ async def start(
         )
     except HTTPStatusError as exc:
         if exc.response.status_code == codes.NOT_FOUND:
-            await update.effective_message.edit_text(
-                text=templates.ASK_NAME,
-                reply_markup=common_keyboards.CANCEL_KEYBOARD,
-            )
+            await update.effective_message.edit_text(text=templates.ASK_NAME)
 
             return States.NAME
         raise exc
@@ -160,7 +156,6 @@ async def handle_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     context.user_data[templates.NAME_FIELD] = name
     await update.effective_message.reply_text(
         text=templates.ASK_AGE,
-        reply_markup=common_keyboards.CANCEL_KEYBOARD,
     )
 
     return States.AGE
@@ -189,10 +184,7 @@ async def handle_age(
     context.user_data[templates.AGE_FIELD] = int(age)
 
     await update.effective_message.reply_text(
-        templates.ASK_SEX,
-        reply_markup=common_funcs.combine_keyboards(
-            keyboards.SEX_KEYBOARD, common_keyboards.CANCEL_KEYBOARD
-        ),
+        templates.ASK_SEX, reply_markup=keyboards.SEX_KEYBOARD
     )
 
     return States.SEX
@@ -209,9 +201,7 @@ async def handle_sex(
     await _save_response_about_sex(update, context)
     await update.effective_message.reply_text(
         templates.ASK_LOCATION,
-        reply_markup=common_funcs.combine_keyboards(
-            context.bot_data["location_keyboard"], common_keyboards.CANCEL_KEYBOARD
-        ),
+        reply_markup=context.bot_data["location_keyboard"],
     )
 
     return States.LOCATION
@@ -224,10 +214,7 @@ async def handle_location(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     Переводит диалог в состояние ABOUT_YOURSELF (ввод информации о себе).
     """
     await _save_response_about_location(update, context)
-    await update.effective_message.reply_text(
-        text=templates.ASK_ABOUT,
-        reply_markup=common_keyboards.CANCEL_KEYBOARD,
-    )
+    await update.effective_message.reply_text(text=templates.ASK_ABOUT)
 
     return States.ABOUT_YOURSELF
 
@@ -261,13 +248,8 @@ async def handle_about(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         )
         context.user_data[templates.IS_VISIBLE_FIELD] = True
     await update.effective_chat.send_message(
-        text=templates.ASK_PHOTO,
-        reply_markup=InlineKeyboardMarkup.from_button(
-            InlineKeyboardButton(
-                text=buttons.SAVE_PHOTO_BUTTON, callback_data=buttons.SAVE_PHOTO_BUTTON
-            )
-        ),
-    ),
+        text=templates.ASK_PHOTO, reply_markup=keyboards.PHOTO_KEYBOARD
+    )
 
     return States.PHOTO
 
@@ -390,10 +372,7 @@ async def send_received_photos(
             True,
         )
         return States.CONFIRMATION
-    await update.callback_query.answer(
-        text=templates.DONT_SAVE_WITHOUT_PHOTO,
-        show_alert=True,
-    )
+    await update.effective_message.reply_text(text=templates.DONT_SAVE_WITHOUT_PHOTO)
     return None
 
 
@@ -455,7 +434,6 @@ async def start_filling_again(
 
     await update.effective_message.reply_text(
         text=templates.ASK_NAME_AGAIN,
-        reply_markup=common_keyboards.CANCEL_KEYBOARD,
     )
 
     return States.NAME
@@ -534,7 +512,6 @@ async def send_question_to_edit_about_myself(
     await update.callback_query.message.edit_reply_markup()
     await update.effective_message.reply_text(
         text=templates.ASK_ABOUT,
-        reply_markup=common_keyboards.CANCEL_KEYBOARD,
     )
 
     return States.EDIT_ABOUT_YOURSELF
@@ -549,15 +526,8 @@ async def send_question_to_edit_photo(
     """
     await update.callback_query.message.edit_reply_markup()
     await update.effective_chat.send_message(
-        text=templates.ASK_PHOTO,
-        reply_markup=InlineKeyboardMarkup.from_button(
-            InlineKeyboardButton(
-                text=buttons.SAVE_EDITED_PHOTO_BUTTON,
-                callback_data=buttons.SAVE_EDITED_PHOTO_BUTTON,
-            )
-        ),
+        text=templates.ASK_PHOTO, reply_markup=keyboards.PHOTO_EDIT_KEYBOARD
     )
-
     return States.EDIT_PHOTO
 
 
@@ -703,9 +673,8 @@ async def send_edited_photos(
             True,
         )
         return States.EDIT_CONFIRMATION
-    await update.callback_query.answer(
+    await update.effective_message.reply_text(
         text=templates.DONT_SAVE_WITHOUT_PHOTO,
-        show_alert=True,
     )
     return None
 
