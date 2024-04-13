@@ -1,5 +1,6 @@
 from telegram.ext import (
     CallbackQueryHandler,
+    CommandHandler,
     ConversationHandler,
     MessageHandler,
     filters,
@@ -10,7 +11,6 @@ import conversations.coliving.templates as templates
 import conversations.common_functions.common_buttons as common_buttons
 import conversations.common_functions.common_funcs as common_funcs
 from conversations.coliving.states import States
-from conversations.common_functions.common_templates import CANCEL_TEXT
 from conversations.menu.buttons import COLIVING_BUTTON
 
 coliving_handler: ConversationHandler = ConversationHandler(
@@ -217,17 +217,9 @@ coliving_handler: ConversationHandler = ConversationHandler(
         ],
     },
     fallbacks=[
-        CallbackQueryHandler(
-            pattern=rf"^{CANCEL_TEXT}",
-            callback=common_funcs.cancel,
+        CommandHandler(
+            "cancel",
+            common_funcs.cancel,
         ),
     ],
 )
-
-# fallbacks=[
-#     CallbackQueryHandler(
-#         callback=common_funcs.cancel,
-#         pattern=rf"^{common_buttons.CANCEL_BUTTON}",
-#     ),
-# ],
-# )

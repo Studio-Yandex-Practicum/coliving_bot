@@ -8,8 +8,6 @@ from telegram.constants import ParseMode
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
 import conversations.common_functions.common_buttons as common_buttons
-import conversations.common_functions.common_funcs as common_funcs
-import conversations.common_functions.common_keyboards as common_keyboards
 import conversations.common_functions.common_templates as common_templates
 import conversations.profile.buttons as buttons
 import conversations.profile.keyboards as keyboards
@@ -47,10 +45,7 @@ async def start(
         )
     except HTTPStatusError as exc:
         if exc.response.status_code == codes.NOT_FOUND:
-            await update.effective_message.edit_text(
-                text=templates.ASK_AGE,
-                reply_markup=common_keyboards.CANCEL_KEYBOARD,
-            )
+            await update.effective_message.edit_text(text=templates.ASK_AGE)
 
             return States.AGE
         raise exc
@@ -158,10 +153,7 @@ async def handle_age(
         return States.AGE
     context.user_data[templates.AGE_FIELD] = int(age)
     await update.effective_message.reply_text(
-        templates.ASK_SEX,
-        reply_markup=common_funcs.combine_keyboards(
-            keyboards.SEX_KEYBOARD, common_keyboards.CANCEL_KEYBOARD
-        ),
+        templates.ASK_SEX, reply_markup=keyboards.SEX_KEYBOARD
     )
 
     return States.SEX
@@ -177,7 +169,6 @@ async def handle_sex(
     await _save_response_about_sex(update, context)
     await update.effective_message.reply_text(
         templates.ASK_NAME,
-        reply_markup=common_keyboards.CANCEL_KEYBOARD,
     )
 
     return States.NAME
@@ -205,10 +196,7 @@ async def handle_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
         return States.NAME
     context.user_data[templates.NAME_FIELD] = name
     await update.effective_message.reply_text(
-        text=templates.ASK_LOCATION,
-        reply_markup=common_funcs.combine_keyboards(
-            context.bot_data["location_keyboard"], common_keyboards.CANCEL_KEYBOARD
-        ),
+        text=templates.ASK_LOCATION, reply_markup=context.bot_data["location_keyboard"]
     )
 
     return States.LOCATION
@@ -220,10 +208,7 @@ async def handle_location(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     Переводит диалог в состояние ABOUT_YOURSELF (ввод информации о себе).
     """
     await _save_response_about_location(update, context)
-    await update.effective_message.reply_text(
-        text=templates.ASK_ABOUT,
-        reply_markup=common_keyboards.CANCEL_KEYBOARD,
-    )
+    await update.effective_message.reply_text(text=templates.ASK_ABOUT)
 
     return States.ABOUT_YOURSELF
 
@@ -432,10 +417,7 @@ async def start_filling_again(
     Обработка кнопки 'Заполнить заново.'.
     """
     await _send_chosen_choice_and_remove_buttons(update=update)
-    await update.effective_message.reply_text(
-        text=templates.ASK_AGE_AGAIN,
-        reply_markup=common_keyboards.CANCEL_KEYBOARD,
-    )
+    await update.effective_message.reply_text(text=templates.ASK_AGE_AGAIN)
 
     return States.AGE
 
@@ -505,10 +487,7 @@ async def send_question_to_edit_about_myself(
     Обработка кнопки 'О себе.'.
     """
     await _send_chosen_choice_and_remove_buttons(update=update)
-    await update.effective_message.reply_text(
-        text=templates.ASK_ABOUT,
-        reply_markup=common_keyboards.CANCEL_KEYBOARD,
-    )
+    await update.effective_message.reply_text(text=templates.ASK_ABOUT)
 
     return States.EDIT_ABOUT_YOURSELF
 
