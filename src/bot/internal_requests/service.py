@@ -10,6 +10,7 @@ from internal_requests.entities import (
     ColivingSearchSettings,
     Image,
     Location,
+    MatchedUser,
     ProfileSearchSettings,
     UserProfile,
 )
@@ -124,6 +125,22 @@ class APIService:
         data = {"residence": residence_id}
         return await self._patch_request(endpoint_urn=endpoint_urn, data=data)
 
+    async def get_potential_roommates(
+        self,
+        telegram_id: int,
+    ) -> List[MatchedUser]:
+        """
+        Выводит список потенциальных жильцов
+        для данного коливинга - всех пользователей,
+        у кого есть мэтч с данным telegram_id.
+        """
+        endpoint_urn = f"users/{telegram_id}/matches/"
+        response = await self._get_request(endpoint_urn=endpoint_urn)
+        result = []
+        for matched_user in response.json():
+            result.append(MatchedUser(**matched_user))
+        return result
+
     async def get_user_profile_by_telegram_id(
         self, telegram_id: int
     ) -> Optional[UserProfile]:
@@ -197,6 +214,13 @@ class APIService:
         :return: Обновленный профиль или None, если что-то пошло не так.
         """
         return await self._profile_request(telegram_id, data, method="patch")
+
+    async def delete_coliving(self, coliving_id: int) -> Response:
+        """
+        Удаляет профиль коливинга.
+        """
+        endpoint_urn = f"colivings/{coliving_id}/"
+        return await self._delete_request(endpoint_urn)
 
     async def delete_coliving_photos(
         self, coliving_id: int, telegram_id: int
@@ -321,7 +345,9 @@ class APIService:
     async def _parse_response_to_coliving(response_json: object) -> Coliving:
         """Парсит полученный json, упаковывая в датакласс Coliving."""
         if not isinstance(response_json, dict):
-            ValueError("Возможно было получено несколько записей, ожидалась одна.")
+            raise ValueError(
+                "Возможно было получено несколько записей, ожидалась одна."
+            )
         images = response_json.pop("images")
         coliving_info = Coliving(**response_json)
         if images:

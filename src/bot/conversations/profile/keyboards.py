@@ -2,13 +2,12 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from conversations.common_functions.common_buttons import (
     HIDE_SEARCH_BUTTON,
+    RETURN_BTN_LABEL,
+    RETURN_TO_MENU_BTN_LABEL,
     SHOW_SEARCH_BUTTON,
 )
 from conversations.common_functions.common_keyboards import HIDE_BUTTON, SEARCH_BUTTON
-from conversations.common_functions.common_templates import (
-    RETURN_BTN_LABEL,
-    RETURN_TO_MENU_BTN_LABEL,
-)
+from conversations.profile import buttons as buttons
 from conversations.profile.buttons import (
     EDIT_ABOUT_BUTTON,
     EDIT_AGE_BUTTON,
@@ -34,12 +33,12 @@ PROFILE_DUPLICATE_BUTTONS = [
     ),
 ]
 
-PROFILE_KEYBOARD_OPEN_SEARCH = InlineKeyboardMarkup.from_column(
-    button_column=(SEARCH_BUTTON, *PROFILE_DUPLICATE_BUTTONS)
+VISIBLE_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
+    button_column=(HIDE_BUTTON, *PROFILE_DUPLICATE_BUTTONS)
 )
 
-PROFILE_KEYBOARD_HIDE_SEARCH = InlineKeyboardMarkup.from_column(
-    button_column=(HIDE_BUTTON, *PROFILE_DUPLICATE_BUTTONS)
+HIDDEN_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
+    button_column=(SEARCH_BUTTON, *PROFILE_DUPLICATE_BUTTONS)
 )
 
 SEX_KEYBOARD = InlineKeyboardMarkup.from_row(
@@ -97,5 +96,10 @@ FORM_SAVE_OR_EDIT_KEYBOARD = InlineKeyboardMarkup.from_column(
         InlineKeyboardButton(text=YES_BUTTON, callback_data=YES_BUTTON),
         InlineKeyboardButton(text=EDIT_CANCEL_BUTTON, callback_data=EDIT_CANCEL_BUTTON),
         InlineKeyboardButton(text=EDIT_RESUME_BUTTON, callback_data=EDIT_RESUME_BUTTON),
+    )
+)
+SAVE_PHOTO_KEYBOARD = InlineKeyboardMarkup.from_button(
+    InlineKeyboardButton(
+        text=buttons.SAVE_PHOTO_BUTTON, callback_data=buttons.SAVE_PHOTO_BUTTON
     )
 )
