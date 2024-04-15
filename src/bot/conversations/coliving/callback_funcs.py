@@ -1,6 +1,12 @@
 from typing import Optional
 
-from telegram import InlineKeyboardMarkup, InputMediaPhoto, ReplyKeyboardRemove, Update
+from telegram import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    InputMediaPhoto,
+    ReplyKeyboardRemove,
+    Update,
+)
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
 import conversations.coliving.keyboards as keyboards
@@ -159,20 +165,43 @@ async def handle_coliving_transfer_to(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """Обработка ответа: Передача коливинга."""
-    #############################################################
-    # заглушка
+    roommmates = await api_service.get_coliving_roommates(
+        _context.user_data["coliving_info"].id
+    )
+    buttons = []
+    for user in roommmates:
+        buttons.append(
+            InlineKeyboardButton(
+                text=f"{user['name']} {user['age']}",
+                callback_data=f"transfer_to_confirm:{user['telegram_id']}",
+            )
+        )
+    keyboard = InlineKeyboardMarkup.from_column(button_column=buttons)
     await update.effective_message.edit_reply_markup()
     await update.effective_message.reply_text(
-        text=(
-            "Заглушка. Предусмотрена передача коливинга "
-            "другому владельцу"
-            "\n"
-            "\n"
-            "Нажмите /coliving"
-        )
+        text="Выберете пользователя", reply_markup=keyboard
     )
-    # await set_new_owner(update, context)
-    #############################################################
+    return States.COLIVING
+
+
+async def handle_coliving_transfer_to_confirm(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+):
+    telegram_id = int(update.callback_query.data.split(":")[1])
+    user_info = await api_service.get_user_profile_by_telegram_id(telegram_id)
+    context.user_data["coliving_info"].host = telegram_id
+    await update.effective_message.reply_text(
+        text=f"Передать коливинг {user_info.name} {user_info.age}?",
+        reply_markup=keyboards.COLIVING_TRANSFER_TO_CONFIRM_KEYBOARD,
+    )
+    return States.COLIVING
+
+
+async def handle_coliving_set_new_owner(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+):
+    await api_service.update_coliving_info(context.user_data["coliving_info"])
+    await update.effective_message.reply_text(text="Владелец изменён")
     return ConversationHandler.END
 
 

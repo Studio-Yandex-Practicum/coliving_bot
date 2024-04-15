@@ -6,6 +6,7 @@ from telegram import (
 )
 
 import conversations.coliving.buttons as buttons
+import conversations.coliving.templates as templates
 from conversations.common_functions.common_buttons import (
     LOCATION_PREFIX,
     RETURN_TO_MENU_BTN_LABEL,
@@ -71,6 +72,17 @@ WHAT_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
         InlineKeyboardButton(
             text=buttons.BTN_LABEL_EDIT_PHOTO,
             callback_data=buttons.BTN_LABEL_EDIT_PHOTO,
+        ),
+    )
+)
+
+COLIVING_TRANSFER_TO_CONFIRM_KEYBOARD = InlineKeyboardMarkup.from_row(
+    button_row=(
+        InlineKeyboardButton(
+            text=templates.BTN_LABEL_CONFIRM, callback_data="set_new_owner"
+        ),
+        InlineKeyboardButton(
+            text=templates.BTN_LABEL_CANCEL, callback_data="go_to_menu"
         ),
     )
 )

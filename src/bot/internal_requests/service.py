@@ -191,6 +191,13 @@ class APIService:
             result.append(Coliving(**coliving))
         return result
 
+    async def get_coliving_roommates(self, coliving_id: int) -> List[UserProfile]:
+        response = await self._get_request(f"colivings/{coliving_id}/roommates/")
+        result = []
+        for user in response.json():
+            result.append(user)
+        return result
+
     async def create_user_profile(
         self, telegram_id: int, data: dict
     ) -> Optional[UserProfile]:

@@ -223,8 +223,16 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 pattern=r"^assign_roommate",
             ),
             CallbackQueryHandler(
+                callback=callback_funcs.handle_coliving_transfer_to_confirm,
+                pattern=r"^transfer_to_confirm",
+            ),
+            CallbackQueryHandler(
                 callback=callback_funcs.handle_coliving_transfer_to,
                 pattern=r"^transfer_to",
+            ),
+            CallbackQueryHandler(
+                callback=callback_funcs.handle_coliving_set_new_owner,
+                pattern=r"^set_new_owner",
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.handle_delete_profile,
