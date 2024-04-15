@@ -5,7 +5,6 @@ from rest_framework.test import APITestCase
 from profiles.constants import Restrictions
 from profiles.models import Coliving, ColivingTypes, Location, UserFromTelegram
 
-
 TELEGR_ID_TXT = "telegram_id"
 LOCATION_TXT = "location"
 ROOM_TYPE_TXT = "room_type"
@@ -35,7 +34,6 @@ class ColivingAPITest(APITestCase):
     SPB_LOCATION_NAME = "Санкт-Петербург"
 
     UNKNOWN_LOCATION = "UNKNOWN_LOCATION"
-
 
     @classmethod
     def setUpTestData(cls):
@@ -222,9 +220,7 @@ class UserResidenceUpdateAPITestCase(APITestCase):
     def test_update_with_invalid_residence_id(self):
         """Тест обновления с невалидным residence_id."""
         user_telegram_id = self.OWNER_TELEGRAM_ID
-        url = reverse(
-            VIEW_USER_DET_LINK, kwargs={TELEGR_ID_TXT: user_telegram_id}
-        )
+        url = reverse(VIEW_USER_DET_LINK, kwargs={TELEGR_ID_TXT: user_telegram_id})
         data = {RESIDENCE_TXT: self.INVALID_COLIVING_PK}
         response = self.client.patch(url, data)
 
@@ -233,8 +229,7 @@ class UserResidenceUpdateAPITestCase(APITestCase):
 
 class ColivingSearchAPITest(APITestCase):
     """Тесты проверки логики поиска коливинга."""
-    
-    
+
     URL = reverse(VIEW_COL_LIST_LINK)
     MSK_LOCATION_NAME = "Москва"
     SPB_LOCATION_NAME = "Санкт-Петербург"
