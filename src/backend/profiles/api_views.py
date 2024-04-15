@@ -10,6 +10,7 @@ from profiles.serializers import (
     ColivingSerializer,
     LocationSerializer,
     ProfileSerializer,
+    RoommatesSerializer,
     UserResidenceSerializer,
 )
 
@@ -82,6 +83,13 @@ class ColivingDetailView(
     serializer_class = ColivingSerializer
 
 
+class ColivingRommatesView(generics.ListAPIView):
+    serializer_class = RoommatesSerializer
+
+    def get_queryset(self):
+        return UserFromTelegram.objects.filter(residence_id=self.kwargs["pk"])
+
+
 class UserResidenceUpdateAPIView(generics.UpdateAPIView):
     """Apiview представление для обновления информации о проживании пользователя.
     Обрабатывает PATCH-запросы на адрес /api/v1/users/{telegram_id}/,
@@ -92,3 +100,8 @@ class UserResidenceUpdateAPIView(generics.UpdateAPIView):
     queryset = UserFromTelegram.objects.all()
     serializer_class = UserResidenceSerializer
     lookup_field = "telegram_id"
+
+
+class UserResidenceListAPIView(generics.ListAPIView):
+    queryset = UserFromTelegram.objects.filter(residence__isnull=True)
+    serializer_class = UserResidenceSerializer

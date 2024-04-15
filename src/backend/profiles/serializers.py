@@ -67,3 +67,12 @@ class UserResidenceSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserFromTelegram
         fields = ["residence"]
+
+
+class RoommatesSerializer(serializers.ModelSerializer):
+    age = serializers.IntegerField(source="user_profile.age")
+    name = serializers.CharField(source="user_profile.name")
+
+    class Meta:
+        model = UserFromTelegram
+        fields = ["telegram_id", "name", "age"]
