@@ -168,6 +168,9 @@ async def handle_coliving_transfer_to(
     roommmates = await api_service.get_coliving_roommates(
         _context.user_data["coliving_info"].id
     )
+    if not roommmates:
+        await update.effective_message.reply_text("Список пользователей пуст.")
+        return States.COLIVING
     buttons = []
     for user in roommmates:
         buttons.append(
@@ -187,6 +190,7 @@ async def handle_coliving_transfer_to(
 async def handle_coliving_transfer_to_confirm(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ):
+    """Подтверждение передачи коливинга."""
     telegram_id = int(update.callback_query.data.split(":")[1])
     user_info = await api_service.get_user_profile_by_telegram_id(telegram_id)
     context.user_data["coliving_info"].host = telegram_id
@@ -197,9 +201,11 @@ async def handle_coliving_transfer_to_confirm(
     return States.COLIVING
 
 
+@add_response_prefix(custom_message="Новый владелец успешно установлен")
 async def handle_coliving_set_new_owner(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ):
+    """Обработка выбора нового владельца коливинга."""
     await api_service.update_coliving_info(context.user_data["coliving_info"])
     await update.effective_message.reply_text(text="Владелец изменён")
     return ConversationHandler.END
