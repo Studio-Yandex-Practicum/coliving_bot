@@ -173,13 +173,15 @@ async def handle_coliving_transfer_to(update, context):
     current_page = context.user_data.get("coliving_transfer_page", 0)
     start_index = current_page * page_size
     end_index = min(start_index + page_size, len(roommmates))
-    buttons = []
+    user_buttons = []
     for user in roommmates[start_index:end_index]:
-        buttons.append(
-            InlineKeyboardButton(
-                text=f"{user['name']} {user['age']}",
-                callback_data=f"transfer_to_confirm:{user['telegram_id']}",
-            )
+        user_buttons.append(
+            [
+                InlineKeyboardButton(
+                    text=f"{user['name']} {user['age']}",
+                    callback_data=f"transfer_to_confirm:{user['telegram_id']}",
+                )
+            ]
         )
     pagination_buttons = []
     if current_page > 0:
@@ -190,7 +192,8 @@ async def handle_coliving_transfer_to(update, context):
         pagination_buttons.append(
             InlineKeyboardButton(text="▶️", callback_data="coliving_transfer_next")
         )
-    keyboard = InlineKeyboardMarkup.from_column(buttons + pagination_buttons)
+    user_buttons.append(pagination_buttons)
+    keyboard = InlineKeyboardMarkup(inline_keyboard=user_buttons)
     await update.effective_message.reply_text(
         text="Выберете пользователя", reply_markup=keyboard
     )
