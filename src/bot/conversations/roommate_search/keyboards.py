@@ -38,13 +38,6 @@ PROFILE_KEYBOARD = ReplyKeyboardMarkup.from_row(
     resize_keyboard=True,
 )
 
-LIKE_PROFILE = InlineKeyboardMarkup.from_column(
-    button_column=(
-        InlineKeyboardButton(text=buttons.YES_BTN, callback_data=buttons.SEE_PROFILE),
-        InlineKeyboardButton(text=buttons.WAIT_BTN, callback_data=buttons.WAIT_BTN),
-    )
-)
-
 NO_MATCHES_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         InlineKeyboardButton(text=buttons.WAIT_BTN, callback_data=buttons.WAIT_BTN),

@@ -1,5 +1,6 @@
-from telegram.ext import (  # CommandHandler,
+from telegram.ext import (
     CallbackQueryHandler,
+    CommandHandler,
     ConversationHandler,
     MessageHandler,
     filters,
@@ -8,8 +9,7 @@ from telegram.ext import (  # CommandHandler,
 import conversations.match_requests.buttons as buttons
 import conversations.match_requests.callback_funcs as callbacks
 import conversations.match_requests.states as states
-from conversations.common_functions import common_buttons, common_funcs
-from conversations.roommate_search.buttons import SEE_PROFILE
+from conversations.common_functions import common_funcs
 
 # from conversations.roommate_search.buttons import AGE_RANGE_CALLBACK_PATTERN
 from conversations.roommate_search.validators import (
@@ -17,16 +17,21 @@ from conversations.roommate_search.validators import (
 )
 
 match_requests_handler: ConversationHandler = ConversationHandler(
-    entry_points=[CallbackQueryHandler(callbacks.start, rf"^{SEE_PROFILE}$")],
+    # entry_points=[CallbackQueryHandler(callbacks.start, rf"^{SEE_PROFILE}$")],
+    entry_points=[
+        CallbackQueryHandler(
+            callback=callbacks.start, pattern=rf"^\d+:{buttons.SEE_PROFILE_BNT}$"
+        )
+    ],
     states={
         states.PROFILE: [
-            MessageHandler(
-                filters=filters.Regex(rf"^{buttons.LIKE_BTN}$"),
+            CallbackQueryHandler(
                 callback=callbacks.link_sender_to_receiver,
+                pattern=rf"^\d+:{buttons.LIKE_BTN}$",
             ),
-            MessageHandler(
-                filters=filters.Regex(rf"^{buttons.DISLIKE_BTN}$"),
+            CallbackQueryHandler(
                 callback=callbacks.dislike_to_sender,
+                pattern=rf"^\d+:{buttons.DISLIKE_BTN}$",
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -34,12 +39,10 @@ match_requests_handler: ConversationHandler = ConversationHandler(
             ),
         ],
     },
-    # заглушка
     fallbacks=[
-        CallbackQueryHandler(
+        CommandHandler(
+            command="cancel",
             callback=common_funcs.cancel,
-            pattern=rf"^{common_buttons.CANCEL_BUTTON}",
-        )
+        ),
     ],
-    #  fallbacks=[CommandHandler("cancel", callbacks.)],
 )

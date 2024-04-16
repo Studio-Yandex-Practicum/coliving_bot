@@ -21,6 +21,8 @@ def add_response_prefix(func):
 
     @wraps(func)
     async def wrapper(update, context, *args, **kwargs):
+        await update.effective_message.edit_reply_markup()
+
         if update.callback_query:
             user_response = update.callback_query.data
             if ":" in user_response:

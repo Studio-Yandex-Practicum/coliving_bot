@@ -5,11 +5,12 @@ END_OF_SEARCH = (
     "А если нет, помни, что ты всегда можешь начать поиск заново."
 )
 LIKE_NOTIFICATION = "Кто-то хочет стать твоим соседом, посмотрим?"
-SENDER_PROFILE = "Смотрим анкету {sender_profile.name}"
+LIKE_SENDER_PROFILE = "Смотрим анкету <b>{sender_profile.name}</b>"
 BUTTON_ERROR_MSG = "Выбери соответствующий вариант."
-SEND_SENDER = "Приветствуем будущего соседа {sender_id}"
-SEND_RECEIVER = (
-    "Приветствуем будущего соседа {receiver_id},\n" "Ему тоже понравилась твоя анкета!"
+
+NEW_MATCH_NOTIFICATION = (
+    "<i>Приветствуем твоего будущего соседа</i> <b>{profile.name}</b>,\n"
+    "<i>Вы лайкнули анкеты друг друга.</i>"
 )
 
 

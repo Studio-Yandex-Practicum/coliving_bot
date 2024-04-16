@@ -1,5 +1,5 @@
 LIKE_BTN = "Отправить 👍"
-DISLIKE_BTN = "👎"
+DISLIKE_BTN = "Не сейчас👎"
 WAIT_BTN = "Ждать"
 YES_BTN = "Да"
 NO_BTN = "Нет"

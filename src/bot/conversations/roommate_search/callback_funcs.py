@@ -9,6 +9,8 @@ from telegram import (
 )
 from telegram.ext import ContextTypes, ConversationHandler
 
+import conversations.match_requests.keyboards as match_keyboards
+import conversations.match_requests.templates as match_templates
 import conversations.roommate_search.keyboards as keyboards
 import conversations.roommate_search.templates as templates
 from conversations.common_functions.common_funcs import profile_required
@@ -160,10 +162,11 @@ async def profile_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         text=templates.SEND_LIKE.format(receiver_name=current_profile["name"]),
     )
 
+    keyboard = await match_keyboards.get_view_profile_keyboard(sender_id)
     await context.bot.send_message(
         chat_id=receiver_id,
-        text=templates.LIKE_NOTIFICATION,
-        reply_markup=keyboards.LIKE_PROFILE,
+        text=match_templates.LIKE_NOTIFICATION,
+        reply_markup=keyboard,
     )
 
     await update.effective_message.reply_text(

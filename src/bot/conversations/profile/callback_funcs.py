@@ -71,7 +71,6 @@ async def send_question_to_profile_is_visible_in_search(
     Завершает диалог.
     """
     visibility_choice: bool = await common_funcs.get_visibility_choice(update=update)
-    await update.effective_message.edit_reply_markup()
 
     message_text = common_templates.VISIBILITY_MSG_OPTNS[visibility_choice]
 
@@ -93,7 +92,6 @@ async def send_question_to_edit_profile(
     Обработка кнопки 'Изменить анкету'.
     Переводит диалог в состояние EDIT.
     """
-    await update.callback_query.message.edit_reply_markup()
 
     await update.effective_message.reply_text(
         text=templates.ASK_WANT_TO_CHANGE,
@@ -110,10 +108,8 @@ async def handle_return_to_profile_response(
     """
     Обработка кнопки 'Вернуться'.
     Переводит диалог в состояние PROFILE.
+
     """
-
-    await update.effective_message.edit_reply_markup()
-
     if context.user_data[templates.IS_VISIBLE_FIELD] is True:
         await _look_at_profile(update, context, "", keyboards.VISIBLE_PROFILE_KEYBOARD)
     else:
@@ -126,8 +122,6 @@ async def handle_return_to_menu_response(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> Union[int, States]:
     """Обработка ответа: Вернуться в меню."""
-
-    await update.effective_message.edit_reply_markup()
     context.user_data.clear()
     await menu(update, context)
     return ConversationHandler.END
@@ -384,8 +378,6 @@ async def handle_profile(update: Update, _context: ContextTypes.DEFAULT_TYPE) ->
     """
     edit = update.callback_query.data
 
-    await update.effective_message.edit_reply_markup()
-
     if edit == buttons.EDIT_FORM_BUTTON:
         await update.effective_message.reply_text(
             text=templates.ASK_WANT_TO_CHANGE,
@@ -409,7 +401,6 @@ async def handle_visible(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     Переводит диалог в состояние END (сохранение анкеты).
     """
     visibility_choice: bool = await common_funcs.get_visibility_choice(update=update)
-    await update.effective_message.edit_reply_markup()
 
     context.user_data[templates.IS_VISIBLE_FIELD] = visibility_choice
 
@@ -430,8 +421,6 @@ async def start_filling_again(
     Обработка кнопки 'Заполнить заново.'.
     """
 
-    await update.callback_query.message.edit_reply_markup()
-
     await update.effective_message.reply_text(
         text=templates.ASK_NAME_AGAIN,
     )
@@ -446,7 +435,6 @@ async def send_question_to_edit_name(
     """
     Обработка кнопки 'Имя'.
     """
-    await update.callback_query.message.edit_reply_markup()
 
     await update.effective_message.reply_text(
         text=templates.ASK_NAME_AGAIN,
@@ -462,7 +450,6 @@ async def send_question_to_edit_sex(
     """
     Обработка кнопки 'Пол'.
     """
-    await update.callback_query.message.edit_reply_markup()
 
     await update.effective_message.reply_text(
         text=templates.ASK_SEX,
@@ -479,7 +466,6 @@ async def send_question_to_edit_age(
     """
     Обработка кнопки 'Возраст'.
     """
-    await update.callback_query.message.edit_reply_markup()
     await update.effective_message.reply_text(
         text=templates.ASK_AGE,
     )
@@ -494,7 +480,6 @@ async def send_question_to_edit_location(
     """
     Обработка кнопки 'Место проживания'.
     """
-    await update.callback_query.message.edit_reply_markup()
     await update.effective_message.reply_text(
         text=templates.ASK_LOCATION, reply_markup=context.bot_data["location_keyboard"]
     )
@@ -509,7 +494,6 @@ async def send_question_to_edit_about_myself(
     """
     Обработка кнопки 'О себе.'.
     """
-    await update.callback_query.message.edit_reply_markup()
     await update.effective_message.reply_text(
         text=templates.ASK_ABOUT,
     )
@@ -524,7 +508,6 @@ async def send_question_to_edit_photo(
     """
     Обработка кнопки 'Фотографию.'.
     """
-    await update.callback_query.message.edit_reply_markup()
     await update.effective_chat.send_message(
         text=templates.ASK_PHOTO, reply_markup=keyboards.PHOTO_EDIT_KEYBOARD
     )
@@ -688,7 +671,6 @@ async def send_question_to_profile_is_correct(
     Обработка кнопки 'Да. Верно'.
     Либо завершает диалог.
     """
-    await update.callback_query.message.edit_reply_markup()
     await api_service.update_user_profile(update.effective_chat.id, context.user_data)
     if len(context.user_data.get(templates.RECEIVED_PHOTOS_FIELD)) != 0:
         await api_service.delete_profile_photos(update.effective_chat.id)
@@ -714,7 +696,6 @@ async def send_question_to_cancel_profile_edit(
     Обработка кнопки 'Отменить редактирование'.
     Либо завершает диалог.
     """
-    await update.callback_query.message.edit_reply_markup()
     await update.effective_message.reply_text(
         text=templates.FORM_NOT_CHANGED,
     )
@@ -730,7 +711,6 @@ async def send_question_to_resume_profile_edit(
     Спрашивает верна ли анкета.
     Обработка кнопки 'Продолжить редактирование'.
     """
-    await update.callback_query.message.edit_reply_markup()
     await update.effective_message.reply_text(
         text=templates.ASK_WANT_TO_CHANGE,
         reply_markup=keyboards.FORM_EDIT_KEYBOARD,
@@ -753,12 +733,9 @@ async def send_profile_saved_notification(
 async def _save_response_about_sex(update: Update, context: CallbackContext):
     """Сохраняет полученный ответ про пол пользователя в контекст."""
     sex = update.callback_query.data
-    await update.effective_message.edit_reply_markup()
     context.user_data[templates.SEX_FIELD] = sex.split()[1].capitalize()
 
 
 async def _save_response_about_location(update, context):
     location = update.callback_query.data.split(":")[1]
-
-    await update.effective_message.edit_reply_markup()
     context.user_data[templates.LOCATION_FIELD] = location
