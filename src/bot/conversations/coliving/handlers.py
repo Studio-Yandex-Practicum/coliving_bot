@@ -235,6 +235,14 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 pattern=r"^set_new_owner",
             ),
             CallbackQueryHandler(
+                callback_funcs.coliving_transfer_prev_callback_handler,
+                pattern="^coliving_transfer_prev",
+            ),
+            CallbackQueryHandler(
+                callback_funcs.coliving_transfer_next_callback_handler,
+                pattern="^coliving_transfer_next",
+            ),
+            CallbackQueryHandler(
                 callback=callback_funcs.handle_delete_profile,
                 pattern=rf"^{buttons.BTN_LABEL_DELETE_PROFILE_KEYBOARD}$",
             ),
