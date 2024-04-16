@@ -151,10 +151,12 @@ async def _send_new_match_notification(
     уведомление c именем второго пользователя.
 
     """
-    profile: UserProfile = await api_service.get_user_profile_by_telegram_id(
-        telegram_id=matched_user_1_tg_id,
-    )
+    #  profile: UserProfile = await api_service.get_user_profile_by_telegram_id(
+    #    telegram_id=matched_user_1_tg_id,
+    #  )
+
+    chat = await context.bot.get_chat(chat_id=matched_user_1_tg_id)
     await context.bot.send_message(
         chat_id=matched_user_2_tg_id,
-        text=templates.NEW_MATCH_NOTIFICATION.format(profile=profile),
+        text=templates.NEW_MATCH_NOTIFICATION.format(username=chat.username),
     )

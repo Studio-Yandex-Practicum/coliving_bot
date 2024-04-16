@@ -83,24 +83,6 @@ class MatchRequestListCreateView(generics.ListCreateAPIView):
     serializer_class = MatchRequestSerializer
     filterset_class = MatchRequestFilter
 
-
-class MatchRequestUpdateView(generics.UpdateAPIView):
-    """
-    ApiView для изменения статуса MatchRequest.
-
-    """
-
-    queryset = MatchRequest.objects.all()
-    serializer_class = MatchRequestUpdateSerializer
-
-
-'''
-class MatchRequestView(generics.CreateAPIView, generics.UpdateAPIView):
-    """Apiview для создания MatchRequest."""
-
-    queryset = MatchRequest.objects.all()
-    serializer_class = MatchRequestSerializer
-
     def perform_create(self, serializer):
         sender = self.request.data.get("sender")
         receiver = self.request.data.get("receiver")
@@ -111,4 +93,13 @@ class MatchRequestView(generics.CreateAPIView, generics.UpdateAPIView):
             match.update(status=MatchStatuses.is_match)
         else:
             return serializer.save()
-'''
+
+
+class MatchRequestUpdateView(generics.UpdateAPIView):
+    """
+    ApiView для изменения статуса MatchRequest.
+
+    """
+
+    queryset = MatchRequest.objects.all()
+    serializer_class = MatchRequestUpdateSerializer
