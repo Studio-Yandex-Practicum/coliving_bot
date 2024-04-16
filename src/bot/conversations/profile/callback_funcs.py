@@ -3,7 +3,7 @@ from re import fullmatch
 from typing import Optional, Union
 
 from httpx import HTTPStatusError, codes
-from telegram import InputMediaPhoto, Update
+from telegram import InputMediaPhoto, ReplyKeyboardRemove, Update
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
 import conversations.common_functions.common_funcs as common_funcs
@@ -358,6 +358,10 @@ async def send_received_photos(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> Optional[int]:
     if context.user_data.get(templates.RECEIVED_PHOTOS_FIELD):
+        await update.effective_message.reply_text(
+            text=templates.PHOTO_ADDED,
+            reply_markup=ReplyKeyboardRemove(),
+        )
         await _look_at_profile(
             update,
             context,
@@ -648,6 +652,10 @@ async def send_edited_photos(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> Optional[int]:
     if context.user_data.get("new_photo"):
+        await update.effective_message.reply_text(
+            text=templates.PHOTO_ADDED,
+            reply_markup=ReplyKeyboardRemove(),
+        )
         await _look_at_profile(
             update,
             context,
