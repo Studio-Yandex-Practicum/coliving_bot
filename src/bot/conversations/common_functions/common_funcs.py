@@ -12,7 +12,7 @@ from conversations.common_functions.common_buttons import (
 from internal_requests import api_service
 
 
-def add_response_prefix(func=None, custom_message=None):
+def add_response_prefix(custom_answer: str = ""):
     """
     Декоратор для отправки сообщения пользователю в следующем формате:
     'Твой ответ: <текст выбранной кнопки>'
@@ -22,22 +22,19 @@ def add_response_prefix(func=None, custom_message=None):
         @wraps(func)
         async def wrapper(update, context, *args, **kwargs):
             if update.callback_query:
-                user_response = update.callback_query.data
-                if ":" in user_response:
-                    user_response = user_response.split(":")[1]
-                if custom_message:
-                    response_text = custom_message
+                if custom_answer:
+                    user_answer = custom_answer
                 else:
-                    response_text = f"{templates.RESPONSE_PREFIX}{user_response}"
+                    user_answer = update.callback_query.data
+                    if ":" in user_answer:
+                        user_answer = user_answer.split(":")[1]
+                response_text = f"{templates.RESPONSE_PREFIX}{user_answer}"
                 await update.effective_chat.send_message(text=response_text)
             return await func(update, context, *args, **kwargs)
 
         return wrapper
 
-    if func is None:
-        return decorator
-    else:
-        return decorator(func)
+    return decorator
 
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:

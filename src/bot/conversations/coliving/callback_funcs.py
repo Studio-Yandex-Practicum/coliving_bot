@@ -69,7 +69,7 @@ async def handle_coliving_text_instead_of_button(
     return States.COLIVING
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_coliving_edit(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -84,7 +84,7 @@ async def handle_coliving_edit(
     return States.EDIT
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_is_visible_switching(update: Update, context: CallbackContext) -> int:
     """Обработка ответа: Скрыть из поиска."""
     visibility_choice: bool = await get_visibility_choice(update=update)
@@ -155,7 +155,7 @@ async def handle_assign_roommate(
     return ConversationHandler.END
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_return_to_menu_response(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -182,7 +182,7 @@ async def handle_location_text_input_instead_of_choosing_button(
     )
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Выбор местоположения и запись в контекст."""
     location = update.callback_query.data.split(":")[1]
@@ -212,7 +212,7 @@ async def handle_room_type_text_input_instead_of_choosing_button(
     )
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_room_type(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Выбор типа спального места и запись в контекст."""
     await update.effective_message.edit_reply_markup()
@@ -315,7 +315,7 @@ async def handle_confirm_or_cancel_profile_text_instead_of_button(
     )
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_profile_confirmation_cancel(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -330,7 +330,7 @@ async def handle_profile_confirmation_cancel(
     return ConversationHandler.END
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_confirm_or_edit_reply_confirm(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -348,7 +348,7 @@ async def handle_confirm_or_edit_reply_confirm(
     return States.IS_VISIBLE
 
 
-@add_response_prefix
+@add_response_prefix()
 async def repeat_question_about_coliving_visibility(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> None:
@@ -366,7 +366,7 @@ async def repeat_question_about_coliving_visibility(
     )
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_is_visible_coliving_profile_yes(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -400,7 +400,7 @@ async def handle_what_to_edit_text_instead_of_button(
     )
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_what_to_edit_fill_again(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -419,7 +419,7 @@ async def handle_what_to_edit_fill_again(
     return States.LOCATION
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_what_to_edit_location(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -437,7 +437,7 @@ async def handle_what_to_edit_location(
     return States.EDIT_LOCATION
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_what_to_edit_room_type(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -454,7 +454,7 @@ async def handle_what_to_edit_room_type(
     return States.EDIT_ROOM_TYPE
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_what_to_edit_about_room(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -471,7 +471,7 @@ async def handle_what_to_edit_about_room(
     return States.EDIT_ABOUT_ROOM
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_what_to_edit_price(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -487,7 +487,7 @@ async def handle_what_to_edit_price(
     return States.EDIT_PRICE
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_what_to_edit_photo_room(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -505,7 +505,7 @@ async def handle_what_to_edit_photo_room(
     return States.EDIT_PHOTO_ROOM
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_edit_location(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -524,7 +524,7 @@ async def handle_edit_location(
     return States.EDIT_CONFIRMATION
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_edit_select_room_type(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -642,7 +642,7 @@ async def handle_edit_profile_confirmation_text_instead_of_button(
     )
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_edit_profile_confirmation_confirm(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -663,7 +663,7 @@ async def handle_edit_profile_confirmation_confirm(
     return ConversationHandler.END
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_edit_profile_confirmation_cancel(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -678,7 +678,7 @@ async def handle_edit_profile_confirmation_cancel(
     return ConversationHandler.END
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_edit_profile_confirmation_continue_edit(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -791,7 +791,7 @@ async def send_edited_room_photos(
     return States.EDIT_PHOTO_ROOM
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_delete_profile(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -807,7 +807,7 @@ async def handle_delete_profile(
     return States.DELETE_COLIVING
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_delete_coliving_confirmation_confirm(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -823,7 +823,7 @@ async def handle_delete_coliving_confirmation_confirm(
     return ConversationHandler.END
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_delete_coliving_confirmation_cancel(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:

@@ -3,6 +3,7 @@ from typing import Optional
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
+import conversations.coliving.coliving_transfer.templates as templates
 from conversations.coliving import keyboards as keyboards
 from conversations.coliving.buttons import BTN_LABEL_CANCEL, BTN_LABEL_CONFIRM
 from conversations.coliving.states import States
@@ -20,7 +21,7 @@ async def handle_coliving_transfer_to(update, context):
     keyboard = await _create_page_keyboard(response_json, page)
     await update.effective_message.edit_reply_markup()
     await update.effective_message.reply_text(
-        text="Выберете пользователя", reply_markup=keyboard
+        text=templates.SELECT_USER_MESSAGE, reply_markup=keyboard
     )
     return States.TRANSFER_COLIVING
 
@@ -28,7 +29,7 @@ async def handle_coliving_transfer_to(update, context):
 async def coliving_transfer_page_callback_handler(
     update: Update, context: CallbackContext
 ):
-    """Обработка ответа перехода по страницам при передачи коливинга."""
+    """Обработка ответа перехода по страницам при передаче коливинга."""
     page = int(context.matches[0].group("page"))
     response_json = await _get_coliving_roommates_response(update, context, page)
     if response_json is None:
@@ -47,13 +48,15 @@ async def handle_coliving_transfer_to_confirm(
     user_info = await api_service.get_user_profile_by_telegram_id(telegram_id)
     context.user_data["coliving_info"].host = telegram_id
     await update.effective_message.edit_text(
-        text=f"Передать коливинг {user_info.name} {user_info.age}?",
+        text=templates.USER_INFO_MESSAGE_TEMPLATE.format(
+            name=user_info.name, age=user_info.age
+        ),
         reply_markup=keyboards.COLIVING_TRANSFER_TO_CONFIRM_KEYBOARD,
     )
     return None
 
 
-@add_response_prefix(custom_message=BTN_LABEL_CONFIRM)
+@add_response_prefix(custom_answer=BTN_LABEL_CONFIRM)
 async def handle_coliving_set_new_owner(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ):
@@ -61,28 +64,19 @@ async def handle_coliving_set_new_owner(
     await api_service.update_coliving_info(context.user_data["coliving_info"])
     await context.bot.send_message(
         chat_id=context.user_data["coliving_info"].host,
-        text="Вы стали новым владельцем коливинга!",
+        text=templates.NEW_COLIVING_OWNER_MESSAGE,
     )
     await update.effective_message.edit_reply_markup()
-    await update.effective_message.reply_text(text="Владелец изменён.")
+    await update.effective_message.reply_text(text=templates.OWNER_CHANGED_MESSAGE)
     return ConversationHandler.END
 
 
-async def _cancel_coliving_transfer(
-    update: Update, _context: ContextTypes.DEFAULT_TYPE
-):
-    """Обраюотка отмены передачи коливинга."""
+@add_response_prefix(custom_answer=BTN_LABEL_CANCEL)
+async def handle_cancel_coliving_transfer(update: Update, _context: CallbackContext):
+    """Обработка отмены передачи коливинга."""
     await update.effective_message.edit_reply_markup()
-    await update.effective_message.reply_text("Передача отменена.")
+    await update.effective_message.reply_text(templates.CANCELLATION_MESSAGE)
     return ConversationHandler.END
-
-
-@add_response_prefix(custom_message=BTN_LABEL_CANCEL)
-async def handle_cancel_coliving_transfer(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-):
-    """Обраюотка отмены передачи коливинга."""
-    return await _cancel_coliving_transfer(update, context)
 
 
 async def _get_coliving_roommates_response(
@@ -94,7 +88,7 @@ async def _get_coliving_roommates_response(
     )
     if not response_json["results"]:
         await update.effective_message.edit_reply_markup()
-        await update.effective_message.reply_text("Список пользователей пуст.")
+        await update.effective_message.reply_text(templates.EMPTY_USER_LIST_MESSAGE)
         return None
     return response_json
 
@@ -106,7 +100,7 @@ async def _create_page_keyboard(response_json, page):
         user_buttons.append(
             [
                 InlineKeyboardButton(
-                    text=f"{user['name']} {user['age']}",
+                    text=f"{user['name']}, {user['age']}",
                     callback_data=f"transfer_to_confirm:{user['telegram_id']}",
                 )
             ]
