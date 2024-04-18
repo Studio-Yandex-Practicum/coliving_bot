@@ -599,11 +599,10 @@ async def handle_edit_age(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         value=age,
         min=templates.MIN_AGE,
         max=templates.MAX_AGE,
-        message=templates.AGE_ERROR_MSG.format(
-            min=templates.MIN_AGE, max=templates.MAX_AGE
-        ),
+        message=templates.AGE_ERROR_MSG,
     ):
         return States.EDIT_AGE
+
     context.user_data[templates.AGE_FIELD] = int(age)
     await _look_at_profile(
         update,

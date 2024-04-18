@@ -88,7 +88,9 @@ class ColivingRoommatesView(generics.ListAPIView):
     pagination_class = SmallResultsSetPagination
 
     def get_queryset(self):
-        return UserFromTelegram.objects.filter(residence_id=self.kwargs["pk"])
+        return UserFromTelegram.objects.filter(
+            residence_id=self.kwargs["pk"]
+        ).select_related("user_profile")
 
 
 class UserResidenceUpdateAPIView(generics.UpdateAPIView):
