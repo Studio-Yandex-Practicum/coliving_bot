@@ -70,6 +70,8 @@ class UserResidenceSerializer(serializers.ModelSerializer):
 
 
 class RoommatesSerializer(serializers.ModelSerializer):
+    """Сериализатор пользователей дополнительной информацией."""
+
     age = serializers.IntegerField(source="user_profile.age")
     name = serializers.CharField(source="user_profile.name")
 

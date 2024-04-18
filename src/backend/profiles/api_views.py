@@ -84,10 +84,13 @@ class ColivingDetailView(
 
 
 class ColivingRoommatesView(generics.ListAPIView):
+    """Apiview для получения списка соседей."""
+
     serializer_class = RoommatesSerializer
     pagination_class = SmallResultsSetPagination
 
     def get_queryset(self):
+        """Возвращает пользователей, отфильтрованных по идентификатору коливинга."""
         return UserFromTelegram.objects.filter(
             residence_id=self.kwargs["pk"]
         ).select_related("user_profile")
