@@ -3,13 +3,14 @@ from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
 
-from profiles.filters import ColivingFilter
+from profiles.filters import ColivingFilter, SmallResultsSetPagination
 from profiles.mixins import DestroyWithMediaRemovalMixin
 from profiles.models import Coliving, Location, Profile, UserFromTelegram
 from profiles.serializers import (
     ColivingSerializer,
     LocationSerializer,
     ProfileSerializer,
+    RoommatesSerializer,
     UserResidenceSerializer,
 )
 
@@ -80,6 +81,21 @@ class ColivingDetailView(
 
     queryset = Coliving.objects.select_related("location", "host").all()
     serializer_class = ColivingSerializer
+
+
+class ColivingRoommatesView(generics.ListAPIView):
+    """Apiview для получения списка соседей."""
+
+    serializer_class = RoommatesSerializer
+    pagination_class = SmallResultsSetPagination
+
+    def get_queryset(self):
+        """Возвращает пользователей, отфильтрованных по идентификатору коливинга."""
+        return (
+            UserFromTelegram.objects.select_related("user_profile")
+            .values("user_profile__age", "user_profile__name", "telegram_id")
+            .filter(residence_id=self.kwargs["pk"])
+        )
 
 
 class UserResidenceUpdateAPIView(generics.UpdateAPIView):

@@ -62,7 +62,7 @@ async def start(
     return States.PROFILE
 
 
-@add_response_prefix
+@add_response_prefix()
 async def send_question_to_profile_is_visible_in_search(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> Union[int, States]:
@@ -85,7 +85,7 @@ async def send_question_to_profile_is_visible_in_search(
     return ConversationHandler.END
 
 
-@add_response_prefix
+@add_response_prefix()
 async def send_question_to_edit_profile(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> Union[int, States]:
@@ -103,7 +103,7 @@ async def send_question_to_edit_profile(
     return States.EDIT
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_return_to_profile_response(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> Union[int, States]:
@@ -121,7 +121,7 @@ async def handle_return_to_profile_response(
     return States.PROFILE
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_return_to_menu_response(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> Union[int, States]:
@@ -190,7 +190,7 @@ async def handle_age(
     return States.SEX
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_sex(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> Union[int, States]:
@@ -207,7 +207,7 @@ async def handle_sex(
     return States.LOCATION
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Обрабатывает введенное пользователем желаемое место жительства.
@@ -380,7 +380,7 @@ async def send_received_photos(
     return None
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_profile(update: Update, _context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Выводит сообщение с заполненным профилем.
@@ -406,7 +406,7 @@ async def handle_profile(update: Update, _context: ContextTypes.DEFAULT_TYPE) ->
     return States.CONFIRMATION
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_visible(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Делает анкету видимой или нет.
@@ -426,7 +426,7 @@ async def handle_visible(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     return ConversationHandler.END
 
 
-@add_response_prefix
+@add_response_prefix()
 async def start_filling_again(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -443,7 +443,7 @@ async def start_filling_again(
     return States.NAME
 
 
-@add_response_prefix
+@add_response_prefix()
 async def send_question_to_edit_name(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -459,7 +459,7 @@ async def send_question_to_edit_name(
     return States.EDIT_NAME
 
 
-@add_response_prefix
+@add_response_prefix()
 async def send_question_to_edit_sex(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -476,7 +476,7 @@ async def send_question_to_edit_sex(
     return States.EDIT_SEX
 
 
-@add_response_prefix
+@add_response_prefix()
 async def send_question_to_edit_age(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -491,7 +491,7 @@ async def send_question_to_edit_age(
     return States.EDIT_AGE
 
 
-@add_response_prefix
+@add_response_prefix()
 async def send_question_to_edit_location(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -506,7 +506,7 @@ async def send_question_to_edit_location(
     return States.EDIT_LOCATION
 
 
-@add_response_prefix
+@add_response_prefix()
 async def send_question_to_edit_about_myself(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -521,7 +521,7 @@ async def send_question_to_edit_about_myself(
     return States.EDIT_ABOUT_YOURSELF
 
 
-@add_response_prefix
+@add_response_prefix()
 async def send_question_to_edit_photo(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -569,7 +569,7 @@ async def handle_edit_name(
     return States.EDIT_CONFIRMATION
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_edit_sex(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Обрабатывает отредактированную информацию касательно пола.
@@ -599,11 +599,10 @@ async def handle_edit_age(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         value=age,
         min=templates.MIN_AGE,
         max=templates.MAX_AGE,
-        message=templates.AGE_ERROR_MSG.format(
-            min=templates.MIN_AGE, max=templates.MAX_AGE
-        ),
+        message=templates.AGE_ERROR_MSG,
     ):
         return States.EDIT_AGE
+
     context.user_data[templates.AGE_FIELD] = int(age)
     await _look_at_profile(
         update,
@@ -616,7 +615,7 @@ async def handle_edit_age(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     return States.EDIT_CONFIRMATION
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_edit_location(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -687,7 +686,7 @@ async def send_edited_photos(
     return None
 
 
-@add_response_prefix
+@add_response_prefix()
 async def send_question_to_profile_is_correct(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -713,7 +712,7 @@ async def send_question_to_profile_is_correct(
     return ConversationHandler.END
 
 
-@add_response_prefix
+@add_response_prefix()
 async def send_question_to_cancel_profile_edit(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -730,7 +729,7 @@ async def send_question_to_cancel_profile_edit(
     return ConversationHandler.END
 
 
-@add_response_prefix
+@add_response_prefix()
 async def send_question_to_resume_profile_edit(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:

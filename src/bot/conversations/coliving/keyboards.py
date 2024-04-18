@@ -75,6 +75,15 @@ WHAT_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     )
 )
 
+COLIVING_TRANSFER_TO_CONFIRM_KEYBOARD = InlineKeyboardMarkup.from_row(
+    button_row=(
+        InlineKeyboardButton(
+            text=buttons.BTN_LABEL_CONFIRM, callback_data="set_new_owner"
+        ),
+        InlineKeyboardButton(text=buttons.BTN_LABEL_CANCEL, callback_data="go_to_menu"),
+    )
+)
+
 IS_VISIBLE_OR_NOT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         HIDE_BUTTON,
