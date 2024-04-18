@@ -68,9 +68,9 @@ class ColivingView(generics.ListCreateAPIView):
             excl_list = Coliving.objects.filter(
                 Q(host=user) | Q(viewers=user)
             ).values_list("pk", flat=True)
-            queryset = queryset.exclude(pk__in=excl_list)
+            queryset = queryset.filter(is_visible=True).exclude(pk__in=excl_list)
 
-        return queryset.filter(is_visible=True)
+        return queryset
 
 
 class ColivingDetailView(
