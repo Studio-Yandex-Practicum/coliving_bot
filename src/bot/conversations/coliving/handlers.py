@@ -10,6 +10,7 @@ import conversations.coliving.buttons as buttons
 import conversations.coliving.callback_funcs as callback_funcs
 import conversations.common_functions.common_buttons as common_buttons
 import conversations.common_functions.common_funcs as common_funcs
+from conversations.coliving.coliving_transfer import callback_funcs as coliving_transfer
 from conversations.coliving.states import States
 from conversations.common_functions.common_buttons import RETURN_TO_MENU_BTN_LABEL
 from conversations.menu.buttons import COLIVING_BUTTON
@@ -223,24 +224,8 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 pattern=r"^assign_roommate",
             ),
             CallbackQueryHandler(
-                callback=callback_funcs.handle_coliving_transfer_to_confirm,
-                pattern=r"^transfer_to_confirm",
-            ),
-            CallbackQueryHandler(
-                callback=callback_funcs.handle_coliving_transfer_to,
+                callback=coliving_transfer.handle_coliving_transfer_to,
                 pattern=r"^transfer_to",
-            ),
-            CallbackQueryHandler(
-                callback=callback_funcs.handle_coliving_set_new_owner,
-                pattern=r"^set_new_owner",
-            ),
-            CallbackQueryHandler(
-                callback_funcs.coliving_transfer_prev_callback_handler,
-                pattern="^coliving_transfer_prev",
-            ),
-            CallbackQueryHandler(
-                callback_funcs.coliving_transfer_next_callback_handler,
-                pattern="^coliving_transfer_next",
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.handle_delete_profile,
@@ -253,6 +238,23 @@ coliving_handler: ConversationHandler = ConversationHandler(
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
                 callback_funcs.handle_coliving_text_instead_of_button,
+            ),
+        ],
+        States.TRANSFER_COLIVING: [
+            CallbackQueryHandler(
+                coliving_transfer.coliving_transfer_page_callback_handler,
+                pattern=r"^coliving_transfer_page:(?P<page>\d+)",
+            ),
+            CallbackQueryHandler(
+                callback=coliving_transfer.handle_coliving_transfer_to_confirm,
+                pattern=r"^transfer_to_confirm:(?P<telegram_id>\d+)",
+            ),
+            CallbackQueryHandler(
+                callback=coliving_transfer.handle_coliving_set_new_owner,
+                pattern=r"^set_new_owner",
+            ),
+            CallbackQueryHandler(
+                callback=coliving_transfer.handle_cancel_coliving_transfer,
             ),
         ],
     },

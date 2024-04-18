@@ -1,12 +1,6 @@
 from typing import Optional
 
-from telegram import (
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-    InputMediaPhoto,
-    ReplyKeyboardRemove,
-    Update,
-)
+from telegram import InlineKeyboardMarkup, InputMediaPhoto, ReplyKeyboardRemove, Update
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
 import conversations.coliving.keyboards as keyboards
@@ -158,92 +152,6 @@ async def handle_assign_roommate(
     )
 
     #############################################################
-    return ConversationHandler.END
-
-
-async def handle_coliving_transfer_to(update, context):
-    """Обработка ответа: Передача коливинга."""
-    roommmates = await api_service.get_coliving_roommates(
-        context.user_data["coliving_info"].id
-    )
-    if not roommmates:
-        await update.effective_message.reply_text("Список пользователей пуст.")
-        return States.COLIVING
-    page_size = 6
-    current_page = context.user_data.get("coliving_transfer_page", 0)
-    start_index = current_page * page_size
-    end_index = min(start_index + page_size, len(roommmates))
-    user_buttons = []
-    for user in roommmates[start_index:end_index]:
-        user_buttons.append(
-            [
-                InlineKeyboardButton(
-                    text=f"{user['name']} {user['age']}",
-                    callback_data=f"transfer_to_confirm:{user['telegram_id']}",
-                )
-            ]
-        )
-    pagination_buttons = []
-    if current_page > 0:
-        pagination_buttons.append(
-            InlineKeyboardButton(text="◀️", callback_data="coliving_transfer_prev")
-        )
-    if end_index < len(roommmates):
-        pagination_buttons.append(
-            InlineKeyboardButton(text="▶️", callback_data="coliving_transfer_next")
-        )
-    user_buttons.append(pagination_buttons)
-    keyboard = InlineKeyboardMarkup(inline_keyboard=user_buttons)
-    await update.effective_message.reply_text(
-        text="Выберете пользователя", reply_markup=keyboard
-    )
-    return States.COLIVING
-
-
-async def coliving_transfer_prev_callback_handler(update, context):
-    """Обработка ответа перехода к предыдущей странице при передачи коливинга."""
-    current_page = context.user_data.get("coliving_transfer_page", 0)
-    if current_page > 0:
-        current_page -= 1
-        context.user_data["coliving_transfer_page"] = current_page
-        await handle_coliving_transfer_to(update, context)
-
-
-async def coliving_transfer_next_callback_handler(update, context):
-    """Обработчка ответа перехода к следующей странице при передачи коливинга."""
-    current_page = context.user_data.get("coliving_transfer_page", 0)
-    roommates = await api_service.get_coliving_roommates(
-        context.user_data["coliving_info"].id
-    )
-    page_size = 6
-    end_index = min((current_page + 1) * page_size, len(roommates))
-    if end_index < len(roommates):
-        current_page += 1
-        context.user_data["coliving_transfer_page"] = current_page
-        await handle_coliving_transfer_to(update, context)
-
-
-async def handle_coliving_transfer_to_confirm(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-):
-    """Подтверждение передачи коливинга."""
-    telegram_id = int(update.callback_query.data.split(":")[1])
-    user_info = await api_service.get_user_profile_by_telegram_id(telegram_id)
-    context.user_data["coliving_info"].host = telegram_id
-    await update.effective_message.reply_text(
-        text=f"Передать коливинг {user_info.name} {user_info.age}?",
-        reply_markup=keyboards.COLIVING_TRANSFER_TO_CONFIRM_KEYBOARD,
-    )
-    return States.COLIVING
-
-
-@add_response_prefix(custom_message="Новый владелец успешно установлен")
-async def handle_coliving_set_new_owner(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-):
-    """Обработка выбора нового владельца коливинга."""
-    await api_service.update_coliving_info(context.user_data["coliving_info"])
-    await update.effective_message.reply_text(text="Владелец изменён")
     return ConversationHandler.END
 
 

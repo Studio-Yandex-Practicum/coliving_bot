@@ -3,7 +3,7 @@ from django.urls import path
 
 from profiles.api_views import (
     ColivingDetailView,
-    ColivingRommatesView,
+    ColivingRoommatesView,
     ColivingView,
     LocationList,
     ProfileView,
@@ -25,7 +25,7 @@ urlpatterns = [
     ),
     path(
         "v1/colivings/<int:pk>/roommates/",
-        ColivingRommatesView.as_view(),
+        ColivingRoommatesView.as_view(),
         name="colivings-roommates",
     ),
     path("v1/colivings/", ColivingView.as_view(), name="colivings-list"),

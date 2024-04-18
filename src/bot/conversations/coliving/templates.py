@@ -4,8 +4,6 @@ from conversations.common_functions.common_templates import (
 )
 from internal_requests.entities import Coliving
 
-BTN_LABEL_CONFIRM = "Да, подтвердить ✅"
-BTN_LABEL_CANCEL = "Отменить"
 LOCATION_FIELD = "location"
 ROOM_TYPE_FIELD = "room_type"
 ABOUT_FIELD = "about"

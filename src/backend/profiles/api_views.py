@@ -3,7 +3,7 @@ from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
 
-from profiles.filters import ColivingFilter
+from profiles.filters import ColivingFilter, SmallResultsSetPagination
 from profiles.mixins import DestroyWithMediaRemovalMixin
 from profiles.models import Coliving, Location, Profile, UserFromTelegram
 from profiles.serializers import (
@@ -83,8 +83,9 @@ class ColivingDetailView(
     serializer_class = ColivingSerializer
 
 
-class ColivingRommatesView(generics.ListAPIView):
+class ColivingRoommatesView(generics.ListAPIView):
     serializer_class = RoommatesSerializer
+    pagination_class = SmallResultsSetPagination
 
     def get_queryset(self):
         return UserFromTelegram.objects.filter(residence_id=self.kwargs["pk"])

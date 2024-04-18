@@ -22,4 +22,5 @@ class States(int, enum.Enum):
         EDIT_CONFIRMATION,
         EDIT_LOCATION,
         DELETE_COLIVING,
-    ) = range(17)
+        TRANSFER_COLIVING,
+    ) = range(18)
