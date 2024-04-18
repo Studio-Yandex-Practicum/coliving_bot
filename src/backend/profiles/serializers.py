@@ -70,10 +70,10 @@ class UserResidenceSerializer(serializers.ModelSerializer):
 
 
 class RoommatesSerializer(serializers.ModelSerializer):
-    """Сериализатор пользователей дополнительной информацией."""
+    """Сериализатор пользователей с дополнительной информацией о возрасте и имени."""
 
-    age = serializers.IntegerField(source="user_profile.age")
-    name = serializers.CharField(source="user_profile.name")
+    age = serializers.IntegerField(source="user_profile__age")
+    name = serializers.CharField(source="user_profile__name")
 
     class Meta:
         model = UserFromTelegram

@@ -91,9 +91,11 @@ class ColivingRoommatesView(generics.ListAPIView):
 
     def get_queryset(self):
         """Возвращает пользователей, отфильтрованных по идентификатору коливинга."""
-        return UserFromTelegram.objects.filter(
-            residence_id=self.kwargs["pk"]
-        ).select_related("user_profile")
+        return (
+            UserFromTelegram.objects.select_related("user_profile")
+            .values("user_profile__age", "user_profile__name", "telegram_id")
+            .filter(residence_id=self.kwargs["pk"])
+        )
 
 
 class UserResidenceUpdateAPIView(generics.UpdateAPIView):
