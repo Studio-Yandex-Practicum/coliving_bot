@@ -8,7 +8,7 @@ from telegram import (
 import conversations.coliving.buttons as buttons
 from conversations.common_functions.common_buttons import (
     LOCATION_PREFIX,
-    RETURN_TO_MENU_BTN_LABEL,
+    RETURN_TO_MENU_BTN,
     ROOM_TYPE_PREFIX,
 )
 from conversations.common_functions.common_keyboards import HIDE_BUTTON, SEARCH_BUTTON
@@ -123,8 +123,8 @@ COLIVING_PROFILE_DUPLICATE_BUTTONS = [
         callback_data=buttons.BTN_LABEL_DELETE_PROFILE_KEYBOARD,
     ),
     InlineKeyboardButton(
-        text=RETURN_TO_MENU_BTN_LABEL,
-        callback_data=RETURN_TO_MENU_BTN_LABEL,
+        text=RETURN_TO_MENU_BTN,
+        callback_data=RETURN_TO_MENU_BTN,
     ),
 ]
 

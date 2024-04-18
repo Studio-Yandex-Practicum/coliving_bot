@@ -112,5 +112,7 @@ roommate_search_handler: ConversationHandler = ConversationHandler(
             ),
         ],
     },
-    fallbacks=[CommandHandler("cancel", callbacks.end_of_search)],
+    fallbacks=[
+        CommandHandler("cancel", callbacks.end_of_search),
+    ],
 )

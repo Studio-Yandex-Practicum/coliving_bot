@@ -9,6 +9,7 @@ from conversations.common_functions.common_buttons import (
     HIDE_SEARCH_BUTTON,
     SHOW_SEARCH_BUTTON,
 )
+from conversations.menu.callback_funcs import menu
 from internal_requests import api_service
 
 
@@ -89,3 +90,14 @@ async def get_visibility_choice(update: Update) -> bool:
     }
 
     return visibility_options[visibility_btn]
+
+
+@add_response_prefix()
+async def handle_return_to_menu_response(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """Обработка ответа: Вернуться в меню."""
+    await update.effective_message.edit_reply_markup()
+    context.user_data.clear()
+    await menu(update, context)
+    return ConversationHandler.END

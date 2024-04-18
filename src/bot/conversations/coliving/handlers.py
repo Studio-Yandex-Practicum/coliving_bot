@@ -12,7 +12,7 @@ import conversations.common_functions.common_buttons as common_buttons
 import conversations.common_functions.common_funcs as common_funcs
 from conversations.coliving.coliving_transfer import callback_funcs as coliving_transfer
 from conversations.coliving.states import States
-from conversations.common_functions.common_buttons import RETURN_TO_MENU_BTN_LABEL
+from conversations.common_functions.common_buttons import RETURN_TO_MENU_BTN
 from conversations.menu.buttons import COLIVING_BUTTON
 
 coliving_handler: ConversationHandler = ConversationHandler(
@@ -232,8 +232,8 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 pattern=rf"^{buttons.BTN_LABEL_DELETE_PROFILE_KEYBOARD}$",
             ),
             CallbackQueryHandler(
-                callback=callback_funcs.handle_return_to_menu_response,
-                pattern=rf"^{RETURN_TO_MENU_BTN_LABEL}$",
+                callback=common_funcs.handle_return_to_menu_response,
+                pattern=rf"^{RETURN_TO_MENU_BTN}$",
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
