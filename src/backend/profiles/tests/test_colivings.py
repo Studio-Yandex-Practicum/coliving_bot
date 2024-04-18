@@ -5,6 +5,24 @@ from rest_framework.test import APITestCase
 from profiles.constants import Restrictions
 from profiles.models import Coliving, ColivingTypes, Location, UserFromTelegram
 
+TELEGR_ID_TXT = "telegram_id"
+LOCATION_TXT = "location"
+ROOM_TYPE_TXT = "room_type"
+PRC_TXT = "price"
+MAX_PRC_TXT = "max_price"
+MIN_PRC_TXT = "min_price"
+VIEWER_TXT = "viewer"
+RESIDENCE_TXT = "residence"
+HOST_TXT = "host"
+ABOUT_TXT = "about"
+IS_VISIBLE_TXT = "is_visible"
+SOME_TXT = "Some text"
+ID_TXT = "id"
+
+VIEW_USER_DET_LINK = "api-v1:profiles:users-detail"
+VIEW_COL_LIST_LINK = "api-v1:profiles:colivings-list"
+VIEW_COL_DET_LINK = "api-v1:profiles:colivings-detail"
+
 
 class ColivingAPITest(APITestCase):
     """Тесты для проверки ресурса Coliving."""
@@ -27,22 +45,33 @@ class ColivingAPITest(APITestCase):
             location=Location.objects.create(name=cls.MSK_LOCATION_NAME),
             about=cls.OWNER_1_ABOUT,
         )
+
+        spb_location = Location.objects.create(name=cls.SPB_LOCATION_NAME)
+        owner_2 = UserFromTelegram.objects.create(telegram_id=cls.OWNER_2_TELEGRAM_ID)
         Coliving.objects.create(
-            host=UserFromTelegram.objects.create(telegram_id=cls.OWNER_2_TELEGRAM_ID),
+            host=owner_2,
             price=Restrictions.PRICE_MIN,
             room_type=ColivingTypes.ROOM,
-            location=Location.objects.create(name=cls.SPB_LOCATION_NAME),
+            location=spb_location,
+            is_visible=True,
+        )
+        Coliving.objects.create(
+            host=owner_2,
+            price=Restrictions.PRICE_MIN,
+            room_type=ColivingTypes.ROOM,
+            location=spb_location,
+            is_visible=False,
         )
 
     def test_create_coliving(self):
         """Тест на создание Coliving с валидными данными."""
-        url = reverse("api-v1:profiles:colivings-list")
+        url = reverse(VIEW_COL_LIST_LINK)
         data = {
-            "host": self.OWNER_1_TELEGRAM_ID,
-            "location": self.MSK_LOCATION_NAME,
-            "price": Restrictions.PRICE_MAX,
-            "room_type": ColivingTypes.ROOM,
-            "about": "Some text",
+            HOST_TXT: self.OWNER_1_TELEGRAM_ID,
+            LOCATION_TXT: self.MSK_LOCATION_NAME,
+            PRC_TXT: Restrictions.PRICE_MAX,
+            ROOM_TYPE_TXT: ColivingTypes.ROOM,
+            ABOUT_TXT: SOME_TXT,
         }
         response = self.client.post(url, data)
 
@@ -50,33 +79,33 @@ class ColivingAPITest(APITestCase):
 
     def test_create_coliving_invalid_data(self):
         """Тест на создание Coliving с невалидными данными."""
-        url = reverse("api-v1:profiles:colivings-list")
+        url = reverse(VIEW_COL_LIST_LINK)
         data = {
-            "host": self.OWNER_1_TELEGRAM_ID,
-            "room_type": ColivingTypes.ROOM,
-            "about": "Some text",
+            HOST_TXT: self.OWNER_1_TELEGRAM_ID,
+            ROOM_TYPE_TXT: ColivingTypes.ROOM,
+            ABOUT_TXT: SOME_TXT,
         }
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_get_coliving(self):
         """Тест на получение cписка Coliving."""
-        url = reverse("api-v1:profiles:colivings-list")
+        url = reverse(VIEW_COL_LIST_LINK)
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_get_coliving_id(self):
         """Тест на получение данных Coliving."""
-        url = reverse("api-v1:profiles:colivings-detail", args=[1])
+        url = reverse(VIEW_COL_DET_LINK, args=[1])
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_patch_coliving(self):
         """Тест на обновление Coliving с валидными данными."""
-        url = reverse("api-v1:profiles:colivings-detail", args=[1])
+        url = reverse(VIEW_COL_DET_LINK, args=[1])
         data_list = [
-            {"price": Restrictions.PRICE_MIN},
-            {"price": Restrictions.PRICE_MAX},
+            {PRC_TXT: Restrictions.PRICE_MIN},
+            {PRC_TXT: Restrictions.PRICE_MAX},
         ]
 
         for data in data_list:
@@ -89,8 +118,8 @@ class ColivingAPITest(APITestCase):
 
     def test_patch_coliving__invalid_data(self):
         """Тест на обновление Coliving с невалидными данными."""
-        url = reverse("api-v1:profiles:colivings-detail", args=[1])
-        data = {"location": self.UNKNOWN_LOCATION}
+        url = reverse(VIEW_COL_DET_LINK, args=[1])
+        data = {LOCATION_TXT: self.UNKNOWN_LOCATION}
         response = self.client.patch(
             url,
             data,
@@ -100,12 +129,12 @@ class ColivingAPITest(APITestCase):
     def test_filters_coliving(self):
         """Тест на фильтрацию данных Coliving."""
         response = self.client.get(
-            reverse("api-v1:profiles:colivings-list"),
+            reverse(VIEW_COL_LIST_LINK),
             {
-                "location": self.MSK_LOCATION_NAME,
-                "room_type": ColivingTypes.ROOM,
-                "min_price": Restrictions.PRICE_MIN,
-                "max_price ": Restrictions.PRICE_MIN + 1,
+                LOCATION_TXT: self.MSK_LOCATION_NAME,
+                ROOM_TYPE_TXT: ColivingTypes.ROOM,
+                MIN_PRC_TXT: Restrictions.PRICE_MIN,
+                MAX_PRC_TXT: Restrictions.PRICE_MIN + 1,
             },
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -113,12 +142,12 @@ class ColivingAPITest(APITestCase):
             response.data,
             [
                 {
-                    "id": 1,
-                    "host": self.OWNER_1_TELEGRAM_ID,
-                    "location": self.MSK_LOCATION_NAME,
-                    "price": Restrictions.PRICE_MIN,
-                    "room_type": ColivingTypes.ROOM,
-                    "about": self.OWNER_1_ABOUT,
+                    ID_TXT: 1,
+                    HOST_TXT: self.OWNER_1_TELEGRAM_ID,
+                    LOCATION_TXT: self.MSK_LOCATION_NAME,
+                    PRC_TXT: Restrictions.PRICE_MIN,
+                    ROOM_TYPE_TXT: ColivingTypes.ROOM,
+                    ABOUT_TXT: self.OWNER_1_ABOUT,
                     "is_visible": True,
                     "images": [],
                 }
@@ -127,13 +156,32 @@ class ColivingAPITest(APITestCase):
         self.assertEqual(len(response.data), 1)
 
     def test_filters_owner_coliving(self):
-        """Тест на фильтрацию данных Coliving."""
+        """Тест на фильтрацию данных Coliving по полю owner."""
         response = self.client.get(
-            reverse("api-v1:profiles:colivings-list"),
+            reverse(VIEW_COL_LIST_LINK),
             {"owner": self.OWNER_2_TELEGRAM_ID},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
+        self.assertTrue(
+            any(
+                coliving[HOST_TXT] == self.OWNER_2_TELEGRAM_ID
+                for coliving in response.data
+            ),
+            "В ответе нет коливингов для указанного владельца.",
+        )
+        self.assertTrue(
+            any(coliving[IS_VISIBLE_TXT] is False for coliving in response.data),
+            msg=(
+                "Если данные фильтруются по полю owner,"
+                " то в выдаче должны присутствовать все коливинги пользователя."
+                " Даже если установлен is_visible=False."
+            ),
+        )
+        self.assertEqual(
+            len(response.data),
+            Coliving.objects.filter(host__telegram_id=self.OWNER_2_TELEGRAM_ID).count(),
+            msg="В ответе не все коливинги для указанного владельца.",
+        )
 
 
 class UserResidenceUpdateAPITestCase(APITestCase):
@@ -160,10 +208,10 @@ class UserResidenceUpdateAPITestCase(APITestCase):
             host__telegram_id=self.OWNER_TELEGRAM_ID
         ).first()
         url = reverse(
-            "api-v1:profiles:users-detail",
-            kwargs={"telegram_id": self.OWNER_TELEGRAM_ID},
+            VIEW_USER_DET_LINK,
+            kwargs={TELEGR_ID_TXT: self.OWNER_TELEGRAM_ID},
         )
-        data = {"residence": coliving.id}
+        data = {RESIDENCE_TXT: coliving.id}
         response = self.client.patch(url, data)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -179,10 +227,10 @@ class UserResidenceUpdateAPITestCase(APITestCase):
         user.save()
 
         url = reverse(
-            "api-v1:profiles:users-detail",
-            kwargs={"telegram_id": self.OWNER_TELEGRAM_ID},
+            VIEW_USER_DET_LINK,
+            kwargs={TELEGR_ID_TXT: self.OWNER_TELEGRAM_ID},
         )
-        data = {"residence": None}
+        data = {RESIDENCE_TXT: None}
         response = self.client.patch(url, data)
 
         user.refresh_from_db()
@@ -192,10 +240,10 @@ class UserResidenceUpdateAPITestCase(APITestCase):
     def test_update_with_invalid_telegram_id(self):
         """Тест обновления с невалидным telegram_id."""
         url = reverse(
-            "api-v1:profiles:users-detail",
-            kwargs={"telegram_id": self.INVALID_COLIVING_PK},
+            VIEW_USER_DET_LINK,
+            kwargs={TELEGR_ID_TXT: self.INVALID_COLIVING_PK},
         )
-        data = {"residence": 1}
+        data = {RESIDENCE_TXT: 1}
         response = self.client.patch(url, data)
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -203,10 +251,8 @@ class UserResidenceUpdateAPITestCase(APITestCase):
     def test_update_with_invalid_residence_id(self):
         """Тест обновления с невалидным residence_id."""
         user_telegram_id = self.OWNER_TELEGRAM_ID
-        url = reverse(
-            "api-v1:profiles:users-detail", kwargs={"telegram_id": user_telegram_id}
-        )
-        data = {"residence": self.INVALID_COLIVING_PK}
+        url = reverse(VIEW_USER_DET_LINK, kwargs={TELEGR_ID_TXT: user_telegram_id})
+        data = {RESIDENCE_TXT: self.INVALID_COLIVING_PK}
         response = self.client.patch(url, data)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -215,7 +261,7 @@ class UserResidenceUpdateAPITestCase(APITestCase):
 class ColivingSearchAPITest(APITestCase):
     """Тесты проверки логики поиска коливинга."""
 
-    URL = reverse("api-v1:profiles:colivings-list")
+    URL = reverse(VIEW_COL_LIST_LINK)
     MSK_LOCATION_NAME = "Москва"
     SPB_LOCATION_NAME = "Санкт-Петербург"
     NON_EXISTING_VIEWER_ID = 20
@@ -242,21 +288,21 @@ class ColivingSearchAPITest(APITestCase):
         response = self.client.get(
             self.URL,
             {
-                "location": self.MSK_LOCATION_NAME,
-                "max_price": Restrictions.PRICE_MAX,
-                "min_price": Restrictions.PRICE_MIN,
-                "room_type": self.coliving_2.room_type,
+                LOCATION_TXT: self.MSK_LOCATION_NAME,
+                MAX_PRC_TXT: Restrictions.PRICE_MAX,
+                MIN_PRC_TXT: Restrictions.PRICE_MIN,
+                ROOM_TYPE_TXT: self.coliving_2.room_type,
             },
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]["id"], self.coliving_2.id)
+        self.assertEqual(response.data[0][ID_TXT], self.coliving_2.id)
 
     def test_empty_result(self):
         response = self.client.get(
             self.URL,
             {
-                "location": self.SPB_LOCATION_NAME,
+                LOCATION_TXT: self.SPB_LOCATION_NAME,
             },
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -268,11 +314,11 @@ class ColivingSearchAPITest(APITestCase):
         response = self.client.get(
             self.URL,
             {
-                "location": self.coliving_1.location,
-                "max_price": self.coliving_1.price + 1,
-                "min_price": self.coliving_1.price - 1,
-                "room_type": self.coliving_1.room_type,
-                "viewer": self.host.telegram_id,
+                LOCATION_TXT: self.coliving_1.location,
+                MAX_PRC_TXT: self.coliving_1.price + 1,
+                MIN_PRC_TXT: self.coliving_1.price - 1,
+                ROOM_TYPE_TXT: self.coliving_1.room_type,
+                VIEWER_TXT: self.host.telegram_id,
             },
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -287,11 +333,11 @@ class ColivingSearchAPITest(APITestCase):
         response = self.client.get(
             self.URL,
             {
-                "location": self.coliving_1.location,
-                "max_price": self.coliving_1.price + 1,
-                "min_price": self.coliving_1.price - 1,
-                "room_type": self.coliving_1.room_type,
-                "viewer": self.viewer.telegram_id,
+                LOCATION_TXT: self.coliving_1.location,
+                MAX_PRC_TXT: self.coliving_1.price + 1,
+                MIN_PRC_TXT: self.coliving_1.price - 1,
+                ROOM_TYPE_TXT: self.coliving_1.room_type,
+                VIEWER_TXT: self.viewer.telegram_id,
             },
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -305,7 +351,7 @@ class ColivingSearchAPITest(APITestCase):
         response = self.client.get(
             self.URL,
             {
-                "viewer": self.NON_EXISTING_VIEWER_ID,
+                VIEWER_TXT: self.NON_EXISTING_VIEWER_ID,
             },
         )
         self.assertEqual(
