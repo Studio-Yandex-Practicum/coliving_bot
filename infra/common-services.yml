@@ -20,7 +20,7 @@ services:
   backend:
     build:
       context: ..
-      dockerfile: /src/backend/Dockerfile
+      dockerfile: src/backend/Dockerfile
     image: coliving_bot_backend:latest
     container_name: backend
     restart: always
@@ -40,7 +40,7 @@ services:
   bot:
     build:
       context: ..
-      dockerfile: /src/bot/Dockerfile
+      dockerfile: src/bot/Dockerfile
     image: coliving_bot:latest
     container_name: bot
     restart: always
