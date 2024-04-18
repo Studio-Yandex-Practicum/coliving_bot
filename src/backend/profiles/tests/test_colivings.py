@@ -15,6 +15,7 @@ VIEWER_TXT = "viewer"
 RESIDENCE_TXT = "residence"
 HOST_TXT = "host"
 ABOUT_TXT = "about"
+IS_VISIBLE_TXT = "is_visible"
 SOME_TXT = "Some text"
 ID_TXT = "id"
 
@@ -44,11 +45,22 @@ class ColivingAPITest(APITestCase):
             location=Location.objects.create(name=cls.MSK_LOCATION_NAME),
             about=cls.OWNER_1_ABOUT,
         )
+
+        spb_location = Location.objects.create(name=cls.SPB_LOCATION_NAME)
+        owner_2 = UserFromTelegram.objects.create(telegram_id=cls.OWNER_2_TELEGRAM_ID)
         Coliving.objects.create(
-            host=UserFromTelegram.objects.create(telegram_id=cls.OWNER_2_TELEGRAM_ID),
+            host=owner_2,
             price=Restrictions.PRICE_MIN,
             room_type=ColivingTypes.ROOM,
-            location=Location.objects.create(name=cls.SPB_LOCATION_NAME),
+            location=spb_location,
+            is_visible=True,
+        )
+        Coliving.objects.create(
+            host=owner_2,
+            price=Restrictions.PRICE_MIN,
+            room_type=ColivingTypes.ROOM,
+            location=spb_location,
+            is_visible=False,
         )
 
     def test_create_coliving(self):
@@ -144,13 +156,32 @@ class ColivingAPITest(APITestCase):
         self.assertEqual(len(response.data), 1)
 
     def test_filters_owner_coliving(self):
-        """Тест на фильтрацию данных Coliving."""
+        """Тест на фильтрацию данных Coliving по полю owner."""
         response = self.client.get(
             reverse(VIEW_COL_LIST_LINK),
             {"owner": self.OWNER_2_TELEGRAM_ID},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
+        self.assertTrue(
+            any(
+                coliving[HOST_TXT] == self.OWNER_2_TELEGRAM_ID
+                for coliving in response.data
+            ),
+            "В ответе нет коливингов для указанного владельца.",
+        )
+        self.assertTrue(
+            any(coliving[IS_VISIBLE_TXT] is False for coliving in response.data),
+            msg=(
+                "Если данные фильтруются по полю owner,"
+                " то в выдаче должны присутствовать все коливинги пользователя."
+                " Даже если установлен is_visible=False."
+            ),
+        )
+        self.assertEqual(
+            len(response.data),
+            Coliving.objects.filter(host__telegram_id=self.OWNER_2_TELEGRAM_ID).count(),
+            msg="В ответе не все коливинги для указанного владельца.",
+        )
 
 
 class UserResidenceUpdateAPITestCase(APITestCase):
