@@ -97,15 +97,9 @@ async def get_visibility_choice(update: Update) -> bool:
 async def handle_return_to_menu_response(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
-    """Обработка ответа: Вернуться в меню."""
+    """Обработка ответа кнопки Вернуться в меню."""
     await update.effective_message.edit_reply_markup()
-
-    search_settings = context.user_data.get("search_settings")
     context.user_data.clear()
-
-    # Оставляем параметры для поиска
-    if search_settings:
-        context.user_data["search_settings"] = search_settings
 
     await menu(update, context)
     return ConversationHandler.END
