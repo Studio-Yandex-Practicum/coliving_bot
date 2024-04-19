@@ -9,6 +9,7 @@ from conversations.menu.callback_funcs import menu, start
 from conversations.menu.keyboards import get_main_menu_commands
 from conversations.profile.handlers import profile_handler
 from conversations.roommate_search.handlers import roommate_search_handler
+from conversations.invitation.handlers import invitation_handler
 from error_handler.callback_funcs import error_handler
 from utils.configs import TOKEN
 
@@ -33,5 +34,6 @@ def create_bot_app(defaults: Optional[Defaults] = None) -> Application:
     application.add_handler(handler=profile_handler)
     application.add_handler(handler=roommate_search_handler)
     application.add_handler(handler=coliving_search_handler)
+    application.add_handler(handler=invitation_handler)
     application.add_error_handler(error_handler)
     return application

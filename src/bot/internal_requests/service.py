@@ -134,7 +134,7 @@ class APIService:
         для данного коливинга - всех пользователей,
         у кого есть мэтч с данным telegram_id.
         """
-        endpoint_urn = f"users/{telegram_id}/matches/"
+        endpoint_urn = f"users/{telegram_id}/matches/?roommates=1"
         response = await self._get_request(endpoint_urn=endpoint_urn)
         result = []
         for matched_user in response.json():

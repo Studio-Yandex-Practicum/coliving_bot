@@ -11,6 +11,7 @@ class UserFromTelegramAdmin(admin.ModelAdmin):
     """
 
     list_display = ("id", "telegram_id", "residence")
+    list_editable = ("residence",)
 
 
 @admin.register(Location)

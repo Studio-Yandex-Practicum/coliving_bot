@@ -197,9 +197,31 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 callback=callback_funcs.handle_delete_coliving_confirmation_cancel,
                 pattern=rf"^{buttons.BTN_LABEL_DELETE_CANCEL}",
             ),
+        ],
+        States.NEXT_ROOMMATE: [
+            CallbackQueryHandler(
+                callback=callback_funcs.next_roommate,
+                pattern=rf"^{buttons.YES_BTN}$",
+            ),
+            CallbackQueryHandler(
+                callback=callback_funcs.end_of_assign_roomate,
+                pattern=rf"^{buttons.NO_BTN}$",
+            ),
+        ],
+        States.NO_ROOMMATES: [
+            CallbackQueryHandler(
+                callback=callback_funcs.end_of_assign_roomate,
+                pattern=rf"^{buttons.WAIT_BTN}$",
+            ),
+        ],
+        States.ROOMMATE: [
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
-                callback_funcs.handle_delete_profile,
+                filters=filters.Regex(rf"^{buttons.OK_ROOMMATE_BTN}$"),
+                callback=callback_funcs.roommate_like,
+            ),
+            MessageHandler(
+                filters=filters.Regex(rf"^{buttons.NEXT_ROOMMATE_BTN}$"),
+                callback=callback_funcs.next_roommate,
             ),
         ],
         States.COLIVING: [

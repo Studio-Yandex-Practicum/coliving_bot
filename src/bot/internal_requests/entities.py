@@ -18,8 +18,9 @@ class UserProfile:
 
 @dataclass
 class MatchedUser:
-    user: int
+    telegram_id: int
     name: str
+    age: int
 
 
 @dataclass
