@@ -3,6 +3,7 @@ from typing import Optional
 from telegram import InlineKeyboardMarkup, InputMediaPhoto, ReplyKeyboardRemove, Update
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
+import conversations.coliving.constants as consts
 import conversations.coliving.keyboards as keyboards
 import conversations.coliving.templates as templates
 import conversations.common_functions.common_templates as common_templates
@@ -232,9 +233,9 @@ async def handle_about_coliving(
         update,
         context,
         len(about_coliving),
-        min=templates.MIN_ABOUT_LENGTH,
-        max=templates.MAX_ABOUT_LENGTH,
-        message=templates.ERR_MSG_ABOUT_MAX_LEN.format(max=templates.MAX_ABOUT_LENGTH),
+        min=consts.MIN_ABOUT_LENGTH,
+        max=consts.MAX_ABOUT_LENGTH,
+        message=templates.ERR_MSG_ABOUT_MAX_LEN.format(max=consts.MAX_ABOUT_LENGTH),
     ):
         await update.effective_message.reply_text(text=templates.REPLY_MSG_ASK_ABOUT)
         return States.ABOUT_ROOM
@@ -257,10 +258,10 @@ async def handle_price(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         update=update,
         context=context,
         value=price,
-        min=templates.MIN_PRICE,
-        max=templates.MAX_PRICE,
+        min=consts.MIN_PRICE,
+        max=consts.MAX_PRICE,
         message=templates.ERR_MSG_PRICE.format(
-            min=templates.MIN_PRICE, max=templates.MAX_PRICE
+            min=consts.MIN_PRICE, max=consts.MAX_PRICE
         ),
     ):
         return States.PRICE
@@ -552,9 +553,9 @@ async def handle_edit_about_coliving(
         update,
         context,
         len(about_coliving),
-        min=templates.MIN_ABOUT_LENGTH,
-        max=templates.MAX_ABOUT_LENGTH,
-        message=templates.ERR_MSG_ABOUT_MAX_LEN.format(max=templates.MAX_ABOUT_LENGTH),
+        min=consts.MIN_ABOUT_LENGTH,
+        max=consts.MAX_ABOUT_LENGTH,
+        message=templates.ERR_MSG_ABOUT_MAX_LEN.format(max=consts.MAX_ABOUT_LENGTH),
     ):
         await update.effective_message.reply_text(
             text=templates.REPLY_MSG_ASK_ABOUT,
@@ -580,10 +581,10 @@ async def handle_edit_price(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         update=update,
         context=context,
         value=edit_price,
-        min=templates.MIN_PRICE,
-        max=templates.MAX_PRICE,
+        min=consts.MIN_PRICE,
+        max=consts.MAX_PRICE,
         message=templates.ERR_MSG_PRICE.format(
-            min=templates.MIN_PRICE, max=templates.MAX_PRICE
+            min=consts.MIN_PRICE, max=consts.MAX_PRICE
         ),
     ):
         return States.EDIT_PRICE
@@ -651,7 +652,7 @@ async def handle_edit_profile_confirmation_confirm(
     await update.effective_message.edit_reply_markup()
 
     coliving = context.user_data["coliving_info"]
-    images = context.user_data["coliving_info"].images[: templates.PHOTO_MAX_NUMBER]
+    images = context.user_data["coliving_info"].images[: consts.PHOTO_MAX_NUMBER]
     # Проверка наличия измененных фото по размеру первой фотографии
     if images[0].photo_size:
         await api_service.delete_coliving_photos(coliving.id, update.effective_chat.id)

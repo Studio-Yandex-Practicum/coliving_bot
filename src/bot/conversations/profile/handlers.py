@@ -8,7 +8,7 @@ from telegram.ext import (
 
 import conversations.profile.buttons as buttons
 import conversations.profile.callback_funcs as callback_funcs
-import conversations.profile.templates as templates
+import conversations.profile.constants as consts
 from conversations.common_functions import common_buttons, common_funcs
 from conversations.menu.buttons import MY_PROFILE_BUTTON
 from conversations.profile.states import States
@@ -47,7 +47,7 @@ profile_handler: ConversationHandler = ConversationHandler(
         ],
         States.AGE: [
             MessageHandler(
-                filters.Regex(rf"{templates.AGE_PATTERN}") & ~filters.COMMAND,
+                filters.Regex(rf"{consts.AGE_PATTERN}") & ~filters.COMMAND,
                 callback_funcs.handle_age,
             ),
             MessageHandler(filters.TEXT & ~filters.COMMAND, callback_funcs.handle_age),

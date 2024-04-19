@@ -13,6 +13,8 @@ from telegram.ext import ContextTypes, ConversationHandler
 import conversations.coliving_search.keyboards as keyboards
 import conversations.coliving_search.states as states
 import conversations.coliving_search.templates as templates
+from conversations.coliving.constants import MAX_PRICE, MIN_PRICE
+from conversations.coliving_search import constants
 from conversations.menu.callback_funcs import menu
 from general.validators import value_is_in_range_validator
 from internal_requests import api_service
@@ -24,9 +26,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     Начало ветви общения по поиску коливинга.
     Проверяет, был ли настроен поиск ранее и, в зависимости от проверки,
     переводит либо в состояние подтверждения настроек, либо в настройку поиска.
+
     """
-    search_settings = context.user_data.get("search_settings")
-    if search_settings and isinstance(search_settings, ColivingSearchSettings):
+    search_settings = context.user_data.get(constants.SRCH_STNG_FIELD)
+    if search_settings:
         await _message_edit(
             message=update.effective_message,
             text=templates.format_search_settings_message(search_settings),
@@ -46,7 +49,7 @@ async def ok_settings(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     Вызывается при подтверждении настроек поиска.
     Получает список подходящих объявлений и переводит в состояние оценки коливинга.
     """
-    search_settings = context.user_data.get("search_settings")
+    search_settings = context.user_data.get(constants.SRCH_STNG_FIELD)
     colivings = await api_service.get_filtered_colivings(
         filters=search_settings, viewer=update.effective_chat.id
     )
@@ -78,7 +81,9 @@ async def set_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     Переводит в состояние выбора типа жилья.
     """
     location = update.callback_query.data.split(":")[1]
-    context.user_data["search_settings"] = ColivingSearchSettings(location=location)
+    context.user_data[constants.SRCH_STNG_FIELD] = ColivingSearchSettings(
+        location=location
+    )
     await _message_edit(
         message=update.effective_message,
         text=templates.ASK_ROOM_TYPE,
@@ -92,14 +97,12 @@ async def set_room_type(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     Устанавливает тип жилья в настройках поиска.
     Переводит в состояние ввода минимальной цены.
     """
-    context.user_data["search_settings"].room_type = update.callback_query.data
+    context.user_data[constants.SRCH_STNG_FIELD].room_type = update.callback_query.data
     await _message_edit(
         message=update.effective_message,
         text=templates.ASK_PRICE,
     )
-    await update.effective_message.reply_text(
-        text=templates.ASK_MIN_PRICE,
-    )
+    await update.effective_message.reply_text(text=templates.ASK_MIN_PRICE)
 
     return states.COST_MIN
 
@@ -114,21 +117,15 @@ async def set_cost_min(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         update,
         context,
         min_price,
-        min=templates.MIN_COST,
-        max=templates.MAX_COST,
-        message=templates.ERR_MSG_ABOUT_COST.format(
-            min=templates.MIN_COST, max=templates.MAX_COST
-        ),
+        min=MIN_PRICE,
+        max=MAX_PRICE,
+        message=templates.ERR_MSG_ABOUT_COST.format(min=MIN_PRICE, max=MAX_PRICE),
     ):
-        await update.effective_message.reply_text(
-            text=templates.ASK_MIN_PRICE,
-        )
+        await update.effective_message.reply_text(text=templates.ASK_MIN_PRICE)
         return states.COST_MIN
 
-    context.user_data["search_settings"].min_price = min_price
-    await update.effective_message.reply_text(
-        text=templates.ASK_MAX_PRICE,
-    )
+    context.user_data[constants.SRCH_STNG_FIELD].min_price = min_price
+    await update.effective_message.reply_text(text=templates.ASK_MAX_PRICE)
     return states.COST_MAX
 
 
@@ -138,24 +135,20 @@ async def set_cost_max(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     Переводит в состояние подтверждения настроек поиска.
     """
     max_price = update.message.text
-    min_price = int(context.user_data["search_settings"].min_price)
+    min_price = int(context.user_data[constants.SRCH_STNG_FIELD].min_price)
     if not await value_is_in_range_validator(
         update,
         context,
         max_price,
         min=min_price,
-        max=templates.MAX_COST,
-        message=templates.ERR_MSG_ABOUT_COST.format(
-            min=min_price, max=templates.MAX_COST
-        ),
+        max=MAX_PRICE,
+        message=templates.ERR_MSG_ABOUT_COST.format(min=min_price, max=MAX_PRICE),
     ):
-        await update.effective_message.reply_text(
-            text=templates.ASK_MAX_PRICE,
-        )
+        await update.effective_message.reply_text(text=templates.ASK_MAX_PRICE)
         return states.COST_MAX
 
-    context.user_data["search_settings"].max_price = max_price
-    search_settings = context.user_data.get("search_settings")
+    context.user_data[constants.SRCH_STNG_FIELD].max_price = max_price
+    search_settings = context.user_data.get(constants.SRCH_STNG_FIELD)
 
     await update.effective_message.reply_text(
         text=templates.format_search_settings_message(search_settings),
