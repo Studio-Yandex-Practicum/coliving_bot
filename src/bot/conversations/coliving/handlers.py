@@ -83,8 +83,8 @@ coliving_handler: ConversationHandler = ConversationHandler(
         ],
         States.EDIT: [
             CallbackQueryHandler(
-                callback=callback_funcs.handle_what_to_edit_fill_again,
-                pattern=rf"^{buttons.BTN_LABEL_FILL_AGAIN}",
+                callback=callback_funcs.handle_delete_profile,
+                pattern=rf"^{buttons.BTN_LABEL_DELETE_PROFILE_KEYBOARD}",
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.handle_what_to_edit_room_type,

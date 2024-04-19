@@ -49,8 +49,8 @@ CONFIRM_OR_CANCEL_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
 WHAT_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         InlineKeyboardButton(
-            text=buttons.BTN_LABEL_FILL_AGAIN,
-            callback_data=buttons.BTN_LABEL_FILL_AGAIN,
+            text=buttons.BTN_LABEL_DELETE_PROFILE_KEYBOARD,
+            callback_data=buttons.BTN_LABEL_DELETE_PROFILE_KEYBOARD,
         ),
         InlineKeyboardButton(
             text=buttons.BTN_LABEL_EDIT_LOCATION,

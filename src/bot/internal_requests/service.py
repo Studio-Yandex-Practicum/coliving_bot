@@ -210,6 +210,13 @@ class APIService:
         """
         return await self._profile_request(telegram_id, data, method="post")
 
+    async def delete_profile(self, telegram_id: int) -> Response:
+        """
+        Удаляет профиль пользователя.
+        """
+        endpoint_urn = f"users/{telegram_id}/profile/"
+        return await self._delete_request(endpoint_urn)
+
     async def update_user_profile(
         self, telegram_id: int, data: dict
     ) -> Optional[UserProfile]:

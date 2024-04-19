@@ -90,9 +90,17 @@ profile_handler: ConversationHandler = ConversationHandler(
             ),
         ],
         States.CONFIRMATION: [
+            # CallbackQueryHandler(
+            #     callback=callback_funcs.handle_profile_confirmation_cancel,
+            #     pattern=rf"^({buttons.YES_BUTTON}|{buttons.EDIT_FORM_BUTTON})$",
+            # ),
             CallbackQueryHandler(
-                callback=callback_funcs.handle_profile,
-                pattern=rf"^({buttons.YES_BUTTON}|{buttons.EDIT_FORM_BUTTON})$",
+                callback=callback_funcs.handle_ok_to_save,
+                pattern=rf"^{buttons.YES_BUTTON}",
+            ),
+            CallbackQueryHandler(
+                callback=callback_funcs.handle_profile_cancel_confirmation,
+                pattern=rf"^{buttons.CANCEL_PROFILE_CREATION}",
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -114,8 +122,8 @@ profile_handler: ConversationHandler = ConversationHandler(
         ],
         States.EDIT: [
             CallbackQueryHandler(
-                callback=callback_funcs.start_filling_again,
-                pattern=rf"^{buttons.FILL_AGAIN_BUTTON}",
+                callback=callback_funcs.handle_delete_profile,
+                pattern=rf"^{buttons.DELETE_PROFILE_BUTTON}",
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.handle_return_to_profile_response,
@@ -207,6 +215,20 @@ profile_handler: ConversationHandler = ConversationHandler(
                 handle_text_input_instead_of_choosing_button,
             ),
         ],
+        States.DELETE_PROFILE: [
+            CallbackQueryHandler(
+                callback=callback_funcs.handle_delete_profile_confirmation_confirm,
+                pattern=rf"^{buttons.DELETE_CONFIRM_BUTTON}",
+            ),
+            CallbackQueryHandler(
+                callback=callback_funcs.handle_delete_profile_confirmation_cancel,
+                pattern=rf"^{buttons.DELETE_CANCEL_BUTTON}",
+            ),
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND,
+                callback_funcs.handle_delete_profile,
+            ),
+        ]
     },
     fallbacks=[
         CommandHandler(

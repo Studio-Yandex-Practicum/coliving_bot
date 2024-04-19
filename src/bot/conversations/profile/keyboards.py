@@ -22,12 +22,15 @@ from conversations.profile.buttons import (
     EDIT_RESUME_BUTTON,
     EDIT_SEX_BUTTON,
     FEMALE_BUTTON,
-    FILL_AGAIN_BUTTON,
+    DELETE_PROFILE_BUTTON,
     MALE_BUTTON,
     NEW_PHOTO_BUTTON,
     SAVE_EDITED_PHOTO_BUTTON,
     SAVE_PHOTO_BUTTON,
     YES_BUTTON,
+    DELETE_CANCEL_BUTTON,
+    DELETE_CONFIRM_BUTTON,
+    CANCEL_PROFILE_CREATION
 )
 
 PROFILE_DUPLICATE_BUTTONS = [
@@ -59,7 +62,9 @@ PHOTO_KEYBOARD = ReplyKeyboardMarkup.from_button(
 FORM_SAVED_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         InlineKeyboardButton(text=YES_BUTTON, callback_data=YES_BUTTON),
-        InlineKeyboardButton(text=EDIT_FORM_BUTTON, callback_data=EDIT_FORM_BUTTON),
+        InlineKeyboardButton(
+            text=CANCEL_PROFILE_CREATION, callback_data=CANCEL_PROFILE_CREATION
+        ),
     )
 )
 
@@ -76,7 +81,9 @@ PHOTO_EDIT_KEYBOARD = ReplyKeyboardMarkup.from_button(
 
 FORM_EDIT_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
-        InlineKeyboardButton(text=FILL_AGAIN_BUTTON, callback_data=FILL_AGAIN_BUTTON),
+        InlineKeyboardButton(
+            text=DELETE_PROFILE_BUTTON, callback_data=DELETE_PROFILE_BUTTON
+        ),
         InlineKeyboardButton(text=EDIT_ABOUT_BUTTON, callback_data=EDIT_ABOUT_BUTTON),
         InlineKeyboardButton(text=EDIT_NAME_BUTTON, callback_data=EDIT_NAME_BUTTON),
         InlineKeyboardButton(text=EDIT_SEX_BUTTON, callback_data=EDIT_SEX_BUTTON),
@@ -94,5 +101,18 @@ FORM_SAVE_OR_EDIT_KEYBOARD = InlineKeyboardMarkup.from_column(
         InlineKeyboardButton(text=YES_BUTTON, callback_data=YES_BUTTON),
         InlineKeyboardButton(text=EDIT_CANCEL_BUTTON, callback_data=EDIT_CANCEL_BUTTON),
         InlineKeyboardButton(text=EDIT_RESUME_BUTTON, callback_data=EDIT_RESUME_BUTTON),
+    )
+)
+
+DELETE_OR_CANCEL_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
+    button_column=(
+        InlineKeyboardButton(
+            text=DELETE_CONFIRM_BUTTON,
+            callback_data=DELETE_CONFIRM_BUTTON,
+        ),
+        InlineKeyboardButton(
+            text=DELETE_CANCEL_BUTTON,
+            callback_data=DELETE_CANCEL_BUTTON,
+        ),
     )
 )
