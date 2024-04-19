@@ -4,6 +4,11 @@ from conversations.common_functions.common_templates import (
 )
 from internal_requests.entities import Coliving
 
+AGE_FIELD = "age"
+SEX_FIELD = "sex"
+NAME_FIELD = "name"
+RECEIVED_PHOTOS_FIELD = "received_photos"
+
 LOCATION_FIELD = "location"
 ROOM_TYPE_FIELD = "room_type"
 ABOUT_FIELD = "about"
@@ -84,15 +89,20 @@ PROFILE_DATA = (
     "<b>Видимость анкеты:</b> {is_visible}\n"
 )
 
-ROOMMATE_DATA = (
+ROOMMATE_DATA = "<b>Имя:</b> {name}\n" "<b>Возраст:</b> {age}\n"
+
+ROOMMATE_PROFILE_DATA = (
     "<b>Имя:</b> {name}\n"
+    "<b>Пол:</b> {sex}\n"
     "<b>Возраст:</b> {age}\n"
+    "<b>Место поиска:</b> {location}\n"
+    "<b>О себе:</b> {about}\n"
 )
 
 ASK_NEXT_ROOMMATE = (
     "Отлично! Этот пользователь получил твое приглашение. "
     "Если он согласится, тебе придет уведомление.\n"
-    "Хочешь продолжить поиск?"
+    "Продолжим?"
 )
 
 NO_ROOMMATES = (
@@ -109,6 +119,15 @@ END_OF_ROOMMATE_ASSIGN = (
 INVITATION_FOR_ROOMMATE = (
     "Тебя приглашают в коливинг. Нажми ✅, чтобы рассмотреть приглашение"
 )
+
+ASSIGN_ROOMMATE_START_MSG = (
+    "Сейчас буду по очереди показывать пользователей, "
+    "которых можно прикрепить к вашему коливингу.\n"
+    "Если вы готовы прикрепить пользователя, нажмите "
+    "'Прикрепить'.\n"
+    "Если не готовы, нажмите 'Следующая анкета.'"
+)
+
 
 async def format_coliving_profile_message(coliving_info: Coliving) -> str:
     is_visible = (

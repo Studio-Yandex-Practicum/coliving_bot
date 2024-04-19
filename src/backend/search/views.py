@@ -24,13 +24,13 @@ class UserReportCreateView(generics.CreateAPIView):
 class MatchedUsersListView(generics.ListAPIView):
     """
     Apiview для получения списка мэчтей.
-    Параметр roomates запроса позволяет наложить 
+    Параметр roomates запроса позволяет наложить
     дополнительный фильтр.
-    roommates = 1 - выводим только тех пользователей, 
-    кто потенциально может стать соседом в коливинге, 
-    то есть помимо мэтча еще и не имеет своего коливинга 
+    roommates = 1 - выводим только тех пользователей,
+    кто потенциально может стать соседом в коливинге,
+    то есть помимо мэтча еще и не имеет своего коливинга
     и не проживает сейчас в коливинге
-    
+
     roommates = 0 - выводим просто всех пользователей с мэтчем
     """
 
@@ -55,7 +55,7 @@ class MatchedUsersListView(generics.ListAPIView):
         )
         matched_users = (users_who_sent_like | liked_users).distinct()
 
-        if roommates==1:
+        if roommates == 1:
             matched_users = matched_users.filter(residence_id__isnull=True)
             matched_users = matched_users.select_related("residence").filter(
                 coliving__host_id__isnull=True

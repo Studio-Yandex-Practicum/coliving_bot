@@ -6,7 +6,7 @@ from telegram import (
     InlineKeyboardButton,
     InputMediaPhoto,
     ReplyKeyboardRemove,
-    Update
+    Update,
 )
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
@@ -148,15 +148,7 @@ async def handle_assign_roommate(
     """Обработка ответа: Прикрепить жильца."""
     await update.effective_message.edit_reply_markup()
 
-    await update.effective_message.reply_text(
-        text= (
-            "Сейчас буду по очереди показывать пользователей, "
-            "которых можно прикрепить к вашему коливингу.\n"
-            "Если вы готовы прикрепить пользователя, нажмите "
-            "\'Прикрепить\'\n."
-            "Если не готовы, нажмите \'Следующая анкета.\'"
-        )
-    )
+    await update.effective_message.reply_text(text=templates.ASSIGN_ROOMMATE_START_MSG)
 
     potential_roommates = await api_service.get_potential_roommates(
         telegram_id=update.effective_chat.id
@@ -171,6 +163,12 @@ async def next_roommate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     Удаляет анкету из выборки и переводит в состояние оценки анкеты,
     либо завершает поиск, если анкет больше нет.
     """
+
+    if update.callback_query:
+        await update.effective_chat.delete_messages(
+            context.user_data["last_profile_message_ids"]
+        )
+
     potential_roommates = context.user_data["potential_roommates"]
     state = await _get_next_roommate(update, context, potential_roommates)
     return state
@@ -186,24 +184,52 @@ async def _get_next_roommate(
     из списка потенциальных соседей.
     Если анкеты заканчиваются - перевод в соответствующие состояние.
     """
-    if update.callback_query:
-        await update.effective_message.delete()
     if potential_roommates:
         roommate = asdict(potential_roommates.pop())
         context.user_data["current_roommate"] = roommate
         context.user_data["potential_roommates"] = potential_roommates
-        message_text = templates.ROOMMATE_DATA.format(**roommate)
-        await update.effective_chat.send_message(
-            text=message_text,
+
+        roommate_profile = await api_service.get_user_profile_by_telegram_id(
+            roommate["telegram_id"]
+        )
+
+        last_profile_message_ids = []
+
+        message_text = (
+            "\n"
+            + templates.ROOMMATE_PROFILE_DATA.format(**asdict(roommate_profile))
+            + "\n"
+        )
+        received_photo = roommate_profile.images[0]
+        if received_photo:
+            media_group = [InputMediaPhoto(received_photo)]
+            new_messages = await update.effective_chat.send_media_group(
+                media=media_group,
+                caption=message_text,
+            )
+            last_profile_message_ids += [message.message_id for message in new_messages]
+        else:
+            message = await update.effective_chat.send_message(
+                text=message_text,
+            )
+            last_profile_message_ids.append(message.message_id)
+
+        message = await update.effective_chat.send_message(
+            text="Ваш выбор?",
             reply_markup=keyboards.ROOMMATE_KEYBOARD,
         )
+        last_profile_message_ids.append(message.message_id)
+
+        context.user_data["last_profile_message_ids"] = last_profile_message_ids
+
         return States.ROOMMATE
+
     message_text = templates.NO_ROOMMATES
     await update.effective_chat.send_message(
         text=message_text,
         reply_markup=ReplyKeyboardRemove(),
     )
-    return States.COLIVING
+    return ConversationHandler.END
 
 
 async def roommate_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -212,13 +238,19 @@ async def roommate_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     Отправляет уведомление другому пользователю о прикреплении
     и переводит в состояние продолжения поиска.
     """
+    if update.callback_query:
+        await update.effective_chat.delete_messages(
+            context.user_data["last_profile_message_ids"]
+        )
+
     current_roommate = context.user_data.get("current_roommate")
-  
+    host_id = context.user_data.get("coliving_info").host
+
     CONSIDER_INVITATION_FROM_HOST = InlineKeyboardMarkup.from_row(
         button_row=(
             InlineKeyboardButton(
                 text=buttons.CONSIDER_INVITATION_FROM_HOST_BTN,
-                callback_data=f"coliving_host:{context.user_data.get('coliving_info').host}",
+                callback_data=f"coliving_host:{host_id}",
             ),
         )
     )
@@ -236,8 +268,7 @@ async def roommate_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 
 
 async def end_of_assign_roomate(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE
+    update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """
     Заканчивает ветку общения по прикреплению жильца.

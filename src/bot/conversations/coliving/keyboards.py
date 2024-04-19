@@ -209,12 +209,17 @@ DELETE_OR_CANCEL_COLIVING_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
 )
 
 
-ROOMMATE_KEYBOARD = ReplyKeyboardMarkup.from_row(
+ROOMMATE_KEYBOARD = InlineKeyboardMarkup.from_row(
     button_row=(
-        KeyboardButton(text=buttons.OK_ROOMMATE_BTN),
-        KeyboardButton(text=buttons.NEXT_ROOMMATE_BTN),
+        InlineKeyboardButton(
+            text=buttons.OK_ROOMMATE_BTN,
+            callback_data=buttons.OK_ROOMMATE_BTN,
+        ),
+        InlineKeyboardButton(
+            text=buttons.NEXT_ROOMMATE_BTN,
+            callback_data=buttons.NEXT_ROOMMATE_BTN,
+        ),
     ),
-    resize_keyboard=True,
 )
 
 

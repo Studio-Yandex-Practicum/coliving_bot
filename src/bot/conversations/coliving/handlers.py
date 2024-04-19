@@ -215,13 +215,13 @@ coliving_handler: ConversationHandler = ConversationHandler(
             ),
         ],
         States.ROOMMATE: [
-            MessageHandler(
-                filters=filters.Regex(rf"^{buttons.OK_ROOMMATE_BTN}$"),
+            CallbackQueryHandler(
                 callback=callback_funcs.roommate_like,
+                pattern=rf"^{buttons.OK_ROOMMATE_BTN}$",
             ),
-            MessageHandler(
-                filters=filters.Regex(rf"^{buttons.NEXT_ROOMMATE_BTN}$"),
+            CallbackQueryHandler(
                 callback=callback_funcs.next_roommate,
+                pattern=rf"^{buttons.NEXT_ROOMMATE_BTN}$",
             ),
         ],
         States.COLIVING: [
