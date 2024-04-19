@@ -390,9 +390,9 @@ async def handle_ok_to_save(update: Update, _context: ContextTypes.DEFAULT_TYPE)
     await update.effective_message.edit_reply_markup()
 
     await update.effective_message.reply_text(
-            text=templates.ASK_FORM_VISIBLE,
-            reply_markup=keyboards.FORM_VISIBLE_KEYBOARD,
-        )
+        text=templates.ASK_FORM_VISIBLE,
+        reply_markup=keyboards.FORM_VISIBLE_KEYBOARD,
+    )
     return States.VISIBLE
 
 
@@ -407,9 +407,7 @@ async def handle_visible(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
     context.user_data[templates.IS_VISIBLE_FIELD] = visibility_choice
 
-    await api_service.create_user_profile(
-        update.effective_chat.id, context.user_data
-    )
+    await api_service.create_user_profile(update.effective_chat.id, context.user_data)
     for file_id in context.user_data.get(templates.RECEIVED_PHOTOS_FIELD, []):
         new_file = await context.bot.get_file(file_id)
         photo_bytearray = await new_file.download_as_bytearray()

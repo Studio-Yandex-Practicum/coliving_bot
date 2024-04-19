@@ -228,7 +228,7 @@ profile_handler: ConversationHandler = ConversationHandler(
                 filters.TEXT & ~filters.COMMAND,
                 callback_funcs.handle_delete_profile,
             ),
-        ]
+        ],
     },
     fallbacks=[
         CommandHandler(
