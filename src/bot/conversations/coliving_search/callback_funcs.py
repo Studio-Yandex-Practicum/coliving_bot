@@ -8,13 +8,11 @@ from telegram import (
     ReplyKeyboardRemove,
     Update,
 )
-from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
 
 import conversations.coliving_search.keyboards as keyboards
 import conversations.coliving_search.states as states
 import conversations.coliving_search.templates as templates
-import conversations.common_functions.common_keyboards as common_keyboards
 from conversations.menu.callback_funcs import menu
 from general.validators import value_is_in_range_validator
 from internal_requests import api_service
@@ -28,7 +26,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     переводит либо в состояние подтверждения настроек, либо в настройку поиска.
     """
     search_settings = context.user_data.get("search_settings")
-    if search_settings:
+    if search_settings and isinstance(search_settings, ColivingSearchSettings):
         await _message_edit(
             message=update.effective_message,
             text=templates.format_search_settings_message(search_settings),
@@ -66,12 +64,10 @@ async def edit_settings(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     await update.effective_chat.send_message(
         text=templates.SEARCH_START,
         reply_markup=ReplyKeyboardRemove(),
-        parse_mode=ParseMode.HTML,
     )
     await update.effective_message.reply_text(
         text=templates.ASK_LOCATION,
         reply_markup=context.bot_data["location_keyboard"],
-        parse_mode=ParseMode.HTML,
     )
     return states.LOCATION
 
@@ -103,7 +99,6 @@ async def set_room_type(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     )
     await update.effective_message.reply_text(
         text=templates.ASK_MIN_PRICE,
-        reply_markup=common_keyboards.CANCEL_KEYBOARD,
     )
 
     return states.COST_MIN
@@ -127,14 +122,12 @@ async def set_cost_min(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     ):
         await update.effective_message.reply_text(
             text=templates.ASK_MIN_PRICE,
-            reply_markup=common_keyboards.CANCEL_KEYBOARD,
         )
         return states.COST_MIN
 
     context.user_data["search_settings"].min_price = min_price
     await update.effective_message.reply_text(
         text=templates.ASK_MAX_PRICE,
-        reply_markup=common_keyboards.CANCEL_KEYBOARD,
     )
     return states.COST_MAX
 
@@ -158,7 +151,6 @@ async def set_cost_max(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     ):
         await update.effective_message.reply_text(
             text=templates.ASK_MAX_PRICE,
-            reply_markup=common_keyboards.CANCEL_KEYBOARD,
         )
         return states.COST_MAX
 
@@ -167,7 +159,6 @@ async def set_cost_max(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
 
     await update.effective_message.reply_text(
         text=templates.format_search_settings_message(search_settings),
-        parse_mode=ParseMode.HTML,
     )
 
     await update.effective_message.reply_text(
@@ -203,7 +194,6 @@ async def coliving_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     await update.effective_message.reply_text(
         text=templates.ASK_NEXT_COLIVING,
         reply_markup=keyboards.NEXT_COLIVING,
-        parse_mode=ParseMode.HTML,
     )
     return states.NEXT_COLIVING
 
@@ -224,7 +214,6 @@ async def _get_next_coliving(
             await update.effective_chat.send_message(
                 text=templates.SEARCH_INTRO,
                 reply_markup=keyboards.COLIVING_KEYBOARD,
-                parse_mode=ParseMode.HTML,
             )
         coliving = asdict(colivings.pop())
         context.user_data["current_coliving"] = coliving
@@ -234,20 +223,19 @@ async def _get_next_coliving(
         if images:
             media_group = [InputMediaPhoto(file_id) for file_id in images]
             await update.effective_chat.send_media_group(
-                media=media_group, caption=message_text, parse_mode=ParseMode.HTML
+                media=media_group,
+                caption=message_text,
             )
         else:
             await update.effective_chat.send_message(
                 text=message_text,
                 reply_markup=keyboards.COLIVING_KEYBOARD,
-                parse_mode=ParseMode.HTML,
             )
         return states.COLIVING
 
     await update.effective_message.reply_text(
         text=templates.NO_MATCHES,
         reply_markup=keyboards.NO_MATCHES_KEYBOARD,
-        parse_mode=ParseMode.HTML,
     )
 
     return states.NO_MATCHES
@@ -264,7 +252,6 @@ async def handle_return_to_menu_response(
     await update.effective_chat.send_message(
         text=templates.END_OF_SEARCH,
         reply_markup=ReplyKeyboardRemove(),
-        parse_mode=ParseMode.HTML,
     )
     await menu(update, context)
     return ConversationHandler.END
@@ -278,7 +265,7 @@ async def _message_edit(
     """
     Функция для изменения текста и клавиатуры сообщения с ParseMode.HTML.
     """
-    await message.edit_text(text=text, reply_markup=keyboard, parse_mode=ParseMode.HTML)
+    await message.edit_text(text=text, reply_markup=keyboard)
 
 
 async def _clear_coliving_search_context(context):

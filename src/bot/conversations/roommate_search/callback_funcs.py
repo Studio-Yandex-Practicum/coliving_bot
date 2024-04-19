@@ -26,7 +26,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
 
     search_settings = context.user_data.get("search_settings")
-    if search_settings:
+    if search_settings and isinstance(search_settings, ProfileSearchSettings):
         await _message_edit(
             message=update.effective_message,
             text=templates.format_search_settings_message(search_settings),
