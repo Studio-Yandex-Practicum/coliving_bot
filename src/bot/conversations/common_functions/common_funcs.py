@@ -40,6 +40,7 @@ def add_response_prefix(custom_answer: str = ""):
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Отменяет текущий диалог."""
+
     await update.effective_message.reply_text(
         text=templates.CANCEL_TEXT,
         reply_markup=ReplyKeyboardRemove(),
@@ -98,6 +99,13 @@ async def handle_return_to_menu_response(
 ) -> int:
     """Обработка ответа: Вернуться в меню."""
     await update.effective_message.edit_reply_markup()
+
+    search_settings = context.user_data.get("search_settings")
     context.user_data.clear()
+
+    # Оставляем параметры для поиска
+    if search_settings:
+        context.user_data["search_settings"] = search_settings
+
     await menu(update, context)
     return ConversationHandler.END

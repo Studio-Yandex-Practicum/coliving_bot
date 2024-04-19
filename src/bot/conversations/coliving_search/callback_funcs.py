@@ -19,7 +19,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     переводит либо в состояние подтверждения настроек, либо в настройку поиска.
     """
     search_settings = context.user_data.get("search_settings")
-    if search_settings:
+    if search_settings and isinstance(search_settings, ColivingSearchSettings):
         await update.effective_message.edit_text(
             text=templates.format_search_settings_message(search_settings)
         )
