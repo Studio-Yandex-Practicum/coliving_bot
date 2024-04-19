@@ -13,6 +13,10 @@ from conversations.common_functions.common_buttons import (
 )
 from conversations.common_functions.common_keyboards import HIDE_BUTTON, SEARCH_BUTTON
 from conversations.profile.buttons import (
+    CANCEL_PROFILE_CREATION,
+    DELETE_CANCEL_BUTTON,
+    DELETE_CONFIRM_BUTTON,
+    DELETE_PROFILE_BUTTON,
     EDIT_ABOUT_BUTTON,
     EDIT_AGE_BUTTON,
     EDIT_CANCEL_BUTTON,
@@ -22,15 +26,11 @@ from conversations.profile.buttons import (
     EDIT_RESUME_BUTTON,
     EDIT_SEX_BUTTON,
     FEMALE_BUTTON,
-    DELETE_PROFILE_BUTTON,
     MALE_BUTTON,
     NEW_PHOTO_BUTTON,
     SAVE_EDITED_PHOTO_BUTTON,
     SAVE_PHOTO_BUTTON,
     YES_BUTTON,
-    DELETE_CANCEL_BUTTON,
-    DELETE_CONFIRM_BUTTON,
-    CANCEL_PROFILE_CREATION,
 )
 
 PROFILE_DUPLICATE_BUTTONS = [
