@@ -1,4 +1,3 @@
-from copy import copy
 from re import fullmatch
 from typing import Optional, Union
 
@@ -259,15 +258,12 @@ async def _look_at_profile(
     context: ContextTypes.DEFAULT_TYPE,
     title: str,
     keyboard: str,
-    ask: bool = False,
+    ask_text: str = templates.PROFILE_VIEWING,
 ) -> None:
     """
     Предварительный просмотр профиля.
     """
     chat_id = update.effective_chat.id
-    ask_text = copy(templates.PROFILE_VIEWING)
-    if not ask:
-        ask_text = templates.PROFILE_VIEWING
     message_text = (
         title
         + "\n\n"
@@ -373,7 +369,7 @@ async def send_received_photos(
             context,
             templates.LOOK_AT_FORM_FIRST,
             keyboards.FORM_SAVED_KEYBOARD,
-            True,
+            templates.ASK_IS_THAT_RIGHT,
         )
         return States.CONFIRMATION
     await update.effective_message.reply_text(text=templates.DONT_SAVE_WITHOUT_PHOTO)
@@ -563,7 +559,7 @@ async def handle_edit_name(
         context,
         templates.LOOK_AT_FORM_SECOND,
         keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
-        True,
+        templates.ASK_IS_THAT_RIGHT,
     )
 
     return States.EDIT_CONFIRMATION
@@ -581,7 +577,7 @@ async def handle_edit_sex(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         context,
         templates.LOOK_AT_FORM_SECOND,
         keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
-        True,
+        templates.ASK_IS_THAT_RIGHT,
     )
 
     return States.EDIT_CONFIRMATION
@@ -610,7 +606,7 @@ async def handle_edit_age(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         context,
         templates.LOOK_AT_FORM_SECOND,
         keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
-        True,
+        templates.ASK_IS_THAT_RIGHT,
     )
 
     return States.EDIT_CONFIRMATION
@@ -630,7 +626,7 @@ async def handle_edit_location(
         context,
         templates.LOOK_AT_FORM_SECOND,
         keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
-        True,
+        templates.ASK_IS_THAT_RIGHT,
     )
 
     return States.EDIT_CONFIRMATION
@@ -659,7 +655,7 @@ async def handle_edit_about(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         context,
         templates.LOOK_AT_FORM_SECOND,
         keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
-        True,
+        templates.ASK_IS_THAT_RIGHT,
     )
 
     return States.EDIT_CONFIRMATION
@@ -678,7 +674,7 @@ async def send_edited_photos(
             context,
             templates.LOOK_AT_FORM_THIRD,
             keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
-            True,
+            templates.ASK_IS_THAT_RIGHT,
         )
         return States.EDIT_CONFIRMATION
     await update.effective_message.reply_text(
