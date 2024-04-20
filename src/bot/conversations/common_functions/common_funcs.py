@@ -40,6 +40,7 @@ def add_response_prefix(custom_answer: str = ""):
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Отменяет текущий диалог."""
+
     await update.effective_message.reply_text(
         text=templates.CANCEL_TEXT,
         reply_markup=ReplyKeyboardRemove(),
@@ -90,6 +91,18 @@ async def get_visibility_choice(update: Update) -> bool:
     }
 
     return visibility_options[visibility_btn]
+
+
+@add_response_prefix()
+async def handle_return_to_menu_response(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """Обработка ответа кнопки Вернуться в меню."""
+    await update.effective_message.edit_reply_markup()
+    context.user_data.clear()
+
+    await menu(update, context)
+    return ConversationHandler.END
 
 
 async def return_to_menu_via_menu_command(

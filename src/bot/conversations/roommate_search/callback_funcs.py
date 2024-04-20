@@ -1,12 +1,6 @@
 from dataclasses import asdict
 
-from telegram import (
-    InlineKeyboardMarkup,
-    InputMediaPhoto,
-    Message,
-    ReplyKeyboardRemove,
-    Update,
-)
+from telegram import InputMediaPhoto, ReplyKeyboardRemove, Update
 from telegram.ext import ContextTypes, ConversationHandler
 
 import conversations.roommate_search.keyboards as keyboards
@@ -27,9 +21,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     search_settings = context.user_data.get("search_settings")
     if search_settings:
-        await _message_edit(
-            message=update.effective_message,
-            text=templates.format_search_settings_message(search_settings),
+        await update.effective_message.edit_text(
+            text=templates.format_search_settings_message(search_settings)
         )
         await update.effective_message.reply_text(
             text=templates.ASK_SEARCH_SETTINGS,
@@ -59,11 +52,10 @@ async def edit_settings(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     Переводит в состояние выбора локации.
     """
     await _clear_roommate_search_context(context)
-    await _message_edit(
-        message=update.effective_message,
-        text=templates.ASK_LOCATION,
-        keyboard=context.bot_data["location_keyboard"],
+    await update.effective_message.edit_text(
+        text=templates.ASK_LOCATION, reply_markup=context.bot_data["location_keyboard"]
     )
+
     return States.LOCATION
 
 
@@ -74,10 +66,8 @@ async def set_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     """
     location = update.callback_query.data.split(":")[1]
     context.user_data["search_settings"] = ProfileSearchSettings(location=location)
-    await _message_edit(
-        message=update.effective_message,
-        text=templates.ASK_SEX,
-        keyboard=keyboards.SEX_KEYBOARD,
+    await update.effective_message.edit_text(
+        text=templates.ASK_SEX, reply_markup=keyboards.SEX_KEYBOARD
     )
     return States.SEX
 
@@ -89,10 +79,9 @@ async def set_sex(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     sex = update.callback_query.data
     context.user_data["search_settings"].sex = sex if sex != "Неважно" else None
-    await _message_edit(
-        message=update.effective_message,
+    await update.effective_message.edit_text(
         text=templates.ASK_AGE,
-        keyboard=keyboards.AGE_KEYBOARD,
+        reply_markup=keyboards.AGE_KEYBOARD,
     )
     return States.AGE
 
@@ -116,10 +105,10 @@ async def set_age(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         else:
             raise exception
     search_settings = context.user_data.get("search_settings")
-    await _message_edit(
-        message=update.effective_message,
-        text=templates.format_search_settings_message(search_settings),
+    await update.effective_message.edit_text(
+        text=templates.format_search_settings_message(search_settings)
     )
+
     await update.effective_message.reply_text(
         text=templates.ASK_SEARCH_SETTINGS,
         reply_markup=keyboards.SEARCH_SETTINGS_KEYBOARD,
@@ -211,17 +200,6 @@ async def _get_next_user_profile(
         reply_markup=keyboards.NO_MATCHES_KEYBOARD,
     )
     return States.NO_MATCHES
-
-
-async def _message_edit(
-    message: Message,
-    text: str,
-    keyboard: InlineKeyboardMarkup | None = None,
-) -> None:
-    """
-    Функция для изменения текста и клавиатуры сообщения с ParseMode.HTML.
-    """
-    await message.edit_text(text=text, reply_markup=keyboard)
 
 
 async def _clear_roommate_search_context(context):

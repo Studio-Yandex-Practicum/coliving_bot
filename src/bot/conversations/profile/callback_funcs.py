@@ -12,7 +12,6 @@ import conversations.profile.buttons as buttons
 import conversations.profile.keyboards as keyboards
 import conversations.profile.templates as templates
 from conversations.common_functions.common_funcs import add_response_prefix
-from conversations.menu.callback_funcs import menu
 from conversations.profile.states import States
 from general.validators import value_is_in_range_validator
 from internal_requests import api_service
@@ -119,18 +118,6 @@ async def handle_return_to_profile_response(
     else:
         await _look_at_profile(update, context, "", keyboards.HIDDEN_PROFILE_KEYBOARD)
     return States.PROFILE
-
-
-@add_response_prefix()
-async def handle_return_to_menu_response(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> Union[int, States]:
-    """Обработка ответа: Вернуться в меню."""
-
-    await update.effective_message.edit_reply_markup()
-    context.user_data.clear()
-    await menu(update, context)
-    return ConversationHandler.END
 
 
 async def handle_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:

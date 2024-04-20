@@ -13,7 +13,6 @@ from conversations.common_functions.common_funcs import (
     get_visibility_choice,
     profile_required,
 )
-from conversations.menu.callback_funcs import menu
 from general.validators import value_is_in_range_validator
 from internal_requests import api_service
 from internal_requests.entities import Coliving, Image
@@ -152,17 +151,6 @@ async def handle_assign_roommate(
     )
 
     #############################################################
-    return ConversationHandler.END
-
-
-@add_response_prefix()
-async def handle_return_to_menu_response(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> int:
-    """Обработка ответа: Вернуться в меню."""
-    await update.effective_message.edit_reply_markup()
-    context.user_data.clear()
-    await menu(update, context)
     return ConversationHandler.END
 
 
