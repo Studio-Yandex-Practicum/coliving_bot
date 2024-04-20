@@ -39,11 +39,8 @@ class ProfileLike(Like):
     )
 
     class Meta:
+        unique_together = ("sender", "receiver")
         constraints = [
-            models.UniqueConstraint(
-                fields=["sender", "receiver"],
-                name="unique_sender_receiver",
-            ),
             models.CheckConstraint(
                 check=~models.Q(sender=models.F("receiver")),
                 name="different_sender_receiver",
@@ -66,12 +63,7 @@ class ColivingLike(Like):
     )
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["sender", "coliving"],
-                name="unique_sender_coliving",
-            ),
-        ]
+        unique_together = ("sender", "coliving")
 
 
 class UserReport(models.Model):
