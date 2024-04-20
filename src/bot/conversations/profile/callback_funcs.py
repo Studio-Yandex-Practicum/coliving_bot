@@ -2,7 +2,7 @@ from re import fullmatch
 from typing import Optional, Union
 
 from httpx import HTTPStatusError, codes
-from telegram import InputMediaPhoto, ReplyKeyboardRemove, Update
+from telegram import InputMediaPhoto, InlineKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
 import conversations.common_functions.common_funcs as common_funcs
@@ -257,13 +257,12 @@ async def _look_at_profile(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
     title: str,
-    keyboard: str,
+    keyboard: Optional[InlineKeyboardMarkup] = None,
     ask_text: str = templates.PROFILE_VIEWING,
 ) -> None:
     """
     Предварительный просмотр профиля.
     """
-    chat_id = update.effective_chat.id
     message_text = (
         title
         + "\n\n"
@@ -301,9 +300,10 @@ async def _look_at_profile(
         await update.effective_chat.send_message(text=message_text)
 
     # Отправляем сообщение с вопросом после предварительного просмотра
-    await context.bot.send_message(
-        chat_id=chat_id, text=ask_text, reply_markup=keyboard
-    )
+    if ask_text and keyboard is not None:
+        await update.effective_chat.send_message(
+            text=ask_text, reply_markup=keyboard
+        )
 
 
 async def handle_photo(
