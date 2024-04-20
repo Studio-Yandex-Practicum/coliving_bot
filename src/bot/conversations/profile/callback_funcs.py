@@ -1,9 +1,8 @@
-from copy import copy
 from re import fullmatch
 from typing import Optional, Union
 
 from httpx import HTTPStatusError, codes
-from telegram import InputMediaPhoto, ReplyKeyboardRemove, Update
+from telegram import InlineKeyboardMarkup, InputMediaPhoto, ReplyKeyboardRemove, Update
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
 import conversations.common_functions.common_funcs as common_funcs
@@ -242,16 +241,12 @@ async def _look_at_profile(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
     title: str,
-    keyboard: str,
-    ask: bool = False,
+    keyboard: Optional[InlineKeyboardMarkup] = None,
+    ask_text: str = templates.PROFILE_VIEWING,
 ) -> None:
     """
     Предварительный просмотр профиля.
     """
-    chat_id = update.effective_chat.id
-    ask_text = copy(templates.PROFILE_VIEWING)
-    if not ask:
-        ask_text = templates.PROFILE_VIEWING
     message_text = (
         title
         + "\n\n"
@@ -289,9 +284,8 @@ async def _look_at_profile(
         await update.effective_chat.send_message(text=message_text)
 
     # Отправляем сообщение с вопросом после предварительного просмотра
-    await context.bot.send_message(
-        chat_id=chat_id, text=ask_text, reply_markup=keyboard
-    )
+    if ask_text and keyboard is not None:
+        await update.effective_chat.send_message(text=ask_text, reply_markup=keyboard)
 
 
 async def handle_photo(
@@ -357,7 +351,7 @@ async def send_received_photos(
             context,
             templates.LOOK_AT_FORM_FIRST,
             keyboards.FORM_SAVED_KEYBOARD,
-            True,
+            templates.ASK_IS_THAT_RIGHT,
         )
         return States.CONFIRMATION
     await update.effective_message.reply_text(text=templates.DONT_SAVE_WITHOUT_PHOTO)
@@ -547,7 +541,7 @@ async def handle_edit_name(
         context,
         templates.LOOK_AT_FORM_SECOND,
         keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
-        True,
+        templates.ASK_IS_THAT_RIGHT,
     )
 
     return States.EDIT_CONFIRMATION
@@ -565,7 +559,7 @@ async def handle_edit_sex(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         context,
         templates.LOOK_AT_FORM_SECOND,
         keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
-        True,
+        templates.ASK_IS_THAT_RIGHT,
     )
 
     return States.EDIT_CONFIRMATION
@@ -593,7 +587,7 @@ async def handle_edit_age(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         context,
         templates.LOOK_AT_FORM_SECOND,
         keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
-        True,
+        templates.ASK_IS_THAT_RIGHT,
     )
 
     return States.EDIT_CONFIRMATION
@@ -613,7 +607,7 @@ async def handle_edit_location(
         context,
         templates.LOOK_AT_FORM_SECOND,
         keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
-        True,
+        templates.ASK_IS_THAT_RIGHT,
     )
 
     return States.EDIT_CONFIRMATION
@@ -640,7 +634,7 @@ async def handle_edit_about(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         context,
         templates.LOOK_AT_FORM_SECOND,
         keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
-        True,
+        templates.ASK_IS_THAT_RIGHT,
     )
 
     return States.EDIT_CONFIRMATION
@@ -659,7 +653,7 @@ async def send_edited_photos(
             context,
             templates.LOOK_AT_FORM_THIRD,
             keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
-            True,
+            templates.ASK_IS_THAT_RIGHT,
         )
         return States.EDIT_CONFIRMATION
     await update.effective_message.reply_text(
