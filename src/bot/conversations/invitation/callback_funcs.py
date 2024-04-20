@@ -36,49 +36,41 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     return States.INVITATION_START
 
 
-async def invitation_no(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def process_invitation(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+) -> int:
     """
-    Обрабатывает отклоненное приглашение в коливинг.
+    Обрабатывает решение по коливингу.
+        - отправляет сообщение хозяину
+        - выводит всплывающую плашку на экран приглашенному
+        - в случае принятия приглашения создает прикреление в базе данных
+    Параметр decision может принимать два значения - "NO" и "YES"
     """
     current_chat = update.effective_chat
+    decision = int(context.matches[0].group("decision"))
+
+    if decision == 1:
+        answer_to_host = templates.YES_TO_HOST
+        message_to_roommate = templates.INVITATION_YES_MSG
+
+        await api_service.update_user_residence(
+            current_chat.id, context.user_data.get("coliving_info").id
+        )
+    else:
+        answer_to_host = templates.NO_TO_HOST
+        message_to_roommate = templates.INVITATION_NO_MSG
 
     await _send_message_to_host(
         update,
         context,
         context.user_data.get("host_info").user,
         current_chat.id,
-        templates.NO_TO_HOST,
+        answer_to_host,
     )
 
     await update.callback_query.answer(
-        text=templates.INVITATION_NO_MSG,
-        show_alert=True,
-    )
-    await update.effective_message.delete()
-
-    return ConversationHandler.END
-
-
-async def invitation_yes(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """
-    Обрабатывает принятое приглашение в коливинг.
-    """
-    current_chat = update.effective_chat
-
-    await api_service.update_user_residence(
-        current_chat.id, context.user_data.get("coliving_info").id
-    )
-
-    await _send_message_to_host(
-        update,
-        context,
-        context.user_data.get("host_info").user,
-        current_chat.id,
-        templates.YES_TO_HOST,
-    )
-
-    await update.callback_query.answer(
-        text=templates.INVITATION_YES_MSG,
+        text=message_to_roommate,
         show_alert=True,
     )
     await update.effective_message.delete()

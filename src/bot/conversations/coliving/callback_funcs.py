@@ -200,9 +200,8 @@ async def _get_next_roommate(
             + templates.ROOMMATE_PROFILE_DATA.format(**asdict(roommate_profile))
             + "\n"
         )
-        received_photo = roommate_profile.images[0]
-        if received_photo:
-            media_group = [InputMediaPhoto(received_photo)]
+        if len(roommate_profile.images) > 0:
+            media_group = [InputMediaPhoto(roommate_profile.images[0])]
             new_messages = await update.effective_chat.send_media_group(
                 media=media_group,
                 caption=message_text,
@@ -990,4 +989,6 @@ async def handle_delete_coliving_confirmation_cancel(
 
 async def _clear_assign_roommate_context(context):
     context.user_data.pop("potential_roomates", None)
-    # context.user_data.pop("current_profile", None)
+    context.user_data.pop("coliving_info", None)
+    context.user_data.pop("current_roommate", None)
+    context.user_data.pop("host_info", None)
