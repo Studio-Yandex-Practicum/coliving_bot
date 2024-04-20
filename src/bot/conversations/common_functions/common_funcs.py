@@ -22,6 +22,8 @@ def add_response_prefix(custom_answer: str = ""):
     def decorator(func):
         @wraps(func)
         async def wrapper(update, context, *args, **kwargs):
+            await update.effective_message.edit_reply_markup()
+
             if update.callback_query:
                 if custom_answer:
                     user_answer = custom_answer
@@ -93,25 +95,13 @@ async def get_visibility_choice(update: Update) -> bool:
     return visibility_options[visibility_btn]
 
 
-@add_response_prefix()
-async def handle_return_to_menu_response(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> int:
-    """Обработка ответа кнопки Вернуться в меню."""
-    await update.effective_message.edit_reply_markup()
+async def return_to_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Возврат в меню."""
     context.user_data.clear()
 
     await menu(update, context)
     return ConversationHandler.END
 
 
-async def return_to_menu_via_menu_command(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> int:
-    """
-    Возвращает в меню при использовании команды /menu.
-
-    """
-    context.user_data.clear()
-    await menu(update, context)
-    return ConversationHandler.END
+handle_return_to_menu_response = add_response_prefix()(return_to_menu)
+return_to_menu_via_menu_command = return_to_menu

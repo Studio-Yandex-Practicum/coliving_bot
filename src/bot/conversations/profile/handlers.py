@@ -12,6 +12,7 @@ import conversations.profile.buttons as buttons
 import conversations.profile.callback_funcs as callback_funcs
 import conversations.profile.constants as consts
 from conversations.menu.buttons import MY_PROFILE_BUTTON
+from conversations.menu.constants import CANCEL_COMMAND, MENU_COMMAND
 from conversations.profile.states import States
 from general.validators import (
     handle_text_input_instead_of_choosing_button,
@@ -211,11 +212,11 @@ profile_handler: ConversationHandler = ConversationHandler(
     },
     fallbacks=[
         CommandHandler(
-            command="cancel",
+            command=CANCEL_COMMAND,
             callback=common_funcs.cancel,
         ),
         CommandHandler(
-            command="menu",
+            command=MENU_COMMAND,
             callback=common_funcs.return_to_menu_via_menu_command,
         ),
     ],

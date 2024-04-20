@@ -15,6 +15,7 @@ from conversations.coliving_search.validators import (
     handle_text_input_instead_of_choosing_button,
 )
 from conversations.menu.buttons import SEARCH_COLIVING_BUTTON
+from conversations.menu.constants import CANCEL_COMMAND, MENU_COMMAND
 
 coliving_search_handler: ConversationHandler = ConversationHandler(
     entry_points=[
@@ -122,11 +123,11 @@ coliving_search_handler: ConversationHandler = ConversationHandler(
     },
     fallbacks=[
         CommandHandler(
-            command="cancel",
+            command=CANCEL_COMMAND,
             callback=common_funcs.cancel,
         ),
         CommandHandler(
-            command="menu",
+            command=MENU_COMMAND,
             callback=common_funcs.return_to_menu_via_menu_command,
         ),
     ],

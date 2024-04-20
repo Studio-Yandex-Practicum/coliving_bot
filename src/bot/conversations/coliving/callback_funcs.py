@@ -75,8 +75,6 @@ async def handle_coliving_edit(
 ) -> int:
     """Обработка ответа: Изменить коливинг профиль."""
 
-    await update.effective_message.edit_reply_markup()
-
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_WHAT_TO_EDIT,
         reply_markup=keyboards.WHAT_EDIT_PROFILE_KEYBOARD,
@@ -88,7 +86,6 @@ async def handle_coliving_edit(
 async def handle_is_visible_switching(update: Update, context: CallbackContext) -> int:
     """Обработка ответа: Скрыть из поиска."""
     visibility_choice: bool = await get_visibility_choice(update=update)
-    await update.effective_message.edit_reply_markup()
 
     context.user_data["coliving_info"].is_visible = visibility_choice
 
@@ -175,7 +172,6 @@ async def handle_location_text_input_instead_of_choosing_button(
 async def handle_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Выбор местоположения и запись в контекст."""
     location = update.callback_query.data.split(":")[1]
-    await update.effective_message.edit_reply_markup()
     context.user_data["coliving_info"].location = location
 
     await update.effective_message.reply_text(
@@ -204,7 +200,6 @@ async def handle_room_type_text_input_instead_of_choosing_button(
 @add_response_prefix()
 async def handle_room_type(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Выбор типа спального места и запись в контекст."""
-    await update.effective_message.edit_reply_markup()
     room_type = update.callback_query.data.split(":")[1]
     context.user_data["coliving_info"].room_type = room_type
 
@@ -309,9 +304,6 @@ async def handle_profile_confirmation_cancel(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """Отмена редактирования коливинг профиля."""
-
-    await update.effective_message.edit_reply_markup()
-
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_PROFILE_NO_CREATE,
     )
@@ -328,8 +320,6 @@ async def handle_confirm_or_edit_reply_confirm(
     Обработка ответа - подтверждение коливинг профиля.
     Перевод на установку флажка поиска IS_VISIBLE.
     """
-    await update.effective_message.edit_reply_markup()
-
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_TO_SHOW_PROFILE,
         reply_markup=keyboards.IS_VISIBLE_OR_NOT_PROFILE_KEYBOARD,
@@ -364,7 +354,6 @@ async def handle_is_visible_coliving_profile_yes(
     перевод на стадию сохранения в БД.
     """
     visibility_choice: bool = await get_visibility_choice(update=update)
-    await update.effective_message.edit_reply_markup()
 
     context.user_data["coliving_info"].is_visible = visibility_choice
 
@@ -397,9 +386,6 @@ async def handle_what_to_edit_fill_again(
     Выбор редактируемого поля.
     Обработка ответа: Заполнить заново.
     """
-
-    await update.effective_message.edit_reply_markup()
-
     context.user_data.clear()
     await update.effective_chat.send_message(
         text=templates.REPLY_MSG_ASK_LOCATION,
@@ -416,9 +402,6 @@ async def handle_what_to_edit_location(
     Выбор редактируемого поля.
     Обработка ответа: Местоположение.
     """
-
-    await update.effective_message.edit_reply_markup()
-
     await update.effective_chat.send_message(
         text=templates.REPLY_MSG_ASK_LOCATION,
         reply_markup=context.bot_data["location_keyboard"],
@@ -434,8 +417,6 @@ async def handle_what_to_edit_room_type(
     Выбор редактируемого поля.
     Обработка ответа: Тип помещения.
     """
-    await update.effective_message.edit_reply_markup()
-
     await update.effective_chat.send_message(
         text=templates.REPLY_MSG_ASK_ROOM_TYPE,
         reply_markup=keyboards.ROOM_TYPE_KEYBOARD,
@@ -451,9 +432,6 @@ async def handle_what_to_edit_about_room(
     Выбор редактируемого поля.
     Обработка ответа: Описание.
     """
-
-    await update.effective_message.edit_reply_markup()
-
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_ABOUT,
     )
@@ -468,8 +446,6 @@ async def handle_what_to_edit_price(
     Выбор редактируемого поля.
     Обработка ответа: Цена.
     """
-    await update.effective_message.edit_reply_markup()
-
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_PRICE,
     )
@@ -484,7 +460,6 @@ async def handle_what_to_edit_photo_room(
     Выбор редактируемого поля.
     Обработка ответа: Фото квартиры.
     """
-    await update.effective_message.edit_reply_markup()
     context.user_data["coliving_info"].images.clear()
 
     await update.effective_message.reply_text(
@@ -499,9 +474,7 @@ async def handle_edit_location(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """Редактирование location."""
-
     location = update.callback_query.data.split(":")[1]
-    await update.effective_message.edit_reply_markup()
     context.user_data["coliving_info"].location = location
 
     await _show_coliving_profile(
@@ -519,7 +492,6 @@ async def handle_edit_select_room_type(
 ) -> int:
     """Редактирование типа помещения."""
     room_type = update.callback_query.data.split(":")[1]
-    await update.effective_message.edit_reply_markup()
     context.user_data["coliving_info"].room_type = room_type
 
     await _show_coliving_profile(
@@ -636,9 +608,6 @@ async def handle_edit_profile_confirmation_confirm(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """Подтверждение измененного коливинг профиля."""
-
-    await update.effective_message.edit_reply_markup()
-
     coliving = context.user_data["coliving_info"]
     images = context.user_data["coliving_info"].images[: consts.PHOTO_MAX_NUMBER]
     # Проверка наличия измененных фото по размеру первой фотографии
@@ -658,8 +627,6 @@ async def handle_edit_profile_confirmation_cancel(
 ) -> int:
     """Отмена редактирования коливинг профиля."""
 
-    await update.effective_message.edit_reply_markup()
-
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_PROFILE_NO_CHANGE,
     )
@@ -672,9 +639,6 @@ async def handle_edit_profile_confirmation_continue_edit(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """Продолжение редактирования коливинг профиля."""
-
-    await update.effective_message.edit_reply_markup()
-
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_WHAT_TO_EDIT,
         reply_markup=keyboards.WHAT_EDIT_PROFILE_KEYBOARD,
@@ -788,7 +752,6 @@ async def handle_delete_profile(
     Выбор р.
     Обработка ответа: Заполнить заново.
     """
-    await update.effective_message.edit_reply_markup()
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_WANT_TO_DELETE,
         reply_markup=keyboards.DELETE_OR_CANCEL_COLIVING_PROFILE_KEYBOARD,
@@ -803,8 +766,6 @@ async def handle_delete_coliving_confirmation_confirm(
     """
     Удаление коливинга
     """
-    await update.effective_message.edit_reply_markup()
-
     coliving = context.user_data["coliving_info"]
     await api_service.delete_coliving(coliving.id)
     context.user_data.clear()
@@ -819,8 +780,6 @@ async def handle_delete_coliving_confirmation_cancel(
     """
     Отмена удаления коливинга
     """
-    await update.effective_message.edit_reply_markup()
-
     context.user_data.clear()
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_PROFILE_NO_CHANGE
