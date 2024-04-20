@@ -125,5 +125,9 @@ coliving_search_handler: ConversationHandler = ConversationHandler(
             command="cancel",
             callback=common_funcs.cancel,
         ),
+        CommandHandler(
+            command="menu",
+            callback=common_funcs.return_to_menu_via_menu_command,
+        ),
     ],
 )

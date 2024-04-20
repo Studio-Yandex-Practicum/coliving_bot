@@ -260,8 +260,12 @@ coliving_handler: ConversationHandler = ConversationHandler(
     },
     fallbacks=[
         CommandHandler(
-            "cancel",
-            common_funcs.cancel,
+            command="cancel",
+            callback=common_funcs.cancel,
+        ),
+        CommandHandler(
+            command="menu",
+            callback=common_funcs.return_to_menu_via_menu_command,
         ),
     ],
 )

@@ -103,3 +103,15 @@ async def handle_return_to_menu_response(
 
     await menu(update, context)
     return ConversationHandler.END
+
+
+async def return_to_menu_via_menu_command(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """
+    Возвращает в меню при использовании команды /menu.
+
+    """
+    context.user_data.clear()
+    await menu(update, context)
+    return ConversationHandler.END
