@@ -6,10 +6,11 @@ from telegram.ext import (
     filters,
 )
 
+import conversations.common_functions.common_buttons as common_buttons
+import conversations.common_functions.common_funcs as common_funcs
 import conversations.profile.buttons as buttons
 import conversations.profile.callback_funcs as callback_funcs
-import conversations.profile.templates as templates
-from conversations.common_functions import common_buttons, common_funcs
+import conversations.profile.constants as consts
 from conversations.menu.buttons import MY_PROFILE_BUTTON
 from conversations.profile.states import States
 from general.validators import (
@@ -37,8 +38,8 @@ profile_handler: ConversationHandler = ConversationHandler(
                 pattern=rf"^{buttons.EDIT_FORM_BUTTON}",
             ),
             CallbackQueryHandler(
-                callback=callback_funcs.handle_return_to_menu_response,
-                pattern=rf"^{common_buttons.RETURN_TO_MENU_BTN_LABEL}",
+                callback=common_funcs.handle_return_to_menu_response,
+                pattern=rf"^{common_buttons.RETURN_TO_MENU_BTN}",
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
@@ -47,8 +48,12 @@ profile_handler: ConversationHandler = ConversationHandler(
         ],
         States.AGE: [
             MessageHandler(
-                filters.Regex(rf"{templates.AGE_PATTERN}") & ~filters.COMMAND,
+                filters.Regex(consts.AGE_PATTERN) & ~filters.COMMAND,
                 callback_funcs.handle_age,
+            ),
+            MessageHandler(
+                filters.UpdateType.MESSAGE & ~filters.COMMAND,
+                callback_funcs.handle_wrong_age,
             ),
         ],
         States.SEX: [
@@ -169,9 +174,13 @@ profile_handler: ConversationHandler = ConversationHandler(
         ],
         States.EDIT_AGE: [
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
+                filters.Regex(consts.AGE_PATTERN) & ~filters.COMMAND,
                 callback_funcs.handle_edit_age,
-            )
+            ),
+            MessageHandler(
+                filters.UpdateType.MESSAGE & ~filters.COMMAND,
+                callback_funcs.handle_wrong_age,
+            ),
         ],
         States.EDIT_LOCATION: [
             CallbackQueryHandler(
@@ -218,8 +227,12 @@ profile_handler: ConversationHandler = ConversationHandler(
     },
     fallbacks=[
         CommandHandler(
-            "cancel",
-            common_funcs.cancel,
+            command="cancel",
+            callback=common_funcs.cancel,
+        ),
+        CommandHandler(
+            command="menu",
+            callback=common_funcs.return_to_menu_via_menu_command,
         ),
     ],
 )

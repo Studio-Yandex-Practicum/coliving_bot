@@ -1,4 +1,5 @@
 from django_filters import rest_framework as filters
+from rest_framework.pagination import PageNumberPagination
 
 from profiles.models import Coliving
 
@@ -22,3 +23,7 @@ class ColivingFilter(filters.FilterSet):
             "max_price",
             "owner",
         )
+
+
+class SmallResultsSetPagination(PageNumberPagination):
+    page_size = 6

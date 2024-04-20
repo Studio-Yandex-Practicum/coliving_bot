@@ -3,6 +3,7 @@ from typing import Optional
 from telegram import InlineKeyboardMarkup, InputMediaPhoto, ReplyKeyboardRemove, Update
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
+import conversations.coliving.constants as consts
 import conversations.coliving.keyboards as keyboards
 import conversations.coliving.templates as templates
 import conversations.common_functions.common_templates as common_templates
@@ -13,7 +14,6 @@ from conversations.common_functions.common_funcs import (
     get_visibility_choice,
     profile_required,
 )
-from conversations.menu.callback_funcs import menu
 from general.validators import value_is_in_range_validator
 from internal_requests import api_service
 from internal_requests.entities import Coliving, Image
@@ -69,7 +69,7 @@ async def handle_coliving_text_instead_of_button(
     return States.COLIVING
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_coliving_edit(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -84,7 +84,7 @@ async def handle_coliving_edit(
     return States.EDIT
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_is_visible_switching(update: Update, context: CallbackContext) -> int:
     """Обработка ответа: Скрыть из поиска."""
     visibility_choice: bool = await get_visibility_choice(update=update)
@@ -155,38 +155,6 @@ async def handle_assign_roommate(
     return ConversationHandler.END
 
 
-async def handle_coliving_transfer_to(
-    update: Update, _context: ContextTypes.DEFAULT_TYPE
-) -> int:
-    """Обработка ответа: Передача коливинга."""
-    #############################################################
-    # заглушка
-    await update.effective_message.edit_reply_markup()
-    await update.effective_message.reply_text(
-        text=(
-            "Заглушка. Предусмотрена передача коливинга "
-            "другому владельцу"
-            "\n"
-            "\n"
-            "Нажмите /coliving"
-        )
-    )
-    # await set_new_owner(update, context)
-    #############################################################
-    return ConversationHandler.END
-
-
-@add_response_prefix
-async def handle_return_to_menu_response(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> int:
-    """Обработка ответа: Вернуться в меню."""
-    await update.effective_message.edit_reply_markup()
-    context.user_data.clear()
-    await menu(update, context)
-    return ConversationHandler.END
-
-
 async def handle_location_text_input_instead_of_choosing_button(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> None:
@@ -203,7 +171,7 @@ async def handle_location_text_input_instead_of_choosing_button(
     )
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Выбор местоположения и запись в контекст."""
     location = update.callback_query.data.split(":")[1]
@@ -233,7 +201,7 @@ async def handle_room_type_text_input_instead_of_choosing_button(
     )
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_room_type(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Выбор типа спального места и запись в контекст."""
     await update.effective_message.edit_reply_markup()
@@ -253,9 +221,9 @@ async def handle_about_coliving(
         update,
         context,
         len(about_coliving),
-        min=templates.MIN_ABOUT_LENGTH,
-        max=templates.MAX_ABOUT_LENGTH,
-        message=templates.ERR_MSG_ABOUT_MAX_LEN.format(max=templates.MAX_ABOUT_LENGTH),
+        min=consts.MIN_ABOUT_LENGTH,
+        max=consts.MAX_ABOUT_LENGTH,
+        message=templates.ERR_MSG_ABOUT_MAX_LEN.format(max=consts.MAX_ABOUT_LENGTH),
     ):
         await update.effective_message.reply_text(text=templates.REPLY_MSG_ASK_ABOUT)
         return States.ABOUT_ROOM
@@ -278,10 +246,10 @@ async def handle_price(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         update=update,
         context=context,
         value=price,
-        min=templates.MIN_PRICE,
-        max=templates.MAX_PRICE,
+        min=consts.MIN_PRICE,
+        max=consts.MAX_PRICE,
         message=templates.ERR_MSG_PRICE.format(
-            min=templates.MIN_PRICE, max=templates.MAX_PRICE
+            min=consts.MIN_PRICE, max=consts.MAX_PRICE
         ),
     ):
         return States.PRICE
@@ -336,7 +304,7 @@ async def handle_confirm_or_cancel_profile_text_instead_of_button(
     )
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_profile_confirmation_cancel(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -351,7 +319,7 @@ async def handle_profile_confirmation_cancel(
     return ConversationHandler.END
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_confirm_or_edit_reply_confirm(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -369,7 +337,7 @@ async def handle_confirm_or_edit_reply_confirm(
     return States.IS_VISIBLE
 
 
-@add_response_prefix
+@add_response_prefix()
 async def repeat_question_about_coliving_visibility(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> None:
@@ -387,7 +355,7 @@ async def repeat_question_about_coliving_visibility(
     )
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_is_visible_coliving_profile_yes(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -421,7 +389,7 @@ async def handle_what_to_edit_text_instead_of_button(
     )
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_what_to_edit_fill_again(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -440,7 +408,7 @@ async def handle_what_to_edit_fill_again(
     return States.LOCATION
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_what_to_edit_location(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -458,7 +426,7 @@ async def handle_what_to_edit_location(
     return States.EDIT_LOCATION
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_what_to_edit_room_type(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -475,7 +443,7 @@ async def handle_what_to_edit_room_type(
     return States.EDIT_ROOM_TYPE
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_what_to_edit_about_room(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -492,7 +460,7 @@ async def handle_what_to_edit_about_room(
     return States.EDIT_ABOUT_ROOM
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_what_to_edit_price(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -508,7 +476,7 @@ async def handle_what_to_edit_price(
     return States.EDIT_PRICE
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_what_to_edit_photo_room(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -526,7 +494,7 @@ async def handle_what_to_edit_photo_room(
     return States.EDIT_PHOTO_ROOM
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_edit_location(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -545,7 +513,7 @@ async def handle_edit_location(
     return States.EDIT_CONFIRMATION
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_edit_select_room_type(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -573,9 +541,9 @@ async def handle_edit_about_coliving(
         update,
         context,
         len(about_coliving),
-        min=templates.MIN_ABOUT_LENGTH,
-        max=templates.MAX_ABOUT_LENGTH,
-        message=templates.ERR_MSG_ABOUT_MAX_LEN.format(max=templates.MAX_ABOUT_LENGTH),
+        min=consts.MIN_ABOUT_LENGTH,
+        max=consts.MAX_ABOUT_LENGTH,
+        message=templates.ERR_MSG_ABOUT_MAX_LEN.format(max=consts.MAX_ABOUT_LENGTH),
     ):
         await update.effective_message.reply_text(
             text=templates.REPLY_MSG_ASK_ABOUT,
@@ -601,10 +569,10 @@ async def handle_edit_price(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         update=update,
         context=context,
         value=edit_price,
-        min=templates.MIN_PRICE,
-        max=templates.MAX_PRICE,
+        min=consts.MIN_PRICE,
+        max=consts.MAX_PRICE,
         message=templates.ERR_MSG_PRICE.format(
-            min=templates.MIN_PRICE, max=templates.MAX_PRICE
+            min=consts.MIN_PRICE, max=consts.MAX_PRICE
         ),
     ):
         return States.EDIT_PRICE
@@ -663,7 +631,7 @@ async def handle_edit_profile_confirmation_text_instead_of_button(
     )
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_edit_profile_confirmation_confirm(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -672,7 +640,7 @@ async def handle_edit_profile_confirmation_confirm(
     await update.effective_message.edit_reply_markup()
 
     coliving = context.user_data["coliving_info"]
-    images = context.user_data["coliving_info"].images[: templates.PHOTO_MAX_NUMBER]
+    images = context.user_data["coliving_info"].images[: consts.PHOTO_MAX_NUMBER]
     # Проверка наличия измененных фото по размеру первой фотографии
     if images[0].photo_size:
         await api_service.delete_coliving_photos(coliving.id, update.effective_chat.id)
@@ -684,7 +652,7 @@ async def handle_edit_profile_confirmation_confirm(
     return ConversationHandler.END
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_edit_profile_confirmation_cancel(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -699,7 +667,7 @@ async def handle_edit_profile_confirmation_cancel(
     return ConversationHandler.END
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_edit_profile_confirmation_continue_edit(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -812,7 +780,7 @@ async def send_edited_room_photos(
     return States.EDIT_PHOTO_ROOM
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_delete_profile(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -828,7 +796,7 @@ async def handle_delete_profile(
     return States.DELETE_COLIVING
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_delete_coliving_confirmation_confirm(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -844,7 +812,7 @@ async def handle_delete_coliving_confirmation_confirm(
     return ConversationHandler.END
 
 
-@add_response_prefix
+@add_response_prefix()
 async def handle_delete_coliving_confirmation_cancel(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:

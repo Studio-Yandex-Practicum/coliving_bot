@@ -8,7 +8,7 @@ from telegram import (
 from conversations.common_functions.common_buttons import (
     HIDE_SEARCH_BUTTON,
     RETURN_BTN_LABEL,
-    RETURN_TO_MENU_BTN_LABEL,
+    RETURN_TO_MENU_BTN,
     SHOW_SEARCH_BUTTON,
 )
 from conversations.common_functions.common_keyboards import HIDE_BUTTON, SEARCH_BUTTON
@@ -32,9 +32,7 @@ from conversations.profile.buttons import (
 
 PROFILE_DUPLICATE_BUTTONS = [
     InlineKeyboardButton(text=EDIT_FORM_BUTTON, callback_data=EDIT_FORM_BUTTON),
-    InlineKeyboardButton(
-        text=RETURN_TO_MENU_BTN_LABEL, callback_data=RETURN_TO_MENU_BTN_LABEL
-    ),
+    InlineKeyboardButton(text=RETURN_TO_MENU_BTN, callback_data=RETURN_TO_MENU_BTN),
 ]
 
 VISIBLE_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
