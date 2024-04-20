@@ -1,56 +1,77 @@
 from django.db import models
 
-from profiles.models import UserFromTelegram
+from profiles.models import Coliving, Profile, UserFromTelegram
+from search.constants import MatchStatuses, ReportCategories, ReportStatuses
 
-from .constants import MatchStatuses, ReportCategories, ReportStatuses
 
-
-class MatchRequest(models.Model):
-    """
-    Конфигурация объекта 'MatchRequests'.
-    """
-
-    sender = models.ForeignKey(
-        UserFromTelegram,
-        verbose_name="Отправитель",
-        on_delete=models.CASCADE,
-        related_name="likes",
-    )
-    receiver = models.ForeignKey(
-        UserFromTelegram,
-        verbose_name="Получатель",
-        on_delete=models.CASCADE,
-        related_name="match_requests",
-    )
+class Like(models.Model):
     status = models.SmallIntegerField(
         verbose_name="Статус запроса",
         choices=MatchStatuses,
         default=MatchStatuses.is_pending,
-    )
-    created_date = models.DateTimeField(
-        verbose_name="Дата запроса",
-        auto_now_add=True,
     )
     match_date = models.DateTimeField(
         verbose_name="Дата ответа",
         null=True,
         blank=True,
     )
+    created_date = models.DateTimeField(
+        verbose_name="Дата запроса",
+        auto_now_add=True,
+    )
 
     class Meta:
-        verbose_name = "Связь"
-        verbose_name_plural = "Связи"
-        ordering = ("sender", "receiver", "-created_date")
-        constraints = (
+        abstract = True
+
+
+class ProfileLike(Like):
+    sender = models.ForeignKey(
+        Profile,
+        verbose_name="Отправитель",
+        on_delete=models.CASCADE,
+        related_name="liked_profiles",
+    )
+    receiver = models.ForeignKey(
+        Profile,
+        verbose_name="Получатель",
+        on_delete=models.CASCADE,
+        related_name="received_likes",
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["sender", "receiver"],
+                name="unique_sender_receiver",
+            ),
             models.CheckConstraint(
                 check=~models.Q(sender=models.F("receiver")),
-                name="Cant match to myself",
+                name="different_sender_receiver",
             ),
+        ]
+
+
+class ColivingLike(Like):
+    sender = models.ForeignKey(
+        Profile,
+        verbose_name="Отправитель",
+        on_delete=models.CASCADE,
+        related_name="liked_colivings",
+    )
+    coliving = models.ForeignKey(
+        Coliving,
+        verbose_name="Комната Coliving",
+        on_delete=models.CASCADE,
+        related_name="likes",
+    )
+
+    class Meta:
+        constraints = [
             models.UniqueConstraint(
-                name="Uniq match request",
-                fields=("sender", "receiver"),
+                fields=["sender", "coliving"],
+                name="unique_sender_coliving",
             ),
-        )
+        ]
 
 
 class UserReport(models.Model):
