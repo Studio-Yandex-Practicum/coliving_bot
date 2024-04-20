@@ -86,20 +86,19 @@ class MatchRequestListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         sender = self.request.data.get("sender")
         receiver = self.request.data.get("receiver")
+        status = self.request.data.get("status")
+
         match = MatchRequest.objects.filter(
             sender__telegram_id=receiver, receiver__telegram_id=sender
         )
         if match:
-            match.update(status=MatchStatuses.is_match)
+            match.update(status=status)
         else:
             return serializer.save()
 
 
 class MatchRequestUpdateView(generics.UpdateAPIView):
-    """
-    ApiView для изменения статуса MatchRequest.
-
-    """
+    """ApiView для изменения статуса MatchRequest."""
 
     queryset = MatchRequest.objects.all()
     serializer_class = MatchRequestUpdateSerializer

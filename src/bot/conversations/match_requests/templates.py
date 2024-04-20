@@ -1,15 +1,16 @@
 from internal_requests.entities import ProfileSearchSettings
 
+ASK_RESPOND_TO_LIKE = "Что ты хочешь сделать?"
 END_OF_SEARCH = (
     "Надеюсь, ты смог найти себе соседа.\n"
     "А если нет, помни, что ты всегда можешь начать поиск заново."
 )
 LIKE_NOTIFICATION = "Кто-то хочет стать твоим соседом, посмотрим?"
-LIKE_SENDER_PROFILE = "Смотрим анкету <b>{sender_profile.name}</b>"
+
 BUTTON_ERROR_MSG = "Выбери соответствующий вариант."
 
 NEW_MATCH_NOTIFICATION = (
-    "<b>Приветствуем твоего будущего соседа @{username},\n"
+    "<b>Возможно, @{username} - твой новый сосед,\n"
     "Вы лайкнули анкеты друг друга.</b>"
 )
 

@@ -1,13 +1,14 @@
-from dataclasses import asdict
+from typing import Optional
 
-from telegram import InputMediaPhoto, Update
+from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
 
 import conversations.match_requests.keyboards as keyboards
 import conversations.match_requests.states as states
 import conversations.match_requests.templates as templates
 from conversations.common_functions.common_funcs import add_response_prefix
-from conversations.match_requests.constants import MatchStatus
+from conversations.match_requests.constants import TG_ID_REGEX_GRP, MatchStatus
+from conversations.roommate_search.callback_funcs import send_profile_info
 from conversations.roommate_search.templates import PROFILE_DATA
 from internal_requests import api_service
 from internal_requests.entities import UserProfile
@@ -22,9 +23,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     Переходим к шагу показа анкеты (sender)
 
     """
-
-    callback_data = update.callback_query.data
-    like_sender_id, _ = callback_data.split(":")
+    like_sender_id: int = await _get_like_sender_tg_id(context=context)
 
     await show_sender_profile(
         update=update,
@@ -34,65 +33,32 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     return states.PROFILE
 
 
-async def show_sender_profile(
-    update: Update,
-    like_sender_id: int,
-) -> int:
+async def show_sender_profile(update: Update, like_sender_id: int):
     """
-    Отправляем сообщение с профилем отправителя
-    лайка получателю
-    (send sender_profile to receiver):
-    - находим анкету
-    - отправляем анету отправителя лайка получателю
-    """
+    Находит UserProfile отправителя лайка (like_sender).
+    Отправляет получателю лайка (like_receiver)
+    анкету отправителя лайка (like_sender).
 
+    """
     like_sender_profile: UserProfile = (
         await api_service.get_user_profile_by_telegram_id(telegram_id=like_sender_id)
     )
 
-    await update.effective_chat.send_message(
-        text=templates.LIKE_SENDER_PROFILE.format(sender_profile=like_sender_profile)
+    like_or_dislike_keyboard = await keyboards.get_like_or_dislike_keyboard(
+        telegram_id=like_sender_id,
     )
-
     await send_profile_info(
         update=update,
         profile=like_sender_profile,
         profile_template=PROFILE_DATA,
     )
 
-    like_or_dislike_keyboard = await keyboards.get_like_or_dislike_keyboard(
-        like_sender_id
-    )
     await update.effective_chat.send_message(
-        text="Что ты хочешь сделать?",
+        text=templates.ASK_RESPOND_TO_LIKE,
         reply_markup=like_or_dislike_keyboard,
     )
-    return like_sender_profile
 
 
-async def send_profile_info(
-    update: Update,
-    profile: UserProfile,
-    profile_template: str,
-):
-    profile_dict: dict = asdict(profile)
-
-    images = profile_dict.pop("images", None)
-    profile_brief_info = profile_template.format(**profile_dict)
-
-    if images:
-        media_group = [InputMediaPhoto(file_id) for file_id in images]
-        await update.effective_chat.send_media_group(
-            media=media_group,
-            caption=profile_brief_info,
-        )
-    else:
-        await update.effective_chat.send_message(
-            text=profile_brief_info,
-        )
-
-
-@add_response_prefix
 async def link_sender_to_receiver(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
@@ -108,9 +74,7 @@ async def link_sender_to_receiver(
     """
     like_receiver_id: int = update.effective_chat.id
 
-    callback_data = update.callback_query.data
-
-    like_sender_id, _ = callback_data.split(":")
+    like_sender_id: int = await _get_like_sender_tg_id(context=context)
 
     await api_service.update_match_request_status(
         sender=like_sender_id,
@@ -118,45 +82,49 @@ async def link_sender_to_receiver(
         status=MatchStatus.IS_MATCH.value,
     )
 
-    await _send_new_match_notification(
-        context=context,
-        matched_user_1_tg_id=like_receiver_id,
-        matched_user_2_tg_id=like_sender_id,
+    like_sender_username: str = await _get_tg_username(
+        context=context, telegram_id=like_sender_id
+    )
+    like_receiver_username: str = await _get_tg_username(
+        context=context, telegram_id=like_receiver_id
     )
 
-    await _send_new_match_notification(
-        context=context,
-        matched_user_1_tg_id=like_sender_id,
-        matched_user_2_tg_id=like_receiver_id,
+    await update.effective_message.edit_text(
+        text=templates.NEW_MATCH_NOTIFICATION.format(username=like_sender_username)
     )
 
+    await context.bot.send_message(
+        chat_id=like_sender_id,
+        text=templates.NEW_MATCH_NOTIFICATION.format(username=like_receiver_username),
+    )
     return ConversationHandler.END
 
 
 async def dislike_to_sender(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
-    Обрабатывает ДИЗЛАЙК на профиль Sender.
-    Потом придумаем, как быть в таком случае
-    """
-    pass
-
-
-async def _send_new_match_notification(
-    context: ContextTypes.DEFAULT_TYPE,
-    matched_user_1_tg_id: int,
-    matched_user_2_tg_id: int,
-):
-    """
-    Отправляет одному из пользовтелей пары MatchRequest со статусом is_match
-    уведомление c именем второго пользователя.
+    Обрабатывает ДИЗЛАЙК на профиль Sender. Изменяет статус MatchRequest на is_rejected.
 
     """
-    #  profile: UserProfile = await api_service.get_user_profile_by_telegram_id(
-    #    telegram_id=matched_user_1_tg_id,
-    #  )
+    like_receiver_id: int = update.effective_chat.id
 
-    chat = await context.bot.get_chat(chat_id=matched_user_1_tg_id)
-    await context.bot.send_message(
-        chat_id=matched_user_2_tg_id,
-        text=templates.NEW_MATCH_NOTIFICATION.format(username=chat.username),
+    like_sender_id: int = await _get_like_sender_tg_id(context=context)
+
+    await api_service.update_match_request_status(
+        sender=like_sender_id,
+        receiver=like_receiver_id,
+        status=MatchStatus.IS_REJECTED.value,
     )
+
+
+async def _get_like_sender_tg_id(context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Возвращает telegram id отправителя лайка."""
+    like_sender_id: int = int(context.matches[0].group(TG_ID_REGEX_GRP))
+    return like_sender_id
+
+
+async def _get_tg_username(
+    context: ContextTypes.DEFAULT_TYPE, telegram_id: int
+) -> Optional[str]:
+    """Возвращает username пользователя телеграм или None в случае отсутствия."""
+    chat: str = await context.bot.get_chat(chat_id=telegram_id)
+    return chat.username

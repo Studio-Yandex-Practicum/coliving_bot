@@ -207,22 +207,15 @@ async def _get_next_user_profile(
                 text=templates.SEARCH_INTRO,
                 reply_markup=keyboards.PROFILE_KEYBOARD,
             )
-        profile = asdict(user_profiles.pop())
-        context.user_data["current_profile"] = profile
+        profile = user_profiles.pop()
+        context.user_data["current_profile"] = asdict(profile)
         context.user_data["user_profiles"] = user_profiles
-        images = profile.pop("images")
-        message_text = templates.PROFILE_DATA.format(**profile)
-        if images:
-            media_group = [InputMediaPhoto(file_id) for file_id in images]
-            await update.effective_chat.send_media_group(
-                media=media_group,
-                caption=message_text,
-            )
-        else:
-            await update.effective_chat.send_message(
-                text=message_text,
-                reply_markup=keyboards.PROFILE_KEYBOARD,
-            )
+
+        await send_profile_info(
+            update=update,
+            profile=profile,
+            profile_template=templates.PROFILE_DATA,
+        )
         return States.PROFILE
 
     await update.effective_message.reply_text(
@@ -230,6 +223,29 @@ async def _get_next_user_profile(
         reply_markup=keyboards.NO_MATCHES_KEYBOARD,
     )
     return States.NO_MATCHES
+
+
+async def send_profile_info(
+    update: Update,
+    profile: UserProfile,
+    profile_template: str,
+):
+    """Формирует и отправляет сообщение с профилем пользователя."""
+    profile_dict: dict = asdict(profile)
+
+    images = profile_dict.pop("images", None)
+    profile_brief_info = profile_template.format(**profile_dict)
+
+    if images:
+        media_group = [InputMediaPhoto(file_id) for file_id in images]
+        await update.effective_chat.send_media_group(
+            media=media_group,
+            caption=profile_brief_info,
+        )
+    else:
+        await update.effective_chat.send_message(
+            text=profile_brief_info,
+        )
 
 
 async def _message_edit(

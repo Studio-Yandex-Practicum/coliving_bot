@@ -245,24 +245,21 @@ class APIService:
         endpoint_urn = f"users/{telegram_id}/profile/images/"
         return await self._delete_request(endpoint_urn)
 
-    async def send_match_request(self, sender: int, receiver: int) -> Response:
+    async def send_match_request(
+        self, sender: int, receiver: int, status=None
+    ) -> Response:
         """Совершает POST-запрос к эндпоинту создания MatchRequest.
 
         :param sender: telegram_id отправителя.
         :param receiver: telegram_id получателя.
         """
         data = {"sender": sender, "receiver": receiver}
-        try:
-            await self._get_match_request_by_sender_and_receiver(
-                sender=sender,
-                receiver=receiver,
-            )
-            return
-        except MatchReuestgNotFound:
-            response = await self._post_request(
-                endpoint_urn=constants.MATCH_REQUEST_URL, data=data
-            )
-            return response
+        if status:
+            data.update({"status": status})
+        response = await self._post_request(
+            endpoint_urn=constants.MATCH_REQUEST_URL, data=data
+        )
+        return response
 
     async def update_match_request_status(
         self,
@@ -281,7 +278,7 @@ class APIService:
             receiver=receiver,
         )
         endpoint_urn = f"{constants.MATCH_REQUEST_URL}{match_request_id}/"
-        data = {"sender": sender, "receiver": receiver, "status": status}
+        data = {"status": status}
         response = await self._patch_request(endpoint_urn=endpoint_urn, data=data)
         return response
 
