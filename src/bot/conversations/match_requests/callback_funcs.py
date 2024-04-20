@@ -108,11 +108,18 @@ async def dislike_to_sender(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     like_receiver_id: int = update.effective_chat.id
 
     like_sender_id: int = await _get_like_sender_tg_id(context=context)
+    like_sender_profile = await api_service.get_user_profile_by_telegram_id(
+        telegram_id=like_sender_id
+    )
 
     await api_service.update_match_request_status(
         sender=like_sender_id,
         receiver=like_receiver_id,
         status=MatchStatus.IS_REJECTED.value,
+    )
+
+    await update.effective_message.edit_text(
+        text=templates.REJECTION_NOTIFICATION.format(sender_profile=like_sender_profile)
     )
 
 
