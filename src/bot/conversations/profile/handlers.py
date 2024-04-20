@@ -90,10 +90,6 @@ profile_handler: ConversationHandler = ConversationHandler(
             ),
         ],
         States.CONFIRMATION: [
-            # CallbackQueryHandler(
-            #     callback=callback_funcs.handle_profile_confirmation_cancel,
-            #     pattern=rf"^({buttons.YES_BUTTON}|{buttons.EDIT_FORM_BUTTON})$",
-            # ),
             CallbackQueryHandler(
                 callback=callback_funcs.handle_ok_to_save,
                 pattern=rf"^{buttons.YES_BUTTON}",

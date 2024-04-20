@@ -600,8 +600,7 @@ async def handle_edit_name(
         ),
     ):
         return None
-    print(context.user_data)
-    context.user_data["profile_info"] = name
+    context.user_data[templates.NAME_FIELD] = name
     await _look_at_profile(
         update,
         context,

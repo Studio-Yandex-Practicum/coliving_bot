@@ -110,6 +110,10 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 filters.TEXT & ~filters.COMMAND,
                 callback_funcs.handle_what_to_edit_text_instead_of_button,
             ),
+            CallbackQueryHandler(
+                callback=callback_funcs.handle_return_to_menu_response,
+                pattern=rf"^{RETURN_TO_MENU_BTN_LABEL}$",
+            ),
         ],
         States.IS_VISIBLE: [
             CallbackQueryHandler(
@@ -226,10 +230,6 @@ coliving_handler: ConversationHandler = ConversationHandler(
             CallbackQueryHandler(
                 callback=coliving_transfer.handle_coliving_transfer_to,
                 pattern=r"^transfer_to",
-            ),
-            CallbackQueryHandler(
-                callback=callback_funcs.handle_delete_profile,
-                pattern=rf"^{buttons.BTN_LABEL_DELETE_PROFILE_KEYBOARD}$",
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.handle_return_to_menu_response,
