@@ -2,7 +2,7 @@ from re import fullmatch
 from typing import Optional, Union
 
 from httpx import HTTPStatusError, codes
-from telegram import InputMediaPhoto, InlineKeyboardMarkup, ReplyKeyboardRemove, Update
+from telegram import InlineKeyboardMarkup, InputMediaPhoto, ReplyKeyboardRemove, Update
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
 import conversations.common_functions.common_funcs as common_funcs
@@ -301,9 +301,7 @@ async def _look_at_profile(
 
     # Отправляем сообщение с вопросом после предварительного просмотра
     if ask_text and keyboard is not None:
-        await update.effective_chat.send_message(
-            text=ask_text, reply_markup=keyboard
-        )
+        await update.effective_chat.send_message(text=ask_text, reply_markup=keyboard)
 
 
 async def handle_photo(
