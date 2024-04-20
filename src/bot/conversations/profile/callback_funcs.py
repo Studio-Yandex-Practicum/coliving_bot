@@ -135,7 +135,7 @@ async def handle_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
         value=len(name),
         min=consts.MIN_NAME_LENGTH,
         max=consts.MAX_NAME_LENGTH,
-        message=templates.NAME_LENGHT_ERROR_MSG.format(
+        message=templates.NAME_LENGTH_ERROR_MSG.format(
             min=consts.MIN_NAME_LENGTH, max=consts.MAX_NAME_LENGTH
         ),
     ):
@@ -155,24 +155,18 @@ async def handle_age(
     Обрабатывает введенный пользователем возраст.
     Переводит диалог в состояние SEX (пол пользователя).
     """
-    age = update.message.text
-    if not await value_is_in_range_validator(
-        update=update,
-        context=context,
-        value=age,
-        min=consts.MIN_AGE,
-        max=consts.MAX_AGE,
-        message=templates.AGE_ERROR_MSG.format(min=consts.MIN_AGE, max=consts.MAX_AGE),
-    ):
-        return States.AGE
-
-    context.user_data[consts.AGE_FIELD] = int(age)
+    context.user_data[consts.AGE_FIELD] = int(update.message.text)
 
     await update.effective_message.reply_text(
         templates.ASK_SEX, reply_markup=keyboards.SEX_KEYBOARD
     )
 
     return States.SEX
+
+
+async def handle_wrong_age(update: Update, _context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.effective_chat.send_message(templates.AGE_ERROR_MSG)
+    return None
 
 
 @add_response_prefix()
@@ -530,7 +524,7 @@ async def handle_edit_name(
         value=len(name),
         min=consts.MIN_NAME_LENGTH,
         max=consts.MAX_NAME_LENGTH,
-        message=templates.NAME_LENGHT_ERROR_MSG.format(
+        message=templates.NAME_LENGTH_ERROR_MSG.format(
             min=consts.MIN_NAME_LENGTH, max=consts.MAX_NAME_LENGTH
         ),
     ):
@@ -570,18 +564,7 @@ async def handle_edit_age(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     Обрабатывает отредактированный возраст.
     Переводит диалог в состояние EDIT_CONFIRMATION (анкета верна или нет).
     """
-    age = update.message.text
-    if not await value_is_in_range_validator(
-        update=update,
-        context=context,
-        value=age,
-        min=consts.MIN_AGE,
-        max=consts.MAX_AGE,
-        message=templates.AGE_ERROR_MSG,
-    ):
-        return States.EDIT_AGE
-
-    context.user_data[consts.AGE_FIELD] = int(age)
+    context.user_data[consts.AGE_FIELD] = int(update.message.text)
     await _look_at_profile(
         update,
         context,

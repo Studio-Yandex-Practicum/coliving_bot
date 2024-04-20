@@ -6,7 +6,7 @@ MIN_ABOUT_LENGTH = 0
 MAX_ABOUT_LENGTH = 1000
 PHOTO_MAX_NUMBER = 3
 NAME_PATTERN = "^[А-Яа-яA-Za-z'-]+$"
-AGE_PATTERN = r"^1[8-9]|[2-9]\d$"
+AGE_PATTERN = r"^(1[8-9]|[2-9]\d)$"
 
 AGE_FIELD = "age"
 SEX_FIELD = "sex"

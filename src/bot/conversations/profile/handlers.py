@@ -42,16 +42,19 @@ profile_handler: ConversationHandler = ConversationHandler(
                 pattern=rf"^{common_buttons.RETURN_TO_MENU_BTN}",
             ),
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
+                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
                 handle_text_input_instead_of_choosing_button,
             ),
         ],
         States.AGE: [
             MessageHandler(
-                filters.Regex(rf"{consts.AGE_PATTERN}") & ~filters.COMMAND,
+                filters.Regex(consts.AGE_PATTERN) & ~filters.COMMAND,
                 callback_funcs.handle_age,
             ),
-            MessageHandler(filters.TEXT & ~filters.COMMAND, callback_funcs.handle_age),
+            MessageHandler(
+                filters.UpdateType.MESSAGE & ~filters.COMMAND,
+                callback_funcs.handle_wrong_age,
+            ),
         ],
         States.SEX: [
             CallbackQueryHandler(
@@ -59,12 +62,15 @@ profile_handler: ConversationHandler = ConversationHandler(
                 pattern=rf"^({buttons.MALE_BUTTON}|{buttons.FEMALE_BUTTON})$",
             ),
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
+                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
                 handle_text_input_instead_of_choosing_button,
             ),
         ],
         States.NAME: [
-            MessageHandler(filters.TEXT & ~filters.COMMAND, callback_funcs.handle_name),
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
+                callback_funcs.handle_name,
+            ),
         ],
         States.LOCATION: [
             CallbackQueryHandler(
@@ -72,12 +78,15 @@ profile_handler: ConversationHandler = ConversationHandler(
                 pattern=common_buttons.LOCATION_CALLBACK_PATTERN,
             ),
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
+                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
                 handle_text_input_instead_of_choosing_button,
             ),
         ],
         States.ABOUT_YOURSELF: [
-            MessageHandler(filters.TEXT & ~filters.COMMAND, callback_funcs.handle_about)
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
+                callback_funcs.handle_about,
+            )
         ],
         States.PHOTO: [
             MessageHandler(filters.PHOTO, callback_funcs.handle_photo),
@@ -86,7 +95,7 @@ profile_handler: ConversationHandler = ConversationHandler(
                 callback_funcs.send_received_photos,
             ),
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
+                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
                 handle_text_input_instead_of_send_photo,
             ),
         ],
@@ -96,7 +105,7 @@ profile_handler: ConversationHandler = ConversationHandler(
                 pattern=rf"^({buttons.YES_BUTTON}|{buttons.EDIT_FORM_BUTTON})$",
             ),
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
+                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
                 handle_text_input_instead_of_choosing_button,
             ),
         ],
@@ -109,7 +118,7 @@ profile_handler: ConversationHandler = ConversationHandler(
                 ),
             ),
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
+                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
                 handle_text_input_instead_of_choosing_button,
             ),
         ],
@@ -147,25 +156,31 @@ profile_handler: ConversationHandler = ConversationHandler(
                 pattern=rf"^{buttons.NEW_PHOTO_BUTTON}",
             ),
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
+                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
                 handle_text_input_instead_of_choosing_button,
             ),
         ],
         States.EDIT_NAME: [
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND, callback_funcs.handle_edit_name
+                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
+                callback_funcs.handle_edit_name,
             )
         ],
         States.EDIT_SEX: [
             CallbackQueryHandler(
                 callback_funcs.handle_edit_sex,
                 rf"^({buttons.MALE_BUTTON}|{buttons.FEMALE_BUTTON})$",
-            )
+            ),
         ],
         States.EDIT_AGE: [
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND, callback_funcs.handle_edit_age
-            )
+                filters.Regex(consts.AGE_PATTERN) & ~filters.COMMAND,
+                callback_funcs.handle_edit_age,
+            ),
+            MessageHandler(
+                filters.UpdateType.MESSAGE & ~filters.COMMAND,
+                callback_funcs.handle_wrong_age,
+            ),
         ],
         States.EDIT_LOCATION: [
             CallbackQueryHandler(
@@ -175,7 +190,8 @@ profile_handler: ConversationHandler = ConversationHandler(
         ],
         States.EDIT_ABOUT_YOURSELF: [
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND, callback_funcs.handle_edit_about
+                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
+                callback_funcs.handle_edit_about,
             )
         ],
         States.EDIT_PHOTO: [
@@ -186,7 +202,7 @@ profile_handler: ConversationHandler = ConversationHandler(
                 callback_funcs.send_edited_photos,
             ),
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
+                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
                 handle_text_input_instead_of_send_photo,
             ),
         ],
@@ -204,7 +220,7 @@ profile_handler: ConversationHandler = ConversationHandler(
                 pattern=rf"^{buttons.EDIT_RESUME_BUTTON}",
             ),
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
+                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
                 handle_text_input_instead_of_choosing_button,
             ),
         ],
