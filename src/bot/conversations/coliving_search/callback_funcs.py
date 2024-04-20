@@ -91,9 +91,7 @@ async def set_room_type(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     Переводит в состояние ввода минимальной цены.
     """
     context.user_data[constants.SRCH_STNG_FIELD].room_type = update.callback_query.data
-    await update.effective_message.reply_text(
-        text=templates.ASK_MIN_PRICE,
-    )
+
     await update.effective_message.reply_text(text=templates.ASK_MIN_PRICE)
 
     return states.COST_MIN
