@@ -6,6 +6,8 @@ from telegram.ext import ContextTypes, ConversationHandler
 import conversations.roommate_search.keyboards as keyboards
 import conversations.roommate_search.templates as templates
 from conversations.common_functions.common_funcs import profile_required
+from conversations.roommate_search.buttons import ANY_GENDER_BTN
+from conversations.roommate_search.constants import SRCH_STNG_FIELD
 from conversations.roommate_search.states import States
 from internal_requests import api_service
 from internal_requests.entities import ProfileSearchSettings, UserProfile
@@ -19,7 +21,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     переводит либо в состояние подтверждения настроек, либо в настройку поиска.
     """
 
-    search_settings = context.user_data.get("search_settings")
+    search_settings = context.user_data.get(SRCH_STNG_FIELD)
     if search_settings:
         await update.effective_message.edit_text(
             text=templates.format_search_settings_message(search_settings)
@@ -38,7 +40,7 @@ async def ok_settings(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     Вызывается при подтверждении настроек поиска.
     Получает список подходящих анкет и переводит в состояние оценки профиля соседа.
     """
-    search_settings = context.user_data.get("search_settings")
+    search_settings = context.user_data.get(SRCH_STNG_FIELD)
     user_profiles = await api_service.get_filtered_user_profiles(
         filters=search_settings, viewer=update.effective_chat.id
     )
@@ -65,7 +67,7 @@ async def set_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     Переводит в состояние выбора пола соседа.
     """
     location = update.callback_query.data.split(":")[1]
-    context.user_data["search_settings"] = ProfileSearchSettings(location=location)
+    context.user_data[SRCH_STNG_FIELD] = ProfileSearchSettings(location=location)
     await update.effective_message.edit_text(
         text=templates.ASK_SEX, reply_markup=keyboards.SEX_KEYBOARD
     )
@@ -78,7 +80,7 @@ async def set_sex(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     Переводит в состояние выбора возраста.
     """
     sex = update.callback_query.data
-    context.user_data["search_settings"].sex = sex if sex != "Неважно" else None
+    context.user_data[SRCH_STNG_FIELD].sex = sex if sex != ANY_GENDER_BTN else None
     await update.effective_message.edit_text(
         text=templates.ASK_AGE,
         reply_markup=keyboards.AGE_KEYBOARD,
@@ -94,17 +96,15 @@ async def set_age(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     callback_data = update.callback_query.data
     try:
         (
-            context.user_data["search_settings"].age_min,
-            context.user_data["search_settings"].age_max,
+            context.user_data[SRCH_STNG_FIELD].age_min,
+            context.user_data[SRCH_STNG_FIELD].age_max,
         ) = callback_data.split("-")
     except ValueError as exception:
         if callback_data.startswith(">"):
-            context.user_data["search_settings"].age_min = callback_data.replace(
-                ">", ""
-            )
+            context.user_data[SRCH_STNG_FIELD].age_min = callback_data.replace(">", "")
         else:
             raise exception
-    search_settings = context.user_data.get("search_settings")
+    search_settings = context.user_data.get(SRCH_STNG_FIELD)
     await update.effective_message.edit_text(
         text=templates.format_search_settings_message(search_settings)
     )
