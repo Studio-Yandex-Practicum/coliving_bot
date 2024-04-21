@@ -23,11 +23,12 @@ class UserReportSerializer(serializers.ModelSerializer):
         }
 
 
-class MatchedProfileSerializer(serializers.ModelSerializer):
+class MatchedProfileSerializer(serializers.Serializer):
     """Сериализатор для получения списка мэтчей."""
 
-    name = serializers.CharField(read_only=True, source="name")
-    age = serializers.IntegerField(read_only=True, source="age")
+    telegram_id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField(read_only=True)
+    age = serializers.IntegerField(read_only=True)
 
 
 class OnlyLikeStatusWriteSerializerMixin:
@@ -61,7 +62,7 @@ class ProfileLikeUpdateSerializer(
 
 class ColivingLikeCreateSerializer(serializers.ModelSerializer):
     sender = serializers.SlugRelatedField(
-        slug_field="user_id", queryset=UserFromTelegram.objects.all()
+        slug_field="user_id", queryset=Profile.objects.all()
     )
 
     class Meta:

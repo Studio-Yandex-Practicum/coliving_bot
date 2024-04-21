@@ -1,10 +1,10 @@
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Q
+from django.db.models import F, Q
 from rest_framework import exceptions, generics, status
-from rest_framework.generics import CreateAPIView, UpdateAPIView
+from rest_framework.generics import CreateAPIView, UpdateAPIView, get_object_or_404
 from rest_framework.response import Response
 
-from profiles.models import Profile
+from profiles.models import Coliving, Profile
 from profiles.serializers import ProfileSerializer
 from search.constants import MatchStatuses
 from search.filters import ProfilesSearchFilterSet
@@ -30,13 +30,45 @@ class MatchedProfileListAPIView(generics.ListAPIView):
     serializer_class = MatchedProfileSerializer
 
     def get_queryset(self):
-        telegram_id = self.kwargs.get("telegram_id")
-        user = Profile.objects.filter(user__telegram_id=telegram_id).first()
-        if not user:
-            raise exceptions.NotFound("Такого пользователя не существует.")
-        liked_profiles = user.liked_profiles.filter(status=MatchStatuses.is_match)
-        received_likes = user.received_likes.filter(status=MatchStatuses.is_match)
-        return (liked_profiles | received_likes).values("age", "name").all()
+        user_profile = get_object_or_404(
+            Profile, user__telegram_id=self.kwargs.get("telegram_id")
+        )
+        liked_profiles = (
+            user_profile.liked_profiles.filter(status=MatchStatuses.is_match)
+            .annotate(
+                telegram_id=F("receiver__user_id"),
+                age=F("receiver__age"),
+                name=F("receiver__name"),
+            )
+            .values("telegram_id", "age", "name")
+        )
+        received_likes = (
+            user_profile.received_likes.filter(status=MatchStatuses.is_match)
+            .annotate(
+                telegram_id=F("sender__user_id"),
+                age=F("sender__age"),
+                name=F("sender__name"),
+            )
+            .values("telegram_id", "age", "name")
+        )
+        return liked_profiles.union(received_likes).all()
+
+
+class ColivingLikesListAPIView(generics.ListAPIView):
+    serializer_class = MatchedProfileSerializer
+
+    def get_queryset(self):
+        coliving = get_object_or_404(Coliving, pk=self.kwargs.get("pk"))
+        likes = (
+            coliving.likes.filter(status=MatchStatuses.is_match)
+            .annotate(
+                telegram_id=F("sender__user_id"),
+                age=F("sender__age"),
+                name=F("sender__name"),
+            )
+            .values("telegram_id", "age", "name")
+        )
+        return likes.all()
 
 
 class ProfilesSearchView(generics.ListAPIView):

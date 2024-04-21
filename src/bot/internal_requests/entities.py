@@ -18,9 +18,10 @@ class UserProfile:
 
 
 @dataclass
-class MatchedUser:
+class ShortProfileInfo:
     user: int
     name: str
+    age: int
 
 
 @dataclass

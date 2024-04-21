@@ -17,7 +17,7 @@ from conversations.common_functions.common_funcs import (
 from general.validators import value_is_in_range_validator
 from internal_requests import api_service
 from internal_requests.entities import Coliving, Image
-from internal_requests.service import ColivingNotFound
+from internal_requests.exceptions import ColivingNotFound
 
 
 @profile_required

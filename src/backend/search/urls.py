@@ -3,6 +3,7 @@ from django.urls import path
 
 from search.views import (
     ColivingLikeCreateAPIView,
+    ColivingLikesListAPIView,
     ColivingLikeUpdateAPIView,
     MatchedProfileListAPIView,
     ProfileLikeCreateAPIView,
@@ -17,7 +18,12 @@ urlpatterns = [
     path(
         f"{settings.API_V1_PREFIX}/users/<int:telegram_id>/matches/",
         MatchedProfileListAPIView.as_view(),
-        name="matched_likes_profiles",
+        name="matched_profile_likes",
+    ),
+    path(
+        f"{settings.API_V1_PREFIX}/colivings/<int:pk>/matches/",
+        ColivingLikesListAPIView.as_view(),
+        name="matched_coliving_likes",
     ),
     path(
         f"{settings.API_V1_PREFIX}/reports/",
