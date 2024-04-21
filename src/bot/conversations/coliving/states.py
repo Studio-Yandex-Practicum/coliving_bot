@@ -14,7 +14,9 @@ class States(int, enum.Enum):
         CONFIRMATION,
         EDIT,
         IS_VISIBLE,
-        ROOMMATES,
+        ROOMMATE,
+        NEXT_ROOMMATE,
+        NO_ROOMMATES,
         EDIT_ROOM_TYPE,
         EDIT_ABOUT_ROOM,
         EDIT_PRICE,
@@ -23,4 +25,4 @@ class States(int, enum.Enum):
         EDIT_LOCATION,
         DELETE_COLIVING,
         TRANSFER_COLIVING,
-    ) = range(18)
+    ) = range(20)

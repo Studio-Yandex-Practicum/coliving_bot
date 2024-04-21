@@ -210,6 +210,32 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 callback_funcs.handle_delete_profile,
             ),
         ],
+        States.NEXT_ROOMMATE: [
+            CallbackQueryHandler(
+                callback=callback_funcs.next_roommate,
+                pattern=rf"^{buttons.YES_BTN}$",
+            ),
+            CallbackQueryHandler(
+                callback=callback_funcs.end_of_assign_roomate,
+                pattern=rf"^{buttons.NO_BTN}$",
+            ),
+        ],
+        States.NO_ROOMMATES: [
+            CallbackQueryHandler(
+                callback=callback_funcs.end_of_assign_roomate,
+                pattern=rf"^{buttons.WAIT_BTN}$",
+            ),
+        ],
+        States.ROOMMATE: [
+            CallbackQueryHandler(
+                callback=callback_funcs.roommate_like,
+                pattern=rf"^{buttons.OK_ROOMMATE_BTN}$",
+            ),
+            CallbackQueryHandler(
+                callback=callback_funcs.next_roommate,
+                pattern=rf"^{buttons.NEXT_ROOMMATE_BTN}$",
+            ),
+        ],
         States.COLIVING: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_coliving_edit,

@@ -218,6 +218,37 @@ DELETE_OR_CANCEL_COLIVING_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
 )
 
 
+ROOMMATE_KEYBOARD = InlineKeyboardMarkup.from_row(
+    button_row=(
+        InlineKeyboardButton(
+            text=buttons.OK_ROOMMATE_BTN,
+            callback_data=buttons.OK_ROOMMATE_BTN,
+        ),
+        InlineKeyboardButton(
+            text=buttons.NEXT_ROOMMATE_BTN,
+            callback_data=buttons.NEXT_ROOMMATE_BTN,
+        ),
+    ),
+)
+
+
+NEXT_ROOMMATE = InlineKeyboardMarkup.from_column(
+    button_column=(
+        InlineKeyboardButton(text=buttons.YES_BTN, callback_data=buttons.YES_BTN),
+        InlineKeyboardButton(text=buttons.NO_BTN, callback_data=buttons.NO_BTN),
+    )
+)
+
+CONSIDER_INVITATION_FROM_HOST = InlineKeyboardMarkup.from_row(
+    button_row=(
+        InlineKeyboardButton(
+            text=buttons.CONSIDER_INVITATION_FROM_HOST_BTN,
+            callback_data=buttons.CONSIDER_INVITATION_FROM_HOST_BTN,
+        ),
+    )
+)
+
+
 async def create_keyboard_of_locations():
     locations = await api_service.get_locations()
     button_column = []

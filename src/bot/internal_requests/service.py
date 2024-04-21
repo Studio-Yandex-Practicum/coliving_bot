@@ -84,7 +84,19 @@ class APIService:
         await self.save_coliving_photo(images, created_coliving)
         return created_coliving
 
-    async def save_coliving_photo(self, images, coliving: Coliving) -> int:
+    async def save_profile_photo(self, images, profile: UserProfile) -> None:
+        """Запрос на сохранение фото коливинга в БД."""
+        for image in images:
+            file = await image.photo_size.get_file()
+            photo_bytearray = await file.download_as_bytearray()
+            await self.save_photo(
+                telegram_id=profile.user,
+                photo_bytearray=photo_bytearray,
+                filename=file.file_path,
+                file_id=image.file_id,
+            )
+
+    async def save_coliving_photo(self, images, coliving: Coliving) -> None:
         """Запрос на сохранение фото коливинга в БД."""
         for image in images:
             file = await image.photo_size.get_file()
@@ -141,7 +153,7 @@ class APIService:
         для данного коливинга - всех пользователей,
         у кого есть мэтч с данным telegram_id.
         """
-        endpoint_urn = f"users/{telegram_id}/matches/"
+        endpoint_urn = f"users/{telegram_id}/matches/?roommates=1"
         response = await self._get_request(endpoint_urn=endpoint_urn)
         result = []
         for matched_user in response.json():
@@ -199,23 +211,28 @@ class APIService:
         return result
 
     async def get_coliving_roommates(self, coliving_id: int, page: int) -> dict:
-        """ "Получение списка соседей."""
+        """Получение списка соседей."""
         response = await self._get_request(
             f"colivings/{coliving_id}/roommates/?page={page}"
         )
         return response.json()
 
-    async def create_user_profile(
-        self, telegram_id: int, data: dict
-    ) -> Optional[UserProfile]:
+    async def create_user_profile(self, profile: UserProfile) -> Optional[UserProfile]:
         """
         Создание профиля пользователя.
 
-        :param telegram_id: Идентификатор пользователя.
-        :param data: Объект UserProfile с данными для создания профиля.
-        :return: Созданный профиль или None, если что-то пошло не так.
+        :param profile: Объект UserProfile с данными для создания профиля.
+        :return: Созданный профиль
         """
-        return await self._profile_request(telegram_id, data, method="post")
+
+        endpoint_urn = f"users/{profile.user}/profile/"
+        images = profile.images.copy()
+        profile.images.clear()
+        data = asdict(profile)
+        response = await self._post_request(endpoint_urn=endpoint_urn, data=data)
+        created_profile = await self._parse_response_to_user_profile(response.json())
+        await self.save_profile_photo(images, created_profile)
+        return created_profile
 
     async def delete_profile(self, telegram_id: int) -> Response:
         """
@@ -224,17 +241,18 @@ class APIService:
         endpoint_urn = f"users/{telegram_id}/profile/"
         return await self._delete_request(endpoint_urn)
 
-    async def update_user_profile(
-        self, telegram_id: int, data: dict
-    ) -> Optional[UserProfile]:
+    async def update_user_profile(self, profile: UserProfile) -> UserProfile:
         """
         Обновление профиля пользователя.
 
-        :param telegram_id: Идентификатор пользователя.
-        :param data: Словарь данных для обновления профиля.
-        :return: Обновленный профиль или None, если что-то пошло не так.
+        :param profile: Данные для обновления профиля.
+        :return: Обновленный профиль
         """
-        return await self._profile_request(telegram_id, data, method="patch")
+        endpoint_urn = f"users/{profile.user}/profile/"
+        profile.images.clear()
+        data = asdict(profile)
+        response = await self._patch_request(endpoint_urn=endpoint_urn, data=data)
+        return await self._parse_response_to_user_profile(response.json())
 
     async def delete_coliving(self, coliving_id: int) -> Response:
         """
@@ -320,31 +338,6 @@ class APIService:
         match_request_pk = response_json[0]["id"]
         return match_request_pk
 
-    async def _profile_request(
-        self, telegram_id: int, data: dict, method: str
-    ) -> Optional[UserProfile]:
-        """
-        Основная функция для создания и обновления профиля.
-
-        :param telegram_id: Идентификатор пользователя.
-        :param data: Словарь данных для профиля.
-        :param method: HTTP-метод ('post' или 'patch').
-        :return: Созданный или обновленный профиль, или None, если что-то пошло не так.
-        """
-        endpoint_urn = f"users/{telegram_id}/profile/"
-        request_data = {
-            "name": data.get("name", ""),
-            "sex": data.get("sex", ""),
-            "age": data.get("age", 0),
-            "location": data.get("location", ""),
-            "about": data.get("about", ""),
-            "is_visible": data.get("is_visible", True),
-        }
-        response = await getattr(self, f"_{method}_request")(
-            endpoint_urn, data=request_data
-        )
-        return UserProfile(**response.json())
-
     async def _get_request(self, endpoint_urn: str) -> Response:
         """
         Отправляет GET-запрос к указанному эндпоинту.
@@ -424,3 +417,15 @@ class APIService:
         if images:
             coliving_info.images = [Image(file_id=file_id) for file_id in images]
         return coliving_info
+
+    @staticmethod
+    async def _parse_response_to_user_profile(response_json: object) -> UserProfile:
+        if not isinstance(response_json, dict):
+            raise ValueError(
+                "Возможно было получено несколько записей, ожидалась одна."
+            )
+        images = response_json.pop("images")
+        profile_info = UserProfile(**response_json)
+        if images:
+            profile_info.images = [Image(file_id=file_id) for file_id in images]
+        return profile_info

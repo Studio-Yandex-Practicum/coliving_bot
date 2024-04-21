@@ -23,11 +23,23 @@ class UserReportCreateView(generics.CreateAPIView):
 
 
 class MatchedUsersListView(generics.ListAPIView):
-    """Apiview для получения списка мэчтей."""
+    """
+    Apiview для получения списка мэчтей.
+    Параметр roomates запроса позволяет наложить
+    дополнительный фильтр.
+    roommates = 1 - выводим только тех пользователей,
+    кто потенциально может стать соседом в коливинге,
+    то есть помимо мэтча еще и не имеет своего коливинга
+    и не проживает сейчас в коливинге
+
+    roommates = 0 - выводим просто всех пользователей с мэтчем
+    """
 
     serializer_class = MatchListSerializer
 
     def get_queryset(self):
+        roommates = int(self.request.query_params.get("roommates", 0))
+
         telegram_id = self.kwargs.get("telegram_id")
         user = UserFromTelegram.objects.filter(telegram_id=telegram_id).first()
         if user is None:
@@ -42,8 +54,14 @@ class MatchedUsersListView(generics.ListAPIView):
             match_requests__sender=user,
             match_requests__status=MatchStatuses.is_match,
         )
+        matched_users = (users_who_sent_like | liked_users).distinct()
 
-        return (users_who_sent_like | liked_users).distinct()
+        if roommates == 1:
+            matched_users = matched_users.filter(residence_id__isnull=True)
+            matched_users = matched_users.select_related("residence").filter(
+                coliving__host_id__isnull=True
+            )
+        return matched_users
 
 
 class ProfilesSearchView(generics.ListAPIView):

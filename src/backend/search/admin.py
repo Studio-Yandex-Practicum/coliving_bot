@@ -17,6 +17,7 @@ class MatchRequestsAdmin(admin.ModelAdmin):
         "created_date",
         "match_date",
     )
+    list_editable = ("status",)
 
 
 @admin.register(UserReport)

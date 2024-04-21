@@ -8,11 +8,4 @@ PHOTO_MAX_NUMBER = 3
 NAME_PATTERN = "^[А-Яа-яA-Za-z'-]+$"
 AGE_PATTERN = r"^(1[8-9]|[2-9]\d)$"
 
-AGE_FIELD = "age"
-SEX_FIELD = "sex"
-NAME_FIELD = "name"
-LOCATION_FIELD = "location"
-ABOUT_FIELD = "about"
-IMAGE_FIELD = "image"
-IS_VISIBLE_FIELD = "is_visible"
 RECEIVED_PHOTOS_FIELD = "received_photos"

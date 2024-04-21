@@ -14,19 +14,7 @@ from conversations.common_functions.common_funcs import add_response_prefix
 from conversations.profile.states import States
 from general.validators import value_is_in_range_validator
 from internal_requests import api_service
-
-
-async def set_profile_to_context(
-    context: ContextTypes.DEFAULT_TYPE,
-    profile_info,
-) -> None:
-    context.user_data[consts.NAME_FIELD] = profile_info.name
-    context.user_data[consts.SEX_FIELD] = profile_info.sex
-    context.user_data[consts.AGE_FIELD] = profile_info.age
-    context.user_data[consts.LOCATION_FIELD] = profile_info.location
-    context.user_data[consts.ABOUT_FIELD] = profile_info.about
-    context.user_data[consts.IS_VISIBLE_FIELD] = profile_info.is_visible
-    context.user_data[consts.RECEIVED_PHOTOS_FIELD] = profile_info.images
+from internal_requests.entities import Image, UserProfile
 
 
 async def start(
@@ -37,9 +25,9 @@ async def start(
     Переводит диалог в состояние AGE (ввод возраста пользователя).
     """
     try:
-        profile_info = await api_service.get_user_profile_by_telegram_id(
-            update.effective_chat.id
-        )
+        context.user_data[
+            "profile_info"
+        ] = await api_service.get_user_profile_by_telegram_id(update.effective_chat.id)
     except HTTPStatusError as exc:
         if exc.response.status_code == codes.NOT_FOUND:
             await update.effective_message.edit_text(text=templates.ASK_NAME)
@@ -47,12 +35,11 @@ async def start(
             return States.NAME
         raise exc
 
-    await set_profile_to_context(context, profile_info)
     await update.effective_message.delete()
 
     keyboard = (
         keyboards.VISIBLE_PROFILE_KEYBOARD
-        if profile_info.is_visible
+        if context.user_data["profile_info"].is_visible
         else keyboards.HIDDEN_PROFILE_KEYBOARD
     )
     await _look_at_profile(update, context, "", keyboard)
@@ -72,12 +59,10 @@ async def send_question_to_profile_is_visible_in_search(
 
     message_text = common_templates.VISIBILITY_MSG_OPTNS[visibility_choice]
 
-    context.user_data[consts.IS_VISIBLE_FIELD] = visibility_choice
+    context.user_data["profile_info"].is_visible = visibility_choice
 
     await update.effective_message.reply_text(text=message_text)
-    await api_service.update_user_profile(
-        telegram_id=update.effective_chat.id, data=context.user_data
-    )
+    await api_service.update_user_profile(context.user_data["profile_info"])
 
     return ConversationHandler.END
 
@@ -106,7 +91,7 @@ async def handle_return_to_profile_response(
     Обработка кнопки 'Вернуться'.
     Переводит диалог в состояние PROFILE.
     """
-    if context.user_data[consts.IS_VISIBLE_FIELD] is True:
+    if context.user_data["profile_info"].is_visible is True:
         await _look_at_profile(update, context, "", keyboards.VISIBLE_PROFILE_KEYBOARD)
     else:
         await _look_at_profile(update, context, "", keyboards.HIDDEN_PROFILE_KEYBOARD)
@@ -133,7 +118,9 @@ async def handle_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
         ),
     ):
         return States.NAME
-    context.user_data[consts.NAME_FIELD] = name
+    context.user_data["profile_info"] = UserProfile(
+        user=update.effective_chat.id, name=name
+    )
     await update.effective_message.reply_text(
         text=templates.ASK_AGE,
     )
@@ -155,10 +142,11 @@ async def handle_age(
         value=age,
         min=consts.MIN_AGE,
         max=consts.MAX_AGE,
-        message=templates.AGE_ERROR_MSG.format(min=consts.MIN_AGE, max=consts.MAX_AGE),
+        message=templates.AGE_ERROR_MSG,
     ):
         return States.AGE
 
+    context.user_data["profile_info"].age = int(age)
     await update.effective_message.reply_text(
         templates.ASK_SEX, reply_markup=keyboards.SEX_KEYBOARD
     )
@@ -215,11 +203,7 @@ async def handle_about(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         message=templates.ABOUT_MAX_LEN_ERROR_MSG.format(max=consts.MAX_ABOUT_LENGTH),
     ):
         return States.ABOUT_YOURSELF
-    if context.user_data.get(consts.ABOUT_FIELD):
-        context.user_data[consts.ABOUT_FIELD] = about
-    else:
-        context.user_data[consts.ABOUT_FIELD] = about
-        context.user_data[consts.IS_VISIBLE_FIELD] = True
+    context.user_data["profile_info"].about = about
     await update.effective_chat.send_message(
         text=templates.ASK_PHOTO, reply_markup=keyboards.PHOTO_KEYBOARD
     )
@@ -241,13 +225,13 @@ async def _look_at_profile(
         title
         + "\n\n"
         + templates.PROFILE_DATA.format(
-            name=context.user_data.get(consts.NAME_FIELD),
-            sex=context.user_data.get(consts.SEX_FIELD),
-            age=context.user_data.get(consts.AGE_FIELD),
-            location=context.user_data.get(consts.LOCATION_FIELD),
-            about=context.user_data.get(consts.ABOUT_FIELD),
+            name=context.user_data["profile_info"].name,
+            sex=context.user_data["profile_info"].sex,
+            age=context.user_data["profile_info"].age,
+            location=context.user_data["profile_info"].location,
+            about=context.user_data["profile_info"].about,
             is_visible=common_templates.PROFILE_IS_VISIBLE_TEXT
-            if context.user_data.get(consts.IS_VISIBLE_FIELD)
+            if context.user_data["profile_info"].is_visible
             else common_templates.PROFILE_IS_HIDDEN_TEXT,
         )
         + "\n"
@@ -255,7 +239,7 @@ async def _look_at_profile(
     new_photos = context.user_data.get("new_photo")
     received_photo = context.user_data.get(consts.RECEIVED_PHOTOS_FIELD)
     if new_photos:
-        media_group = [InputMediaPhoto(file_id) for file_id in new_photos]
+        media_group = [InputMediaPhoto(file.file_id) for file in new_photos]
         await update.effective_chat.send_media_group(
             media=media_group,
             caption=message_text,
@@ -264,7 +248,7 @@ async def _look_at_profile(
         context.user_data["new_photo"] = []
 
     elif received_photo:
-        media_group = [InputMediaPhoto(file_id) for file_id in received_photo]
+        media_group = [InputMediaPhoto(file.file_id) for file in received_photo]
         await update.effective_chat.send_media_group(
             media=media_group,
             caption=message_text,
@@ -286,10 +270,10 @@ async def handle_photo(
     Переводит диалог в состояние CONFIRMATION (анкета верна или нет)
     """
 
-    file_id = update.effective_message.photo[-1].file_id
+    file = update.effective_message.photo[-1]
 
     received_photos = context.user_data.get(consts.RECEIVED_PHOTOS_FIELD, [])
-    received_photos.append(file_id)
+    received_photos.append(Image(file_id=file.file_id, photo_size=file))
     context.user_data[consts.RECEIVED_PHOTOS_FIELD] = received_photos
 
     if len(received_photos) == templates.PHOTO_MAX_NUMBER:
@@ -307,10 +291,10 @@ async def handle_edit_photo(
     Переводит диалог в состояние CONFIRMATION (анкета верна или нет)
     """
 
-    file_id = update.effective_message.photo[-1].file_id
+    file = update.effective_message.photo[-1]
 
     new_photos = context.user_data.get("new_photo", [])
-    new_photos.append(file_id)
+    new_photos.append(Image(file_id=file.file_id, photo_size=file))
     context.user_data["new_photo"] = new_photos
 
     if len(new_photos) == templates.PHOTO_MAX_NUMBER:
@@ -374,18 +358,9 @@ async def handle_visible(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     """
     visibility_choice: bool = await common_funcs.get_visibility_choice(update=update)
 
-    context.user_data[consts.IS_VISIBLE_FIELD] = visibility_choice
+    context.user_data["profile_info"].is_visible = visibility_choice
 
-    await api_service.create_user_profile(update.effective_chat.id, context.user_data)
-    for file_id in context.user_data.get(templates.RECEIVED_PHOTOS_FIELD, []):
-        new_file = await context.bot.get_file(file_id)
-        photo_bytearray = await new_file.download_as_bytearray()
-        await api_service.save_photo(
-            telegram_id=update.effective_chat.id,
-            photo_bytearray=photo_bytearray,
-            filename=new_file.file_path,
-            file_id=file_id,
-        )
+    await api_service.create_user_profile(context.user_data["profile_info"])
     await send_profile_saved_notification(update, context)
 
     return ConversationHandler.END
@@ -413,7 +388,7 @@ async def handle_delete_profile_confirmation_confirm(
     """
     Подтверждение и удаление анкеты.
     """
-    await api_service.delete_profile(context._user_id)
+    await api_service.delete_profile(telegram_id=update.effective_chat.id)
     context.user_data.clear()
     await update.effective_message.reply_text(text=templates.REPLY_MSG_PROFILE_DELETED)
 
@@ -553,7 +528,7 @@ async def handle_edit_name(
         ),
     ):
         return None
-    context.user_data[consts.NAME_FIELD] = name
+    context.user_data["profile_info"].name = name
     await _look_at_profile(
         update,
         context,
@@ -588,7 +563,7 @@ async def handle_edit_age(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     Обрабатывает отредактированный возраст.
     Переводит диалог в состояние EDIT_CONFIRMATION (анкета верна или нет).
     """
-    context.user_data[consts.AGE_FIELD] = int(update.message.text)
+    context.user_data["profile_info"].age = int(update.message.text)
     await _look_at_profile(
         update,
         context,
@@ -635,7 +610,7 @@ async def handle_edit_about(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         message=templates.ABOUT_MAX_LEN_ERROR_MSG.format(max=consts.MAX_ABOUT_LENGTH),
     ):
         return States.EDIT_ABOUT_YOURSELF
-    context.user_data[templates.ABOUT_FIELD] = about
+    context.user_data["profile_info"].about = about
     await _look_at_profile(
         update,
         context,
@@ -678,18 +653,13 @@ async def send_question_to_profile_is_correct(
     Обработка кнопки 'Да. Верно'.
     Либо завершает диалог.
     """
-    await api_service.update_user_profile(update.effective_chat.id, context.user_data)
+    await api_service.update_user_profile(context.user_data["profile_info"])
     if len(context.user_data.get(consts.RECEIVED_PHOTOS_FIELD)) != 0:
         await api_service.delete_profile_photos(update.effective_chat.id)
-        for file_id in context.user_data.get(consts.RECEIVED_PHOTOS_FIELD):
-            new_file = await context.bot.get_file(file_id)
-            photo_bytearray = await new_file.download_as_bytearray()
-            await api_service.save_photo(
-                telegram_id=update.effective_chat.id,
-                photo_bytearray=photo_bytearray,
-                filename=new_file.file_path,
-                file_id=file_id,
-            )
+        await api_service.save_profile_photo(
+            images=context.user_data.get(consts.RECEIVED_PHOTOS_FIELD),
+            profile=context.user_data["profile_info"],
+        )
     await send_profile_saved_notification(update, context)
     return ConversationHandler.END
 
@@ -740,9 +710,9 @@ async def send_profile_saved_notification(
 async def _save_response_about_sex(update: Update, context: CallbackContext):
     """Сохраняет полученный ответ про пол пользователя в контекст."""
     sex = update.callback_query.data
-    context.user_data[consts.SEX_FIELD] = sex.split()[1].capitalize()
+    context.user_data["profile_info"].sex = sex.split()[1].capitalize()
 
 
 async def _save_response_about_location(update, context):
     location = update.callback_query.data.split(":")[1]
-    context.user_data[consts.LOCATION_FIELD] = location
+    context.user_data["profile_info"].location = location
