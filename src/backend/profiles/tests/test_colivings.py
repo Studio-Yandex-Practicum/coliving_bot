@@ -2,8 +2,9 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from profiles.constants import Restrictions
-from profiles.models import Coliving, ColivingTypes, Location, UserFromTelegram
+from profiles.constants import Restrictions, Sex
+from profiles.models import Coliving, ColivingTypes, Location, Profile, UserFromTelegram
+from search.models import ColivingLike
 
 TELEGR_ID_TXT = "telegram_id"
 LOCATION_TXT = "location"
@@ -271,6 +272,20 @@ class ColivingSearchAPITest(APITestCase):
         cls.host = UserFromTelegram.objects.create(telegram_id=5)
         cls.viewer = UserFromTelegram.objects.create(telegram_id=10)
         msk_location = Location.objects.create(name=cls.MSK_LOCATION_NAME)
+        cls.viewer_profile = Profile.objects.create(
+            user=cls.viewer,
+            name="test",
+            sex=Sex.MAN,
+            age=Restrictions.AGE_MIN,
+            location=msk_location,
+        )
+        cls.host_profile = Profile.objects.create(
+            user=cls.host,
+            name="test",
+            sex=Sex.MAN,
+            age=Restrictions.AGE_MIN,
+            location=msk_location,
+        )
         cls.coliving_1 = Coliving.objects.create(
             location=msk_location,
             price=Restrictions.PRICE_MAX - 1000,
@@ -311,16 +326,18 @@ class ColivingSearchAPITest(APITestCase):
         )
 
     def test_hosted_coliving_absent(self):
+        params = {
+            LOCATION_TXT: self.coliving_1.location.name,
+            MAX_PRC_TXT: self.coliving_1.price + 1,
+            MIN_PRC_TXT: self.coliving_1.price - 1,
+            ROOM_TYPE_TXT: self.coliving_1.room_type,
+            VIEWER_TXT: self.host.telegram_id,
+        }
         response = self.client.get(
             self.URL,
-            {
-                LOCATION_TXT: self.coliving_1.location,
-                MAX_PRC_TXT: self.coliving_1.price + 1,
-                MIN_PRC_TXT: self.coliving_1.price - 1,
-                ROOM_TYPE_TXT: self.coliving_1.room_type,
-                VIEWER_TXT: self.host.telegram_id,
-            },
+            params,
         )
+        print(f"\n{params}\n")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             len(response.data),
@@ -329,11 +346,13 @@ class ColivingSearchAPITest(APITestCase):
         )
 
     def test_viewed_content_absent(self):
-        self.coliving_1.viewers.add(self.viewer)
+        ColivingLike.objects.create(
+            sender=self.viewer_profile, coliving=self.coliving_1
+        )
         response = self.client.get(
             self.URL,
             {
-                LOCATION_TXT: self.coliving_1.location,
+                LOCATION_TXT: self.coliving_1.location.name,
                 MAX_PRC_TXT: self.coliving_1.price + 1,
                 MIN_PRC_TXT: self.coliving_1.price - 1,
                 ROOM_TYPE_TXT: self.coliving_1.room_type,
@@ -356,11 +375,6 @@ class ColivingSearchAPITest(APITestCase):
         )
         self.assertEqual(
             response.status_code,
-            status.HTTP_200_OK,
+            status.HTTP_404_NOT_FOUND,
             "Неверный статус при запросе с несуществующим viewer.",
-        )
-        self.assertFalse(
-            response.data,
-            "Должен быть возвращен непустой список "
-            "при запросе с несуществующим viewer.",
         )

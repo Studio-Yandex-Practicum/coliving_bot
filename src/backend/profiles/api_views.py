@@ -1,7 +1,6 @@
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
+from rest_framework.generics import get_object_or_404
 
 from profiles.filters import ColivingFilter, SmallResultsSetPagination
 from profiles.mixins import DestroyWithMediaRemovalMixin
@@ -47,10 +46,8 @@ class LocationList(generics.ListAPIView):
 class ColivingView(generics.ListCreateAPIView):
     """Apiview для создания и получения Coliving."""
 
-    queryset = (
-        Coliving.objects.select_related("location", "host")
-        .prefetch_related("images")
-        .all()
+    queryset = Coliving.objects.select_related("location", "host").prefetch_related(
+        "images"
     )
     serializer_class = ColivingSerializer
     filter_backends = [DjangoFilterBackend]
@@ -59,19 +56,26 @@ class ColivingView(generics.ListCreateAPIView):
     def get_queryset(self):
         queryset = super().get_queryset()
 
-        viewer = self.request.query_params.get("viewer", None)
-        if viewer:
-            try:
-                user = UserFromTelegram.objects.get(telegram_id=viewer)
-            except ObjectDoesNotExist:
-                user = None
-
-            excl_list = Coliving.objects.filter(
-                Q(host=user) | Q(viewers=user)
-            ).values_list("pk", flat=True)
-            queryset = queryset.filter(is_visible=True).exclude(pk__in=excl_list)
-
-        return queryset
+        viewer = self.request.query_params.get("viewer")
+        if viewer is None:
+            return queryset.all()
+        user_profile = get_object_or_404(Profile, user_id=viewer)
+        return (
+            queryset.exclude(
+                id__in=user_profile.liked_colivings.values_list(
+                    "coliving__id",
+                    flat=True,
+                ),
+            )
+            .exclude(
+                id__in=user_profile.user.colivings.values_list(
+                    "id",
+                    flat=True,
+                ),
+            )
+            .filter(is_visible=True)
+            .all()
+        )
 
 
 class ColivingDetailView(

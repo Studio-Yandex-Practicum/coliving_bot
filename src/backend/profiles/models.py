@@ -77,11 +77,6 @@ class BaseProfileColiving(models.Model):
         verbose_name="Отображать при поиске",
         default=True,
     )
-    viewers = models.ManyToManyField(
-        UserFromTelegram,
-        verbose_name="Просмотры",
-        blank=True,
-    )
     created_date = models.DateTimeField(
         verbose_name="Дата создания",
         auto_now_add=True,

@@ -29,7 +29,7 @@ class ProfileLike(Like):
         Profile,
         verbose_name="Отправитель",
         on_delete=models.CASCADE,
-        related_name="liked_profiles",
+        related_name="sent_likes",
     )
     receiver = models.ForeignKey(
         Profile,

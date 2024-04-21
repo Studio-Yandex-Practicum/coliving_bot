@@ -257,7 +257,7 @@ class ProfileSearchViewTests(APITestCase):
     def test_search_correct_data(self):
         """Тест на корректные результаты поиска для разных критериев."""
         for telegram_id, gsr_data in self.global_search_results_data.items():
-            with self.subTest(id=telegram_id, data=gsr_data["search_result"]):
+            with self.subTest(viewer=telegram_id, data=gsr_data["search_result"]):
                 kwargs = {}
                 kwargs["viewer"] = telegram_id
                 for key, value in gsr_data["search_criteria"].items():
