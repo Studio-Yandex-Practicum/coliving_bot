@@ -14,7 +14,7 @@ from internal_requests import api_service
 from internal_requests.entities import UserProfile
 
 
-@add_response_prefix
+@add_response_prefix()
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Начало ветви по одобрению соседа.

@@ -8,7 +8,7 @@ from telegram import (
 import conversations.coliving.buttons as buttons
 from conversations.common_functions.common_buttons import (
     LOCATION_PREFIX,
-    RETURN_TO_MENU_BTN_LABEL,
+    RETURN_TO_MENU_BTN,
     ROOM_TYPE_PREFIX,
 )
 from conversations.common_functions.common_keyboards import HIDE_BUTTON, SEARCH_BUTTON
@@ -75,6 +75,15 @@ WHAT_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     )
 )
 
+COLIVING_TRANSFER_TO_CONFIRM_KEYBOARD = InlineKeyboardMarkup.from_row(
+    button_row=(
+        InlineKeyboardButton(
+            text=buttons.BTN_LABEL_CONFIRM, callback_data="set_new_owner"
+        ),
+        InlineKeyboardButton(text=buttons.BTN_LABEL_CANCEL, callback_data="go_to_menu"),
+    )
+)
+
 IS_VISIBLE_OR_NOT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         HIDE_BUTTON,
@@ -114,8 +123,8 @@ COLIVING_PROFILE_DUPLICATE_BUTTONS = [
         callback_data=buttons.BTN_LABEL_DELETE_PROFILE_KEYBOARD,
     ),
     InlineKeyboardButton(
-        text=RETURN_TO_MENU_BTN_LABEL,
-        callback_data=RETURN_TO_MENU_BTN_LABEL,
+        text=RETURN_TO_MENU_BTN,
+        callback_data=RETURN_TO_MENU_BTN,
     ),
 ]
 

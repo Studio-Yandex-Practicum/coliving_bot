@@ -198,6 +198,13 @@ class APIService:
             result.append(Coliving(**coliving))
         return result
 
+    async def get_coliving_roommates(self, coliving_id: int, page: int) -> dict:
+        """ "Получение списка соседей."""
+        response = await self._get_request(
+            f"colivings/{coliving_id}/roommates/?page={page}"
+        )
+        return response.json()
+
     async def create_user_profile(
         self, telegram_id: int, data: dict
     ) -> Optional[UserProfile]:
@@ -246,20 +253,26 @@ class APIService:
         return await self._delete_request(endpoint_urn)
 
     async def send_match_request(
-        self, sender: int, receiver: int, status=None
+        self,
+        sender: int,
+        receiver: int,
     ) -> Response:
         """Совершает POST-запрос к эндпоинту создания MatchRequest.
 
         :param sender: telegram_id отправителя.
         :param receiver: telegram_id получателя.
         """
-        data = {"sender": sender, "receiver": receiver}
-        if status:
-            data.update({"status": status})
-        response = await self._post_request(
-            endpoint_urn=constants.MATCH_REQUEST_URL, data=data
-        )
-        return response
+        try:
+            await self._get_match_request_by_sender_and_receiver(
+                sender=sender,
+                receiver=receiver,
+            )
+            return
+        except MatchReuestgNotFound:
+            response = await self._post_request(
+                endpoint_urn=constants.MATCH_REQUEST_URL
+            )
+            return response
 
     async def update_match_request_status(
         self,

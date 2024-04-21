@@ -1,7 +1,7 @@
 HIDE_SEARCH_BUTTON = "Скрыть из поиска 🚫"
 SHOW_SEARCH_BUTTON = "Показать в поиске 🔍"
 
-RETURN_TO_MENU_BTN_LABEL = "Вернуться в меню ↩️"
+RETURN_TO_MENU_BTN = "Вернуться в меню ↩️"
 RETURN_BTN_LABEL = "Вернуться ↩️"
 
 LOCATION_PREFIX = "select_location"

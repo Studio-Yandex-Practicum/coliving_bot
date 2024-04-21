@@ -9,35 +9,38 @@ from conversations.common_functions.common_buttons import (
     HIDE_SEARCH_BUTTON,
     SHOW_SEARCH_BUTTON,
 )
+from conversations.menu.callback_funcs import menu
 from internal_requests import api_service
 
 
-def add_response_prefix(func):
+def add_response_prefix(custom_answer: str = ""):
     """
     Декоратор для отправки сообщения пользователю в следующем формате:
     'Твой ответ: <текст выбранной кнопки>'
-
     """
 
-    @wraps(func)
-    async def wrapper(update, context, *args, **kwargs):
-        await update.effective_message.edit_reply_markup()
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(update, context, *args, **kwargs):
+            if update.callback_query:
+                if custom_answer:
+                    user_answer = custom_answer
+                else:
+                    user_answer = update.callback_query.data
+                    if ":" in user_answer:
+                        user_answer = user_answer.split(":")[1]
+                response_text = f"{templates.RESPONSE_PREFIX}{user_answer}"
+                await update.effective_chat.send_message(text=response_text)
+            return await func(update, context, *args, **kwargs)
 
-        if update.callback_query:
-            user_response = update.callback_query.data
-            if ":" in user_response:
-                user_response = user_response.split(":")[1]
+        return wrapper
 
-            await update.effective_chat.send_message(
-                text=f"{templates.RESPONSE_PREFIX}{user_response}\n",
-            )
-        return await func(update, context, *args, **kwargs)
-
-    return wrapper
+    return decorator
 
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Отменяет текущий диалог."""
+
     await update.effective_message.reply_text(
         text=templates.CANCEL_TEXT,
         reply_markup=ReplyKeyboardRemove(),
@@ -88,3 +91,27 @@ async def get_visibility_choice(update: Update) -> bool:
     }
 
     return visibility_options[visibility_btn]
+
+
+@add_response_prefix()
+async def handle_return_to_menu_response(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """Обработка ответа кнопки Вернуться в меню."""
+    await update.effective_message.edit_reply_markup()
+    context.user_data.clear()
+
+    await menu(update, context)
+    return ConversationHandler.END
+
+
+async def return_to_menu_via_menu_command(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """
+    Возвращает в меню при использовании команды /menu.
+
+    """
+    context.user_data.clear()
+    await menu(update, context)
+    return ConversationHandler.END
