@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from enum import IntEnum
 from typing import List, Optional
 
 from telegram import PhotoSize
@@ -17,8 +18,8 @@ class UserProfile:
 
 
 @dataclass
-class MatchedUser:
-    telegram_id: int
+class ShortProfileInfo:
+    user: int
     name: str
     age: int
 
@@ -66,3 +67,25 @@ class ColivingSearchSettings:
     min_price: Optional[int] = field(default=None)
     max_price: Optional[int] = field(default=None)
     location: Optional[str] = field(default=None)
+
+
+class MatchStatuses(IntEnum):
+    is_pending = 0
+    is_matched = 1
+    is_rejected = -1
+
+
+@dataclass
+class ProfileLike:
+    id: int
+    sender: int
+    receiver: int
+    status: MatchStatuses
+
+
+@dataclass
+class ColivingLike:
+    id: int
+    sender: int
+    coliving: int
+    status: MatchStatuses

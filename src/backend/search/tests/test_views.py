@@ -7,18 +7,17 @@ from rest_framework.test import APITestCase
 from profiles.constants import Sex
 from profiles.models import Location, Profile, UserFromTelegram
 from profiles.serializers import ProfileSerializer
-from search.constants import MatchStatuses
-from search.models import MatchRequest, UserReport
+from search.models import UserReport
 
 
-class ReportMatchViewTests(APITestCase):
+class ReportViewTests(APITestCase):
     """Тесты для UserReportCreateView и MatchedUsersListView."""
 
     URL_REVERSE = reverse("api-v1:search:report")
     AGE_25 = 25
     REPORT_TEXT = "test_text"
     CATEGORY_TEXT = "Категория 1"
-    TELEGR_ID_TXT = "telegram_id"
+    TELEGRAM_ID_TXT = "telegram_id"
     AGE_TXT = "age"
     LOCATION_TXT = "location"
     NAME_TXT = "name"
@@ -43,37 +42,21 @@ class ReportMatchViewTests(APITestCase):
         )
         [Profile.objects.create(**data._asdict()) for data in profiles_data]
 
-        cls.match_1 = MatchRequest.objects.create(
-            sender=cls.t_users[0],
-            receiver=cls.t_users[1],
-            status=MatchStatuses.is_match,
-        )
-        cls.match_3 = MatchRequest.objects.create(
-            sender=cls.t_users[2],
-            receiver=cls.t_users[0],
-            status=MatchStatuses.is_match,
-        )
-        cls.negative_match = MatchRequest.objects.create(
-            sender=cls.t_users[4],
-            receiver=cls.t_users[3],
-            status=MatchStatuses.is_rejected,
-        )
-
         cls.report_data = {
-            "reporter": cls.t_users[0].id,
-            "reported_user": cls.t_users[1].id,
+            "reporter": cls.t_users[0].pk,
+            "reported_user": cls.t_users[1].pk,
             "text": cls.REPORT_TEXT,
             "category": cls.CATEGORY_TEXT,
         }
 
         cls.expected_match_data_for_user_1 = [
             {
-                cls.TELEGR_ID_TXT: 2,
+                cls.TELEGRAM_ID_TXT: 2,
                 cls.NAME_TXT: cls.t_names[1],
                 cls.AGE_TXT: cls.AGE_25,
             },
             {
-                cls.TELEGR_ID_TXT: 3,
+                cls.TELEGRAM_ID_TXT: 3,
                 cls.NAME_TXT: cls.t_names[2],
                 cls.AGE_TXT: cls.AGE_25,
             },
@@ -81,7 +64,7 @@ class ReportMatchViewTests(APITestCase):
 
         cls.expected_match_data_for_user_2 = [
             {
-                cls.TELEGR_ID_TXT: 1,
+                cls.TELEGRAM_ID_TXT: 1,
                 cls.NAME_TXT: cls.t_names[0],
                 cls.AGE_TXT: cls.AGE_25,
             }
@@ -89,7 +72,7 @@ class ReportMatchViewTests(APITestCase):
 
         cls.expected_match_data_for_user_3 = [
             {
-                cls.TELEGR_ID_TXT: 1,
+                cls.TELEGRAM_ID_TXT: 1,
                 cls.NAME_TXT: cls.t_names[0],
                 cls.AGE_TXT: cls.AGE_25,
             }
@@ -122,7 +105,7 @@ class ReportMatchViewTests(APITestCase):
     def test_invalid_reported_user(self):
         """Тест создания жалобы на несуществующиего пользователя."""
         invalid_data = {
-            "reporter": self.t_users[0].id,
+            "reporter": self.t_users[0].pk,
             "reported_user": 99999,
             "text": "test_text_2",
             "category": "Категория 2",
@@ -133,8 +116,8 @@ class ReportMatchViewTests(APITestCase):
     def test_invalid_data(self):
         """Тест создания жалобы с некорректными данными."""
         invalid_data = {
-            "reporter": self.t_users[0].id,
-            "reported_user": self.t_users[1].id,
+            "reporter": self.t_users[0].pk,
+            "reported_user": self.t_users[1].pk,
             "text": 999999,
             "category": True,
         }
@@ -144,8 +127,8 @@ class ReportMatchViewTests(APITestCase):
     def test_required_param_is_absent(self):
         """Тест создания жалобы без обязательных параметров"""
         invalid_data = {
-            "reporter": self.t_users[0].id,
-            "reported_user": self.t_users[1].id,
+            "reporter": self.t_users[0].pk,
+            "reported_user": self.t_users[1].pk,
         }
         response = self.client.post(self.URL_REVERSE, invalid_data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -159,51 +142,6 @@ class ReportMatchViewTests(APITestCase):
                 self.assertEqual(
                     response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED
                 )
-
-    def test_get_match_list(self):
-        """Тест получения списка мэтчей."""
-        response = self.client.get(
-            reverse(
-                "api-v1:search:matched-users",
-                kwargs={self.TELEGR_ID_TXT: self.t_users[0].id},
-            )
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_get_match_for_invalid_user(self):
-        """Тест получения мэтчей для несуществующего пользователя."""
-        response = self.client.get(
-            reverse("api-v1:search:matched-users", kwargs={self.TELEGR_ID_TXT: 99999})
-        )
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    def test_invalid_methods_match(self):
-        """Тест на незарешенные методы запроса (match)."""
-        methods = ["post", "put", "patch", "delete"]
-        for method in methods:
-            with self.subTest(method=method):
-                response = self.client.generic(
-                    method,
-                    reverse(
-                        "api-v1:search:matched-users",
-                        kwargs={self.TELEGR_ID_TXT: self.t_users[0].id},
-                    ),
-                )
-                self.assertEqual(
-                    response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED
-                )
-
-    def test_matches_correct_data(self):
-        """Тест на корректный вывод данных мэтчей."""
-        for telegram_id, data in self.global_match_data.items():
-            with self.subTest(id=telegram_id, data=data):
-                response = self.client.get(
-                    reverse(
-                        "api-v1:search:matched-users",
-                        kwargs={self.TELEGR_ID_TXT: telegram_id},
-                    )
-                )
-                self.assertEqual(response.json(), data)
 
 
 class ProfileSearchViewTests(APITestCase):
@@ -319,7 +257,7 @@ class ProfileSearchViewTests(APITestCase):
     def test_search_correct_data(self):
         """Тест на корректные результаты поиска для разных критериев."""
         for telegram_id, gsr_data in self.global_search_results_data.items():
-            with self.subTest(id=telegram_id, data=gsr_data["search_result"]):
+            with self.subTest(viewer=telegram_id, data=gsr_data["search_result"]):
                 kwargs = {}
                 kwargs["viewer"] = telegram_id
                 for key, value in gsr_data["search_criteria"].items():

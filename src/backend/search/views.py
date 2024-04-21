@@ -1,16 +1,19 @@
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Q
-from rest_framework import exceptions, generics
+from django.db.models import F
+from rest_framework import generics, status
+from rest_framework.generics import CreateAPIView, UpdateAPIView, get_object_or_404
+from rest_framework.response import Response
 
-from profiles.models import Profile
+from profiles.models import Coliving, Profile
 from profiles.serializers import ProfileSerializer
 from search.constants import MatchStatuses
-from search.filters import MatchRequestFilter, ProfilesSearchFilterSet
-from search.models import MatchRequest, UserFromTelegram, UserReport
+from search.filters import ProfilesSearchFilterSet
+from search.models import ColivingLike, ProfileLike, UserReport
 from search.serializers import (
-    MatchListSerializer,
-    MatchRequestSerializer,
-    MatchRequestUpdateSerializer,
+    ColivingLikeCreateSerializer,
+    ColivingLikeUpdateSerializer,
+    MatchedProfileSerializer,
+    ProfileLikeCreateSerializer,
+    ProfileLikeUpdateSerializer,
     UserReportSerializer,
 )
 
@@ -22,100 +25,138 @@ class UserReportCreateView(generics.CreateAPIView):
     serializer_class = UserReportSerializer
 
 
-class MatchedUsersListView(generics.ListAPIView):
-    """
-    Apiview для получения списка мэчтей.
-    Параметр roomates запроса позволяет наложить
-    дополнительный фильтр.
-    roommates = 1 - выводим только тех пользователей,
-    кто потенциально может стать соседом в коливинге,
-    то есть помимо мэтча еще и не имеет своего коливинга
-    и не проживает сейчас в коливинге
-
-    roommates = 0 - выводим просто всех пользователей с мэтчем
-    """
-
-    serializer_class = MatchListSerializer
+class MatchedProfileListAPIView(generics.ListAPIView):
+    serializer_class = MatchedProfileSerializer
 
     def get_queryset(self):
-        roommates = int(self.request.query_params.get("roommates", 0))
-
-        telegram_id = self.kwargs.get("telegram_id")
-        user = UserFromTelegram.objects.filter(telegram_id=telegram_id).first()
-        if user is None:
-            raise exceptions.NotFound("Такого пользователя не существует.")
-        users_who_sent_like = UserFromTelegram.objects.select_related(
-            "user_profile"
-        ).filter(
-            likes__receiver=user,
-            likes__status=MatchStatuses.is_match,
+        user_profile = get_object_or_404(
+            Profile, user__telegram_id=self.kwargs.get("telegram_id")
         )
-        liked_users = UserFromTelegram.objects.select_related("user_profile").filter(
-            match_requests__sender=user,
-            match_requests__status=MatchStatuses.is_match,
-        )
-        matched_users = (users_who_sent_like | liked_users).distinct()
-
-        if roommates == 1:
-            matched_users = matched_users.filter(residence_id__isnull=True)
-            matched_users = matched_users.select_related("residence").filter(
-                coliving__host_id__isnull=True
+        sent_likes = (
+            user_profile.sent_likes.filter(status=MatchStatuses.is_match)
+            .annotate(
+                telegram_id=F("receiver__user_id"),
+                age=F("receiver__age"),
+                name=F("receiver__name"),
             )
-        return matched_users
+            .values("telegram_id", "age", "name")
+        )
+        received_likes = (
+            user_profile.received_likes.filter(status=MatchStatuses.is_match)
+            .annotate(
+                telegram_id=F("sender__user_id"),
+                age=F("sender__age"),
+                name=F("sender__name"),
+            )
+            .values("telegram_id", "age", "name")
+        )
+        return sent_likes.union(received_likes).all()
+
+
+class ColivingLikesListAPIView(generics.ListAPIView):
+    serializer_class = MatchedProfileSerializer
+
+    def get_queryset(self):
+        coliving = get_object_or_404(Coliving, pk=self.kwargs.get("pk"))
+        likes = (
+            coliving.likes.filter(status=MatchStatuses.is_match)
+            .annotate(
+                telegram_id=F("sender__user_id"),
+                age=F("sender__age"),
+                name=F("sender__name"),
+            )
+            .values("telegram_id", "age", "name")
+        )
+        return likes.all()
 
 
 class ProfilesSearchView(generics.ListAPIView):
     """Apiview для для поиска профилей."""
 
-    queryset = Profile.objects.all().select_related("user", "location")
+    queryset = Profile.objects.select_related("location", "user").prefetch_related(
+        "images"
+    )
+
     serializer_class = ProfileSerializer
     filterset_class = ProfilesSearchFilterSet
 
     def get_queryset(self):
-        try:
-            user = UserFromTelegram.objects.get(
-                telegram_id=self.request.query_params.get("viewer", None)
-            )
-        except ObjectDoesNotExist:
-            raise exceptions.NotFound("Такого пользователя не существует.")
-        excl_list = Profile.objects.filter(Q(user=user) | Q(viewers=user)).values_list(
-            "pk", flat=True
-        )
+        queryset = super().get_queryset()
+        viewer = self.request.query_params.get("viewer")
+        if viewer is None:
+            return queryset.all()
+        user_profile = get_object_or_404(Profile, user_id=viewer)
         return (
-            super()
-            .get_queryset()
+            queryset.exclude(
+                id__in=user_profile.sent_likes.values_list(
+                    "receiver__id",
+                    flat=True,
+                ),
+            )
+            .exclude(
+                id__in=user_profile.received_likes.values_list(
+                    "sender__id",
+                    flat=True,
+                ),
+            )
+            .exclude(id=user_profile.id)
             .filter(is_visible=True)
-            .exclude(pk__in=excl_list)
             .order_by("pk")
+            .all()
         )
 
 
-class MatchRequestListCreateView(generics.ListCreateAPIView):
-    """
-    ApiView для создания MatchRequest и вывода списка всех MatchRequest
-    с фильтрацией по sender и receiver.
+class ProfileLikeCreateAPIView(CreateAPIView):
+    queryset = ProfileLike.objects.all()
+    serializer_class = ProfileLikeCreateSerializer
 
-    """
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-    queryset = MatchRequest.objects.all()
-    serializer_class = MatchRequestSerializer
-    filterset_class = MatchRequestFilter
+        sender = serializer.validated_data["sender"]
+        receiver = serializer.validated_data["receiver"]
 
-    def perform_create(self, serializer):
-        sender = self.request.data.get("sender")
-        receiver = self.request.data.get("receiver")
+        reverse_like = ProfileLike.objects.filter(
+            sender=receiver, receiver=sender
+        ).first()
+        if reverse_like:
+            reverse_like.status = MatchStatuses.is_match
+            reverse_like.save()
+            return Response(
+                ProfileLikeCreateSerializer(reverse_like).data,
+                status=status.HTTP_200_OK,
+            )
 
-        match = MatchRequest.objects.filter(
-            sender__telegram_id=receiver, receiver__telegram_id=sender
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
-        if match:
-            match.update(status=MatchStatuses.is_match)
-        else:
-            return serializer.save()
 
 
-class MatchRequestUpdateView(generics.UpdateAPIView):
-    """ApiView для изменения статуса MatchRequest."""
+class ProfileLikeUpdateAPIView(UpdateAPIView):
+    queryset = ProfileLike.objects.all()
+    serializer_class = ProfileLikeUpdateSerializer
 
-    queryset = MatchRequest.objects.all()
-    serializer_class = MatchRequestUpdateSerializer
+    @property
+    def allowed_methods(self):
+        result = super().allowed_methods
+        result.remove("PUT")
+        return result
+
+
+class ColivingLikeCreateAPIView(CreateAPIView):
+    queryset = ColivingLike.objects.all()
+    serializer_class = ColivingLikeCreateSerializer
+
+
+class ColivingLikeUpdateAPIView(UpdateAPIView):
+    queryset = ColivingLike.objects.all()
+    serializer_class = ColivingLikeUpdateSerializer
+
+    @property
+    def allowed_methods(self):
+        result = super().allowed_methods
+        result.remove("PUT")
+        return result

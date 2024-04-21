@@ -1,6 +1,6 @@
 import mimetypes
 from dataclasses import asdict
-from typing import List, Optional
+from typing import List, NoReturn, Optional
 from urllib.parse import urlencode, urljoin
 
 from httpx import AsyncClient, Response
@@ -8,19 +8,16 @@ from httpx import AsyncClient, Response
 import internal_requests.constants as constants
 from internal_requests.entities import (
     Coliving,
+    ColivingLike,
     ColivingSearchSettings,
     Image,
     Location,
-    MatchedUser,
+    ProfileLike,
     ProfileSearchSettings,
+    ShortProfileInfo,
     UserProfile,
 )
-
-
-class ColivingNotFound(Exception):
-    def __init__(self, message, response):
-        super().__init__(message)
-        self.response = response
+from internal_requests.exceptions import ColivingNotFound
 
 
 class MatchReuestgNotFound(Exception):
@@ -144,21 +141,61 @@ class APIService:
         data = {"residence": residence_id}
         return await self._patch_request(endpoint_urn=endpoint_urn, data=data)
 
-    async def get_potential_roommates(
+    async def get_matched_coliving_likes(
+        self,
+        coliving_pk: int,
+    ) -> List[ShortProfileInfo]:
+        """
+        Выводит одобренные (is_matched) лайки для переданного коливинга.
+        """
+        endpoint_urn = f"colivings/{coliving_pk}/matches/"
+        response = await self._get_request(endpoint_urn=endpoint_urn)
+        result = []
+        for matched_user in response.json():
+            result.append(ShortProfileInfo(**matched_user))
+        return result
+
+    async def get_matched_profile_likes(
         self,
         telegram_id: int,
-    ) -> List[MatchedUser]:
+    ) -> List[ShortProfileInfo]:
         """
-        Выводит список потенциальных жильцов
-        для данного коливинга - всех пользователей,
-        у кого есть мэтч с данным telegram_id.
+        Выводит совпадающие (is_matched) лайки для переданного пользователя.
         """
         endpoint_urn = f"users/{telegram_id}/matches/?roommates=1"
         response = await self._get_request(endpoint_urn=endpoint_urn)
         result = []
         for matched_user in response.json():
-            result.append(MatchedUser(**matched_user))
+            result.append(ShortProfileInfo(**matched_user))
         return result
+
+    async def send_profile_like(self, sender: int, receiver: int) -> ProfileLike:
+        """Отправляет запрос на создание лайка профиля."""
+        endpoint_urn = "profile/likes/"
+        data = {"sender": sender, "receiver": receiver}
+        response = await self._post_request(endpoint_urn=endpoint_urn, data=data)
+        return ProfileLike(**response.json())
+
+    async def update_status_profile_like(self, pk: int, status: int) -> ProfileLike:
+        """Отправляет запрос на обновление статуса лайка профиля."""
+        endpoint_urn = f"profile/likes/{pk}/"
+        data = {"status": status}
+        response = await self._patch_request(endpoint_urn=endpoint_urn, data=data)
+        return ProfileLike(**response.json())
+
+    async def send_coliving_like(self, sender: int, coliving_pk: int) -> ColivingLike:
+        """Отправляет запрос на создание лайка для коливинга."""
+        endpoint_urn = "colivings/likes/"
+        data = {"sender": sender, "coliving": coliving_pk}
+        response = await self._post_request(endpoint_urn=endpoint_urn, data=data)
+        return ColivingLike(**response.json())
+
+    async def update_status_coliving_like(self, pk: int, status: int) -> ColivingLike:
+        """Отправляет запрос на обновление статуса лайка для коливинга."""
+        endpoint_urn = f"colivings/likes/{pk}/"
+        data = {"status": status}
+        response = await self._patch_request(endpoint_urn=endpoint_urn, data=data)
+        return ColivingLike(**response.json())
 
     async def get_user_profile_by_telegram_id(
         self, telegram_id: int

@@ -38,6 +38,7 @@ class UserFromTelegram(models.Model):
         verbose_name="Идентификатор пользователя Telegram",
         unique=True,
         db_index=True,
+        primary_key=True,
     )
     residence = models.ForeignKey(
         "Coliving",
@@ -75,11 +76,6 @@ class BaseProfileColiving(models.Model):
     is_visible = models.BooleanField(
         verbose_name="Отображать при поиске",
         default=True,
-    )
-    viewers = models.ManyToManyField(
-        UserFromTelegram,
-        verbose_name="Просмотры",
-        blank=True,
     )
     created_date = models.DateTimeField(
         verbose_name="Дата создания",

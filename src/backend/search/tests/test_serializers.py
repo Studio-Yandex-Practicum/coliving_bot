@@ -2,10 +2,10 @@ from rest_framework.test import APITestCase
 
 from profiles.models import Location, Profile, UserFromTelegram
 from search.models import UserReport
-from search.serializers import MatchListSerializer, UserReportSerializer
+from search.serializers import UserReportSerializer
 
 
-class ReportMatchSerializerTests(APITestCase):
+class ReportSerializerTests(APITestCase):
     """Тесты для UserReportSerializer и MatchListSerializer."""
 
     @classmethod
@@ -18,8 +18,8 @@ class ReportMatchSerializerTests(APITestCase):
         )
 
         cls.report_data = {
-            "reporter": cls.test_user_1.id,
-            "reported_user": cls.test_user_2.id,
+            "reporter": cls.test_user_1.pk,
+            "reported_user": cls.test_user_2.pk,
             "text": "test_text",
             "category": "Категория 1",
         }
@@ -32,7 +32,7 @@ class ReportMatchSerializerTests(APITestCase):
         }
 
         cls.serializer_data = {
-            "telegram_id": cls.test_user_1.id,
+            "telegram_id": cls.test_user_1.pk,
             "name": "Vlad",
             "age": 25,
         }
@@ -53,21 +53,6 @@ class ReportMatchSerializerTests(APITestCase):
         serializer = UserReportSerializer(data=self.report_data)
         serializer.is_valid()
         serializer.save()
-        created_report = UserReport.objects.get(reporter=self.test_user_1.id)
+        created_report = UserReport.objects.get(reporter=self.test_user_1.pk)
         self.assertIsNotNone(created_report)
         self.assertEqual(created_report.reporter, self.test_user_1)
-
-    def test_match_data_serializer(self):
-        """Тест на правильную сериализацию данных мэтча."""
-        serializer = MatchListSerializer(instance=self.test_user_1)
-        expected_fields = {"telegram_id", "name", "age"}
-        self.assertEqual(set(serializer.data.keys()), expected_fields)
-        for field in expected_fields:
-            with self.subTest(field=field):
-                self.assertEqual(serializer.data[field], self.serializer_data[field])
-
-    def test_match_to_representation(self):
-        """Тест на корректность метода to_representation."""
-        serializer = MatchListSerializer(instance=self.test_user_1)
-        representation = serializer.to_representation(self.test_user_1)
-        self.assertEqual(representation, self.serializer_data)

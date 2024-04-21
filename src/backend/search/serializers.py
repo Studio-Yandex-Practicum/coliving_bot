@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
-from profiles.models import UserFromTelegram
-from search.models import MatchRequest, UserReport
+from profiles.models import Profile, UserFromTelegram
+from search.models import ColivingLike, ProfileLike, UserReport
 
 
 class UserReportSerializer(serializers.ModelSerializer):
@@ -23,51 +23,55 @@ class UserReportSerializer(serializers.ModelSerializer):
         }
 
 
-class MatchListSerializer(serializers.ModelSerializer):
+class MatchedProfileSerializer(serializers.Serializer):
     """Сериализатор для получения списка мэтчей."""
 
-    name = serializers.CharField(read_only=True, source="user_profile.name")
-    age = serializers.IntegerField(read_only=True, source="user_profile.age")
+    telegram_id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField(read_only=True)
+    age = serializers.IntegerField(read_only=True)
 
+
+class OnlyLikeStatusWriteSerializerMixin:
     class Meta:
-        model = UserFromTelegram
-        fields = ("telegram_id", "name", "age")
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        profile = getattr(instance, "user_profile")
-        representation["name"] = profile.name
-        representation["age"] = profile.age
-        return representation
+        model = ProfileLike
+        fields = ("status", "id", "sender", "receiver", "match_date", "created_date")
+        read_only_fields = ("id", "sender", "receiver", "match_date", "created_date")
 
 
-class MatchRequestSerializer(serializers.ModelSerializer):
-    """Сериализатор для создания MatchRequest."""
-
-    receiver = serializers.SlugRelatedField(
-        slug_field="telegram_id", queryset=UserFromTelegram.objects.all()
-    )
+class ProfileLikeCreateSerializer(serializers.ModelSerializer):
     sender = serializers.SlugRelatedField(
-        slug_field="telegram_id", queryset=UserFromTelegram.objects.all()
+        slug_field="user_id",
+        queryset=Profile.objects.all(),
+    )
+    receiver = serializers.SlugRelatedField(
+        slug_field="user_id",
+        queryset=Profile.objects.all(),
     )
 
     class Meta:
-        model = MatchRequest
-        fields = ("id", "receiver", "sender", "status")
-        read_only_fields = ("id",)
-        validators = [
-            serializers.UniqueTogetherValidator(
-                queryset=MatchRequest.objects.all(),
-                fields=("sender", "receiver"),
-                message="Запрос MatchRequest уже создан.",
-            )
-        ]
+        model = ProfileLike
+        fields = ("id", "sender", "receiver", "status", "match_date", "created_date")
+        read_only_fields = ("id", "match_date", "created_date")
 
 
-class MatchRequestUpdateSerializer(serializers.ModelSerializer):
-    """Сериализатор для обновления статуса MatchRequest."""
+class ProfileLikeUpdateSerializer(
+    OnlyLikeStatusWriteSerializerMixin, ProfileLikeCreateSerializer
+):
+    pass
+
+
+class ColivingLikeCreateSerializer(serializers.ModelSerializer):
+    sender = serializers.SlugRelatedField(
+        slug_field="user_id", queryset=Profile.objects.all()
+    )
 
     class Meta:
-        model = MatchRequest
-        fields = ("receiver", "sender", "status")
-        read_only_fields = ("id", "receiver", "sender")
+        model = ColivingLike
+        fields = ("id", "sender", "coliving", "status", "match_date", "created_date")
+        read_only_fields = ("id", "match_date", "created_date")
+
+
+class ColivingLikeUpdateSerializer(
+    OnlyLikeStatusWriteSerializerMixin, ColivingLikeCreateSerializer
+):
+    pass

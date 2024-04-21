@@ -1,23 +1,20 @@
 from django.contrib import admin
 
-from .models import MatchRequest, UserReport
+from search.models import ColivingLike, ProfileLike, UserReport
 
 
-@admin.register(MatchRequest)
-class MatchRequestsAdmin(admin.ModelAdmin):
-    """
-    Управление объектами 'MatchRequests' в админ-зоне.
-    """
+@admin.register(ProfileLike)
+class ProfileLikeAdmin(admin.ModelAdmin):
+    list_display = ("sender", "receiver", "status", "match_date", "created_date")
+    list_filter = ("status",)
+    readonly_fields = ("created_date", "match_date")
 
-    list_display = (
-        "id",
-        "sender",
-        "receiver",
-        "status",
-        "created_date",
-        "match_date",
-    )
-    list_editable = ("status",)
+
+@admin.register(ColivingLike)
+class ColivingLikeAdmin(admin.ModelAdmin):
+    list_display = ("sender", "coliving", "status", "match_date", "created_date")
+    list_filter = ("status",)
+    readonly_fields = ("created_date", "match_date")
 
 
 @admin.register(UserReport)
