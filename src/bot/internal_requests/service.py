@@ -5,6 +5,7 @@ from urllib.parse import urlencode, urljoin
 
 from httpx import AsyncClient, Response
 
+import internal_requests.constants as constants
 from internal_requests.entities import (
     Coliving,
     ColivingSearchSettings,
@@ -17,6 +18,12 @@ from internal_requests.entities import (
 
 
 class ColivingNotFound(Exception):
+    def __init__(self, message, response):
+        super().__init__(message)
+        self.response = response
+
+
+class MatchReuestgNotFound(Exception):
     def __init__(self, message, response):
         super().__init__(message)
         self.response = response
@@ -252,16 +259,66 @@ class APIService:
         endpoint_urn = f"users/{telegram_id}/profile/images/"
         return await self._delete_request(endpoint_urn)
 
-    async def send_match_request(self, sender: int, receiver: int) -> Response:
+    async def send_match_request(
+        self,
+        sender: int,
+        receiver: int,
+    ) -> Response:
         """Совершает POST-запрос к эндпоинту создания MatchRequest.
 
         :param sender: telegram_id отправителя.
         :param receiver: telegram_id получателя.
         """
-        endpoint_urn = "match_requests/"
-        data = {"sender": sender, "receiver": receiver}
-        response = await self._post_request(endpoint_urn=endpoint_urn, data=data)
+        try:
+            await self._get_match_request_by_sender_and_receiver(
+                sender=sender,
+                receiver=receiver,
+            )
+            return
+        except MatchReuestgNotFound:
+            response = await self._post_request(
+                endpoint_urn=constants.MATCH_REQUEST_URL
+            )
+            return response
+
+    async def update_match_request_status(
+        self,
+        sender: int,
+        receiver: int,
+        status: int,
+    ) -> Response:
+        """Совершает PATCH-запрос к эндпоинту изменения MatchRequest.
+
+        :param sender: telegram_id отправителя.
+        :param receiver: telegram_id получателя.
+        :param status: match_request status
+        """
+        match_request_id: int = await self._get_match_request_by_sender_and_receiver(
+            sender=sender,
+            receiver=receiver,
+        )
+        endpoint_urn = f"{constants.MATCH_REQUEST_URL}{match_request_id}/"
+        data = {"status": status}
+        response = await self._patch_request(endpoint_urn=endpoint_urn, data=data)
         return response
+
+    async def _get_match_request_by_sender_and_receiver(
+        self,
+        sender: int,
+        receiver: int,
+    ):
+        endpoint_urn = (
+            f"{constants.MATCH_REQUEST_URL}/" f"?sender={sender}&receiver={receiver}"
+        )
+        response = await self._get_request(endpoint_urn=endpoint_urn)
+        response_json = response.json()
+        if not response_json:
+            raise MatchReuestgNotFound(
+                message="Такой MatchRequest не найден",
+                response=response,
+            )
+        match_request_pk = response_json[0]["id"]
+        return match_request_pk
 
     async def _profile_request(
         self, telegram_id: int, data: dict, method: str

@@ -610,7 +610,6 @@ async def handle_edit_profile_confirmation_cancel(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """Отмена редактирования коливинг профиля."""
-
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_PROFILE_NO_CHANGE,
     )
@@ -747,9 +746,7 @@ async def handle_delete_profile(
 async def handle_delete_coliving_confirmation_confirm(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
-    """
-    Удаление коливинга
-    """
+    """Удаление коливинга."""
     coliving = context.user_data["coliving_info"]
     await api_service.delete_coliving(coliving.id)
     context.user_data.clear()
@@ -761,9 +758,7 @@ async def handle_delete_coliving_confirmation_confirm(
 async def handle_delete_coliving_confirmation_cancel(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
-    """
-    Отмена удаления коливинга
-    """
+    """Отмена удаления коливинга."""
     context.user_data.clear()
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_PROFILE_NO_CHANGE

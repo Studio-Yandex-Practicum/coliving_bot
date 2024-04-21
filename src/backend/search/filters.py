@@ -2,6 +2,7 @@ from django_filters import ChoiceFilter, FilterSet, ModelChoiceFilter, RangeFilt
 
 from profiles.constants import Sex
 from profiles.models import Location, Profile
+from search.models import MatchRequest
 
 
 class ProfilesSearchFilterSet(FilterSet):
@@ -16,3 +17,12 @@ class ProfilesSearchFilterSet(FilterSet):
     class Meta:
         model = Profile
         fields = ["location", "sex", "age"]
+
+
+class MatchRequestFilter(FilterSet):
+    class Meta:
+        model = MatchRequest
+        fields = (
+            "sender__telegram_id",
+            "receiver__telegram_id",
+        )

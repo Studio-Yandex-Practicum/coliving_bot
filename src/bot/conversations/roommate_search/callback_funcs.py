@@ -3,6 +3,8 @@ from dataclasses import asdict
 from telegram import InputMediaPhoto, ReplyKeyboardRemove, Update
 from telegram.ext import ContextTypes, ConversationHandler
 
+import conversations.match_requests.keyboards as match_keyboards
+import conversations.match_requests.templates as match_templates
 import conversations.roommate_search.keyboards as keyboards
 import conversations.roommate_search.templates as templates
 from conversations.common_functions.common_funcs import profile_required
@@ -131,12 +133,29 @@ async def profile_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     """
     Обрабатывает ЛАЙК на профиль соседа.
     Посылает POST запрос в API на добавление MatchRequest,
+    отправляет уведомление sender о том, что лайк поставлен,
     отправляет уведомление другому пользователю о лайке
     и переводит в состояние продолжения поиска.
     """
     current_profile = context.user_data.get("current_profile")
+    sender_id = update.effective_chat.id
+    receiver_id = current_profile["user"]
+
     await api_service.send_match_request(
-        sender=update.effective_chat.id, receiver=current_profile["user"]
+        sender=sender_id,
+        receiver=receiver_id,
+    )
+
+    await context.bot.send_message(
+        chat_id=sender_id,
+        text=templates.SEND_LIKE.format(receiver_name=current_profile["name"]),
+    )
+
+    keyboard = await match_keyboards.get_view_profile_keyboard(sender_id)
+    await context.bot.send_message(
+        chat_id=receiver_id,
+        text=match_templates.LIKE_NOTIFICATION,
+        reply_markup=keyboard,
     )
 
     await update.effective_message.reply_text(
@@ -177,22 +196,15 @@ async def _get_next_user_profile(
                 text=templates.SEARCH_INTRO,
                 reply_markup=keyboards.PROFILE_KEYBOARD,
             )
-        profile = asdict(user_profiles.pop())
-        context.user_data["current_profile"] = profile
+        profile = user_profiles.pop()
+        context.user_data["current_profile"] = asdict(profile)
         context.user_data["user_profiles"] = user_profiles
-        images = profile.pop("images")
-        message_text = templates.PROFILE_DATA.format(**profile)
-        if images:
-            media_group = [InputMediaPhoto(file_id) for file_id in images]
-            await update.effective_chat.send_media_group(
-                media=media_group,
-                caption=message_text,
-            )
-        else:
-            await update.effective_chat.send_message(
-                text=message_text,
-                reply_markup=keyboards.PROFILE_KEYBOARD,
-            )
+
+        await send_profile_info(
+            update=update,
+            profile=profile,
+            profile_template=templates.PROFILE_DATA,
+        )
         return States.PROFILE
 
     await update.effective_message.reply_text(
@@ -200,6 +212,29 @@ async def _get_next_user_profile(
         reply_markup=keyboards.NO_MATCHES_KEYBOARD,
     )
     return States.NO_MATCHES
+
+
+async def send_profile_info(
+    update: Update,
+    profile: UserProfile,
+    profile_template: str,
+):
+    """Формирует и отправляет сообщение с профилем пользователя."""
+    profile_dict: dict = asdict(profile)
+
+    images = profile_dict.pop("images", None)
+    profile_brief_info = profile_template.format(**profile_dict)
+
+    if images:
+        media_group = [InputMediaPhoto(file_id) for file_id in images]
+        await update.effective_chat.send_media_group(
+            media=media_group,
+            caption=profile_brief_info,
+        )
+    else:
+        await update.effective_chat.send_message(
+            text=profile_brief_info,
+        )
 
 
 async def _clear_roommate_search_context(context):
