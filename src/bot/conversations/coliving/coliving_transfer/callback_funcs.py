@@ -66,7 +66,6 @@ async def handle_coliving_set_new_owner(
         chat_id=context.user_data["coliving_info"].host,
         text=templates.NEW_COLIVING_OWNER_MESSAGE,
     )
-    await update.effective_message.edit_reply_markup()
     await update.effective_message.reply_text(text=templates.OWNER_CHANGED_MESSAGE)
     return ConversationHandler.END
 
@@ -74,7 +73,6 @@ async def handle_coliving_set_new_owner(
 @add_response_prefix(custom_answer=BTN_LABEL_CANCEL)
 async def handle_cancel_coliving_transfer(update: Update, _context: CallbackContext):
     """Обработка отмены передачи коливинга."""
-    await update.effective_message.edit_reply_markup()
     await update.effective_message.reply_text(templates.CANCELLATION_MESSAGE)
     return ConversationHandler.END
 

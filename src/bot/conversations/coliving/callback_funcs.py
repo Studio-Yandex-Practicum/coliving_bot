@@ -304,7 +304,6 @@ async def handle_profile_confirmation_cancel(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """Отмена редактирования коливинг профиля."""
-
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_PROFILE_NO_CREATE,
     )
@@ -321,7 +320,6 @@ async def handle_confirm_or_edit_reply_confirm(
     Обработка ответа - подтверждение коливинг профиля.
     Перевод на установку флажка поиска IS_VISIBLE.
     """
-
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_TO_SHOW_PROFILE,
         reply_markup=keyboards.IS_VISIBLE_OR_NOT_PROFILE_KEYBOARD,
@@ -381,22 +379,6 @@ async def handle_what_to_edit_text_instead_of_button(
 
 
 @add_response_prefix()
-async def handle_what_to_edit_fill_again(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> int:
-    """
-    Выбор редактируемого поля.
-    Обработка ответа: Заполнить заново.
-    """
-    context.user_data.clear()
-    await update.effective_chat.send_message(
-        text=templates.REPLY_MSG_ASK_LOCATION,
-        reply_markup=context.bot_data["location_keyboard"],
-    )
-    return States.LOCATION
-
-
-@add_response_prefix()
 async def handle_what_to_edit_location(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -404,7 +386,6 @@ async def handle_what_to_edit_location(
     Выбор редактируемого поля.
     Обработка ответа: Местоположение.
     """
-
     await update.effective_chat.send_message(
         text=templates.REPLY_MSG_ASK_LOCATION,
         reply_markup=context.bot_data["location_keyboard"],
@@ -420,7 +401,6 @@ async def handle_what_to_edit_room_type(
     Выбор редактируемого поля.
     Обработка ответа: Тип помещения.
     """
-
     await update.effective_chat.send_message(
         text=templates.REPLY_MSG_ASK_ROOM_TYPE,
         reply_markup=keyboards.ROOM_TYPE_KEYBOARD,
@@ -450,7 +430,6 @@ async def handle_what_to_edit_price(
     Выбор редактируемого поля.
     Обработка ответа: Цена.
     """
-
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_PRICE,
     )
@@ -479,7 +458,6 @@ async def handle_edit_location(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """Редактирование location."""
-
     location = update.callback_query.data.split(":")[1]
     context.user_data["coliving_info"].location = location
 
@@ -755,7 +733,7 @@ async def handle_delete_profile(
 ) -> int:
     """
     Выбор р.
-    Обработка ответа: Заполнить заново.
+    Обработка ответа: Удалить профиль.
     """
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_WANT_TO_DELETE,
