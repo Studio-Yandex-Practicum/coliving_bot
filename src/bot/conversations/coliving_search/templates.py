@@ -1,8 +1,5 @@
 from internal_requests.entities import ColivingSearchSettings
 
-MIN_COST = 0
-MAX_COST = 1000000
-
 COLIVING_DATA = """
 <b>Город:</b> {location}
 <b>Тип коливинга:</b> {room_type}

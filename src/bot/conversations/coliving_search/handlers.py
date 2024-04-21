@@ -15,6 +15,7 @@ from conversations.coliving_search.validators import (
     handle_text_input_instead_of_choosing_button,
 )
 from conversations.menu.buttons import SEARCH_COLIVING_BUTTON
+from conversations.menu.constants import CANCEL_COMMAND, MENU_COMMAND
 
 coliving_search_handler: ConversationHandler = ConversationHandler(
     entry_points=[
@@ -61,8 +62,8 @@ coliving_search_handler: ConversationHandler = ConversationHandler(
                 pattern=rf"^{buttons.YES_BTN}$",
             ),
             CallbackQueryHandler(
-                callback=callbacks.handle_return_to_menu_response,
-                pattern=rf"^{buttons.TO_MENU_BTN}$",
+                callback=common_funcs.handle_return_to_menu_response,
+                pattern=rf"^{common_buttons.RETURN_TO_MENU_BTN}$",
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -71,8 +72,8 @@ coliving_search_handler: ConversationHandler = ConversationHandler(
         ],
         states.NO_MATCHES: [
             CallbackQueryHandler(
-                callback=callbacks.handle_return_to_menu_response,
-                pattern=rf"^{buttons.TO_MENU_BTN}$",
+                callback=common_funcs.handle_return_to_menu_response,
+                pattern=rf"^{common_buttons.RETURN_TO_MENU_BTN}$",
             ),
             CallbackQueryHandler(
                 callback=callbacks.edit_settings,
@@ -93,8 +94,8 @@ coliving_search_handler: ConversationHandler = ConversationHandler(
                 callback=callbacks.next_coliving,
             ),
             MessageHandler(
-                filters=filters.Regex(rf"^{buttons.TO_MENU_BTN}$"),
-                callback=callbacks.handle_return_to_menu_response,
+                filters=filters.Regex(rf"^{common_buttons.RETURN_TO_MENU_BTN}$"),
+                callback=common_funcs.handle_return_to_menu_response,
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -111,8 +112,8 @@ coliving_search_handler: ConversationHandler = ConversationHandler(
                 pattern=rf"^{buttons.EDIT_SETTINGS_BTN}$",
             ),
             CallbackQueryHandler(
-                callback=callbacks.handle_return_to_menu_response,
-                pattern=rf"^{buttons.TO_MENU_BTN}$",
+                callback=common_funcs.handle_return_to_menu_response,
+                pattern=rf"^{common_buttons.RETURN_TO_MENU_BTN}$",
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -122,8 +123,12 @@ coliving_search_handler: ConversationHandler = ConversationHandler(
     },
     fallbacks=[
         CommandHandler(
-            command="cancel",
+            command=CANCEL_COMMAND,
             callback=common_funcs.cancel,
+        ),
+        CommandHandler(
+            command=MENU_COMMAND,
+            callback=common_funcs.return_to_menu_via_menu_command,
         ),
     ],
 )

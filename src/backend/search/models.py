@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 from profiles.models import UserFromTelegram
 
@@ -51,6 +52,11 @@ class MatchRequest(models.Model):
                 fields=("sender", "receiver"),
             ),
         )
+
+    def save(self, *args, **kwargs):
+        if self.id:
+            self.match_date = timezone.now()
+        return super().save(*args, **kwargs)
 
 
 class UserReport(models.Model):

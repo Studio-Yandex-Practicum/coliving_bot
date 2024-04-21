@@ -1,21 +1,4 @@
-MIN_AGE = 18
-MAX_AGE = 99
-MIN_NAME_LENGTH = 2
-MAX_NAME_LENGTH = 30
-MIN_ABOUT_LENGTH = 0
-MAX_ABOUT_LENGTH = 1000
-PHOTO_MAX_NUMBER = 3
-NAME_PATTERN = "^[А-Яа-яA-Za-z'-]+$"
-AGE_PATTERN = "^([0-9]{3})$"
-
-AGE_FIELD = "age"
-SEX_FIELD = "sex"
-NAME_FIELD = "name"
-LOCATION_FIELD = "location"
-ABOUT_FIELD = "about"
-IMAGE_FIELD = "image"
-IS_VISIBLE_FIELD = "is_visible"
-RECEIVED_PHOTOS_FIELD = "received_photos"
+from conversations.profile.constants import PHOTO_MAX_NUMBER
 
 ASK_AGE = "Сколько тебе лет?"
 ASK_SEX = "Ты парень или девушка?"
@@ -39,6 +22,7 @@ ASK_PHOTO = (
     " и загрузи их, затем нажми кнопку 'Сохранить фото' 😉"
     "\np.s. загрузить можно не более 3 фотографий."
 )
+PHOTO_ADDED = "Классные фото! Сохранил! 📸"
 DONT_SAVE_WITHOUT_PHOTO = "Сохранить анкету без фото нельзя."
 LOOK_AT_FORM_FIRST = "Вау! Фото класс! Давай посмотрим, что получилось 🤩"
 LOOK_AT_FORM_SECOND = "Супер. Теперь твоя анкета выглядит так:"
@@ -53,8 +37,8 @@ FORM_NOT_CHANGED = "Что ж, анкета осталась как есть."
 PROFILE_VIEWING = "Это твоя анкета. Что хочешь сделать?"
 ASK_WANT_TO_CHANGE = "Хорошо. Давай исправим 🤔"
 # fmt: off
-AGE_ERROR_MSG = "Введи целое число от {min} до {max}:"
-NAME_LENGHT_ERROR_MSG = "Введи имя от {min} до {max} символов:"
+AGE_ERROR_MSG = "Введите свой возраст в формате двузначного числа (например - 25)."
+NAME_LENGTH_ERROR_MSG = "Введи имя от {min} до {max} символов:"
 # fmt: on
 DEFAULT_ERROR_MESSAGE = "Некорректный ввод."
 NAME_SYMBOL_ERROR_MSG = "Введи имя без цифр и спецсимволов:"
@@ -72,3 +56,8 @@ PROFILE_DATA = (
     "<b>О себе:</b> {about}\n"
     "<b>Видимость анкеты:</b> {is_visible}\n"
 )
+
+REPLY_MSG_WANT_TO_DELETE = "Ты уверен, что хочешь удалить свою анкету?"
+REPLY_MSG_PROFILE_DELETED = "Твоя анкета была удалена."
+REPLY_MSG_PROFILE_NO_CHANGE = "Анкета не была изменена."
+CANCEL_PROFILE_CREATION = "Создание анкеты отменено."

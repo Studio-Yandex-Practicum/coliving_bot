@@ -3,21 +3,22 @@ from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
 
-from profiles.filters import ColivingFilter
+from profiles.filters import ColivingFilter, SmallResultsSetPagination
 from profiles.mixins import DestroyWithMediaRemovalMixin
 from profiles.models import Coliving, Location, Profile, UserFromTelegram
 from profiles.serializers import (
     ColivingSerializer,
     LocationSerializer,
     ProfileSerializer,
+    RoommatesSerializer,
     UserResidenceSerializer,
 )
 
 
 class ProfileView(
     generics.CreateAPIView,
-    generics.RetrieveAPIView,
-    generics.UpdateAPIView,
+    DestroyWithMediaRemovalMixin,
+    generics.RetrieveUpdateDestroyAPIView,
 ):
     """
     Вью-класс для отображения, сохранения и обновления объектов 'Profile'.
@@ -27,7 +28,7 @@ class ProfileView(
     serializer_class = ProfileSerializer
     lookup_field = "user__telegram_id"
     lookup_url_kwarg = "telegram_id"
-    http_method_names = ["get", "post", "patch"]
+    http_method_names = ["get", "post", "patch", "delete"]
 
     def perform_create(self, serializer) -> None:
         user, _is_created = UserFromTelegram.objects.get_or_create(
@@ -68,9 +69,9 @@ class ColivingView(generics.ListCreateAPIView):
             excl_list = Coliving.objects.filter(
                 Q(host=user) | Q(viewers=user)
             ).values_list("pk", flat=True)
-            queryset = queryset.exclude(pk__in=excl_list)
+            queryset = queryset.filter(is_visible=True).exclude(pk__in=excl_list)
 
-        return queryset.filter(is_visible=True)
+        return queryset
 
 
 class ColivingDetailView(
@@ -80,6 +81,21 @@ class ColivingDetailView(
 
     queryset = Coliving.objects.select_related("location", "host").all()
     serializer_class = ColivingSerializer
+
+
+class ColivingRoommatesView(generics.ListAPIView):
+    """Apiview для получения списка соседей."""
+
+    serializer_class = RoommatesSerializer
+    pagination_class = SmallResultsSetPagination
+
+    def get_queryset(self):
+        """Возвращает пользователей, отфильтрованных по идентификатору коливинга."""
+        return (
+            UserFromTelegram.objects.select_related("user_profile")
+            .values("user_profile__age", "user_profile__name", "telegram_id")
+            .filter(residence_id=self.kwargs["pk"])
+        )
 
 
 class UserResidenceUpdateAPIView(generics.UpdateAPIView):

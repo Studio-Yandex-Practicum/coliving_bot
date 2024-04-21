@@ -53,4 +53,21 @@ class MatchRequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MatchRequest
-        fields = ("receiver", "sender")
+        fields = ("id", "receiver", "sender", "status")
+        read_only_fields = ("id",)
+        validators = [
+            serializers.UniqueTogetherValidator(
+                queryset=MatchRequest.objects.all(),
+                fields=("sender", "receiver"),
+                message="Запрос MatchRequest уже создан.",
+            )
+        ]
+
+
+class MatchRequestUpdateSerializer(serializers.ModelSerializer):
+    """Сериализатор для обновления статуса MatchRequest."""
+
+    class Meta:
+        model = MatchRequest
+        fields = ("receiver", "sender", "status")
+        read_only_fields = ("id", "receiver", "sender")

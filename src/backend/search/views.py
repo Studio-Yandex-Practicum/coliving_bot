@@ -5,11 +5,12 @@ from rest_framework import exceptions, generics
 from profiles.models import Profile
 from profiles.serializers import ProfileSerializer
 from search.constants import MatchStatuses
-from search.filters import ProfilesSearchFilterSet
+from search.filters import MatchRequestFilter, ProfilesSearchFilterSet
 from search.models import MatchRequest, UserFromTelegram, UserReport
 from search.serializers import (
     MatchListSerializer,
     MatchRequestSerializer,
+    MatchRequestUpdateSerializer,
     UserReportSerializer,
 )
 
@@ -89,15 +90,21 @@ class ProfilesSearchView(generics.ListAPIView):
         )
 
 
-class MatchRequestView(generics.CreateAPIView):
-    """Apiview для создания MatchRequest."""
+class MatchRequestListCreateView(generics.ListCreateAPIView):
+    """
+    ApiView для создания MatchRequest и вывода списка всех MatchRequest
+    с фильтрацией по sender и receiver.
+
+    """
 
     queryset = MatchRequest.objects.all()
     serializer_class = MatchRequestSerializer
+    filterset_class = MatchRequestFilter
 
     def perform_create(self, serializer):
         sender = self.request.data.get("sender")
         receiver = self.request.data.get("receiver")
+
         match = MatchRequest.objects.filter(
             sender__telegram_id=receiver, receiver__telegram_id=sender
         )
@@ -105,3 +112,10 @@ class MatchRequestView(generics.CreateAPIView):
             match.update(status=MatchStatuses.is_match)
         else:
             return serializer.save()
+
+
+class MatchRequestUpdateView(generics.UpdateAPIView):
+    """ApiView для изменения статуса MatchRequest."""
+
+    queryset = MatchRequest.objects.all()
+    serializer_class = MatchRequestUpdateSerializer

@@ -1,17 +1,15 @@
 from dataclasses import asdict
 
-from telegram import (
-    InlineKeyboardMarkup,
-    InputMediaPhoto,
-    Message,
-    ReplyKeyboardRemove,
-    Update,
-)
+from telegram import InputMediaPhoto, ReplyKeyboardRemove, Update
 from telegram.ext import ContextTypes, ConversationHandler
 
+import conversations.match_requests.keyboards as match_keyboards
+import conversations.match_requests.templates as match_templates
 import conversations.roommate_search.keyboards as keyboards
 import conversations.roommate_search.templates as templates
 from conversations.common_functions.common_funcs import profile_required
+from conversations.roommate_search.buttons import ANY_GENDER_BTN
+from conversations.roommate_search.constants import SRCH_STNG_FIELD
 from conversations.roommate_search.states import States
 from internal_requests import api_service
 from internal_requests.entities import ProfileSearchSettings, UserProfile
@@ -25,11 +23,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     переводит либо в состояние подтверждения настроек, либо в настройку поиска.
     """
 
-    search_settings = context.user_data.get("search_settings")
+    search_settings = context.user_data.get(SRCH_STNG_FIELD)
     if search_settings:
-        await _message_edit(
-            message=update.effective_message,
-            text=templates.format_search_settings_message(search_settings),
+        await update.effective_message.edit_text(
+            text=templates.format_search_settings_message(search_settings)
         )
         await update.effective_message.reply_text(
             text=templates.ASK_SEARCH_SETTINGS,
@@ -45,7 +42,7 @@ async def ok_settings(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     Вызывается при подтверждении настроек поиска.
     Получает список подходящих анкет и переводит в состояние оценки профиля соседа.
     """
-    search_settings = context.user_data.get("search_settings")
+    search_settings = context.user_data.get(SRCH_STNG_FIELD)
     user_profiles = await api_service.get_filtered_user_profiles(
         filters=search_settings, viewer=update.effective_chat.id
     )
@@ -59,11 +56,10 @@ async def edit_settings(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     Переводит в состояние выбора локации.
     """
     await _clear_roommate_search_context(context)
-    await _message_edit(
-        message=update.effective_message,
-        text=templates.ASK_LOCATION,
-        keyboard=context.bot_data["location_keyboard"],
+    await update.effective_message.edit_text(
+        text=templates.ASK_LOCATION, reply_markup=context.bot_data["location_keyboard"]
     )
+
     return States.LOCATION
 
 
@@ -73,11 +69,9 @@ async def set_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     Переводит в состояние выбора пола соседа.
     """
     location = update.callback_query.data.split(":")[1]
-    context.user_data["search_settings"] = ProfileSearchSettings(location=location)
-    await _message_edit(
-        message=update.effective_message,
-        text=templates.ASK_SEX,
-        keyboard=keyboards.SEX_KEYBOARD,
+    context.user_data[SRCH_STNG_FIELD] = ProfileSearchSettings(location=location)
+    await update.effective_message.edit_text(
+        text=templates.ASK_SEX, reply_markup=keyboards.SEX_KEYBOARD
     )
     return States.SEX
 
@@ -88,11 +82,10 @@ async def set_sex(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     Переводит в состояние выбора возраста.
     """
     sex = update.callback_query.data
-    context.user_data["search_settings"].sex = sex if sex != "Неважно" else None
-    await _message_edit(
-        message=update.effective_message,
+    context.user_data[SRCH_STNG_FIELD].sex = sex if sex != ANY_GENDER_BTN else None
+    await update.effective_message.edit_text(
         text=templates.ASK_AGE,
-        keyboard=keyboards.AGE_KEYBOARD,
+        reply_markup=keyboards.AGE_KEYBOARD,
     )
     return States.AGE
 
@@ -105,21 +98,19 @@ async def set_age(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     callback_data = update.callback_query.data
     try:
         (
-            context.user_data["search_settings"].age_min,
-            context.user_data["search_settings"].age_max,
+            context.user_data[SRCH_STNG_FIELD].age_min,
+            context.user_data[SRCH_STNG_FIELD].age_max,
         ) = callback_data.split("-")
     except ValueError as exception:
         if callback_data.startswith(">"):
-            context.user_data["search_settings"].age_min = callback_data.replace(
-                ">", ""
-            )
+            context.user_data[SRCH_STNG_FIELD].age_min = callback_data.replace(">", "")
         else:
             raise exception
-    search_settings = context.user_data.get("search_settings")
-    await _message_edit(
-        message=update.effective_message,
-        text=templates.format_search_settings_message(search_settings),
+    search_settings = context.user_data.get(SRCH_STNG_FIELD)
+    await update.effective_message.edit_text(
+        text=templates.format_search_settings_message(search_settings)
     )
+
     await update.effective_message.reply_text(
         text=templates.ASK_SEARCH_SETTINGS,
         reply_markup=keyboards.SEARCH_SETTINGS_KEYBOARD,
@@ -142,12 +133,29 @@ async def profile_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     """
     Обрабатывает ЛАЙК на профиль соседа.
     Посылает POST запрос в API на добавление MatchRequest,
+    отправляет уведомление sender о том, что лайк поставлен,
     отправляет уведомление другому пользователю о лайке
     и переводит в состояние продолжения поиска.
     """
     current_profile = context.user_data.get("current_profile")
+    sender_id = update.effective_chat.id
+    receiver_id = current_profile["user"]
+
     await api_service.send_match_request(
-        sender=update.effective_chat.id, receiver=current_profile["user"]
+        sender=sender_id,
+        receiver=receiver_id,
+    )
+
+    await context.bot.send_message(
+        chat_id=sender_id,
+        text=templates.SEND_LIKE.format(receiver_name=current_profile["name"]),
+    )
+
+    keyboard = await match_keyboards.get_view_profile_keyboard(sender_id)
+    await context.bot.send_message(
+        chat_id=receiver_id,
+        text=match_templates.LIKE_NOTIFICATION,
+        reply_markup=keyboard,
     )
 
     await update.effective_message.reply_text(
@@ -188,22 +196,15 @@ async def _get_next_user_profile(
                 text=templates.SEARCH_INTRO,
                 reply_markup=keyboards.PROFILE_KEYBOARD,
             )
-        profile = asdict(user_profiles.pop())
-        context.user_data["current_profile"] = profile
+        profile = user_profiles.pop()
+        context.user_data["current_profile"] = asdict(profile)
         context.user_data["user_profiles"] = user_profiles
-        images = profile.pop("images")
-        message_text = templates.PROFILE_DATA.format(**profile)
-        if images:
-            media_group = [InputMediaPhoto(file_id) for file_id in images]
-            await update.effective_chat.send_media_group(
-                media=media_group,
-                caption=message_text,
-            )
-        else:
-            await update.effective_chat.send_message(
-                text=message_text,
-                reply_markup=keyboards.PROFILE_KEYBOARD,
-            )
+
+        await send_profile_info(
+            update=update,
+            profile=profile,
+            profile_template=templates.PROFILE_DATA,
+        )
         return States.PROFILE
 
     await update.effective_message.reply_text(
@@ -213,15 +214,27 @@ async def _get_next_user_profile(
     return States.NO_MATCHES
 
 
-async def _message_edit(
-    message: Message,
-    text: str,
-    keyboard: InlineKeyboardMarkup | None = None,
-) -> None:
-    """
-    Функция для изменения текста и клавиатуры сообщения с ParseMode.HTML.
-    """
-    await message.edit_text(text=text, reply_markup=keyboard)
+async def send_profile_info(
+    update: Update,
+    profile: UserProfile,
+    profile_template: str,
+):
+    """Формирует и отправляет сообщение с профилем пользователя."""
+    profile_dict: dict = asdict(profile)
+
+    images = profile_dict.pop("images", None)
+    profile_brief_info = profile_template.format(**profile_dict)
+
+    if images:
+        media_group = [InputMediaPhoto(file_id) for file_id in images]
+        await update.effective_chat.send_media_group(
+            media=media_group,
+            caption=profile_brief_info,
+        )
+    else:
+        await update.effective_chat.send_message(
+            text=profile_brief_info,
+        )
 
 
 async def _clear_roommate_search_context(context):

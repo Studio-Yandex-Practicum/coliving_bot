@@ -3,7 +3,8 @@ from django.urls import path
 
 from search.views import (
     MatchedUsersListView,
-    MatchRequestView,
+    MatchRequestListCreateView,
+    MatchRequestUpdateView,
     ProfilesSearchView,
     UserReportCreateView,
 )
@@ -29,7 +30,12 @@ urlpatterns = [
     ),
     path(
         f"{settings.API_V1_PREFIX}/match_requests/",
-        MatchRequestView.as_view(),
+        MatchRequestListCreateView.as_view(),
         name="match-request",
+    ),
+    path(
+        f"{settings.API_V1_PREFIX}/match_requests/<int:pk>/",
+        MatchRequestUpdateView.as_view(),
+        name="patch-match-request",
     ),
 ]

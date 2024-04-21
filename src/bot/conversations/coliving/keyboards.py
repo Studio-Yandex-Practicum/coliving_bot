@@ -8,7 +8,7 @@ from telegram import (
 import conversations.coliving.buttons as buttons
 from conversations.common_functions.common_buttons import (
     LOCATION_PREFIX,
-    RETURN_TO_MENU_BTN_LABEL,
+    RETURN_TO_MENU_BTN,
     ROOM_TYPE_PREFIX,
 )
 from conversations.common_functions.common_keyboards import HIDE_BUTTON, SEARCH_BUTTON
@@ -49,10 +49,6 @@ CONFIRM_OR_CANCEL_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
 WHAT_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         InlineKeyboardButton(
-            text=buttons.BTN_LABEL_FILL_AGAIN,
-            callback_data=buttons.BTN_LABEL_FILL_AGAIN,
-        ),
-        InlineKeyboardButton(
             text=buttons.BTN_LABEL_EDIT_LOCATION,
             callback_data=buttons.BTN_LABEL_EDIT_LOCATION,
         ),
@@ -72,6 +68,23 @@ WHAT_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
             text=buttons.BTN_LABEL_EDIT_PHOTO,
             callback_data=buttons.BTN_LABEL_EDIT_PHOTO,
         ),
+        InlineKeyboardButton(
+            text=buttons.BTN_LABEL_DELETE_PROFILE_KEYBOARD,
+            callback_data=buttons.BTN_LABEL_DELETE_PROFILE_KEYBOARD,
+        ),
+        InlineKeyboardButton(
+            text=RETURN_TO_MENU_BTN,
+            callback_data=RETURN_TO_MENU_BTN,
+        ),
+    )
+)
+
+COLIVING_TRANSFER_TO_CONFIRM_KEYBOARD = InlineKeyboardMarkup.from_row(
+    button_row=(
+        InlineKeyboardButton(
+            text=buttons.BTN_LABEL_CONFIRM, callback_data="set_new_owner"
+        ),
+        InlineKeyboardButton(text=buttons.BTN_LABEL_CANCEL, callback_data="go_to_menu"),
     )
 )
 
@@ -110,12 +123,8 @@ COLIVING_PROFILE_DUPLICATE_BUTTONS = [
     ),
     EDIT_PROFILE_KEYBOARD,
     InlineKeyboardButton(
-        text=buttons.BTN_LABEL_DELETE_PROFILE_KEYBOARD,
-        callback_data=buttons.BTN_LABEL_DELETE_PROFILE_KEYBOARD,
-    ),
-    InlineKeyboardButton(
-        text=RETURN_TO_MENU_BTN_LABEL,
-        callback_data=RETURN_TO_MENU_BTN_LABEL,
+        text=RETURN_TO_MENU_BTN,
+        callback_data=RETURN_TO_MENU_BTN,
     ),
 ]
 

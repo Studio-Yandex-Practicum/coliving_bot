@@ -9,10 +9,9 @@ BTN_LABEL_BED_IN_ROOM = "Спальное место"
 BTN_LABEL_ROOM_IN_APARTMENT = "Комната"
 
 BTN_LABEL_CONFIRM = "Да, подтвердить ✅"
-
+BTN_LABEL_CANCEL = "Отменить ❌"
 BTN_LABEL_CANCEL_CREATE = "Отменить создание коливинга ❌"
 BTN_LABEL_CANCEL_EDIT = "Отменить редактирование ❌"
-BTN_LABEL_FILL_AGAIN = "Заполнить заново ✏️"
 BTN_LABEL_EDIT_ROOM_TYPE = "Тип аренды"
 BTN_LABEL_EDIT_ABOUT_ROOM = "Описание"
 BTN_LABEL_EDIT_PRICE = "Цена"

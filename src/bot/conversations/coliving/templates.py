@@ -1,30 +1,9 @@
+from conversations.coliving.constants import PHOTO_MAX_NUMBER
 from conversations.common_functions.common_templates import (
     PROFILE_IS_HIDDEN_TEXT,
     PROFILE_IS_VISIBLE_TEXT,
 )
 from internal_requests.entities import Coliving
-
-AGE_FIELD = "age"
-SEX_FIELD = "sex"
-NAME_FIELD = "name"
-RECEIVED_PHOTOS_FIELD = "received_photos"
-
-LOCATION_FIELD = "location"
-ROOM_TYPE_FIELD = "room_type"
-ABOUT_FIELD = "about"
-PRICE_FIELD = "price"
-IS_VISIBLE_FIELD = "is_visible"
-ROOMMATES_FIELD = "roommates"
-VIEWERS_FIELD = "viewers"
-IMAGE_FIELD = "image"
-
-MIN_ABOUT_LENGTH = 0
-MAX_ABOUT_LENGTH = 1000
-MIN_PRICE = 0
-MAX_PRICE = 1000000
-PHOTO_MAX_NUMBER = 5
-
-DEFAULT_ERROR_MESSAGE = "Некорректный ввод."
 
 ERR_MSG_ABOUT_MAX_LEN = (
     "Описание не должно содержать более {max} символов. Попробуй ещё раз:"
