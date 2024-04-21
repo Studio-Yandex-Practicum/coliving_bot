@@ -8,7 +8,7 @@ from telegram import (
 from conversations.common_functions.common_buttons import (
     HIDE_SEARCH_BUTTON,
     RETURN_BTN_LABEL,
-    RETURN_TO_MENU_BTN_LABEL,
+    RETURN_TO_MENU_BTN,
     SHOW_SEARCH_BUTTON,
 )
 from conversations.common_functions.common_keyboards import HIDE_BUTTON, SEARCH_BUTTON
@@ -35,9 +35,7 @@ from conversations.profile.buttons import (
 
 PROFILE_DUPLICATE_BUTTONS = [
     InlineKeyboardButton(text=EDIT_FORM_BUTTON, callback_data=EDIT_FORM_BUTTON),
-    InlineKeyboardButton(
-        text=RETURN_TO_MENU_BTN_LABEL, callback_data=RETURN_TO_MENU_BTN_LABEL
-    ),
+    InlineKeyboardButton(text=RETURN_TO_MENU_BTN, callback_data=RETURN_TO_MENU_BTN),
 ]
 
 VISIBLE_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
@@ -81,9 +79,6 @@ PHOTO_EDIT_KEYBOARD = ReplyKeyboardMarkup.from_button(
 
 FORM_EDIT_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
-        InlineKeyboardButton(
-            text=DELETE_PROFILE_BUTTON, callback_data=DELETE_PROFILE_BUTTON
-        ),
         InlineKeyboardButton(text=EDIT_ABOUT_BUTTON, callback_data=EDIT_ABOUT_BUTTON),
         InlineKeyboardButton(text=EDIT_NAME_BUTTON, callback_data=EDIT_NAME_BUTTON),
         InlineKeyboardButton(text=EDIT_SEX_BUTTON, callback_data=EDIT_SEX_BUTTON),
@@ -92,6 +87,9 @@ FORM_EDIT_KEYBOARD = InlineKeyboardMarkup.from_column(
             text=EDIT_LOCATION_BUTTON, callback_data=EDIT_LOCATION_BUTTON
         ),
         InlineKeyboardButton(text=NEW_PHOTO_BUTTON, callback_data=NEW_PHOTO_BUTTON),
+        InlineKeyboardButton(
+            text=DELETE_PROFILE_BUTTON, callback_data=DELETE_PROFILE_BUTTON
+        ),
         InlineKeyboardButton(text=RETURN_BTN_LABEL, callback_data=RETURN_BTN_LABEL),
     )
 )

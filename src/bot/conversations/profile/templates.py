@@ -1,21 +1,4 @@
-MIN_AGE = 18
-MAX_AGE = 99
-MIN_NAME_LENGTH = 2
-MAX_NAME_LENGTH = 30
-MIN_ABOUT_LENGTH = 0
-MAX_ABOUT_LENGTH = 1000
-PHOTO_MAX_NUMBER = 3
-NAME_PATTERN = "^[А-Яа-яA-Za-z'-]+$"
-AGE_PATTERN = r"^1[8-9]|[2-9]\d$"
-
-AGE_FIELD = "age"
-SEX_FIELD = "sex"
-NAME_FIELD = "name"
-LOCATION_FIELD = "location"
-ABOUT_FIELD = "about"
-IMAGE_FIELD = "image"
-IS_VISIBLE_FIELD = "is_visible"
-RECEIVED_PHOTOS_FIELD = "received_photos"
+from conversations.profile.constants import PHOTO_MAX_NUMBER
 
 ASK_AGE = "Сколько тебе лет?"
 ASK_SEX = "Ты парень или девушка?"
@@ -55,7 +38,7 @@ PROFILE_VIEWING = "Это твоя анкета. Что хочешь сдела�
 ASK_WANT_TO_CHANGE = "Хорошо. Давай исправим 🤔"
 # fmt: off
 AGE_ERROR_MSG = "Введите свой возраст в формате двузначного числа (например - 25)."
-NAME_LENGHT_ERROR_MSG = "Введи имя от {min} до {max} символов:"
+NAME_LENGTH_ERROR_MSG = "Введи имя от {min} до {max} символов:"
 # fmt: on
 DEFAULT_ERROR_MESSAGE = "Некорректный ввод."
 NAME_SYMBOL_ERROR_MSG = "Введи имя без цифр и спецсимволов:"

@@ -12,7 +12,7 @@ import conversations.common_functions.common_buttons as common_buttons
 import conversations.common_functions.common_funcs as common_funcs
 from conversations.coliving.coliving_transfer import callback_funcs as coliving_transfer
 from conversations.coliving.states import States
-from conversations.common_functions.common_buttons import RETURN_TO_MENU_BTN_LABEL
+from conversations.common_functions.common_buttons import RETURN_TO_MENU_BTN
 from conversations.menu.buttons import COLIVING_BUTTON
 
 coliving_handler: ConversationHandler = ConversationHandler(
@@ -29,7 +29,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 pattern=common_buttons.LOCATION_CALLBACK_PATTERN,
             ),
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
+                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
                 callback_funcs.handle_location_text_input_instead_of_choosing_button,
             ),
         ],
@@ -39,13 +39,14 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 pattern=common_buttons.ROOM_TYPE_CALLBACK_PATTERN,
             ),
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
+                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
                 callback_funcs.handle_room_type_text_input_instead_of_choosing_button,
             ),
         ],
         States.ABOUT_ROOM: [
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND, callback_funcs.handle_about_coliving
+                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
+                callback_funcs.handle_about_coliving,
             ),
         ],
         States.PRICE: [
@@ -54,7 +55,8 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 callback_funcs.handle_price,
             ),
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND, callback_funcs.handle_price
+                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
+                callback_funcs.handle_price,
             ),
         ],
         States.PHOTO_ROOM: [
@@ -77,7 +79,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 pattern=rf"^{buttons.BTN_LABEL_CANCEL_CREATE}",
             ),
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
+                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
                 callback_funcs.handle_confirm_or_cancel_profile_text_instead_of_button,
             ),
         ],
@@ -107,12 +109,12 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 pattern=rf"^{buttons.BTN_LABEL_EDIT_PHOTO}",
             ),
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
+                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
                 callback_funcs.handle_what_to_edit_text_instead_of_button,
             ),
             CallbackQueryHandler(
-                callback=callback_funcs.handle_return_to_menu_response,
-                pattern=rf"^{RETURN_TO_MENU_BTN_LABEL}$",
+                callback=common_funcs.handle_return_to_menu_response,
+                pattern=rf"^{RETURN_TO_MENU_BTN}$",
             ),
         ],
         States.IS_VISIBLE: [
@@ -124,7 +126,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 ),
             ),
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
+                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
                 callback_funcs.repeat_question_about_coliving_visibility,
             ),
         ],
@@ -134,7 +136,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 pattern=common_buttons.LOCATION_CALLBACK_PATTERN,
             ),
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
+                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
                 callback_funcs.handle_location_text_input_instead_of_choosing_button,
             ),
         ],
@@ -144,13 +146,13 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 pattern=common_buttons.ROOM_TYPE_CALLBACK_PATTERN,
             ),
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
+                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
                 callback_funcs.handle_room_type_text_input_instead_of_choosing_button,
             ),
         ],
         States.EDIT_ABOUT_ROOM: [
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
+                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
                 callback_funcs.handle_edit_about_coliving,
             ),
         ],
@@ -160,7 +162,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 callback_funcs.handle_edit_price,
             ),
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
+                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
                 callback_funcs.handle_edit_price,
             ),
         ],
@@ -189,7 +191,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 pattern=rf"^{buttons.BTN_LABEL_EDIT_CONTINUE}",
             ),
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
+                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
                 callback_funcs.handle_edit_profile_confirmation_text_instead_of_button,
             ),
         ],
@@ -203,7 +205,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 pattern=rf"^{buttons.BTN_LABEL_DELETE_CANCEL}",
             ),
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
+                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
                 callback_funcs.handle_delete_profile,
             ),
         ],
@@ -232,11 +234,11 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 pattern=r"^transfer_to",
             ),
             CallbackQueryHandler(
-                callback=callback_funcs.handle_return_to_menu_response,
-                pattern=rf"^{RETURN_TO_MENU_BTN_LABEL}$",
+                callback=common_funcs.handle_return_to_menu_response,
+                pattern=rf"^{RETURN_TO_MENU_BTN}$",
             ),
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
+                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
                 callback_funcs.handle_coliving_text_instead_of_button,
             ),
         ],
@@ -260,8 +262,12 @@ coliving_handler: ConversationHandler = ConversationHandler(
     },
     fallbacks=[
         CommandHandler(
-            "cancel",
-            common_funcs.cancel,
+            command="cancel",
+            callback=common_funcs.cancel,
+        ),
+        CommandHandler(
+            command="menu",
+            callback=common_funcs.return_to_menu_via_menu_command,
         ),
     ],
 )

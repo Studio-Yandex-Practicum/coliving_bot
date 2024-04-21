@@ -16,7 +16,7 @@ async def handle_coliving_transfer_to(update, context):
     page = 1
     response_json = await _get_coliving_roommates_response(update, context, page)
     if response_json is None:
-        await context.user_data.clear()
+        context.user_data.clear()
         return ConversationHandler.END
     keyboard = await _create_page_keyboard(response_json, page)
     await update.effective_message.edit_reply_markup()
