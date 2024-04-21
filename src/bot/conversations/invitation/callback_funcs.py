@@ -5,10 +5,8 @@ from telegram.ext import ContextTypes, ConversationHandler
 
 import conversations.invitation.keyboards as keyboards
 import conversations.invitation.templates as templates
+from conversations.common_functions.common_funcs import profile_required
 from conversations.invitation.states import States
-from conversations.common_functions.common_funcs import (
-    profile_required,
-)
 from internal_requests import api_service
 
 

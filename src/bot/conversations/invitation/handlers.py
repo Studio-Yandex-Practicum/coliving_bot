@@ -1,11 +1,7 @@
-from telegram.ext import (
-    CallbackQueryHandler,
-    CommandHandler,
-    ConversationHandler,
-)
+from telegram.ext import CallbackQueryHandler, CommandHandler, ConversationHandler
 
-import conversations.invitation.callback_funcs as callback_funcs
 import conversations.common_functions.common_funcs as common_funcs
+import conversations.invitation.callback_funcs as callback_funcs
 from conversations.invitation.states import States
 
 invitation_handler: ConversationHandler = ConversationHandler(

@@ -1,10 +1,6 @@
-from telegram import (
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-)
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 import conversations.invitation.buttons as buttons
-
 
 CONSIDER_INVITATION = InlineKeyboardMarkup.from_column(
     button_column=(
