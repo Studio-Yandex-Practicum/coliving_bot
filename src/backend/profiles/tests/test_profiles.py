@@ -157,7 +157,7 @@ class ProfileAPITestCase(APITestCase):
 
     def test_invalid_methods_profile(self):
         """Тест на незарешенные методы запроса."""
-        methods = ["put", "delete"]
+        methods = ["put"]
         for method in methods:
             with self.subTest(method=method):
                 response = self.client.generic(

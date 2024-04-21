@@ -7,7 +7,6 @@ from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
 import conversations.common_functions.common_funcs as common_funcs
 import conversations.common_functions.common_templates as common_templates
-import conversations.profile.buttons as buttons
 import conversations.profile.constants as consts
 import conversations.profile.keyboards as keyboards
 import conversations.profile.templates as templates
@@ -129,7 +128,7 @@ async def handle_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
         value=len(name),
         min=consts.MIN_NAME_LENGTH,
         max=consts.MAX_NAME_LENGTH,
-        message=templates.NAME_LENGHT_ERROR_MSG.format(
+        message=templates.NAME_LENGTH_ERROR_MSG.format(
             min=consts.MIN_NAME_LENGTH, max=consts.MAX_NAME_LENGTH
         ),
     ):
@@ -149,24 +148,18 @@ async def handle_age(
     Обрабатывает введенный пользователем возраст.
     Переводит диалог в состояние SEX (пол пользователя).
     """
-    age = update.message.text
-    if not await value_is_in_range_validator(
-        update=update,
-        context=context,
-        value=age,
-        min=consts.MIN_AGE,
-        max=consts.MAX_AGE,
-        message=templates.AGE_ERROR_MSG.format(min=consts.MIN_AGE, max=consts.MAX_AGE),
-    ):
-        return States.AGE
-
-    context.user_data[consts.AGE_FIELD] = int(age)
+    context.user_data[consts.AGE_FIELD] = int(update.message.text)
 
     await update.effective_message.reply_text(
         templates.ASK_SEX, reply_markup=keyboards.SEX_KEYBOARD
     )
 
     return States.SEX
+
+
+async def handle_wrong_age(update: Update, _context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.effective_chat.send_message(templates.AGE_ERROR_MSG)
+    return None
 
 
 @add_response_prefix()
@@ -215,14 +208,8 @@ async def handle_about(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         return States.ABOUT_YOURSELF
     if context.user_data.get(consts.ABOUT_FIELD):
         context.user_data[consts.ABOUT_FIELD] = about
-        await api_service.update_user_profile(
-            update.effective_chat.id, context.user_data
-        )
     else:
         context.user_data[consts.ABOUT_FIELD] = about
-        await api_service.create_user_profile(
-            update.effective_chat.id, context.user_data
-        )
         context.user_data[consts.IS_VISIBLE_FIELD] = True
     await update.effective_chat.send_message(
         text=templates.ASK_PHOTO, reply_markup=keyboards.PHOTO_KEYBOARD
@@ -292,14 +279,6 @@ async def handle_photo(
 
     file_id = update.effective_message.photo[-1].file_id
 
-    new_file = await context.bot.get_file(file_id)
-    photo_bytearray = await new_file.download_as_bytearray()
-    await api_service.save_photo(
-        telegram_id=update.effective_chat.id,
-        photo_bytearray=photo_bytearray,
-        filename=new_file.file_path,
-        file_id=file_id,
-    )
     received_photos = context.user_data.get(consts.RECEIVED_PHOTOS_FIELD, [])
     received_photos.append(file_id)
     context.user_data[consts.RECEIVED_PHOTOS_FIELD] = received_photos
@@ -353,27 +332,29 @@ async def send_received_photos(
 
 
 @add_response_prefix()
-async def handle_profile(update: Update, _context: ContextTypes.DEFAULT_TYPE) -> int:
-    """
-    Выводит сообщение с заполненным профилем.
-    Вызывает метод для отправки запроса на видимость анкеты,
-    """
-    edit = update.callback_query.data
+async def handle_profile_cancel_confirmation(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """Отмена создания профиля."""
+    await update.effective_message.reply_text(
+        text=templates.CANCEL_PROFILE_CREATION,
+    )
+    context.user_data.clear()
 
-    if edit == buttons.EDIT_FORM_BUTTON:
-        await update.effective_message.reply_text(
-            text=templates.ASK_WANT_TO_CHANGE,
-            reply_markup=keyboards.FORM_EDIT_KEYBOARD,
-        )
-        return States.EDIT
-    elif edit == buttons.YES_BUTTON:
-        await update.effective_message.reply_text(
-            text=templates.ASK_FORM_VISIBLE,
-            reply_markup=keyboards.FORM_VISIBLE_KEYBOARD,
-        )
-        return States.VISIBLE
+    return ConversationHandler.END
 
-    return States.CONFIRMATION
+
+@add_response_prefix()
+async def handle_ok_to_save(update: Update, _context: ContextTypes.DEFAULT_TYPE) -> int:
+    """
+    Обработчик кнопки Да, все верно.
+    Переводит в состояние VISIBLE.
+    """
+    await update.effective_message.reply_text(
+        text=templates.ASK_FORM_VISIBLE,
+        reply_markup=keyboards.FORM_VISIBLE_KEYBOARD,
+    )
+    return States.VISIBLE
 
 
 @add_response_prefix()
@@ -386,27 +367,75 @@ async def handle_visible(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
     context.user_data[consts.IS_VISIBLE_FIELD] = visibility_choice
 
-    await api_service.update_user_profile(
-        telegram_id=update.effective_chat.id,
-        data=context.user_data,
-    )
+    await api_service.create_user_profile(update.effective_chat.id, context.user_data)
+    for file_id in context.user_data.get(templates.RECEIVED_PHOTOS_FIELD, []):
+        new_file = await context.bot.get_file(file_id)
+        photo_bytearray = await new_file.download_as_bytearray()
+        await api_service.save_photo(
+            telegram_id=update.effective_chat.id,
+            photo_bytearray=photo_bytearray,
+            filename=new_file.file_path,
+            file_id=file_id,
+        )
     await send_profile_saved_notification(update, context)
 
     return ConversationHandler.END
 
 
 @add_response_prefix()
-async def start_filling_again(
+async def handle_delete_profile(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """
-    Обработка кнопки 'Заполнить заново.'.
+    Выбор р.
+    Обработка ответа: Удалить анкету.
     """
     await update.effective_message.reply_text(
-        text=templates.ASK_NAME_AGAIN,
+        text=templates.REPLY_MSG_WANT_TO_DELETE,
+        reply_markup=keyboards.DELETE_OR_CANCEL_PROFILE_KEYBOARD,
     )
+    return States.DELETE_PROFILE
 
-    return States.NAME
+
+@add_response_prefix()
+async def handle_delete_profile_confirmation_confirm(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """
+    Подтверждение и удаление анкеты.
+    """
+    await api_service.delete_profile(context._user_id)
+    context.user_data.clear()
+    await update.effective_message.reply_text(text=templates.REPLY_MSG_PROFILE_DELETED)
+
+    return ConversationHandler.END
+
+
+@add_response_prefix()
+async def handle_delete_profile_confirmation_cancel(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """
+    Отмена удаления анкеты.
+    """
+    context.user_data.clear()
+    await update.effective_message.reply_text(
+        text=templates.REPLY_MSG_PROFILE_NO_CHANGE
+    )
+    return ConversationHandler.END
+
+
+@add_response_prefix()
+async def handle_profile_confirmation_cancel(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """Отмена редактирования профиля."""
+    await update.effective_message.reply_text(
+        text=templates.CANCEL_PROFILE_CREATION,
+    )
+    context.user_data.clear()
+
+    return ConversationHandler.END
 
 
 @add_response_prefix()
@@ -510,7 +539,7 @@ async def handle_edit_name(
         value=len(name),
         min=consts.MIN_NAME_LENGTH,
         max=consts.MAX_NAME_LENGTH,
-        message=templates.NAME_LENGHT_ERROR_MSG.format(
+        message=templates.NAME_LENGTH_ERROR_MSG.format(
             min=consts.MIN_NAME_LENGTH, max=consts.MAX_NAME_LENGTH
         ),
     ):
@@ -550,18 +579,7 @@ async def handle_edit_age(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     Обрабатывает отредактированный возраст.
     Переводит диалог в состояние EDIT_CONFIRMATION (анкета верна или нет).
     """
-    age = update.message.text
-    if not await value_is_in_range_validator(
-        update=update,
-        context=context,
-        value=age,
-        min=consts.MIN_AGE,
-        max=consts.MAX_AGE,
-        message=templates.AGE_ERROR_MSG,
-    ):
-        return States.EDIT_AGE
-
-    context.user_data[consts.AGE_FIELD] = int(age)
+    context.user_data[consts.AGE_FIELD] = int(update.message.text)
     await _look_at_profile(
         update,
         context,

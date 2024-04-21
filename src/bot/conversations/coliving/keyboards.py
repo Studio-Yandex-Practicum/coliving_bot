@@ -49,10 +49,6 @@ CONFIRM_OR_CANCEL_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
 WHAT_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         InlineKeyboardButton(
-            text=buttons.BTN_LABEL_FILL_AGAIN,
-            callback_data=buttons.BTN_LABEL_FILL_AGAIN,
-        ),
-        InlineKeyboardButton(
             text=buttons.BTN_LABEL_EDIT_LOCATION,
             callback_data=buttons.BTN_LABEL_EDIT_LOCATION,
         ),
@@ -71,6 +67,14 @@ WHAT_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
         InlineKeyboardButton(
             text=buttons.BTN_LABEL_EDIT_PHOTO,
             callback_data=buttons.BTN_LABEL_EDIT_PHOTO,
+        ),
+        InlineKeyboardButton(
+            text=buttons.BTN_LABEL_DELETE_PROFILE_KEYBOARD,
+            callback_data=buttons.BTN_LABEL_DELETE_PROFILE_KEYBOARD,
+        ),
+        InlineKeyboardButton(
+            text=RETURN_TO_MENU_BTN,
+            callback_data=RETURN_TO_MENU_BTN,
         ),
     )
 )
@@ -118,10 +122,6 @@ COLIVING_PROFILE_DUPLICATE_BUTTONS = [
         callback_data=buttons.BTN_TRANSFER_TO,
     ),
     EDIT_PROFILE_KEYBOARD,
-    InlineKeyboardButton(
-        text=buttons.BTN_LABEL_DELETE_PROFILE_KEYBOARD,
-        callback_data=buttons.BTN_LABEL_DELETE_PROFILE_KEYBOARD,
-    ),
     InlineKeyboardButton(
         text=RETURN_TO_MENU_BTN,
         callback_data=RETURN_TO_MENU_BTN,
