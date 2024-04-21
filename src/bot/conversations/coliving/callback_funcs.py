@@ -390,25 +390,6 @@ async def handle_what_to_edit_text_instead_of_button(
 
 
 @add_response_prefix()
-async def handle_what_to_edit_fill_again(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> int:
-    """
-    Выбор редактируемого поля.
-    Обработка ответа: Заполнить заново.
-    """
-
-    await update.effective_message.edit_reply_markup()
-
-    context.user_data.clear()
-    await update.effective_chat.send_message(
-        text=templates.REPLY_MSG_ASK_LOCATION,
-        reply_markup=context.bot_data["location_keyboard"],
-    )
-    return States.LOCATION
-
-
-@add_response_prefix()
 async def handle_what_to_edit_location(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -786,7 +767,7 @@ async def handle_delete_profile(
 ) -> int:
     """
     Выбор р.
-    Обработка ответа: Заполнить заново.
+    Обработка ответа: Удалить профиль.
     """
     await update.effective_message.edit_reply_markup()
     await update.effective_message.reply_text(

@@ -23,4 +23,5 @@ class States(int, enum.Enum):
         EDIT_CONFIRMATION,
         VISIBLE,
         MENU,
-    ) = range(18)
+        DELETE_PROFILE,
+    ) = range(19)
