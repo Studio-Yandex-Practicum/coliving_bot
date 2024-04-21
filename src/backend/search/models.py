@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 from profiles.models import Coliving, Profile, UserFromTelegram
 from search.constants import MatchStatuses, ReportCategories, ReportStatuses
@@ -64,6 +65,11 @@ class ColivingLike(Like):
 
     class Meta:
         unique_together = ("sender", "coliving")
+
+    def save(self, *args, **kwargs):
+        if self.id:
+            self.match_date = timezone.now()
+        return super().save(*args, **kwargs)
 
 
 class UserReport(models.Model):

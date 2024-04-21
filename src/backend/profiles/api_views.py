@@ -16,8 +16,8 @@ from profiles.serializers import (
 
 class ProfileView(
     generics.CreateAPIView,
-    generics.RetrieveAPIView,
-    generics.UpdateAPIView,
+    DestroyWithMediaRemovalMixin,
+    generics.RetrieveUpdateDestroyAPIView,
 ):
     """
     Вью-класс для отображения, сохранения и обновления объектов 'Profile'.
@@ -27,7 +27,7 @@ class ProfileView(
     serializer_class = ProfileSerializer
     lookup_field = "user__telegram_id"
     lookup_url_kwarg = "telegram_id"
-    http_method_names = ["get", "post", "patch"]
+    http_method_names = ["get", "post", "patch", "delete"]
 
     def perform_create(self, serializer) -> None:
         user, _is_created = UserFromTelegram.objects.get_or_create(

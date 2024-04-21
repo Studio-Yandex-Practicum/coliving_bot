@@ -49,10 +49,6 @@ CONFIRM_OR_CANCEL_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
 WHAT_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         InlineKeyboardButton(
-            text=buttons.BTN_LABEL_FILL_AGAIN,
-            callback_data=buttons.BTN_LABEL_FILL_AGAIN,
-        ),
-        InlineKeyboardButton(
             text=buttons.BTN_LABEL_EDIT_LOCATION,
             callback_data=buttons.BTN_LABEL_EDIT_LOCATION,
         ),
@@ -71,6 +67,14 @@ WHAT_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
         InlineKeyboardButton(
             text=buttons.BTN_LABEL_EDIT_PHOTO,
             callback_data=buttons.BTN_LABEL_EDIT_PHOTO,
+        ),
+        InlineKeyboardButton(
+            text=buttons.BTN_LABEL_DELETE_PROFILE_KEYBOARD,
+            callback_data=buttons.BTN_LABEL_DELETE_PROFILE_KEYBOARD,
+        ),
+        InlineKeyboardButton(
+            text=RETURN_TO_MENU_BTN,
+            callback_data=RETURN_TO_MENU_BTN,
         ),
     )
 )
@@ -118,10 +122,6 @@ COLIVING_PROFILE_DUPLICATE_BUTTONS = [
         callback_data=buttons.BTN_TRANSFER_TO,
     ),
     EDIT_PROFILE_KEYBOARD,
-    InlineKeyboardButton(
-        text=buttons.BTN_LABEL_DELETE_PROFILE_KEYBOARD,
-        callback_data=buttons.BTN_LABEL_DELETE_PROFILE_KEYBOARD,
-    ),
     InlineKeyboardButton(
         text=RETURN_TO_MENU_BTN,
         callback_data=RETURN_TO_MENU_BTN,
@@ -213,6 +213,37 @@ DELETE_OR_CANCEL_COLIVING_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
         InlineKeyboardButton(
             text=buttons.BTN_LABEL_DELETE_CANCEL,
             callback_data=buttons.BTN_LABEL_DELETE_CANCEL,
+        ),
+    )
+)
+
+
+ROOMMATE_KEYBOARD = InlineKeyboardMarkup.from_row(
+    button_row=(
+        InlineKeyboardButton(
+            text=buttons.OK_ROOMMATE_BTN,
+            callback_data=buttons.OK_ROOMMATE_BTN,
+        ),
+        InlineKeyboardButton(
+            text=buttons.NEXT_ROOMMATE_BTN,
+            callback_data=buttons.NEXT_ROOMMATE_BTN,
+        ),
+    ),
+)
+
+
+NEXT_ROOMMATE = InlineKeyboardMarkup.from_column(
+    button_column=(
+        InlineKeyboardButton(text=buttons.YES_BTN, callback_data=buttons.YES_BTN),
+        InlineKeyboardButton(text=buttons.NO_BTN, callback_data=buttons.NO_BTN),
+    )
+)
+
+CONSIDER_INVITATION_FROM_HOST = InlineKeyboardMarkup.from_row(
+    button_row=(
+        InlineKeyboardButton(
+            text=buttons.CONSIDER_INVITATION_FROM_HOST_BTN,
+            callback_data=buttons.CONSIDER_INVITATION_FROM_HOST_BTN,
         ),
     )
 )

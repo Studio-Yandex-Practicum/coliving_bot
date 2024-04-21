@@ -14,6 +14,7 @@ from conversations.coliving.coliving_transfer import callback_funcs as coliving_
 from conversations.coliving.states import States
 from conversations.common_functions.common_buttons import RETURN_TO_MENU_BTN
 from conversations.menu.buttons import COLIVING_BUTTON
+from conversations.menu.constants import CANCEL_COMMAND, MENU_COMMAND
 
 coliving_handler: ConversationHandler = ConversationHandler(
     entry_points=[
@@ -85,8 +86,8 @@ coliving_handler: ConversationHandler = ConversationHandler(
         ],
         States.EDIT: [
             CallbackQueryHandler(
-                callback=callback_funcs.handle_what_to_edit_fill_again,
-                pattern=rf"^{buttons.BTN_LABEL_FILL_AGAIN}",
+                callback=callback_funcs.handle_delete_profile,
+                pattern=rf"^{buttons.BTN_LABEL_DELETE_PROFILE_KEYBOARD}",
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.handle_what_to_edit_room_type,
@@ -111,6 +112,10 @@ coliving_handler: ConversationHandler = ConversationHandler(
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
                 callback_funcs.handle_what_to_edit_text_instead_of_button,
+            ),
+            CallbackQueryHandler(
+                callback=common_funcs.handle_return_to_menu_response,
+                pattern=rf"^{RETURN_TO_MENU_BTN}$",
             ),
         ],
         States.IS_VISIBLE: [
@@ -205,6 +210,32 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 callback_funcs.handle_delete_profile,
             ),
         ],
+        States.NEXT_ROOMMATE: [
+            CallbackQueryHandler(
+                callback=callback_funcs.next_roommate,
+                pattern=rf"^{buttons.YES_BTN}$",
+            ),
+            CallbackQueryHandler(
+                callback=callback_funcs.end_of_assign_roomate,
+                pattern=rf"^{buttons.NO_BTN}$",
+            ),
+        ],
+        States.NO_ROOMMATES: [
+            CallbackQueryHandler(
+                callback=callback_funcs.end_of_assign_roomate,
+                pattern=rf"^{buttons.WAIT_BTN}$",
+            ),
+        ],
+        States.ROOMMATE: [
+            CallbackQueryHandler(
+                callback=callback_funcs.roommate_like,
+                pattern=rf"^{buttons.OK_ROOMMATE_BTN}$",
+            ),
+            CallbackQueryHandler(
+                callback=callback_funcs.next_roommate,
+                pattern=rf"^{buttons.NEXT_ROOMMATE_BTN}$",
+            ),
+        ],
         States.COLIVING: [
             CallbackQueryHandler(
                 callback=callback_funcs.handle_coliving_edit,
@@ -228,10 +259,6 @@ coliving_handler: ConversationHandler = ConversationHandler(
             CallbackQueryHandler(
                 callback=coliving_transfer.handle_coliving_transfer_to,
                 pattern=r"^transfer_to",
-            ),
-            CallbackQueryHandler(
-                callback=callback_funcs.handle_delete_profile,
-                pattern=rf"^{buttons.BTN_LABEL_DELETE_PROFILE_KEYBOARD}$",
             ),
             CallbackQueryHandler(
                 callback=common_funcs.handle_return_to_menu_response,
@@ -262,11 +289,11 @@ coliving_handler: ConversationHandler = ConversationHandler(
     },
     fallbacks=[
         CommandHandler(
-            command="cancel",
+            command=CANCEL_COMMAND,
             callback=common_funcs.cancel,
         ),
         CommandHandler(
-            command="menu",
+            command=MENU_COMMAND,
             callback=common_funcs.return_to_menu_via_menu_command,
         ),
     ],

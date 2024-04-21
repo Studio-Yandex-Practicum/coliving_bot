@@ -56,3 +56,8 @@ PROFILE_DATA = (
     "<b>О себе:</b> {about}\n"
     "<b>Видимость анкеты:</b> {is_visible}\n"
 )
+
+REPLY_MSG_WANT_TO_DELETE = "Ты уверен, что хочешь удалить свою анкету?"
+REPLY_MSG_PROFILE_DELETED = "Твоя анкета была удалена."
+REPLY_MSG_PROFILE_NO_CHANGE = "Анкета не была изменена."
+CANCEL_PROFILE_CREATION = "Создание анкеты отменено."
