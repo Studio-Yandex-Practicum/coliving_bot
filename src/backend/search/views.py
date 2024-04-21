@@ -86,13 +86,12 @@ class MatchRequestListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         sender = self.request.data.get("sender")
         receiver = self.request.data.get("receiver")
-        status = self.request.data.get("status")
 
         match = MatchRequest.objects.filter(
             sender__telegram_id=receiver, receiver__telegram_id=sender
         )
         if match:
-            match.update(status=status)
+            match.update(status=MatchStatuses.is_match)
         else:
             return serializer.save()
 
