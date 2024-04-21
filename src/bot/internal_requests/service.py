@@ -1,16 +1,18 @@
 import mimetypes
 from dataclasses import asdict
-from typing import List, Optional
+from typing import List, NoReturn, Optional
 from urllib.parse import urlencode, urljoin
 
 from httpx import AsyncClient, Response
 
 from internal_requests.entities import (
     Coliving,
+    ColivingLike,
     ColivingSearchSettings,
     Image,
     Location,
     MatchedUser,
+    ProfileLike,
     ProfileSearchSettings,
     UserProfile,
 )
@@ -77,7 +79,7 @@ class APIService:
         await self.save_coliving_photo(images, created_coliving)
         return created_coliving
 
-    async def save_coliving_photo(self, images, coliving: Coliving) -> int:
+    async def save_coliving_photo(self, images, coliving: Coliving) -> NoReturn:
         """Запрос на сохранение фото коливинга в БД."""
         for image in images:
             file = await image.photo_size.get_file()
@@ -125,7 +127,18 @@ class APIService:
         data = {"residence": residence_id}
         return await self._patch_request(endpoint_urn=endpoint_urn, data=data)
 
-    async def get_potential_roommates(
+    async def get_matched_coliving_likes(
+        self,
+        telegram_id: int,
+    ) -> List[MatchedUser]:
+        """
+        Выводит список потенциальных жильцов
+        для данного коливинга - всех пользователей,
+        у кого есть мэтч с данным telegram_id.
+        """
+        # TODO: Здесь будет другое
+
+    async def get_matched_profile_likes(
         self,
         telegram_id: int,
     ) -> List[MatchedUser]:
@@ -140,6 +153,34 @@ class APIService:
         for matched_user in response.json():
             result.append(MatchedUser(**matched_user))
         return result
+
+    async def send_profile_like(self, sender: int, receiver: int) -> ProfileLike:
+        """Отправляет запрос на создание лайка профиля."""
+        endpoint_urn = "profile/likes/"
+        data = {"sender": sender, "receiver": receiver}
+        response = await self._post_request(endpoint_urn=endpoint_urn, data=data)
+        return ProfileLike(**response.json())
+
+    async def update_status_profile_like(self, pk: int, status: int) -> ProfileLike:
+        """Отправляет запрос на обновление статуса лайка профиля."""
+        endpoint_urn = f"profile/likes/{pk}/"
+        data = {"status": status}
+        response = await self._patch_request(endpoint_urn=endpoint_urn, data=data)
+        return ProfileLike(**response.json())
+
+    async def send_coliving_like(self, sender: int, coliving_pk: int) -> ColivingLike:
+        """Отправляет запрос на создание лайка для коливинга."""
+        endpoint_urn = "colivings/likes/"
+        data = {"sender": sender, "coliving": coliving_pk}
+        response = await self._post_request(endpoint_urn=endpoint_urn, data=data)
+        return ColivingLike(**response.json())
+
+    async def update_status_coliving_like(self, pk: int, status: int) -> ColivingLike:
+        """Отправляет запрос на обновление статуса лайка для коливинга."""
+        endpoint_urn = f"colivings/likes/{pk}/"
+        data = {"status": status}
+        response = await self._patch_request(endpoint_urn=endpoint_urn, data=data)
+        return ColivingLike(**response.json())
 
     async def get_user_profile_by_telegram_id(
         self, telegram_id: int
@@ -192,7 +233,7 @@ class APIService:
         return result
 
     async def get_coliving_roommates(self, coliving_id: int, page: int) -> dict:
-        """ "Получение списка соседей."""
+        """Получение списка соседей."""
         response = await self._get_request(
             f"colivings/{coliving_id}/roommates/?page={page}"
         )
@@ -244,17 +285,6 @@ class APIService:
         """
         endpoint_urn = f"users/{telegram_id}/profile/images/"
         return await self._delete_request(endpoint_urn)
-
-    async def send_match_request(self, sender: int, receiver: int) -> Response:
-        """Совершает POST-запрос к эндпоинту создания MatchRequest.
-
-        :param sender: telegram_id отправителя.
-        :param receiver: telegram_id получателя.
-        """
-        endpoint_urn = "match_requests/"
-        data = {"sender": sender, "receiver": receiver}
-        response = await self._post_request(endpoint_urn=endpoint_urn, data=data)
-        return response
 
     async def _profile_request(
         self, telegram_id: int, data: dict, method: str

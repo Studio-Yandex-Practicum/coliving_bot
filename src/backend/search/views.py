@@ -1,15 +1,20 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
-from rest_framework import exceptions, generics
+from rest_framework import exceptions, generics, status
+from rest_framework.generics import CreateAPIView, UpdateAPIView
+from rest_framework.response import Response
 
 from profiles.models import Profile
 from profiles.serializers import ProfileSerializer
 from search.constants import MatchStatuses
 from search.filters import ProfilesSearchFilterSet
-from search.models import MatchRequest, UserFromTelegram, UserReport
+from search.models import ColivingLike, ProfileLike, UserFromTelegram, UserReport
 from search.serializers import (
-    MatchListSerializer,
-    MatchRequestSerializer,
+    ColivingLikeCreateSerializer,
+    ColivingLikeUpdateSerializer,
+    MatchedProfileSerializer,
+    ProfileLikeCreateSerializer,
+    ProfileLikeUpdateSerializer,
     UserReportSerializer,
 )
 
@@ -21,28 +26,17 @@ class UserReportCreateView(generics.CreateAPIView):
     serializer_class = UserReportSerializer
 
 
-class MatchedUsersListView(generics.ListAPIView):
-    """Apiview для получения списка мэчтей."""
-
-    serializer_class = MatchListSerializer
+class MatchedProfileListAPIView(generics.ListAPIView):
+    serializer_class = MatchedProfileSerializer
 
     def get_queryset(self):
         telegram_id = self.kwargs.get("telegram_id")
-        user = UserFromTelegram.objects.filter(telegram_id=telegram_id).first()
-        if user is None:
+        user = Profile.objects.filter(user__telegram_id=telegram_id).first()
+        if not user:
             raise exceptions.NotFound("Такого пользователя не существует.")
-        users_who_sent_like = UserFromTelegram.objects.select_related(
-            "user_profile"
-        ).filter(
-            likes__receiver=user,
-            likes__status=MatchStatuses.is_match,
-        )
-        liked_users = UserFromTelegram.objects.select_related("user_profile").filter(
-            match_requests__sender=user,
-            match_requests__status=MatchStatuses.is_match,
-        )
-
-        return (users_who_sent_like | liked_users).distinct()
+        liked_profiles = user.liked_profiles.filter(status=MatchStatuses.is_match)
+        received_likes = user.received_likes.filter(status=MatchStatuses.is_match)
+        return (liked_profiles | received_likes).values("age", "name").all()
 
 
 class ProfilesSearchView(generics.ListAPIView):
@@ -71,19 +65,57 @@ class ProfilesSearchView(generics.ListAPIView):
         )
 
 
-class MatchRequestView(generics.CreateAPIView):
-    """Apiview для создания MatchRequest."""
+class ProfileLikeCreateAPIView(CreateAPIView):
+    queryset = ProfileLike.objects.all()
+    serializer_class = ProfileLikeCreateSerializer
 
-    queryset = MatchRequest.objects.all()
-    serializer_class = MatchRequestSerializer
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-    def perform_create(self, serializer):
-        sender = self.request.data.get("sender")
-        receiver = self.request.data.get("receiver")
-        match = MatchRequest.objects.filter(
-            sender__telegram_id=receiver, receiver__telegram_id=sender
+        sender = serializer.validated_data["sender"]
+        receiver = serializer.validated_data["receiver"]
+
+        reverse_like = ProfileLike.objects.filter(
+            sender=receiver, receiver=sender
+        ).first()
+        if reverse_like:
+            reverse_like.status = MatchStatuses.is_match
+            reverse_like.save()
+            return Response(
+                ProfileLikeCreateSerializer(reverse_like).data,
+                status=status.HTTP_200_OK,
+            )
+
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
-        if match:
-            match.update(status=MatchStatuses.is_match)
-        else:
-            return serializer.save()
+
+
+class ProfileLikeUpdateAPIView(UpdateAPIView):
+    queryset = ProfileLike.objects.all()
+    serializer_class = ProfileLikeUpdateSerializer
+
+    @property
+    def allowed_methods(self):
+        result = super().allowed_methods
+        result.remove("PUT")
+        return result
+
+
+class ColivingLikeCreateAPIView(CreateAPIView):
+    queryset = ColivingLike.objects.all()
+    serializer_class = ColivingLikeCreateSerializer
+
+
+class ColivingLikeUpdateAPIView(UpdateAPIView):
+    queryset = ColivingLike.objects.all()
+    serializer_class = ColivingLikeUpdateSerializer
+
+    @property
+    def allowed_methods(self):
+        result = super().allowed_methods
+        result.remove("PUT")
+        return result

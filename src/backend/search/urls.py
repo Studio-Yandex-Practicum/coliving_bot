@@ -2,20 +2,22 @@ from django.conf import settings
 from django.urls import path
 
 from search.views import (
-    MatchedUsersListView,
-    MatchRequestView,
+    ColivingLikeCreateAPIView,
+    ColivingLikeUpdateAPIView,
+    MatchedProfileListAPIView,
+    ProfileLikeCreateAPIView,
+    ProfileLikeUpdateAPIView,
     ProfilesSearchView,
     UserReportCreateView,
 )
 
 app_name = "search"
 
-
 urlpatterns = [
     path(
         f"{settings.API_V1_PREFIX}/users/<int:telegram_id>/matches/",
-        MatchedUsersListView.as_view(),
-        name="matched-users",
+        MatchedProfileListAPIView.as_view(),
+        name="matched_likes_profiles",
     ),
     path(
         f"{settings.API_V1_PREFIX}/reports/",
@@ -28,8 +30,23 @@ urlpatterns = [
         name="profiles",
     ),
     path(
-        f"{settings.API_V1_PREFIX}/match_requests/",
-        MatchRequestView.as_view(),
-        name="match-request",
+        f"{settings.API_V1_PREFIX}/profiles/like/",
+        ProfileLikeCreateAPIView.as_view(),
+        name="profile-like-create",
+    ),
+    path(
+        f"{settings.API_V1_PREFIX}/profiles/like/<int:pk>/",
+        ProfileLikeUpdateAPIView.as_view(),
+        name="profile-like-update",
+    ),
+    path(
+        f"{settings.API_V1_PREFIX}/colivings/like/",
+        ColivingLikeCreateAPIView.as_view(),
+        name="coliving-like-create",
+    ),
+    path(
+        f"{settings.API_V1_PREFIX}/colivings/like/<int:pk>/",
+        ColivingLikeUpdateAPIView.as_view(),
+        name="coliving-like-update",
     ),
 ]

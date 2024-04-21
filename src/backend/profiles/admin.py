@@ -10,7 +10,7 @@ class UserFromTelegramAdmin(admin.ModelAdmin):
     Управление объектами 'UserFromTelegram' в админ-зоне.
     """
 
-    list_display = ("id", "telegram_id", "residence")
+    list_display = ("telegram_id", "residence")
 
 
 @admin.register(Location)

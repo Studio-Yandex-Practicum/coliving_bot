@@ -38,6 +38,7 @@ class UserFromTelegram(models.Model):
         verbose_name="Идентификатор пользователя Telegram",
         unique=True,
         db_index=True,
+        primary_key=True,
     )
     residence = models.ForeignKey(
         "Coliving",
