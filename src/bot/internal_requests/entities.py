@@ -77,6 +77,7 @@ class MatchStatuses(IntEnum):
 
 @dataclass
 class ProfileLike:
+    id: int
     sender: int
     receiver: int
     status: MatchStatuses
@@ -84,6 +85,7 @@ class ProfileLike:
 
 @dataclass
 class ColivingLike:
+    id: int
     sender: int
     coliving: int
     status: MatchStatuses
