@@ -14,6 +14,7 @@ from conversations.coliving.coliving_transfer import callback_funcs as coliving_
 from conversations.coliving.states import States
 from conversations.common_functions.common_buttons import RETURN_TO_MENU_BTN
 from conversations.menu.buttons import COLIVING_BUTTON
+from conversations.menu.constants import CANCEL_COMMAND, MENU_COMMAND
 
 coliving_handler: ConversationHandler = ConversationHandler(
     entry_points=[
@@ -262,11 +263,11 @@ coliving_handler: ConversationHandler = ConversationHandler(
     },
     fallbacks=[
         CommandHandler(
-            command="cancel",
+            command=CANCEL_COMMAND,
             callback=common_funcs.cancel,
         ),
         CommandHandler(
-            command="menu",
+            command=MENU_COMMAND,
             callback=common_funcs.return_to_menu_via_menu_command,
         ),
     ],
