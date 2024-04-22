@@ -55,9 +55,4 @@ urlpatterns = [
         ColivingLikeUpdateAPIView.as_view(),
         name="coliving-like-update",
     ),
-    path(
-        f"{settings.API_V1_PREFIX}/match_requests/<int:pk>/",
-        MatchRequestUpdateView.as_view(),
-        name="patch-match-request",
-    ),
 ]
