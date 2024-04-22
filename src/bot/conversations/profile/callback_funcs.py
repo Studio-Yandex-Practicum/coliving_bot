@@ -1,4 +1,3 @@
-from re import fullmatch
 from typing import Optional, Union
 
 from httpx import HTTPStatusError, codes
@@ -50,7 +49,7 @@ async def start(
 @add_response_prefix()
 async def send_question_to_profile_is_visible_in_search(
     update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> Union[int, States]:
+) -> int:
     """
     Обработка кнопки 'Показать в поиске'.
     Завершает диалог.
@@ -61,10 +60,18 @@ async def send_question_to_profile_is_visible_in_search(
 
     context.user_data["profile_info"].is_visible = visibility_choice
 
-    await update.effective_message.reply_text(text=message_text)
-    await api_service.update_user_profile(context.user_data["profile_info"])
+    context.user_data["profile_info"] = await api_service.update_user_profile(
+        context.user_data["profile_info"]
+    )
 
-    return ConversationHandler.END
+    keyboard = (
+        keyboards.VISIBLE_PROFILE_KEYBOARD
+        if context.user_data["profile_info"].is_visible
+        else keyboards.HIDDEN_PROFILE_KEYBOARD
+    )
+    await _look_at_profile(update, context, message_text, keyboard)
+
+    return States.PROFILE
 
 
 @add_response_prefix()
@@ -98,15 +105,14 @@ async def handle_return_to_profile_response(
     return States.PROFILE
 
 
-async def handle_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def handle_name(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> Optional[int]:
     """
     Обрабатывает введенное пользователем имя.
     Переводит диалог в состояние AGE (ввод возраста).
     """
-    name = update.message.text.strip()
-    if not fullmatch(consts.NAME_PATTERN, name):
-        await update.effective_message.reply_text(text=templates.NAME_SYMBOL_ERROR_MSG)
-        return States.NAME
+    name = update.effective_message.text
     if not await value_is_in_range_validator(
         update=update,
         context=context,
@@ -117,7 +123,7 @@ async def handle_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
             min=consts.MIN_NAME_LENGTH, max=consts.MAX_NAME_LENGTH
         ),
     ):
-        return States.NAME
+        return None
     context.user_data["profile_info"] = UserProfile(
         user=update.effective_chat.id, name=name
     )
@@ -126,6 +132,13 @@ async def handle_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     )
 
     return States.AGE
+
+
+async def handle_wrong_name(
+    update: Update, _context: ContextTypes.DEFAULT_TYPE
+) -> None:
+    await update.effective_chat.send_message(text=templates.NAME_SYMBOL_ERROR_MSG)
+    return None
 
 
 async def handle_age(
@@ -221,43 +234,28 @@ async def _look_at_profile(
     """
     Предварительный просмотр профиля.
     """
-    message_text = (
-        title
-        + "\n\n"
-        + templates.PROFILE_DATA.format(
-            name=context.user_data["profile_info"].name,
-            sex=context.user_data["profile_info"].sex,
-            age=context.user_data["profile_info"].age,
-            location=context.user_data["profile_info"].location,
-            about=context.user_data["profile_info"].about,
-            is_visible=common_templates.PROFILE_IS_VISIBLE_TEXT
-            if context.user_data["profile_info"].is_visible
-            else common_templates.PROFILE_IS_HIDDEN_TEXT,
-        )
-        + "\n"
+    if title:
+        await update.effective_chat.send_message(text=title)
+    message_text = templates.PROFILE_DATA.format(
+        name=context.user_data["profile_info"].name,
+        sex=context.user_data["profile_info"].sex,
+        age=context.user_data["profile_info"].age,
+        location=context.user_data["profile_info"].location,
+        about=context.user_data["profile_info"].about,
+        is_visible=common_templates.PROFILE_IS_VISIBLE_TEXT
+        if context.user_data["profile_info"].is_visible
+        else common_templates.PROFILE_IS_HIDDEN_TEXT,
     )
-    new_photos = context.user_data.get("new_photo")
-    received_photo = context.user_data.get(consts.RECEIVED_PHOTOS_FIELD)
-    if new_photos:
-        media_group = [InputMediaPhoto(file.file_id) for file in new_photos]
-        await update.effective_chat.send_media_group(
-            media=media_group,
-            caption=message_text,
-        )
-        context.user_data[consts.RECEIVED_PHOTOS_FIELD] = new_photos.copy()
-        context.user_data["new_photo"] = []
-
-    elif received_photo:
-        media_group = [InputMediaPhoto(file.file_id) for file in received_photo]
+    images = context.user_data["profile_info"].images
+    if images:
+        media_group = [InputMediaPhoto(file.file_id) for file in images]
         await update.effective_chat.send_media_group(
             media=media_group,
             caption=message_text,
         )
     else:
-        # Если фото нет, отправляем только текст
         await update.effective_chat.send_message(text=message_text)
 
-    # Отправляем сообщение с вопросом после предварительного просмотра
     if ask_text and keyboard is not None:
         await update.effective_chat.send_message(text=ask_text, reply_markup=keyboard)
 
@@ -270,13 +268,13 @@ async def handle_photo(
     Переводит диалог в состояние CONFIRMATION (анкета верна или нет)
     """
 
-    file = update.effective_message.photo[-1]
+    new_photo = update.effective_message.photo[-1]
 
-    received_photos = context.user_data.get(consts.RECEIVED_PHOTOS_FIELD, [])
-    received_photos.append(Image(file_id=file.file_id, photo_size=file))
-    context.user_data[consts.RECEIVED_PHOTOS_FIELD] = received_photos
+    context.user_data["profile_info"].images.append(
+        Image(file_id=new_photo.file_id, photo_size=new_photo)
+    )
 
-    if len(received_photos) == templates.PHOTO_MAX_NUMBER:
+    if len(context.user_data["profile_info"].images) == templates.PHOTO_MAX_NUMBER:
         state = await send_received_photos(update, context)
         return state
 
@@ -290,14 +288,12 @@ async def handle_edit_photo(
     Обрабатывает загруженную пользователем фотографию.
     Переводит диалог в состояние CONFIRMATION (анкета верна или нет)
     """
+    new_photo = update.effective_message.photo[-1]
+    context.user_data["profile_info"].images.append(
+        Image(file_id=new_photo.file_id, photo_size=new_photo)
+    )
 
-    file = update.effective_message.photo[-1]
-
-    new_photos = context.user_data.get("new_photo", [])
-    new_photos.append(Image(file_id=file.file_id, photo_size=file))
-    context.user_data["new_photo"] = new_photos
-
-    if len(new_photos) == templates.PHOTO_MAX_NUMBER:
+    if len(context.user_data["profile_info"].images) == templates.PHOTO_MAX_NUMBER:
         state = await send_edited_photos(update, context)
         return state
 
@@ -307,15 +303,16 @@ async def handle_edit_photo(
 async def send_received_photos(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> Optional[int]:
-    if context.user_data.get(consts.RECEIVED_PHOTOS_FIELD):
+    images = context.user_data["profile_info"].images
+    if images:
         await update.effective_message.reply_text(
-            text=templates.PHOTO_ADDED,
+            text=templates.LOOK_AT_FORM_FIRST,
             reply_markup=ReplyKeyboardRemove(),
         )
         await _look_at_profile(
             update,
             context,
-            templates.LOOK_AT_FORM_FIRST,
+            "",
             keyboards.FORM_SAVED_KEYBOARD,
             templates.ASK_IS_THAT_RIGHT,
         )
@@ -495,11 +492,12 @@ async def send_question_to_edit_about_myself(
 
 @add_response_prefix()
 async def send_question_to_edit_photo(
-    update: Update, _context: ContextTypes.DEFAULT_TYPE
+    update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """
     Обработка кнопки 'Фотографию.'.
     """
+    context.user_data["profile_info"].images.clear()
     await update.effective_chat.send_message(
         text=templates.ASK_PHOTO, reply_markup=keyboards.PHOTO_EDIT_KEYBOARD
     )
@@ -513,10 +511,7 @@ async def handle_edit_name(
     Обрабатывает отредактированное пользователем имя.
     Переводит диалог в состояние EDIT_CONFIRMATION (анкета верна или нет).
     """
-    name = update.message.text.strip()
-    if not fullmatch(consts.NAME_PATTERN, name):
-        await update.effective_message.reply_text(text=templates.NAME_SYMBOL_ERROR_MSG)
-        return States.EDIT_NAME
+    name = update.effective_message.text
     if not await value_is_in_range_validator(
         update=update,
         context=context,
@@ -625,15 +620,16 @@ async def handle_edit_about(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 async def send_edited_photos(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> Optional[int]:
-    if context.user_data.get("new_photo"):
+    images = context.user_data["profile_info"].images
+    if images:
         await update.effective_message.reply_text(
-            text=templates.PHOTO_ADDED,
+            text=templates.LOOK_AT_FORM_THIRD,
             reply_markup=ReplyKeyboardRemove(),
         )
         await _look_at_profile(
             update,
             context,
-            templates.LOOK_AT_FORM_THIRD,
+            "",
             keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
             templates.ASK_IS_THAT_RIGHT,
         )
@@ -645,22 +641,21 @@ async def send_edited_photos(
 
 
 @add_response_prefix()
-async def send_question_to_profile_is_correct(
+async def handle_ok_to_correctness_question(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """
-    Спрашивает верна ли анкета.
     Обработка кнопки 'Да. Верно'.
     Либо завершает диалог.
     """
-    await api_service.update_user_profile(context.user_data["profile_info"])
-    if len(context.user_data.get(consts.RECEIVED_PHOTOS_FIELD)) != 0:
+    profile = context.user_data["profile_info"]
+    images = profile.images[: consts.PHOTO_MAX_NUMBER]
+    if images and images[0].photo_size:
         await api_service.delete_profile_photos(update.effective_chat.id)
-        await api_service.save_profile_photo(
-            images=context.user_data.get(consts.RECEIVED_PHOTOS_FIELD),
-            profile=context.user_data["profile_info"],
-        )
+        await api_service.save_profile_photo(images, profile)
+    await api_service.update_user_profile(profile)
     await send_profile_saved_notification(update, context)
+    context.user_data.clear()
     return ConversationHandler.END
 
 

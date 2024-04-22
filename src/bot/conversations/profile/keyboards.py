@@ -79,10 +79,10 @@ PHOTO_EDIT_KEYBOARD = ReplyKeyboardMarkup.from_button(
 
 FORM_EDIT_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
-        InlineKeyboardButton(text=EDIT_ABOUT_BUTTON, callback_data=EDIT_ABOUT_BUTTON),
         InlineKeyboardButton(text=EDIT_NAME_BUTTON, callback_data=EDIT_NAME_BUTTON),
         InlineKeyboardButton(text=EDIT_SEX_BUTTON, callback_data=EDIT_SEX_BUTTON),
         InlineKeyboardButton(text=EDIT_AGE_BUTTON, callback_data=EDIT_AGE_BUTTON),
+        InlineKeyboardButton(text=EDIT_ABOUT_BUTTON, callback_data=EDIT_ABOUT_BUTTON),
         InlineKeyboardButton(
             text=EDIT_LOCATION_BUTTON, callback_data=EDIT_LOCATION_BUTTON
         ),

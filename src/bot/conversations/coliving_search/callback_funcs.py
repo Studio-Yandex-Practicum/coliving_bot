@@ -9,11 +9,15 @@ import conversations.coliving_search.states as states
 import conversations.coliving_search.templates as templates
 from conversations.coliving.constants import MAX_PRICE, MIN_PRICE
 from conversations.coliving_search import constants
+from conversations.common_functions.common_funcs import profile_required
+from conversations.match_requests.coliving.keyboards import get_view_coliving_keyboard
+from conversations.match_requests.constants import MatchStatus
 from general.validators import value_is_in_range_validator
 from internal_requests import api_service
 from internal_requests.entities import Coliving, ColivingSearchSettings
 
 
+@profile_required
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Начало ветви общения по поиску коливинга.
@@ -162,7 +166,23 @@ async def next_coliving(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     return state
 
 
-async def coliving_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def dislike_coliving(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """
+    Обрабатывает ДИЗЛАЙК на профиль соседа.
+    """
+    current_coliving = context.user_data["current_coliving"]
+    sender_id = update.effective_chat.id
+
+    await api_service.send_coliving_like(
+        sender=sender_id,
+        coliving_pk=current_coliving.id,
+        status=MatchStatus.IS_REJECTED.value,
+    )
+
+    return await next_coliving(update, context)
+
+
+async def like_coliving(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Обрабатывает ЛАЙК на объявление коливинга.
     Посылает POST запрос в API на добавление MatchRequest,
@@ -170,15 +190,22 @@ async def coliving_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     и переводит в состояние продолжения поиска.
     """
     current_coliving = context.user_data.get("current_coliving")
-    await api_service.send_match_request(
-        sender=update.effective_chat.id, receiver=current_coliving["host"]
+    like = await api_service.send_coliving_like(
+        sender=update.effective_chat.id, coliving_pk=current_coliving.id
+    )
+    sender_id = update.effective_chat.id
+
+    keyboard = await get_view_coliving_keyboard(like, sender_id)
+    await context.bot.send_message(
+        chat_id=current_coliving.host,
+        text=templates.LIKE_NOTIFICATION,
+        reply_markup=keyboard,
     )
 
     await update.effective_message.reply_text(
-        text=templates.ASK_NEXT_COLIVING,
-        reply_markup=keyboards.NEXT_COLIVING,
+        text=templates.COLIVING_LIKE_MSG,
     )
-    return states.NEXT_COLIVING
+    return await next_coliving(update, context)
 
 
 async def _get_next_coliving(
@@ -198,13 +225,14 @@ async def _get_next_coliving(
                 text=templates.SEARCH_INTRO,
                 reply_markup=keyboards.COLIVING_KEYBOARD,
             )
-        coliving = asdict(colivings.pop())
+        coliving = colivings.pop()
         context.user_data["current_coliving"] = coliving
         context.user_data["colivings"] = colivings
-        images = coliving.get("images", [])
-        message_text = templates.COLIVING_DATA.format(**coliving)
+        images = coliving.images.copy()
+        coliving.images.clear()
+        message_text = templates.COLIVING_DATA.format(**asdict(coliving))
         if images:
-            media_group = [InputMediaPhoto(file_id) for file_id in images]
+            media_group = [InputMediaPhoto(file.file_id) for file in images]
             await update.effective_chat.send_media_group(
                 media=media_group,
                 caption=message_text,

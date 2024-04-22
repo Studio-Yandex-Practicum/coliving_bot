@@ -11,4 +11,4 @@ class DestroyWithMediaRemovalMixin:
         instance_dir = f"{instance.__class__.__name__}s".lower()
         path = os.path.join(MEDIA_ROOT, instance_dir, instance_pk)
         instance.delete()
-        shutil.rmtree(path)
+        shutil.rmtree(path, ignore_errors=True)

@@ -9,4 +9,5 @@ class MatchStatus(Enum):
     IS_REJECTED = -1
 
 
-TG_ID_REGEX_GRP = "tg_id"
+LIKE_ID_REGEX_GROUP = "like_id"
+SENDER_ID_REGEX_GROUP = "sender"

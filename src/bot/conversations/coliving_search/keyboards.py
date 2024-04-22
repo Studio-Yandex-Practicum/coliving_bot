@@ -39,7 +39,6 @@ COLIVING_KEYBOARD = ReplyKeyboardMarkup.from_row(
     button_row=(
         KeyboardButton(text=buttons.LIKE_BTN),
         KeyboardButton(text=buttons.DISLIKE_BTN),
-        KeyboardButton(text=common_buttons.RETURN_TO_MENU_BTN),
     ),
     resize_keyboard=True,
 )
@@ -47,12 +46,12 @@ COLIVING_KEYBOARD = ReplyKeyboardMarkup.from_row(
 NO_MATCHES_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         InlineKeyboardButton(
-            text=common_buttons.RETURN_TO_MENU_BTN,
-            callback_data=common_buttons.RETURN_TO_MENU_BTN,
-        ),
-        InlineKeyboardButton(
             text=buttons.EDIT_SETTINGS_BTN,
             callback_data=buttons.EDIT_SETTINGS_BTN,
+        ),
+        InlineKeyboardButton(
+            text=common_buttons.RETURN_TO_MENU_BTN,
+            callback_data=common_buttons.RETURN_TO_MENU_BTN,
         ),
     )
 )

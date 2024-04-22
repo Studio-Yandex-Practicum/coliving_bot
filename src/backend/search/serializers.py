@@ -31,13 +31,6 @@ class MatchedProfileSerializer(serializers.Serializer):
     age = serializers.IntegerField(read_only=True)
 
 
-class OnlyLikeStatusWriteSerializerMixin:
-    class Meta:
-        model = ProfileLike
-        fields = ("status", "id", "sender", "receiver", "match_date", "created_date")
-        read_only_fields = ("id", "sender", "receiver", "match_date", "created_date")
-
-
 class ProfileLikeCreateSerializer(serializers.ModelSerializer):
     sender = serializers.SlugRelatedField(
         slug_field="user_id",
@@ -50,14 +43,15 @@ class ProfileLikeCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProfileLike
-        fields = ("id", "sender", "receiver", "status", "match_date", "created_date")
-        read_only_fields = ("id", "match_date", "created_date")
+        fields = ("id", "sender", "receiver", "status")
+        read_only_fields = ("id",)
 
 
-class ProfileLikeUpdateSerializer(
-    OnlyLikeStatusWriteSerializerMixin, ProfileLikeCreateSerializer
-):
-    pass
+class ProfileLikeUpdateSerializer(ProfileLikeCreateSerializer):
+    class Meta:
+        model = ProfileLike
+        fields = ("id", "sender", "receiver", "status")
+        read_only_fields = ("id", "sender", "receiver")
 
 
 class ColivingLikeCreateSerializer(serializers.ModelSerializer):
@@ -67,11 +61,12 @@ class ColivingLikeCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ColivingLike
-        fields = ("id", "sender", "coliving", "status", "match_date", "created_date")
-        read_only_fields = ("id", "match_date", "created_date")
+        fields = ("id", "sender", "coliving", "status")
+        read_only_fields = ("id",)
 
 
-class ColivingLikeUpdateSerializer(
-    OnlyLikeStatusWriteSerializerMixin, ColivingLikeCreateSerializer
-):
-    pass
+class ColivingLikeUpdateSerializer(ColivingLikeCreateSerializer):
+    class Meta:
+        model = ColivingLike
+        fields = ("id", "sender", "coliving", "status")
+        read_only_fields = ("id", "sender", "coliving")

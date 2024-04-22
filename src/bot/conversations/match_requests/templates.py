@@ -14,7 +14,11 @@ NEW_MATCH_NOTIFICATION = (
     "Вы лайкнули анкеты друг друга.</b>"
 )
 
-REJECTION_NOTIFICATION = "<b>Вы отклонили анкету {sender_profile.name}</b>"
+REJECTION_NOTIFICATION = (
+    "<b>Вы отклонили анкету пользователя {sender_profile.name}.</b>"
+)
+
+NEIGHBOR_WANTS_TO_BE = "Твоим соседом хочет стать:"
 
 
 def format_search_settings_message(filters: ProfileSearchSettings) -> str:

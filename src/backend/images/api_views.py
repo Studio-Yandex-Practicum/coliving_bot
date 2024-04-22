@@ -42,7 +42,7 @@ class BaseImageView(generics.ListCreateAPIView, generics.UpdateAPIView):
         images.delete()
 
         path = os.path.join(settings.MEDIA_ROOT, obj_dir, obj_id)
-        shutil.rmtree(path)
+        shutil.rmtree(path, ignore_errors=True)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

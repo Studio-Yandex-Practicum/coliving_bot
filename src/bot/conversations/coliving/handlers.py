@@ -216,13 +216,13 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 pattern=rf"^{buttons.YES_BTN}$",
             ),
             CallbackQueryHandler(
-                callback=callback_funcs.end_of_assign_roomate,
+                callback=callback_funcs.end_of_assign_roommate,
                 pattern=rf"^{buttons.NO_BTN}$",
             ),
         ],
         States.NO_ROOMMATES: [
             CallbackQueryHandler(
-                callback=callback_funcs.end_of_assign_roomate,
+                callback=callback_funcs.end_of_assign_roommate,
                 pattern=rf"^{buttons.WAIT_BTN}$",
             ),
         ],
@@ -254,7 +254,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
             ),
             CallbackQueryHandler(
                 callback=callback_funcs.handle_assign_roommate,
-                pattern=r"^assign_roommate",
+                pattern=rf"^{buttons.BTN_LABEL_ASSIGN_ROOMMATE}$",
             ),
             CallbackQueryHandler(
                 callback=coliving_transfer.handle_coliving_transfer_to,

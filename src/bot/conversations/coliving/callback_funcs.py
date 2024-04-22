@@ -8,6 +8,7 @@ from telegram import (
     ReplyKeyboardRemove,
     Update,
 )
+from telegram.error import TelegramError
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
 import conversations.coliving.buttons as buttons
@@ -24,7 +25,7 @@ from conversations.common_functions.common_funcs import (
 )
 from general.validators import value_is_in_range_validator
 from internal_requests import api_service
-from internal_requests.entities import Coliving, Image
+from internal_requests.entities import Coliving, Image, UserProfile
 from internal_requests.exceptions import ColivingNotFound
 
 
@@ -138,16 +139,15 @@ async def handle_coliving_roommates(
     return ConversationHandler.END
 
 
+@add_response_prefix()
 async def handle_assign_roommate(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """Обработка ответа: Прикрепить жильца."""
-    await update.effective_message.edit_reply_markup()
-
     await update.effective_message.reply_text(text=templates.ASSIGN_ROOMMATE_START_MSG)
 
     potential_roommates = await api_service.get_potential_roommates(
-        telegram_id=update.effective_chat.id
+        coliving_pk=context.user_data["coliving_info"].id
     )
     state = await _get_next_roommate(update, context, potential_roommates)
     return state
@@ -173,7 +173,7 @@ async def next_roommate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 async def _get_next_roommate(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
-    potential_roommates: list[MatchedUser],
+    potential_roommates: list[UserProfile],
 ) -> int:
     """
     Функция для получения и вывода для оценки соседа анкеты
@@ -181,13 +181,11 @@ async def _get_next_roommate(
     Если анкеты заканчиваются - перевод в соответствующие состояние.
     """
     if potential_roommates:
-        roommate = asdict(potential_roommates.pop())
-        context.user_data["current_roommate"] = roommate
+        roommate_profile = potential_roommates.pop()
+        context.user_data["current_roommate"] = roommate_profile
         context.user_data["potential_roommates"] = potential_roommates
-
-        roommate_profile = await api_service.get_user_profile_by_telegram_id(
-            roommate["telegram_id"]
-        )
+        images = roommate_profile.images.copy()
+        roommate_profile.images.clear()
 
         last_profile_message_ids = []
 
@@ -196,8 +194,8 @@ async def _get_next_roommate(
             + templates.ROOMMATE_PROFILE_DATA.format(**asdict(roommate_profile))
             + "\n"
         )
-        if len(roommate_profile.images) > 0:
-            media_group = [InputMediaPhoto(roommate_profile.images[0])]
+        if images:
+            media_group = [InputMediaPhoto(images[0].file_id)]
             new_messages = await update.effective_chat.send_media_group(
                 media=media_group,
                 caption=message_text,
@@ -210,7 +208,7 @@ async def _get_next_roommate(
             last_profile_message_ids.append(message.message_id)
 
         message = await update.effective_chat.send_message(
-            text="Ваш выбор?",
+            text="Выбери один из вариантов",
             reply_markup=keyboards.ROOMMATE_KEYBOARD,
         )
         last_profile_message_ids.append(message.message_id)
@@ -219,11 +217,14 @@ async def _get_next_roommate(
 
         return States.ROOMMATE
 
-    message_text = templates.NO_ROOMMATES
     await update.effective_chat.send_message(
-        text=message_text,
+        text=templates.NO_ROOMMATES,
         reply_markup=ReplyKeyboardRemove(),
     )
+    try:
+        await update.effective_message.edit_reply_markup()
+    except TelegramError:
+        pass
     return ConversationHandler.END
 
 
@@ -251,7 +252,7 @@ async def roommate_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     )
 
     await context.bot.send_message(
-        chat_id=current_roommate["telegram_id"],
+        chat_id=current_roommate.user,
         text=templates.INVITATION_FOR_ROOMMATE,
         reply_markup=CONSIDER_INVITATION_FROM_HOST,
     )
@@ -262,7 +263,7 @@ async def roommate_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     return States.NEXT_ROOMMATE
 
 
-async def end_of_assign_roomate(
+async def end_of_assign_roommate(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """
@@ -337,7 +338,7 @@ async def handle_about_coliving(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """Ввод описания коливинг профиля и сохранение в контекст."""
-    about_coliving = update.message.text
+    about_coliving = update.effective_message.text
     if not await value_is_in_range_validator(
         update,
         context,
@@ -720,8 +721,7 @@ async def handle_edit_profile_confirmation_confirm(
     """Подтверждение измененного коливинг профиля."""
     coliving = context.user_data["coliving_info"]
     images = context.user_data["coliving_info"].images[: consts.PHOTO_MAX_NUMBER]
-    # Проверка наличия измененных фото по размеру первой фотографии
-    if images[0].photo_size:
+    if images and images[0].photo_size:
         await api_service.delete_coliving_photos(coliving.id, update.effective_chat.id)
         await api_service.save_coliving_photo(images, coliving)
 
@@ -775,8 +775,6 @@ async def _show_coliving_profile(
     keyboard: Optional[InlineKeyboardMarkup] = None,
     coliving: Optional[Coliving] = None,
 ) -> None:
-    """Просмотр профиля и переводит на подтверждение профиля CONFIRMATION."""
-    current_chat = update.effective_chat
     coliving_info: Coliving = coliving or context.user_data["coliving_info"]
 
     if coliving_info.images:
@@ -784,7 +782,7 @@ async def _show_coliving_profile(
             InputMediaPhoto(media=image.file_id)
             for image in coliving_info.images[: templates.PHOTO_MAX_NUMBER]
         ]
-        await current_chat.send_media_group(media=media_group)
+        await update.effective_chat.send_media_group(media=media_group)
 
     if keyboard is None:
         if coliving_info.is_visible:
@@ -797,7 +795,7 @@ async def _show_coliving_profile(
     if ask_to_confirm:
         message_text += templates.REPLY_MSG_ASK_TO_CONFIRM
 
-    await current_chat.send_message(
+    await update.effective_chat.send_message(
         text=message_text,
         reply_markup=keyboard,
     )
@@ -806,13 +804,11 @@ async def _show_coliving_profile(
 async def send_received_room_photos(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
-) -> int:
+) -> Optional[int]:
     """
     Сохранение фотографий
     """
-
     images = context.user_data["coliving_info"].images
-
     if images:
         await update.effective_message.reply_text(
             text=templates.REPLY_MSG_PHOTO,
@@ -826,17 +822,16 @@ async def send_received_room_photos(
         )
         return States.CONFIRMATION
     await update.effective_chat.send_message(templates.DONT_SAVE_COLIVING_WITHOUT_PHOTO)
-    return States.PHOTO_ROOM
+    return None
 
 
 async def send_edited_room_photos(
     update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> int:
+) -> Optional[int]:
     """
     Подтверждение сохранения измененных фотографий
     """
     images = context.user_data["coliving_info"].images
-
     if images:
         await update.effective_message.reply_text(
             text=templates.REPLY_MSG_PHOTO,
@@ -850,7 +845,7 @@ async def send_edited_room_photos(
         )
         return States.EDIT_CONFIRMATION
     await update.effective_chat.send_message(templates.DONT_SAVE_COLIVING_WITHOUT_PHOTO)
-    return States.EDIT_PHOTO_ROOM
+    return None
 
 
 @add_response_prefix()
