@@ -61,9 +61,13 @@ async def handle_coliving_set_new_owner(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ):
     """Обработка выбора нового владельца коливинга."""
-    await api_service.update_coliving_info(context.user_data["coliving_info"])
+    coliving_info = context.user_data["coliving_info"]
+    await api_service.update_coliving_info(coliving_info)
+    await api_service.update_user_residence(
+        telegram_id=coliving_info.host, residence_id=None
+    )
     await context.bot.send_message(
-        chat_id=context.user_data["coliving_info"].host,
+        chat_id=coliving_info.host,
         text=templates.NEW_COLIVING_OWNER_MESSAGE,
     )
     await update.effective_message.reply_text(text=templates.OWNER_CHANGED_MESSAGE)
