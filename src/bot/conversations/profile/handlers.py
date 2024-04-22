@@ -69,8 +69,11 @@ profile_handler: ConversationHandler = ConversationHandler(
         ],
         States.NAME: [
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
+                filters.Regex(consts.NAME_PATTERN) & ~filters.COMMAND,
                 callback_funcs.handle_name,
+            ),
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND, callback_funcs.handle_wrong_name
             ),
         ],
         States.LOCATION: [
@@ -167,9 +170,12 @@ profile_handler: ConversationHandler = ConversationHandler(
         ],
         States.EDIT_NAME: [
             MessageHandler(
-                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
+                filters.Regex(consts.NAME_PATTERN) & ~filters.COMMAND,
                 callback_funcs.handle_edit_name,
-            )
+            ),
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND, callback_funcs.handle_wrong_name
+            ),
         ],
         States.EDIT_SEX: [
             CallbackQueryHandler(
@@ -213,7 +219,7 @@ profile_handler: ConversationHandler = ConversationHandler(
         ],
         States.EDIT_CONFIRMATION: [
             CallbackQueryHandler(
-                callback=callback_funcs.send_question_to_profile_is_correct,
+                callback=callback_funcs.handle_ok_to_correctness_question,
                 pattern=rf"^{buttons.YES_BUTTON}",
             ),
             CallbackQueryHandler(

@@ -24,7 +24,7 @@ from conversations.common_functions.common_funcs import (
 )
 from general.validators import value_is_in_range_validator
 from internal_requests import api_service
-from internal_requests.entities import Coliving, Image
+from internal_requests.entities import Coliving, Image, ShortProfileInfo
 from internal_requests.exceptions import ColivingNotFound
 
 
@@ -173,7 +173,7 @@ async def next_roommate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 async def _get_next_roommate(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
-    potential_roommates: list[MatchedUser],
+    potential_roommates: list[ShortProfileInfo],
 ) -> int:
     """
     Функция для получения и вывода для оценки соседа анкеты
@@ -337,7 +337,7 @@ async def handle_about_coliving(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """Ввод описания коливинг профиля и сохранение в контекст."""
-    about_coliving = update.message.text
+    about_coliving = update.effective_message.text
     if not await value_is_in_range_validator(
         update,
         context,
@@ -720,8 +720,7 @@ async def handle_edit_profile_confirmation_confirm(
     """Подтверждение измененного коливинг профиля."""
     coliving = context.user_data["coliving_info"]
     images = context.user_data["coliving_info"].images[: consts.PHOTO_MAX_NUMBER]
-    # Проверка наличия измененных фото по размеру первой фотографии
-    if images[0].photo_size:
+    if images and images[0].photo_size:
         await api_service.delete_coliving_photos(coliving.id, update.effective_chat.id)
         await api_service.save_coliving_photo(images, coliving)
 
@@ -806,13 +805,11 @@ async def _show_coliving_profile(
 async def send_received_room_photos(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
-) -> int:
+) -> Optional[int]:
     """
     Сохранение фотографий
     """
-
     images = context.user_data["coliving_info"].images
-
     if images:
         await update.effective_message.reply_text(
             text=templates.REPLY_MSG_PHOTO,
@@ -826,17 +823,16 @@ async def send_received_room_photos(
         )
         return States.CONFIRMATION
     await update.effective_chat.send_message(templates.DONT_SAVE_COLIVING_WITHOUT_PHOTO)
-    return States.PHOTO_ROOM
+    return None
 
 
 async def send_edited_room_photos(
     update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> int:
+) -> Optional[int]:
     """
     Подтверждение сохранения измененных фотографий
     """
     images = context.user_data["coliving_info"].images
-
     if images:
         await update.effective_message.reply_text(
             text=templates.REPLY_MSG_PHOTO,
@@ -850,7 +846,7 @@ async def send_edited_room_photos(
         )
         return States.EDIT_CONFIRMATION
     await update.effective_chat.send_message(templates.DONT_SAVE_COLIVING_WITHOUT_PHOTO)
-    return States.EDIT_PHOTO_ROOM
+    return None
 
 
 @add_response_prefix()

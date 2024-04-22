@@ -9,11 +9,13 @@ import conversations.coliving_search.states as states
 import conversations.coliving_search.templates as templates
 from conversations.coliving.constants import MAX_PRICE, MIN_PRICE
 from conversations.coliving_search import constants
+from conversations.common_functions.common_funcs import profile_required
 from general.validators import value_is_in_range_validator
 from internal_requests import api_service
 from internal_requests.entities import Coliving, ColivingSearchSettings
 
 
+@profile_required
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Начало ветви общения по поиску коливинга.

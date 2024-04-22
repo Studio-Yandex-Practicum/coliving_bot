@@ -5,9 +5,7 @@ from conversations.common_functions.common_templates import (
 )
 from internal_requests.entities import Coliving
 
-ERR_MSG_ABOUT_MAX_LEN = (
-    "Описание не должно содержать более {max} символов. Попробуй ещё раз:"
-)
+ERR_MSG_ABOUT_MAX_LEN = "Описание не должно содержать более {max} символов."
 ERR_MSG_PRICE = "Введи цену от {min} до {max}."
 ERR_NEED_TO_SELECT_BTN = "Выбери необходимый вариант из меню."
 ERR_PHOTO_NOT_TEXT = f"Отправь до {PHOTO_MAX_NUMBER} фотографий своего коливинга."

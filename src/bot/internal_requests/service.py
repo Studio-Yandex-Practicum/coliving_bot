@@ -1,6 +1,6 @@
 import mimetypes
 from dataclasses import asdict
-from typing import List, NoReturn, Optional
+from typing import List, Optional
 from urllib.parse import urlencode, urljoin
 
 from httpx import AsyncClient, Response
@@ -207,7 +207,7 @@ class APIService:
         :return: Объект UserProfile или None, если профиль не найден.
         """
         response = await self._get_request(f"users/{telegram_id}/profile/")
-        return UserProfile(**response.json())
+        return await self._parse_response_to_user_profile(response.json())
 
     async def get_filtered_user_profiles(
         self, filters: ProfileSearchSettings, viewer: int
@@ -224,7 +224,8 @@ class APIService:
         response = await self._get_request(f"profiles/?{search_params}&viewer={viewer}")
         result = []
         for profile in response.json():
-            result.append(UserProfile(**profile))
+            parsed_profile = await self._parse_response_to_user_profile(profile)
+            result.append(parsed_profile)
         return result
 
     async def get_filtered_colivings(
