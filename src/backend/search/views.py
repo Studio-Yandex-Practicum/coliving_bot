@@ -1,4 +1,4 @@
-from django.db.models import F
+from django.db.models import F, Q
 from rest_framework import generics, status
 from rest_framework.generics import CreateAPIView, UpdateAPIView, get_object_or_404
 from rest_framework.response import Response
@@ -68,6 +68,38 @@ class ColivingLikesListAPIView(generics.ListAPIView):
             .values("telegram_id", "age", "name")
         )
         return likes.all()
+
+
+class PotentialRoommatesListAPIView(generics.ListAPIView):
+    queryset = Profile.objects.select_related("location", "user").prefetch_related(
+        "images"
+    )
+    serializer_class = ProfileSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        coliving = get_object_or_404(Coliving, pk=self.kwargs.get("pk"))
+        user_profile = coliving.host.user_profile
+        coliving_ids = coliving.likes.filter(
+            status=MatchStatuses.is_match,
+        ).values_list("sender__id", flat=True)
+        sent_like_ids = user_profile.sent_likes.filter(
+            status=MatchStatuses.is_match,
+        ).values_list("receiver__id", flat=True)
+        received_like_ids = user_profile.received_likes.filter(
+            status=MatchStatuses.is_match,
+        ).values_list("sender__id", flat=True)
+        return (
+            queryset.filter(
+                Q(id__in=coliving_ids)
+                | Q(id__in=sent_like_ids)
+                | Q(id__in=received_like_ids)
+            )
+            .exclude(id=user_profile.id)
+            .filter(is_visible=True)
+            .order_by("pk")
+            .all()
+        )
 
 
 class ProfilesSearchView(generics.ListAPIView):

@@ -322,6 +322,15 @@ class APIService:
         endpoint_urn = f"users/{telegram_id}/profile/images/"
         return await self._delete_request(endpoint_urn)
 
+    async def get_potential_roommates(self, coliving_pk: int) -> List[UserProfile]:
+        endpoint_urn = f"colivings/{coliving_pk}/potential-roommates/"
+        response = await self._get_request(endpoint_urn)
+        result = []
+        for profile in response.json():
+            parsed_profile = await self._parse_response_to_user_profile(profile)
+            result.append(parsed_profile)
+        return result
+
     async def _get_request(self, endpoint_urn: str) -> Response:
         """
         Отправляет GET-запрос к указанному эндпоинту.

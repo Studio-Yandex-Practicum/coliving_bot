@@ -6,6 +6,7 @@ from search.views import (
     ColivingLikesListAPIView,
     ColivingLikeUpdateAPIView,
     MatchedProfileListAPIView,
+    PotentialRoommatesListAPIView,
     ProfileLikeCreateAPIView,
     ProfileLikeUpdateAPIView,
     ProfilesSearchView,
@@ -24,6 +25,11 @@ urlpatterns = [
         f"{settings.API_V1_PREFIX}/colivings/<int:pk>/matches/",
         ColivingLikesListAPIView.as_view(),
         name="matched_coliving_likes",
+    ),
+    path(
+        f"{settings.API_V1_PREFIX}/colivings/<int:pk>/potential-roommates/",
+        PotentialRoommatesListAPIView.as_view(),
+        name="potential-roommates",
     ),
     path(
         f"{settings.API_V1_PREFIX}/reports/",

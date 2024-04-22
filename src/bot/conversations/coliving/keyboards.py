@@ -111,7 +111,7 @@ COLIVING_PROFILE_DUPLICATE_BUTTONS = [
     ),
     InlineKeyboardButton(
         text=buttons.BTN_LABEL_ASSIGN_ROOMMATE,
-        callback_data=buttons.BTN_ASSIGN_ROOMMATE,
+        callback_data=buttons.BTN_LABEL_ASSIGN_ROOMMATE,
     ),
     InlineKeyboardButton(
         text=buttons.BTN_LABEL_TRANSFER_TO,
@@ -213,7 +213,6 @@ DELETE_OR_CANCEL_COLIVING_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     )
 )
 
-
 ROOMMATE_KEYBOARD = InlineKeyboardMarkup.from_row(
     button_row=(
         InlineKeyboardButton(
@@ -226,7 +225,6 @@ ROOMMATE_KEYBOARD = InlineKeyboardMarkup.from_row(
         ),
     ),
 )
-
 
 NEXT_ROOMMATE = InlineKeyboardMarkup.from_column(
     button_column=(
