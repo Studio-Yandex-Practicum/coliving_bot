@@ -8,6 +8,8 @@ import conversations.match_requests.templates as match_templates
 import conversations.roommate_search.keyboards as keyboards
 import conversations.roommate_search.templates as templates
 from conversations.common_functions.common_funcs import profile_required
+from conversations.match_requests.constants import MatchStatus
+from conversations.profile.templates import SHORT_PROFILE_DATA
 from conversations.roommate_search.buttons import ANY_GENDER_BTN
 from conversations.roommate_search.constants import SRCH_STNG_FIELD
 from conversations.roommate_search.states import States
@@ -129,6 +131,21 @@ async def next_profile(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     return state
 
 
+async def profile_dislike(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """
+    Обрабатывает ДИЗЛАЙК на профиль соседа.
+    """
+    current_profile = context.user_data["current_profile"]
+    sender_id = update.effective_chat.id
+    receiver_id = current_profile.user
+
+    await api_service.send_profile_like(
+        sender=sender_id, receiver=receiver_id, status=MatchStatus.IS_REJECTED.value
+    )
+
+    return await next_profile(update, context)
+
+
 async def profile_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Обрабатывает ЛАЙК на профиль соседа.
@@ -137,21 +154,16 @@ async def profile_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     отправляет уведомление другому пользователю о лайке
     и переводит в состояние продолжения поиска.
     """
-    current_profile = context.user_data.get("current_profile")
+    current_profile = context.user_data["current_profile"]
     sender_id = update.effective_chat.id
-    receiver_id = current_profile["user"]
+    receiver_id = current_profile.user
 
-    await api_service.send_match_request(
+    like = await api_service.send_profile_like(
         sender=sender_id,
         receiver=receiver_id,
     )
 
-    await context.bot.send_message(
-        chat_id=sender_id,
-        text=templates.SEND_LIKE.format(receiver_name=current_profile["name"]),
-    )
-
-    keyboard = await match_keyboards.get_view_profile_keyboard(sender_id)
+    keyboard = await match_keyboards.get_view_profile_keyboard(like, sender_id)
     await context.bot.send_message(
         chat_id=receiver_id,
         text=match_templates.LIKE_NOTIFICATION,
@@ -159,10 +171,9 @@ async def profile_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     )
 
     await update.effective_message.reply_text(
-        text=templates.ASK_NEXT_PROFILE,
-        reply_markup=keyboards.NEXT_PROFILE,
+        text=templates.PROFILE_LIKE_TEXT.format(current_profile.name),
     )
-    return States.NEXT_PROFILE
+    return await next_profile(update, context)
 
 
 async def end_of_search(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -197,13 +208,13 @@ async def _get_next_user_profile(
                 reply_markup=keyboards.PROFILE_KEYBOARD,
             )
         profile = user_profiles.pop()
-        context.user_data["current_profile"] = asdict(profile)
+        context.user_data["current_profile"] = profile
         context.user_data["user_profiles"] = user_profiles
 
         await send_profile_info(
             update=update,
             profile=profile,
-            profile_template=templates.PROFILE_DATA,
+            profile_template=SHORT_PROFILE_DATA,
         )
         return States.PROFILE
 
@@ -220,13 +231,13 @@ async def send_profile_info(
     profile_template: str,
 ):
     """Формирует и отправляет сообщение с профилем пользователя."""
+    images = profile.images.copy()
+    profile.images.clear()
     profile_dict: dict = asdict(profile)
-
-    images = profile_dict.pop("images", None)
     profile_brief_info = profile_template.format(**profile_dict)
 
     if images:
-        media_group = [InputMediaPhoto(file_id) for file_id in images]
+        media_group = [InputMediaPhoto(file.file_id) for file in images]
         await update.effective_chat.send_media_group(
             media=media_group,
             caption=profile_brief_info,

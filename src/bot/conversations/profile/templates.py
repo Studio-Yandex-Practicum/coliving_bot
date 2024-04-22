@@ -45,14 +45,14 @@ BUTTON_ERROR_MSG = "Выбери соответствующий вариант."
 ABOUT_MAX_LEN_ERROR_MSG = "Описание не должно содержать более {max} символов."
 PHOTO_ERROR_MESSAGE = "Отправь фото."
 ERR_PHOTO_NOT_TEXT = f"Отправь до {PHOTO_MAX_NUMBER} фотографий для своего профиля."
-PROFILE_DATA = (
+SHORT_PROFILE_DATA = (
     "<b>Имя:</b> {name}\n"
     "<b>Пол:</b> {sex}\n"
     "<b>Возраст:</b> {age}\n"
     "<b>Место поиска:</b> {location}\n"
     "<b>О себе:</b> {about}\n"
-    "<b>Видимость анкеты:</b> {is_visible}\n"
 )
+PROFILE_DATA = SHORT_PROFILE_DATA + "<b>Видимость анкеты:</b> {is_visible}\n"
 
 REPLY_MSG_WANT_TO_DELETE = "Ты уверен, что хочешь удалить свою анкету?"
 REPLY_MSG_PROFILE_DELETED = "Твоя анкета была удалена."

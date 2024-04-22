@@ -206,7 +206,7 @@ async def _get_next_coliving(
         images = coliving.get("images", [])
         message_text = templates.COLIVING_DATA.format(**coliving)
         if images:
-            media_group = [InputMediaPhoto(file_id) for file_id in images]
+            media_group = [InputMediaPhoto(file.file_id) for file in images]
             await update.effective_chat.send_media_group(
                 media=media_group,
                 caption=message_text,

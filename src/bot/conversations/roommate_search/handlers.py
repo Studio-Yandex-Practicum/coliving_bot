@@ -77,7 +77,7 @@ roommate_search_handler: ConversationHandler = ConversationHandler(
             ),
             MessageHandler(
                 filters=filters.Regex(rf"^{buttons.DISLIKE_BTN}$"),
-                callback=callbacks.next_profile,
+                callback=callbacks.profile_dislike,
             ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,

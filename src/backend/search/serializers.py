@@ -34,8 +34,8 @@ class MatchedProfileSerializer(serializers.Serializer):
 class OnlyLikeStatusWriteSerializerMixin:
     class Meta:
         model = ProfileLike
-        fields = ("status", "id", "sender", "receiver", "match_date", "created_date")
-        read_only_fields = ("id", "sender", "receiver", "match_date", "created_date")
+        fields = ("status", "id", "sender", "receiver")
+        read_only_fields = ("id", "sender", "receiver")
 
 
 class ProfileLikeCreateSerializer(serializers.ModelSerializer):
@@ -50,8 +50,8 @@ class ProfileLikeCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProfileLike
-        fields = ("id", "sender", "receiver", "status", "match_date", "created_date")
-        read_only_fields = ("id", "match_date", "created_date")
+        fields = ("id", "sender", "receiver", "status")
+        read_only_fields = ("id",)
 
 
 class ProfileLikeUpdateSerializer(
@@ -67,8 +67,8 @@ class ColivingLikeCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ColivingLike
-        fields = ("id", "sender", "coliving", "status", "match_date", "created_date")
-        read_only_fields = ("id", "match_date", "created_date")
+        fields = ("id", "sender", "coliving", "status")
+        read_only_fields = ("id",)
 
 
 class ColivingLikeUpdateSerializer(

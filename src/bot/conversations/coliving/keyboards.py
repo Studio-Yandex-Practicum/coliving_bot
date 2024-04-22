@@ -72,10 +72,6 @@ WHAT_EDIT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
             text=buttons.BTN_LABEL_DELETE_PROFILE_KEYBOARD,
             callback_data=buttons.BTN_LABEL_DELETE_PROFILE_KEYBOARD,
         ),
-        InlineKeyboardButton(
-            text=RETURN_TO_MENU_BTN,
-            callback_data=RETURN_TO_MENU_BTN,
-        ),
     )
 )
 
@@ -90,8 +86,8 @@ COLIVING_TRANSFER_TO_CONFIRM_KEYBOARD = InlineKeyboardMarkup.from_row(
 
 IS_VISIBLE_OR_NOT_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
-        HIDE_BUTTON,
         SEARCH_BUTTON,
+        HIDE_BUTTON,
     )
 )
 
@@ -99,12 +95,12 @@ EDIT_CONFIRMATION_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         CONFIRMATION_KEYBOARD,
         InlineKeyboardButton(
-            text=buttons.BTN_LABEL_CANCEL_EDIT,
-            callback_data=buttons.BTN_LABEL_CANCEL_EDIT,
-        ),
-        InlineKeyboardButton(
             text=buttons.BTN_LABEL_EDIT_CONTINUE,
             callback_data=buttons.BTN_LABEL_EDIT_CONTINUE,
+        ),
+        InlineKeyboardButton(
+            text=buttons.BTN_LABEL_CANCEL_EDIT,
+            callback_data=buttons.BTN_LABEL_CANCEL_EDIT,
         ),
     )
 )

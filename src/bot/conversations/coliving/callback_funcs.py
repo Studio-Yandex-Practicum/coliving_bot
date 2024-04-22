@@ -774,8 +774,6 @@ async def _show_coliving_profile(
     keyboard: Optional[InlineKeyboardMarkup] = None,
     coliving: Optional[Coliving] = None,
 ) -> None:
-    """Просмотр профиля и переводит на подтверждение профиля CONFIRMATION."""
-    current_chat = update.effective_chat
     coliving_info: Coliving = coliving or context.user_data["coliving_info"]
 
     if coliving_info.images:
@@ -783,7 +781,7 @@ async def _show_coliving_profile(
             InputMediaPhoto(media=image.file_id)
             for image in coliving_info.images[: templates.PHOTO_MAX_NUMBER]
         ]
-        await current_chat.send_media_group(media=media_group)
+        await update.effective_chat.send_media_group(media=media_group)
 
     if keyboard is None:
         if coliving_info.is_visible:
@@ -796,7 +794,7 @@ async def _show_coliving_profile(
     if ask_to_confirm:
         message_text += templates.REPLY_MSG_ASK_TO_CONFIRM
 
-    await current_chat.send_message(
+    await update.effective_chat.send_message(
         text=message_text,
         reply_markup=keyboard,
     )

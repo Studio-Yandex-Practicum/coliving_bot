@@ -5,7 +5,6 @@ from urllib.parse import urlencode, urljoin
 
 from httpx import AsyncClient, Response
 
-import internal_requests.constants as constants
 from internal_requests.entities import (
     Coliving,
     ColivingLike,
@@ -169,30 +168,38 @@ class APIService:
             result.append(ShortProfileInfo(**matched_user))
         return result
 
-    async def send_profile_like(self, sender: int, receiver: int) -> ProfileLike:
+    async def send_profile_like(
+        self, sender: int, receiver: int, status: Optional[int] = None
+    ) -> ProfileLike:
         """Отправляет запрос на создание лайка профиля."""
-        endpoint_urn = "profile/likes/"
+        endpoint_urn = "profiles/like/"
         data = {"sender": sender, "receiver": receiver}
+        if status is not None:
+            data["status"] = status
         response = await self._post_request(endpoint_urn=endpoint_urn, data=data)
         return ProfileLike(**response.json())
 
     async def update_status_profile_like(self, pk: int, status: int) -> ProfileLike:
         """Отправляет запрос на обновление статуса лайка профиля."""
-        endpoint_urn = f"profile/likes/{pk}/"
+        endpoint_urn = f"profiles/like/{pk}/"
         data = {"status": status}
         response = await self._patch_request(endpoint_urn=endpoint_urn, data=data)
         return ProfileLike(**response.json())
 
-    async def send_coliving_like(self, sender: int, coliving_pk: int) -> ColivingLike:
+    async def send_coliving_like(
+        self, sender: int, coliving_pk: int, status: Optional[int] = None
+    ) -> ColivingLike:
         """Отправляет запрос на создание лайка для коливинга."""
-        endpoint_urn = "colivings/likes/"
+        endpoint_urn = "colivings/like/"
         data = {"sender": sender, "coliving": coliving_pk}
+        if status is not None:
+            data["status"] = status
         response = await self._post_request(endpoint_urn=endpoint_urn, data=data)
         return ColivingLike(**response.json())
 
     async def update_status_coliving_like(self, pk: int, status: int) -> ColivingLike:
         """Отправляет запрос на обновление статуса лайка для коливинга."""
-        endpoint_urn = f"colivings/likes/{pk}/"
+        endpoint_urn = f"colivings/like/{pk}/"
         data = {"status": status}
         response = await self._patch_request(endpoint_urn=endpoint_urn, data=data)
         return ColivingLike(**response.json())
@@ -314,67 +321,6 @@ class APIService:
         """
         endpoint_urn = f"users/{telegram_id}/profile/images/"
         return await self._delete_request(endpoint_urn)
-
-    async def send_match_request(
-        self,
-        sender: int,
-        receiver: int,
-    ) -> Response:
-        """Совершает POST-запрос к эндпоинту создания MatchRequest.
-
-        :param sender: telegram_id отправителя.
-        :param receiver: telegram_id получателя.
-        """
-        try:
-            await self._get_match_request_by_sender_and_receiver(
-                sender=sender,
-                receiver=receiver,
-            )
-            return
-        except MatchReuestgNotFound:
-            response = await self._post_request(
-                endpoint_urn=constants.MATCH_REQUEST_URL
-            )
-            return response
-
-    async def update_match_request_status(
-        self,
-        sender: int,
-        receiver: int,
-        status: int,
-    ) -> Response:
-        """Совершает PATCH-запрос к эндпоинту изменения MatchRequest.
-
-        :param sender: telegram_id отправителя.
-        :param receiver: telegram_id получателя.
-        :param status: match_request status
-        """
-        match_request_id: int = await self._get_match_request_by_sender_and_receiver(
-            sender=sender,
-            receiver=receiver,
-        )
-        endpoint_urn = f"{constants.MATCH_REQUEST_URL}{match_request_id}/"
-        data = {"status": status}
-        response = await self._patch_request(endpoint_urn=endpoint_urn, data=data)
-        return response
-
-    async def _get_match_request_by_sender_and_receiver(
-        self,
-        sender: int,
-        receiver: int,
-    ):
-        endpoint_urn = (
-            f"{constants.MATCH_REQUEST_URL}/" f"?sender={sender}&receiver={receiver}"
-        )
-        response = await self._get_request(endpoint_urn=endpoint_urn)
-        response_json = response.json()
-        if not response_json:
-            raise MatchReuestgNotFound(
-                message="Такой MatchRequest не найден",
-                response=response,
-            )
-        match_request_pk = response_json[0]["id"]
-        return match_request_pk
 
     async def _get_request(self, endpoint_urn: str) -> Response:
         """

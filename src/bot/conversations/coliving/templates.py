@@ -43,7 +43,7 @@ REPLY_MSG_ASK_PHOTO_SEND = (
     f" Желательно показать кухню, общие зоны, санузел и комнаты,"
     f" где будут жить твои соседи. Можно загрузить до {PHOTO_MAX_NUMBER} фотографий."
 )
-REPLY_MSG_PHOTO = "Какой классный коливинг получается 🫠. Он выглядит так: "
+REPLY_MSG_PHOTO = "Какой классный коливинг получается 😊. Он выглядит так: "
 REPLY_MSG_PHOTO_RECEIVE = "\nЖелаете сохранить фотографии?"
 REPLY_MSG_ASK_TO_CONFIRM = "\nВсё верно?"
 REPLY_MSG_TITLE = "Сейчас анкета коливинга выглядит так: \n\n"
@@ -110,12 +110,10 @@ async def format_coliving_profile_message(coliving_info: Coliving) -> str:
     is_visible = (
         PROFILE_IS_VISIBLE_TEXT if coliving_info.is_visible else PROFILE_IS_HIDDEN_TEXT
     )
-
-    result = REPLY_MSG_TITLE + PROFILE_DATA.format(
+    return PROFILE_DATA.format(
         location=coliving_info.location,
         room_type=coliving_info.room_type,
         about=coliving_info.about,
         price=coliving_info.price,
         is_visible=is_visible,
     )
-    return result
