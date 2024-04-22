@@ -3,12 +3,12 @@ from dataclasses import asdict
 from telegram import InputMediaPhoto, ReplyKeyboardRemove, Update
 from telegram.ext import ContextTypes, ConversationHandler
 
-import conversations.match_requests.keyboards as match_keyboards
 import conversations.match_requests.templates as match_templates
 import conversations.roommate_search.keyboards as keyboards
 import conversations.roommate_search.templates as templates
 from conversations.common_functions.common_funcs import profile_required
 from conversations.match_requests.constants import MatchStatus
+from conversations.match_requests.profile.keyboards import get_view_profile_keyboard
 from conversations.profile.templates import SHORT_PROFILE_DATA
 from conversations.roommate_search.buttons import ANY_GENDER_BTN
 from conversations.roommate_search.constants import SRCH_STNG_FIELD
@@ -163,7 +163,7 @@ async def profile_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         receiver=receiver_id,
     )
 
-    keyboard = await match_keyboards.get_view_profile_keyboard(like, sender_id)
+    keyboard = await get_view_profile_keyboard(like, sender_id)
     await context.bot.send_message(
         chat_id=receiver_id,
         text=match_templates.LIKE_NOTIFICATION,
