@@ -3,14 +3,15 @@ from typing import Optional, Tuple
 from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
 
-import conversations.match_requests.keyboards as keyboards
-import conversations.match_requests.states as states
+import conversations.match_requests.profile.states as states
 import conversations.match_requests.templates as templates
 from conversations.match_requests.constants import (
     LIKE_ID_REGEX_GROUP,
     SENDER_ID_REGEX_GROUP,
     MatchStatus,
 )
+from conversations.match_requests.keyboards import get_like_or_dislike_keyboard
+from conversations.match_requests.utils import send_match_notifications
 from conversations.profile.templates import SHORT_PROFILE_DATA
 from conversations.roommate_search.callback_funcs import send_profile_info
 from internal_requests import api_service
@@ -44,7 +45,7 @@ async def show_sender_profile(update: Update, like_id: int, like_sender_id: int)
         await api_service.get_user_profile_by_telegram_id(telegram_id=like_sender_id)
     )
 
-    like_or_dislike_keyboard = await keyboards.get_like_or_dislike_keyboard(
+    like_or_dislike_keyboard = await get_like_or_dislike_keyboard(
         like_id=like_id,
         telegram_id=like_sender_id,
     )
@@ -82,21 +83,7 @@ async def link_sender_to_receiver(
         status=MatchStatus.IS_MATCH.value,
     )
 
-    like_sender_username: str = await _get_tg_username(
-        context=context, telegram_id=sender_id
-    )
-    like_receiver_username: str = await _get_tg_username(
-        context=context, telegram_id=like_receiver_id
-    )
-
-    await update.effective_message.edit_text(
-        text=templates.NEW_MATCH_NOTIFICATION.format(username=like_sender_username)
-    )
-
-    await context.bot.send_message(
-        chat_id=sender_id,
-        text=templates.NEW_MATCH_NOTIFICATION.format(username=like_receiver_username),
-    )
+    await send_match_notifications(update, context, sender_id, like_receiver_id)
     return ConversationHandler.END
 
 

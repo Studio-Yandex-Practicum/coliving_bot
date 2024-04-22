@@ -87,11 +87,11 @@ coliving_search_handler: ConversationHandler = ConversationHandler(
         states.COLIVING: [
             MessageHandler(
                 filters=filters.Regex(rf"^{buttons.LIKE_BTN}$"),
-                callback=callbacks.coliving_like,
+                callback=callbacks.like_coliving,
             ),
             MessageHandler(
                 filters=filters.Regex(rf"^{buttons.DISLIKE_BTN}$"),
-                callback=callbacks.next_coliving,
+                callback=callbacks.dislike_coliving,
             ),
             MessageHandler(
                 filters=filters.Regex(rf"^{common_buttons.RETURN_TO_MENU_BTN}$"),

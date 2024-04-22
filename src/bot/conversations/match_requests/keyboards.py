@@ -5,11 +5,7 @@ from telegram import (
     ReplyKeyboardMarkup,
 )
 
-import conversations.match_requests.buttons as buttons
-from internal_requests.entities import ProfileLike
-
-# from conversations.roommate_search.buttons import AGE_BUTTONS
-
+from conversations.match_requests import buttons as buttons
 
 PROFILE_KEYBOARD = ReplyKeyboardMarkup.from_row(
     button_row=(
@@ -18,20 +14,6 @@ PROFILE_KEYBOARD = ReplyKeyboardMarkup.from_row(
     ),
     resize_keyboard=True,
 )
-
-
-async def get_view_profile_keyboard(
-    like: ProfileLike, telegram_id: int
-) -> InlineKeyboardMarkup:
-    view_profile_keyboard = InlineKeyboardMarkup.from_column(
-        button_column=(
-            InlineKeyboardButton(
-                text=buttons.SEE_PROFILE_BNT,
-                callback_data=f"{like.id}:{telegram_id}:{buttons.SEE_PROFILE_BNT}",
-            ),
-        )
-    )
-    return view_profile_keyboard
 
 
 async def get_like_or_dislike_keyboard(like_id: int, telegram_id: int):

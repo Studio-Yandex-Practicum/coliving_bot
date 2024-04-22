@@ -252,7 +252,8 @@ class APIService:
         )
         result = []
         for coliving in response.json():
-            result.append(Coliving(**coliving))
+            parsed_coliving = await self._parse_response_to_coliving(coliving)
+            result.append(parsed_coliving)
         return result
 
     async def get_coliving_roommates(self, coliving_id: int, page: int) -> dict:

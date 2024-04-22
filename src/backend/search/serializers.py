@@ -31,13 +31,6 @@ class MatchedProfileSerializer(serializers.Serializer):
     age = serializers.IntegerField(read_only=True)
 
 
-class OnlyLikeStatusWriteSerializerMixin:
-    class Meta:
-        model = ProfileLike
-        fields = ("status", "id", "sender", "receiver")
-        read_only_fields = ("id", "sender", "receiver")
-
-
 class ProfileLikeCreateSerializer(serializers.ModelSerializer):
     sender = serializers.SlugRelatedField(
         slug_field="user_id",
@@ -54,10 +47,11 @@ class ProfileLikeCreateSerializer(serializers.ModelSerializer):
         read_only_fields = ("id",)
 
 
-class ProfileLikeUpdateSerializer(
-    OnlyLikeStatusWriteSerializerMixin, ProfileLikeCreateSerializer
-):
-    pass
+class ProfileLikeUpdateSerializer(ProfileLikeCreateSerializer):
+    class Meta:
+        model = ProfileLike
+        fields = ("id", "sender", "receiver", "status")
+        read_only_fields = ("id", "sender", "receiver")
 
 
 class ColivingLikeCreateSerializer(serializers.ModelSerializer):
@@ -71,7 +65,8 @@ class ColivingLikeCreateSerializer(serializers.ModelSerializer):
         read_only_fields = ("id",)
 
 
-class ColivingLikeUpdateSerializer(
-    OnlyLikeStatusWriteSerializerMixin, ColivingLikeCreateSerializer
-):
-    pass
+class ColivingLikeUpdateSerializer(ColivingLikeCreateSerializer):
+    class Meta:
+        model = ColivingLike
+        fields = ("id", "sender", "coliving", "status")
+        read_only_fields = ("id", "sender", "coliving")
