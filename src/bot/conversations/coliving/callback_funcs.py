@@ -11,13 +11,12 @@ from telegram import (
 from telegram.error import TelegramError
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
-from conversations.coliving.roommates_transfer_dry import handle_coliving
-from conversations.profile.callback_funcs import _look_at_profile
 import conversations.coliving.buttons as buttons
 import conversations.coliving.constants as consts
 import conversations.coliving.keyboards as keyboards
 import conversations.coliving.templates as templates
 import conversations.common_functions.common_templates as common_templates
+from conversations.coliving.roommates_transfer_dry import handle_coliving
 from conversations.coliving.states import States
 from conversations.coliving.templates import format_coliving_profile_message
 from conversations.common_functions.common_funcs import (
@@ -25,6 +24,7 @@ from conversations.common_functions.common_funcs import (
     get_visibility_choice,
     profile_required,
 )
+from conversations.profile.callback_funcs import _look_at_profile
 from general.validators import value_is_in_range_validator
 from internal_requests import api_service
 from internal_requests.entities import Coliving, Image, UserProfile

@@ -4,10 +4,10 @@ from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 import conversations.coliving.coliving_transfer.templates as templates
 from conversations.coliving import keyboards as keyboards
 from conversations.coliving.buttons import BTN_LABEL_CANCEL, BTN_LABEL_CONFIRM
+from conversations.coliving.roommates_transfer_dry import handle_coliving
 from conversations.coliving.states import States
 from conversations.common_functions.common_funcs import add_response_prefix
 from internal_requests import api_service
-from conversations.coliving.roommates_transfer_dry import handle_coliving
 
 
 async def handle_coliving_transfer_to(update, context):
