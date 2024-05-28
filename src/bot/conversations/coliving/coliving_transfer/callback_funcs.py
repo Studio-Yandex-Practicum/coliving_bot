@@ -16,7 +16,7 @@ async def handle_coliving_transfer_to(update, context):
         update=update,
         context=context,
         text=templates.SELECT_USER_MESSAGE,
-        state=States.TRANSFER_COLIVING
+        state=States.TRANSFER_COLIVING,
     )
 
 

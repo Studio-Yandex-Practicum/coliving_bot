@@ -65,15 +65,11 @@ async def create_page_keyboard(response_json, page):
     pagination_buttons = []
     if response_json["previous"]:
         pagination_buttons.append(
-            InlineKeyboardButton(
-                text="◀️", callback_data=f"coliving_page:{page - 1}"
-            )
+            InlineKeyboardButton(text="◀️", callback_data=f"coliving_page:{page - 1}")
         )
     if response_json["next"]:
         pagination_buttons.append(
-            InlineKeyboardButton(
-                text="▶️", callback_data=f"coliving_page:{page + 1}"
-            )
+            InlineKeyboardButton(text="▶️", callback_data=f"coliving_page:{page + 1}")
         )
     user_buttons.append(pagination_buttons)
     keyboard = InlineKeyboardMarkup(inline_keyboard=user_buttons)
