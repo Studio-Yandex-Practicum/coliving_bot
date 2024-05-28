@@ -13,6 +13,7 @@ from internal_requests.entities import (
     Location,
     ProfileLike,
     ProfileSearchSettings,
+    Report,
     ShortProfileInfo,
     UserProfile,
 )
@@ -32,6 +33,15 @@ class APIService:
 
     def __init__(self, base_url: str) -> None:
         self.base_url: str = base_url
+
+    async def create_report(self, report: Report) -> Report:
+        """
+        Запрос на создание жалобы на пользователя.
+        """
+        endpoint_urn = "reports/"
+        data = asdict(report)
+        response = await self._post_request(endpoint_urn=endpoint_urn, data=data)
+        return Report(**response.json())
 
     async def save_photo(
         self,

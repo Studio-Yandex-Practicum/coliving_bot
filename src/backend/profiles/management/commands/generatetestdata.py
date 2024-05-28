@@ -99,13 +99,15 @@ class Command(BaseCommand):
             **{class_name: instance},
             image=django_file,
             file_id=(
-                "AgACAgIAAxkBAAI4b2YWSwABooTTLwrmxG1eyhTLC"
-                "jQ4ewACbdYxGxussUjFdGMFQtfg-AEAAwIAA3kAAzQE"
-            )
-            if class_name == "profile"
-            else (
-                "AgACAgIAAxkBAAI4bmYWSwABE6wxkf3Yey8kY7Fzq"
-                "ur_ewACo9cxGxussUgz-yVGNSObAwEAAwIAA3kAAzQE"
+                (
+                    "AgACAgIAAxkBAAI4b2YWSwABooTTLwrmxG1eyhTLC"
+                    "jQ4ewACbdYxGxussUjFdGMFQtfg-AEAAwIAA3kAAzQE"
+                )
+                if class_name == "profile"
+                else (
+                    "AgACAgIAAxkBAAI4bmYWSwABE6wxkf3Yey8kY7Fzq"
+                    "ur_ewACo9cxGxussUgz-yVGNSObAwEAAwIAA3kAAzQE"
+                )
             ),
         )
         temp_file.close()
