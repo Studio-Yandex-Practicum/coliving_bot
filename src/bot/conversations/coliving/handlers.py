@@ -264,6 +264,22 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 callback=common_funcs.handle_return_to_menu_response,
                 pattern=rf"^{RETURN_TO_MENU_BTN}$",
             ),
+            CallbackQueryHandler(
+                callback=callback_funcs.get_profile_roommate,
+                pattern=r"^profile:(?P<telegram_id>\d+)$",
+            ),
+            CallbackQueryHandler(
+                callback=callback_funcs.unpin_profile,
+                pattern=r"^profile_unpin_coliving:(?P<telegram_id>\d+)$",
+            ),
+            CallbackQueryHandler(
+                callback=callback_funcs.unpin_profile_no,
+                pattern=r"^unpin_profile_no",
+            ),
+            CallbackQueryHandler(
+                callback=callback_funcs.unpin_profile_yes,
+                pattern=r"^unpin_profile_yes:(?P<telegram_id>\d+)$",
+            ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
                 callback_funcs.handle_coliving_text_instead_of_button,

@@ -11,6 +11,8 @@ from telegram import (
 from telegram.error import TelegramError
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
+from conversations.profile.callback_funcs import _look_at_profile
+from conversations.coliving.coliving_transfer.callback_funcs import _get_coliving_roommates_response
 import conversations.coliving.buttons as buttons
 import conversations.coliving.constants as consts
 import conversations.coliving.keyboards as keyboards
@@ -120,23 +122,102 @@ async def handle_is_visible_switching(update: Update, context: CallbackContext) 
 async def handle_coliving_roommates(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ) -> int:
-    """Обработка ответа: Посмотреть анкеты соседей."""
-
-    #############################################################
-    # запрос к API
-    # заглушка
+    """Обработка ответа: Просмотр списка соседей."""
+    page = 1
+    response_json = await _get_coliving_roommates_response(update, _context, page)
+    if response_json is None:
+        _context.user_data.clear()
+        return ConversationHandler.END
+    keyboard = await create_page_keyboard_coliving_roommates(response_json, page)
+    await update.effective_message.reply_text(text=templates.COLIVING_ROOMMATES, reply_markup=keyboard)
     await update.effective_message.edit_reply_markup()
-    await update.effective_message.reply_text(
-        text=(
-            "Заглушка. По идее здесь запрос к API "
-            "вывод списка соседей"
-            "\n"
-            "\n"
-            "Нажмите /coliving"
+    return States.COLIVING
+
+
+async def create_page_keyboard_coliving_roommates(response_json, page):
+    """Клавиатура выбора анкеты соседей."""
+    user_buttons = []
+    for user in response_json["results"]:
+        user_buttons.append(
+            [
+                InlineKeyboardButton(
+                    text=f"{user['name']}, {user['age']}",
+                    callback_data=f"profile:{user['telegram_id']}",
+                )
+            ]
         )
-    )
-    #############################################################
-    return ConversationHandler.END
+    keyboard = InlineKeyboardMarkup(inline_keyboard=user_buttons)
+    return keyboard
+
+
+async def get_profile_roommate(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Получить анкету соседа из списка"""
+    telegram_id = int(context.match.group('telegram_id'))
+    profile_data = await api_service.get_user_profile_by_telegram_id(telegram_id)
+
+    context.user_data['profile_info'] = profile_data
+    await _look_at_profile(update, context, title=templates.PROFILE_ROOMMATE)
+
+    keyboard = await create_keyboard_profile_roommate(telegram_id)
+    await update.effective_message.reply_text(text=templates.WHAT_DO_YOU_WANT_TO_DO, reply_markup=keyboard)
+    await update.effective_message.edit_reply_markup()
+    return States.COLIVING
+
+
+async def create_keyboard_profile_roommate(telegram_id):
+    """Клавиатура администрирования соседей коливинга"""
+    buttons_administrations = [[
+                InlineKeyboardButton(
+                    text=buttons.BTN_PROFILE_UNPIN_FROM_COLIVING,
+                    callback_data=f"profile_unpin_coliving:{telegram_id}",
+                ),
+                InlineKeyboardButton(
+                    text=buttons.BTN_PROFILE_ROOMMATE_GO_BACK,
+                    callback_data=f"roommates_profiles"
+                )
+            ]]
+    keyboard = InlineKeyboardMarkup(inline_keyboard=buttons_administrations)
+    return keyboard
+
+
+async def unpin_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Открепление соседа от коливинга"""
+    telegram_id = int(context.match.group('telegram_id'))
+    name = context.user_data["profile_info"].name
+    keyboard = await create_keyboard_confirmation(telegram_id)
+    await update.effective_message.reply_text(text=templates.CONFIRMATION_UNPIN.format(name=name), reply_markup=keyboard)
+    await update.effective_message.edit_reply_markup()
+    return States.COLIVING
+
+
+async def create_keyboard_confirmation(telegram_id):
+    """Клавиатура подтверждения открепления"""
+    buttons_administrations = [[
+                InlineKeyboardButton(
+                    text=buttons.YES_BTN,
+                    callback_data=f"unpin_profile_yes:{telegram_id}",
+                ),
+                InlineKeyboardButton(
+                    text=buttons.NO_BTN,
+                    callback_data=f"unpin_profile_no"
+                )
+            ]]
+    keyboard = InlineKeyboardMarkup(inline_keyboard=buttons_administrations)
+    return keyboard
+
+
+async def unpin_profile_yes(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Изменяем поле у пользователя residence = null"""
+    telegram_id = int(context.match.group('telegram_id'))
+    name = context.user_data["profile_info"].name
+    await api_service.update_user_residence(telegram_id)
+    await update.effective_message.reply_text(text=templates.ROOMMATE_NOT_IN_COLIVING_NOW.format(name=name))
+
+
+async def unpin_profile_no(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Выводим сообщеие что ничего не изменилось """
+    await update.effective_message.reply_text(text=templates.NOTHING_EDIT_IN_COLIVING)
+    await update.effective_message.edit_reply_markup()
 
 
 @add_response_prefix()
