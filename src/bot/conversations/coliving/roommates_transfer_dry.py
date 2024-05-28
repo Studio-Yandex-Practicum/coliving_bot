@@ -76,4 +76,3 @@ async def create_page_keyboard(response_json, page):
     user_buttons.append(pagination_buttons)
     keyboard = InlineKeyboardMarkup(inline_keyboard=user_buttons)
     return keyboard
-

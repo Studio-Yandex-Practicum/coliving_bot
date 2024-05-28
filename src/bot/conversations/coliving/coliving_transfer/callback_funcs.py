@@ -1,6 +1,4 @@
-from typing import Optional
-
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram import Update
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
 import conversations.coliving.coliving_transfer.templates as templates
@@ -20,6 +18,7 @@ async def handle_coliving_transfer_to(update, context):
         text=templates.SELECT_USER_MESSAGE,
         state=States.TRANSFER_COLIVING
     )
+
 
 async def handle_coliving_transfer_to_confirm(
     update: Update, context: ContextTypes.DEFAULT_TYPE
@@ -60,6 +59,3 @@ async def handle_cancel_coliving_transfer(update: Update, _context: CallbackCont
     """Обработка отмены передачи коливинга."""
     await update.effective_message.reply_text(templates.CANCELLATION_MESSAGE)
     return ConversationHandler.END
-
-
-

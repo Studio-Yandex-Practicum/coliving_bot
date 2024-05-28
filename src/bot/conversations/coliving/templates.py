@@ -101,8 +101,12 @@ COLIVING_ROOMMATES = 'Твои соседи:'
 PROFILE_ROOMMATE = 'Анкета жильца'
 WHAT_DO_YOU_WANT_TO_DO = 'Что хочешь сделать?'
 CONFIRMATION_UNPIN = 'Ты уверен что хочешь открепить {name} от коливинга?'
-ROOMMATE_NOT_IN_COLIVING_NOW = 'Пользователь {name} больше не состоит с вами в коливинге.'
+ROOMMATE_NOT_IN_COLIVING_NOW = (
+    'Пользователь {name} больше не состоит с вами '
+    'в коливинге.'
+)
 NOTHING_EDIT_IN_COLIVING = 'Хорошо. Оставим его жить с нами. Ничего не поменялось'
+
 
 async def format_coliving_profile_message(coliving_info: Coliving) -> str:
     is_visible = (

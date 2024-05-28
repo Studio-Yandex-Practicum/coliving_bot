@@ -140,7 +140,8 @@ async def get_profile_roommate(update: Update, context: ContextTypes.DEFAULT_TYP
     await _look_at_profile(update, context, title=templates.PROFILE_ROOMMATE)
 
     keyboard = await create_keyboard_profile_roommate(telegram_id)
-    await update.effective_message.reply_text(text=templates.WHAT_DO_YOU_WANT_TO_DO, reply_markup=keyboard)
+    await update.effective_message.reply_text(text=templates.WHAT_DO_YOU_WANT_TO_DO,
+                                              reply_markup=keyboard)
     await update.effective_message.edit_reply_markup()
     return States.COLIVING
 
@@ -154,7 +155,7 @@ async def create_keyboard_profile_roommate(telegram_id):
                 ),
                 InlineKeyboardButton(
                     text=buttons.BTN_PROFILE_ROOMMATE_GO_BACK,
-                    callback_data=f"roommates_profiles"
+                    callback_data="roommates_profiles"
                 )
             ]]
     keyboard = InlineKeyboardMarkup(inline_keyboard=buttons_administrations)
@@ -166,7 +167,8 @@ async def unpin_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
     telegram_id = int(context.match.group('telegram_id'))
     name = context.user_data["profile_info"].name
     keyboard = await create_keyboard_confirmation(telegram_id)
-    await update.effective_message.reply_text(text=templates.CONFIRMATION_UNPIN.format(name=name), reply_markup=keyboard)
+    await update.effective_message.reply_text(
+        text=templates.CONFIRMATION_UNPIN.format(name=name), reply_markup=keyboard)
     await update.effective_message.edit_reply_markup()
     return States.COLIVING
 
@@ -180,7 +182,7 @@ async def create_keyboard_confirmation(telegram_id):
                 ),
                 InlineKeyboardButton(
                     text=buttons.NO_BTN,
-                    callback_data=f"unpin_profile_no"
+                    callback_data="unpin_profile_no"
                 )
             ]]
     keyboard = InlineKeyboardMarkup(inline_keyboard=buttons_administrations)
@@ -192,7 +194,8 @@ async def unpin_profile_yes(update: Update, context: ContextTypes.DEFAULT_TYPE):
     telegram_id = int(context.match.group('telegram_id'))
     name = context.user_data["profile_info"].name
     await api_service.update_user_residence(telegram_id)
-    await update.effective_message.reply_text(text=templates.ROOMMATE_NOT_IN_COLIVING_NOW.format(name=name))
+    await update.effective_message.reply_text(
+        text=templates.ROOMMATE_NOT_IN_COLIVING_NOW.format(name=name))
 
 
 async def unpin_profile_no(update: Update, context: ContextTypes.DEFAULT_TYPE):
