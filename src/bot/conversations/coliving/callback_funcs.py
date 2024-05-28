@@ -11,8 +11,8 @@ from telegram import (
 from telegram.error import TelegramError
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
+from conversations.coliving.roommates_transfer_dry import handle_coliving
 from conversations.profile.callback_funcs import _look_at_profile
-from conversations.coliving.coliving_transfer.callback_funcs import _get_coliving_roommates_response
 import conversations.coliving.buttons as buttons
 import conversations.coliving.constants as consts
 import conversations.coliving.keyboards as keyboards
@@ -120,34 +120,15 @@ async def handle_is_visible_switching(update: Update, context: CallbackContext) 
 
 
 async def handle_coliving_roommates(
-    update: Update, _context: ContextTypes.DEFAULT_TYPE
+    update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """Обработка ответа: Просмотр списка соседей."""
-    page = 1
-    response_json = await _get_coliving_roommates_response(update, _context, page)
-    if response_json is None:
-        _context.user_data.clear()
-        return ConversationHandler.END
-    keyboard = await create_page_keyboard_coliving_roommates(response_json, page)
-    await update.effective_message.reply_text(text=templates.COLIVING_ROOMMATES, reply_markup=keyboard)
-    await update.effective_message.edit_reply_markup()
-    return States.COLIVING
-
-
-async def create_page_keyboard_coliving_roommates(response_json, page):
-    """Клавиатура выбора анкеты соседей."""
-    user_buttons = []
-    for user in response_json["results"]:
-        user_buttons.append(
-            [
-                InlineKeyboardButton(
-                    text=f"{user['name']}, {user['age']}",
-                    callback_data=f"profile:{user['telegram_id']}",
-                )
-            ]
-        )
-    keyboard = InlineKeyboardMarkup(inline_keyboard=user_buttons)
-    return keyboard
+    return await handle_coliving(
+        update=update,
+        context=context,
+        text=templates.COLIVING_ROOMMATES,
+        state=States.COLIVING
+    )
 
 
 async def get_profile_roommate(update: Update, context: ContextTypes.DEFAULT_TYPE):

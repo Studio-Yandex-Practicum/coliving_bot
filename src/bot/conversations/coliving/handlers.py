@@ -5,7 +5,7 @@ from telegram.ext import (
     MessageHandler,
     filters,
 )
-
+import conversations.coliving.roommates_transfer_dry as roommates_transfer_dry
 import conversations.coliving.buttons as buttons
 import conversations.coliving.callback_funcs as callback_funcs
 import conversations.common_functions.common_buttons as common_buttons
@@ -280,6 +280,10 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 callback=callback_funcs.unpin_profile_yes,
                 pattern=r"^unpin_profile_yes:(?P<telegram_id>\d+)$",
             ),
+            CallbackQueryHandler(
+                callback=roommates_transfer_dry.coliving_transfer_page_callback_handler,
+                pattern=r"^coliving_page:(?P<page>\d+)",
+            ),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
                 callback_funcs.handle_coliving_text_instead_of_button,
@@ -287,12 +291,12 @@ coliving_handler: ConversationHandler = ConversationHandler(
         ],
         States.TRANSFER_COLIVING: [
             CallbackQueryHandler(
-                coliving_transfer.coliving_transfer_page_callback_handler,
-                pattern=r"^coliving_transfer_page:(?P<page>\d+)",
+                callback=roommates_transfer_dry.coliving_transfer_page_callback_handler,
+                pattern=r"^coliving_page:(?P<page>\d+)",
             ),
             CallbackQueryHandler(
                 callback=coliving_transfer.handle_coliving_transfer_to_confirm,
-                pattern=r"^transfer_to_confirm:(?P<telegram_id>\d+)",
+                pattern=r"^profile:(?P<telegram_id>\d+)",
             ),
             CallbackQueryHandler(
                 callback=coliving_transfer.handle_coliving_set_new_owner,
