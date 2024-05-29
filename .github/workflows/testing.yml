@@ -52,7 +52,6 @@ jobs:
         with:
           options: "--check --verbose"
           src: "./src"
-          version: "23.12.1"
 
       - name: Start testing
         run: |
