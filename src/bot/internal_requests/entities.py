@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from enum import IntEnum
+from enum import Enum, IntEnum
 from typing import List, Optional
 
 from telegram import PhotoSize
@@ -75,6 +75,13 @@ class MatchStatuses(IntEnum):
     is_rejected = -1
 
 
+class Categories(str, Enum):
+    CATEGORY_1 = "Категория 1"
+    CATEGORY_2 = "Категория 2"
+    CATEGORY_3 = "Категория 3"
+    OTHER = "Другое"
+
+
 @dataclass
 class ProfileLike:
     id: int
@@ -89,3 +96,11 @@ class ColivingLike:
     sender: int
     coliving: int
     status: MatchStatuses
+
+
+@dataclass
+class Report:
+    reporter: int
+    reported_user: int
+    text: str
+    category: Categories
