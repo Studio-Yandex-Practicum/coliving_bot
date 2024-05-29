@@ -38,9 +38,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     current_chat = update.effective_chat
 
     try:
-        context.user_data[
-            "coliving_info"
-        ] = await api_service.get_coliving_info_by_user(telegram_id=current_chat.id)
+        context.user_data["coliving_info"] = (
+            await api_service.get_coliving_info_by_user(telegram_id=current_chat.id)
+        )
     except ColivingNotFound:
         await update.effective_message.edit_text(
             text=templates.REPLY_MSG_TIME_TO_CREATE_PROFILE,
