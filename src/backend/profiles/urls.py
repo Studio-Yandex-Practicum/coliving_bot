@@ -7,7 +7,7 @@ from profiles.api_views import (
     ColivingView,
     LocationList,
     ProfileView,
-    UserResidenceUpdateAPIView,
+    UserResidenceAPIView,
 )
 
 app_name = "profiles"
@@ -34,7 +34,7 @@ urlpatterns = [
     ),
     path(
         f"{settings.API_V1_PREFIX}/users/<int:telegram_id>/",
-        UserResidenceUpdateAPIView.as_view(),
+        UserResidenceAPIView.as_view(),
         name="users-detail",
     ),
 ]

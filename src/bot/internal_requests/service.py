@@ -1,5 +1,6 @@
 import mimetypes
 from dataclasses import asdict
+from http import HTTPStatus
 from typing import List, Optional
 from urllib.parse import urlencode, urljoin
 
@@ -107,19 +108,22 @@ class APIService:
 
     async def get_coliving_info_by_user(self, telegram_id: int) -> Coliving:
         """
-        Запрос на получение информации о коливинге по ID владельца.
-        :param telegram_id: Chat ID пользователя, зарегистрировавшего коливинг
-        :raise ColivingNotFound: Если коливингов не нашлось
+        Возвращает коливинг пользователя.
         """
         endpoint_urn = f"colivings/?owner={telegram_id}"
-        response = await self._get_request(endpoint_urn=endpoint_urn)
+        response = await self._get_request(endpoint_urn)
         response_json = response.json()
-        if not response_json:
-            raise ColivingNotFound(
-                message="Пользователь не зарегистрировал коливингов",
-                response=response,
-            )
-        return await self._parse_response_to_coliving(response_json[0])
+        if response_json:
+            return await self._parse_response_to_coliving(response_json[0])
+        endpoint_urn = f"users/{telegram_id}"
+        response = await self._get_request(endpoint_urn)
+        if response.status_code != HTTPStatus.NO_CONTENT:
+            response_json = response.json()
+            return await self._parse_response_to_coliving(response_json)
+        raise ColivingNotFound(
+            message="Не найдено коливингов пользователя.",
+            response=response,
+        )
 
     async def update_coliving_info(self, coliving: Coliving) -> Coliving:
         """Запрос на частичное обновление информации по коливингу."""
@@ -339,7 +343,9 @@ class APIService:
         :param endpoint_urn: Относительный URI эндпоинта.
         """
         async with AsyncClient() as client:
-            response = await client.get(urljoin(base=self.base_url, url=endpoint_urn))
+            response = await client.get(
+                urljoin(base=self.base_url, url=endpoint_urn), follow_redirects=True
+            )
             response.raise_for_status()
         return response
 

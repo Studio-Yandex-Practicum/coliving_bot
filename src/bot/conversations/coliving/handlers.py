@@ -286,6 +286,16 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 callback=coliving_transfer.handle_cancel_coliving_transfer,
             ),
         ],
+        States.COLIVING_CURRENT_USER: [
+            CallbackQueryHandler(
+                callback=callback_funcs.handle_coliving_roommates,
+                pattern=r"^roommates_profiles",
+            ),
+            CallbackQueryHandler(
+                callback=common_funcs.handle_return_to_menu_response,
+                pattern=rf"^{RETURN_TO_MENU_BTN}$",
+            ),
+        ],
     },
     fallbacks=[
         CommandHandler(

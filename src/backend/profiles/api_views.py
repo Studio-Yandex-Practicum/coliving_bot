@@ -1,6 +1,7 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.generics import get_object_or_404
+from rest_framework.response import Response
 
 from profiles.filters import ColivingFilter, SmallResultsSetPagination
 from profiles.mixins import DestroyWithMediaRemovalMixin
@@ -102,13 +103,25 @@ class ColivingRoommatesView(generics.ListAPIView):
         )
 
 
-class UserResidenceUpdateAPIView(generics.UpdateAPIView):
-    """Apiview представление для обновления информации о проживании пользователя.
-    Обрабатывает PATCH-запросы на адрес /api/v1/users/{telegram_id}/,
-    позволяя прикреплять пользователя к определенному коливингу
-    или откреплять его
+class UserResidenceAPIView(generics.UpdateAPIView, generics.RetrieveAPIView):
+    """
+    Apiview представление для обновления информации о проживании пользователя.
+    Обрабатывает Update/Get на адрес /api/v1/users/{telegram_id}/,
+    позволяя получать текущий, прикреплять пользователя к определенному коливингу
+    или откреплять его.
     """
 
     queryset = UserFromTelegram.objects.all()
     serializer_class = UserResidenceSerializer
     lookup_field = "telegram_id"
+
+    def get(self, request, *args, **kwargs):
+        """Получить коливинг текущего проживающего."""
+
+        telegram_id = self.kwargs.get("telegram_id")
+        user = UserFromTelegram.objects.get(telegram_id=telegram_id)
+        coliving_profile = user.residence
+        if coliving_profile:
+            coliving_data = ColivingSerializer(coliving_profile).data
+            return Response(coliving_data)
+        return Response(status=status.HTTP_204_NO_CONTENT)
