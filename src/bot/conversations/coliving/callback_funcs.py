@@ -38,9 +38,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     current_chat = update.effective_chat
 
     try:
-        context.user_data[
-            "coliving_info"
-        ] = await api_service.get_coliving_info_by_user(telegram_id=current_chat.id)
+        context.user_data["coliving_info"] = (
+            await api_service.get_coliving_info_by_user(telegram_id=current_chat.id)
+        )
     except ColivingNotFound:
         await update.effective_message.edit_text(
             text=templates.REPLY_MSG_TIME_TO_CREATE_PROFILE,
@@ -241,6 +241,13 @@ async def roommate_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 
     current_roommate = context.user_data.get("current_roommate")
     host_id = context.user_data.get("coliving_info").host
+
+    if current_roommate.residence or current_roommate.host:
+        await update.effective_message.reply_text(
+            text=templates.CANNOT_INVITE,
+            reply_markup=keyboards.NEXT_ROOMMATE,
+        )
+        return States.NEXT_ROOMMATE
 
     CONSIDER_INVITATION_FROM_HOST = InlineKeyboardMarkup.from_row(
         button_row=(
