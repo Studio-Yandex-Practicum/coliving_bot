@@ -4,7 +4,7 @@ from http import HTTPStatus
 from typing import List, Optional
 from urllib.parse import urlencode, urljoin
 
-from httpx import AsyncClient, Response
+from httpx import AsyncClient, HTTPStatusError, Response
 
 from internal_requests.entities import (
     Coliving,
@@ -115,9 +115,9 @@ class APIService:
         response_json = response.json()
         if response_json:
             return await self._parse_response_to_coliving(response_json[0])
-        endpoint_urn = f"users/{telegram_id}"
+        endpoint_urn = f"users/{telegram_id}/residence"
         response = await self._get_request(endpoint_urn)
-        if response.status_code != HTTPStatus.NO_CONTENT:
+        if response.status_code != HTTPStatus.NOT_FOUND:
             response_json = response.json()
             return await self._parse_response_to_coliving(response_json)
         raise ColivingNotFound(
@@ -343,11 +343,17 @@ class APIService:
         :param endpoint_urn: Относительный URI эндпоинта.
         """
         async with AsyncClient() as client:
-            response = await client.get(
-                urljoin(base=self.base_url, url=endpoint_urn), follow_redirects=True
-            )
-            response.raise_for_status()
-        return response
+            try:
+                response = await client.get(
+                    urljoin(base=self.base_url, url=endpoint_urn), follow_redirects=True
+                )
+                response.raise_for_status()
+            except HTTPStatusError as exc:
+                if exc.response.status_code == HTTPStatus.NOT_FOUND:
+                    return exc.response
+                else:
+                    raise
+            return response
 
     async def _post_request(
         self,

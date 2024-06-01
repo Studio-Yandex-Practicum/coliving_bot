@@ -23,6 +23,7 @@ ID_TXT = "id"
 VIEW_USER_DET_LINK = "api-v1:profiles:users-detail"
 VIEW_COL_LIST_LINK = "api-v1:profiles:colivings-list"
 VIEW_COL_DET_LINK = "api-v1:profiles:colivings-detail"
+VIEW_COL_RET_LINK = "api-v1:profiles:coliving-residence"
 
 
 class ColivingAPITest(APITestCase):
@@ -257,6 +258,37 @@ class UserResidenceUpdateAPITestCase(APITestCase):
         response = self.client.patch(url, data)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class UserResidenceGetAPITestCase(APITestCase):
+    """Тесты на получение коливинга пользователя, не являющегося владельцем."""
+
+    USER_TELEGRAM_ID = 111111
+    OWNER_TELEGRAM_ID = 22222
+    LOCATION_NAME = "Москва"
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.coliving = Coliving.objects.create(
+            host=UserFromTelegram.objects.create(telegram_id=cls.OWNER_TELEGRAM_ID),
+            price=Restrictions.PRICE_MIN,
+            room_type=ColivingTypes.ROOM,
+            location=Location.objects.create(name=cls.LOCATION_NAME),
+        )
+
+    def test_get_coliving_by_user(self):
+        UserFromTelegram.objects.create(
+            telegram_id=self.USER_TELEGRAM_ID, residence_id=self.coliving.id
+        )
+        url = reverse(
+            VIEW_COL_RET_LINK,
+            kwargs={TELEGR_ID_TXT: self.USER_TELEGRAM_ID},
+        )
+        data = {RESIDENCE_TXT: self.coliving.id}
+        response = self.client.get(url, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_json = response.json()
+        self.assertEqual(self.coliving.id, response_json.get("id"))
 
 
 class ColivingSearchAPITest(APITestCase):
