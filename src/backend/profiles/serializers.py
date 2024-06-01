@@ -24,12 +24,10 @@ class ProfileSerializer(serializers.ModelSerializer):
     residence = serializers.PrimaryKeyRelatedField(
         source="user.residence", read_only=True
     )
-    host = serializers.SerializerMethodField()
+    has_coliving = serializers.SerializerMethodField()
 
-    def get_host(self, obj):
-        if obj.user.colivings.first():
-            return True
-        return None
+    def get_has_coliving(self, obj):
+        return obj.user.colivings.exists()
 
     class Meta:
         model = Profile
@@ -41,7 +39,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             "location",
             "about",
             "residence",
-            "host",
+            "has_coliving",
             "is_visible",
             "images",
         )
