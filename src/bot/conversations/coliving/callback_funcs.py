@@ -49,17 +49,26 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             text=templates.REPLY_MSG_ASK_LOCATION,
             reply_markup=context.bot_data["location_keyboard"],
         )
-
         context.user_data["coliving_info"] = Coliving(host=update.effective_chat.id)
         return States.LOCATION
+
+    if current_chat.id == context.user_data["coliving_info"].host:
+        await update.effective_message.edit_text(text=templates.REPLY_MSG_HELLO)
+        await _show_coliving_profile(
+            update=update,
+            context=context,
+            ask_to_confirm=False,
+        )
+        return States.COLIVING
 
     await update.effective_message.edit_text(text=templates.REPLY_MSG_HELLO)
     await _show_coliving_profile(
         update=update,
         context=context,
         ask_to_confirm=False,
+        keyboard=keyboards.COLIVING_PROFILE_KEYBOARD,
     )
-    return States.COLIVING
+    return States.COLIVING_CURRENT_USER
 
 
 async def handle_coliving_text_instead_of_button(
@@ -771,9 +780,9 @@ async def _show_coliving_profile(
 
     if keyboard is None:
         if coliving_info.is_visible:
-            keyboard = keyboards.COLIVING_PROFILE_KEYBOARD_VISIBLE
+            keyboard = keyboards.COLIVING_PROFILE_FOR_OWNER_KEYBOARD_VISIBLE
         else:
-            keyboard = keyboards.COLIVING_PROFILE_KEYBOARD_NOT_VISIBLE
+            keyboard = keyboards.COLIVING_PROFILE_FOR_OWNER_KEYBOARD_NOT_VISIBLE
 
     message_text = await format_coliving_profile_message(coliving_info)
 

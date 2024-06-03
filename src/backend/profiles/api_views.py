@@ -103,7 +103,8 @@ class ColivingRoommatesView(generics.ListAPIView):
 
 
 class UserResidenceUpdateAPIView(generics.UpdateAPIView):
-    """Apiview представление для обновления информации о проживании пользователя.
+    """
+    Apiview представление для обновления информации о проживании пользователя.
     Обрабатывает PATCH-запросы на адрес /api/v1/users/{telegram_id}/,
     позволяя прикреплять пользователя к определенному коливингу
     или откреплять его
@@ -112,3 +113,14 @@ class UserResidenceUpdateAPIView(generics.UpdateAPIView):
     queryset = UserFromTelegram.objects.all()
     serializer_class = UserResidenceSerializer
     lookup_field = "telegram_id"
+
+
+class UserResidenceGetAPIView(generics.RetrieveAPIView):
+    """
+    Apiview для получения коливинга пользователя.
+    """
+
+    queryset = Coliving.objects.all()
+    lookup_field = "roommates__telegram_id"
+    lookup_url_kwarg = "telegram_id"
+    serializer_class = ColivingSerializer
