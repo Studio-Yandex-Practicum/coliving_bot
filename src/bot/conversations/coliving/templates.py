@@ -97,6 +97,11 @@ ASSIGN_ROOMMATE_START_MSG = (
     " которых можно пригласить в коливинг."
 )
 
+CANNOT_INVITE = (
+    "Извините, данный пользователь состоит в другом коливинге"
+    " или является организатором коливинга. Продолжим?"
+)
+
 
 async def format_coliving_profile_message(coliving_info: Coliving) -> str:
     is_visible = (

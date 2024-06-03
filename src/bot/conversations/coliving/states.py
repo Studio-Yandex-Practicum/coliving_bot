@@ -25,5 +25,6 @@ class States(int, enum.Enum):
         EDIT_LOCATION,
         DELETE_COLIVING,
         TRANSFER_COLIVING,
+        COLIVING_ROOMMATE,
         COLIVING_CURRENT_USER,
-    ) = range(21)
+    ) = range(22)

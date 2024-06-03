@@ -35,3 +35,7 @@ OK_ROOMMATE_BTN = "Пригласить"
 NEXT_ROOMMATE_BTN = "Следующая анкета"
 WAIT_BTN = "Ждать"
 CONSIDER_INVITATION_FROM_HOST_BTN = "Да, рассмотреть ✅"
+
+
+BTN_PROFILE_UNPIN_FROM_COLIVING = "Открепить от коливинга ❌"
+BTN_PROFILE_ROOMMATE_GO_BACK = "Вернуться ↩️"
