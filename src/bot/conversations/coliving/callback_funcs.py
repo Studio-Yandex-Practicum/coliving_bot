@@ -117,28 +117,6 @@ async def handle_is_visible_switching(update: Update, context: CallbackContext) 
     return States.COLIVING
 
 
-async def handle_coliving_roommates(
-    update: Update, _context: ContextTypes.DEFAULT_TYPE
-) -> int:
-    """Обработка ответа: Посмотреть анкеты соседей."""
-
-    #############################################################
-    # запрос к API
-    # заглушка
-    await update.effective_message.edit_reply_markup()
-    await update.effective_message.reply_text(
-        text=(
-            "Заглушка. По идее здесь запрос к API "
-            "вывод списка соседей"
-            "\n"
-            "\n"
-            "Нажмите /coliving"
-        )
-    )
-    #############################################################
-    return ConversationHandler.END
-
-
 @add_response_prefix()
 async def handle_assign_roommate(
     update: Update, context: ContextTypes.DEFAULT_TYPE
@@ -888,7 +866,7 @@ async def handle_delete_coliving_confirmation_cancel(
 
 
 async def _clear_assign_roommate_context(context):
-    context.user_data.pop("potential_roomates", None)
+    context.user_data.pop("potential_roommates", None)
     context.user_data.pop("coliving_info", None)
     context.user_data.pop("current_roommate", None)
     context.user_data.pop("host_info", None)
