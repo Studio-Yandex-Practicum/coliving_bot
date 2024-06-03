@@ -203,10 +203,10 @@ async def unpin_profile_yes(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
+@add_response_prefix(custom_answer=buttons.NO_BTN)
 async def unpin_profile_no(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Выводим сообщеие что ничего не изменилось"""
+    """Выводим сообщение, что ничего не изменилось"""
     await update.effective_message.reply_text(text=templates.NOTHING_EDIT_IN_COLIVING)
-    await update.effective_message.edit_reply_markup()
 
 
 @add_response_prefix()
@@ -958,7 +958,7 @@ async def handle_delete_coliving_confirmation_cancel(
 
 
 async def _clear_assign_roommate_context(context):
-    context.user_data.pop("potential_roomates", None)
+    context.user_data.pop("potential_roommates", None)
     context.user_data.pop("coliving_info", None)
     context.user_data.pop("current_roommate", None)
     context.user_data.pop("host_info", None)
