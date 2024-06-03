@@ -192,6 +192,7 @@ async def create_keyboard_confirmation(telegram_id):
     return keyboard
 
 
+@add_response_prefix(custom_answer=buttons.YES_BTN)
 async def unpin_profile_yes(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Изменяем поле у пользователя residence = null"""
     telegram_id = int(context.match.group("telegram_id"))
