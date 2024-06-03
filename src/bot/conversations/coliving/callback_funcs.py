@@ -150,18 +150,16 @@ async def get_profile_roommate(update: Update, context: ContextTypes.DEFAULT_TYP
 async def create_keyboard_profile_roommate(telegram_id):
     """Клавиатура администрирования соседей коливинга"""
     buttons_administrations = [
-        [
-            InlineKeyboardButton(
-                text=buttons.BTN_PROFILE_UNPIN_FROM_COLIVING,
-                callback_data=f"profile_unpin_coliving:{telegram_id}",
-            ),
-            InlineKeyboardButton(
-                text=buttons.BTN_PROFILE_ROOMMATE_GO_BACK,
-                callback_data="roommates_profiles",
-            ),
-        ]
+        InlineKeyboardButton(
+            text=buttons.BTN_PROFILE_UNPIN_FROM_COLIVING,
+            callback_data=f"profile_unpin_coliving:{telegram_id}",
+        ),
+        InlineKeyboardButton(
+            text=buttons.BTN_PROFILE_ROOMMATE_GO_BACK,
+            callback_data="roommates_profiles",
+        ),
     ]
-    keyboard = InlineKeyboardMarkup(inline_keyboard=buttons_administrations)
+    keyboard = InlineKeyboardMarkup.from_row(buttons_administrations)
     return keyboard
 
 
