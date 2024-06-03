@@ -220,6 +220,13 @@ async def roommate_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     current_roommate = context.user_data.get("current_roommate")
     host_id = context.user_data.get("coliving_info").host
 
+    if current_roommate.residence or current_roommate.has_coliving:
+        await update.effective_message.reply_text(
+            text=templates.CANNOT_INVITE,
+            reply_markup=keyboards.NEXT_ROOMMATE,
+        )
+        return States.NEXT_ROOMMATE
+
     CONSIDER_INVITATION_FROM_HOST = InlineKeyboardMarkup.from_row(
         button_row=(
             InlineKeyboardButton(

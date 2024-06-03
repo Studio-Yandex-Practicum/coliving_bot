@@ -13,6 +13,8 @@ class UserProfile:
     age: Optional[int] = field(default=None)
     location: Optional[str] = field(default=None)
     about: Optional[str] = field(default=None)
+    residence: Optional[int] = field(default=None)
+    has_coliving: Optional[bool] = field(default=None)
     is_visible: bool = field(default=True)
     images: list = field(default_factory=list)
 
