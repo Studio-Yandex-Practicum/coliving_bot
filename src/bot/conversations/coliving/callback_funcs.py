@@ -127,7 +127,7 @@ async def handle_coliving_roommates(
         update=update,
         context=context,
         text=templates.COLIVING_ROOMMATES,
-        state=States.COLIVING,
+        state=States.COLIVING_ROOMMATE,
     )
 
 
@@ -144,7 +144,7 @@ async def get_profile_roommate(update: Update, context: ContextTypes.DEFAULT_TYP
         text=templates.WHAT_DO_YOU_WANT_TO_DO, reply_markup=keyboard
     )
     await update.effective_message.edit_reply_markup()
-    return States.COLIVING
+    return States.COLIVING_ROOMMATE
 
 
 async def create_keyboard_profile_roommate(telegram_id):
@@ -174,7 +174,7 @@ async def unpin_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text=templates.CONFIRMATION_UNPIN.format(name=name), reply_markup=keyboard
     )
     await update.effective_message.edit_reply_markup()
-    return States.COLIVING
+    return States.COLIVING_ROOMMATE
 
 
 async def create_keyboard_confirmation(telegram_id):

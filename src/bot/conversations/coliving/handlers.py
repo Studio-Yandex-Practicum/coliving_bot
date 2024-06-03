@@ -250,10 +250,6 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 ),
             ),
             CallbackQueryHandler(
-                callback=callback_funcs.handle_coliving_roommates,
-                pattern=r"^roommates_profiles",
-            ),
-            CallbackQueryHandler(
                 callback=callback_funcs.handle_assign_roommate,
                 pattern=rf"^{buttons.BTN_LABEL_ASSIGN_ROOMMATE}$",
             ),
@@ -265,6 +261,16 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 callback=common_funcs.handle_return_to_menu_response,
                 pattern=rf"^{RETURN_TO_MENU_BTN}$",
             ),
+            CallbackQueryHandler(
+                callback=callback_funcs.handle_coliving_roommates,
+                pattern=r"^roommates_profiles",
+            ),
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
+                callback_funcs.handle_coliving_text_instead_of_button,
+            ),
+        ],
+        States.COLIVING_ROOMMATE: [
             CallbackQueryHandler(
                 callback=callback_funcs.get_profile_roommate,
                 pattern=r"^profile:(?P<telegram_id>\d+)$",
@@ -285,9 +291,9 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 callback=roommates_transfer_dry.coliving_transfer_page_callback_handler,
                 pattern=r"^coliving_page:(?P<page>\d+)",
             ),
-            MessageHandler(
-                filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
-                callback_funcs.handle_coliving_text_instead_of_button,
+            CallbackQueryHandler(
+                callback=callback_funcs.handle_coliving_roommates,
+                pattern=r"^roommates_profiles",
             ),
         ],
         States.TRANSFER_COLIVING: [
