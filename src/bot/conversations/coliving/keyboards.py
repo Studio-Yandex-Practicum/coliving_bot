@@ -110,6 +110,10 @@ COLIVING_PROFILE_BUTTONS = [
         text=buttons.BTN_LABEL_ROOMMATES, callback_data=buttons.BTN_ROOMMATES
     ),
     InlineKeyboardButton(
+        text=buttons.BTN_UNPIN_CURRENT_USER,
+        callback_data=buttons.BTN_UNPIN_CURRENT_USER_CALL_BACK,
+    ),
+    InlineKeyboardButton(
         text=RETURN_TO_MENU_BTN,
         callback_data=RETURN_TO_MENU_BTN,
     ),
