@@ -10,10 +10,9 @@ import conversations.coliving.buttons as buttons
 import conversations.coliving.callback_funcs as callback_funcs
 import conversations.common_functions.common_buttons as common_buttons
 import conversations.common_functions.common_funcs as common_funcs
+from conversations.coliving.coliving_common import coliving_common
 from conversations.coliving.coliving_current_user import callback_funcs as current_user
-from conversations.coliving.coliving_current_user import roommate_current_user_dry
 from conversations.coliving.coliving_roommate import callback_funcs as coliving_roommate
-from conversations.coliving.coliving_roommate import roommates_transfer_dry
 from conversations.coliving.coliving_transfer import callback_funcs as coliving_transfer
 from conversations.coliving.states import States
 from conversations.common_functions.common_buttons import RETURN_TO_MENU_BTN
@@ -283,15 +282,15 @@ coliving_handler: ConversationHandler = ConversationHandler(
                 pattern=r"^profile_unpin_coliving:(?P<telegram_id>\d+)$",
             ),
             CallbackQueryHandler(
-                callback=roommate_current_user_dry.unpin_profile_no,
+                callback=coliving_common.unpin_profile_no,
                 pattern=r"^unpin_profile_no",
             ),
             CallbackQueryHandler(
-                callback=roommate_current_user_dry.unpin_profile_yes,
+                callback=coliving_common.unpin_profile_yes,
                 pattern=r"^unpin_profile_yes:(?P<telegram_id>\d+)$",
             ),
             CallbackQueryHandler(
-                callback=roommates_transfer_dry.coliving_transfer_page_callback_handler,
+                callback=coliving_common.coliving_transfer_page_callback_handler,
                 pattern=r"^coliving_page:(?P<page>\d+)",
             ),
             CallbackQueryHandler(
@@ -301,7 +300,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
         ],
         States.TRANSFER_COLIVING: [
             CallbackQueryHandler(
-                callback=roommates_transfer_dry.coliving_transfer_page_callback_handler,
+                callback=coliving_common.coliving_transfer_page_callback_handler,
                 pattern=r"^coliving_page:(?P<page>\d+)",
             ),
             CallbackQueryHandler(
@@ -327,11 +326,11 @@ coliving_handler: ConversationHandler = ConversationHandler(
             #     pattern=r"^roommates_profiles",
             # ),
             CallbackQueryHandler(
-                callback=roommate_current_user_dry.unpin_profile_yes,
+                callback=coliving_common.unpin_profile_yes,
                 pattern=r"^unpin_profile_yes:(?P<telegram_id>\d+)",
             ),
             CallbackQueryHandler(
-                callback=roommate_current_user_dry.unpin_profile_no,
+                callback=coliving_common.unpin_profile_no,
                 pattern=r"^unpin_profile_no",
             ),
             CallbackQueryHandler(

@@ -2,13 +2,11 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
 from conversations.coliving import buttons
-from conversations.coliving.coliving_current_user.roommate_current_user_dry import (
+from conversations.coliving.coliving_common.coliving_common import (
+    handle_coliving,
     unpin_handler,
 )
 from conversations.coliving.coliving_roommate import templates
-from conversations.coliving.coliving_roommate.roommates_transfer_dry import (
-    handle_coliving,
-)
 from conversations.coliving.states import States
 from conversations.profile.callback_funcs import _look_at_profile
 from internal_requests import api_service

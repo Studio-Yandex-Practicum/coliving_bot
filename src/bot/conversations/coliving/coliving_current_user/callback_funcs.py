@@ -1,10 +1,8 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 
+from conversations.coliving.coliving_common.coliving_common import unpin_handler
 from conversations.coliving.coliving_current_user import templates
-from conversations.coliving.coliving_current_user.roommate_current_user_dry import (
-    unpin_handler,
-)
 from conversations.coliving.states import States
 
 
