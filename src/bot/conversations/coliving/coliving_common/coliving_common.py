@@ -9,6 +9,7 @@ from conversations.coliving.coliving_roommate import templates as temp_room
 from conversations.coliving.coliving_transfer import templates as temp_transfer
 from conversations.coliving.states import States
 from conversations.common_functions.common_funcs import add_response_prefix
+from conversations.profile.callback_funcs import _look_at_profile
 from internal_requests import api_service
 
 
@@ -128,3 +129,21 @@ async def create_page_keyboard(response_json, page):
     user_buttons.append(pagination_buttons)
     keyboard = InlineKeyboardMarkup(inline_keyboard=user_buttons)
     return keyboard
+
+
+async def get_profile_roommate(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, state, keyboard
+):
+    """Получить анкету соседа из списка"""
+    telegram_id = int(context.match.group("telegram_id"))
+    profile_data = await api_service.get_user_profile_by_telegram_id(telegram_id)
+
+    context.user_data["profile_info"] = profile_data
+    await _look_at_profile(update, context, title=temp_room.PROFILE_ROOMMATE)
+
+    keyboard = await keyboard(telegram_id)
+    await update.effective_message.reply_text(
+        text=temp_room.WHAT_DO_YOU_WANT_TO_DO, reply_markup=keyboard
+    )
+    await update.effective_message.edit_reply_markup()
+    return state

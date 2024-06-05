@@ -274,7 +274,7 @@ coliving_handler: ConversationHandler = ConversationHandler(
         ],
         States.COLIVING_ROOMMATE: [
             CallbackQueryHandler(
-                callback=coliving_roommate.get_profile_roommate,
+                callback=coliving_roommate.get_profile_roommate_admin_handler,
                 pattern=r"^profile:(?P<telegram_id>\d+)$",
             ),
             CallbackQueryHandler(
@@ -321,6 +321,10 @@ coliving_handler: ConversationHandler = ConversationHandler(
             # что обычный проживающий получает права открепить любого соседа.
             # А должен иметь право только посмотреть анкету и вернуться.
             #
+            CallbackQueryHandler(
+                callback=current_user.get_profile_roommate_cur_user_handler,
+                pattern=r"^profile:(?P<telegram_id>\d+)$",
+            ),
             CallbackQueryHandler(
                 callback=current_user.current_user_roommates_handler,
                 pattern=r"^roommates_profiles",
