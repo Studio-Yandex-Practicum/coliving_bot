@@ -1,6 +1,12 @@
 from typing import Optional
 
-from telegram.ext import Application, ApplicationBuilder, CommandHandler, Defaults
+from telegram.ext import (
+    AIORateLimiter,
+    Application,
+    ApplicationBuilder,
+    CommandHandler,
+    Defaults,
+)
 
 from conversations.coliving.handlers import coliving_handler
 from conversations.coliving.keyboards import create_keyboard_of_locations
@@ -24,9 +30,11 @@ async def post_init(application: Application) -> None:
 
 
 def create_bot_app(defaults: Optional[Defaults] = None) -> Application:
+    rate_limiter = AIORateLimiter()
     application: Application = (
         ApplicationBuilder()
         .token(TOKEN)
+        .rate_limiter(rate_limiter)
         .defaults(defaults)
         .post_init(post_init)
         .build()
