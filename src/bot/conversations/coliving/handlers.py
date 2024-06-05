@@ -321,10 +321,10 @@ coliving_handler: ConversationHandler = ConversationHandler(
             # что обычный проживающий получает права открепить любого соседа.
             # А должен иметь право только посмотреть анкету и вернуться.
             #
-            # CallbackQueryHandler(
-            #     callback=coliving_roommate.handle_coliving_roommates,
-            #     pattern=r"^roommates_profiles",
-            # ),
+            CallbackQueryHandler(
+                callback=current_user.current_user_roommates_handler,
+                pattern=r"^roommates_profiles",
+            ),
             CallbackQueryHandler(
                 callback=coliving_common.unpin_profile_yes,
                 pattern=r"^unpin_profile_yes:(?P<telegram_id>\d+)",
