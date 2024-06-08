@@ -8,6 +8,7 @@ from search.views import (
     MatchedProfileListAPIView,
     PotentialRoommatesListAPIView,
     ProfileLikeCreateAPIView,
+    ProfileLikeDestroyAPIView,
     ProfileLikeUpdateAPIView,
     ProfilesSearchView,
     UserReportCreateView,
@@ -50,6 +51,11 @@ urlpatterns = [
         f"{settings.API_V1_PREFIX}/profiles/like/<int:pk>/",
         ProfileLikeUpdateAPIView.as_view(),
         name="profile-like-update",
+    ),
+    path(
+        f"{settings.API_V1_PREFIX}/profiles/like/delete_old_likes/",
+        ProfileLikeDestroyAPIView.as_view(),
+        name="profile-like-delete",
     ),
     path(
         f"{settings.API_V1_PREFIX}/colivings/like/",

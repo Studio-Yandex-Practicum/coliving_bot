@@ -346,6 +346,12 @@ class APIService:
             result.append(parsed_profile)
         return result
 
+    async def delete_old_likes(self):
+        """Отправляет запрос на удаление лайков"""
+        endpoint_urn = "profiles/like/delete_old_likes/"
+        response = await self._delete_request(endpoint_urn)
+        return response
+
     async def _get_request(self, endpoint_urn: str) -> Response:
         """
         Отправляет GET-запрос к указанному эндпоинту.
