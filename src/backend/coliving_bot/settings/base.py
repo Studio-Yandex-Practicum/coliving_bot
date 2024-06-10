@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "django_filters",
+    "mailing.apps.MailingConfig",
     "profiles.apps.ProfilesConfig",
     "search.apps.SearchConfig",
     "images.apps.ImagesConfig",

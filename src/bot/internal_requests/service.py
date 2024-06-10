@@ -346,6 +346,33 @@ class APIService:
             result.append(parsed_profile)
         return result
 
+    async def get_mailing(self) -> dict:
+        """
+        Получение сообщения для рассылки.
+        """
+        endpoint_urn = "mailing/"
+        response = await self._get_request(endpoint_urn)
+        return response.json()[-1]
+
+    async def get_users_for_mailing(self, page: int) -> List[int]:
+        """
+        Получение списка пользователей для рассылки.
+
+        :param page: значение страницы.
+        """
+        endpoint_urn = f"mailing/users/?page={page}"
+        response = await self._get_request(endpoint_urn)
+        return response.json()
+
+    async def update_sended_mail(self, mailing_id):
+        """
+        Обновление поля 'is_sended' у рассылки.
+
+        :param mailing_id: id рассылки для обновления.
+        """
+        endpoint_urn = f"mailing/{mailing_id}/"
+        await self._patch_request(endpoint_urn=endpoint_urn, data={"is_sended": True})
+
     async def _get_request(self, endpoint_urn: str) -> Response:
         """
         Отправляет GET-запрос к указанному эндпоинту.

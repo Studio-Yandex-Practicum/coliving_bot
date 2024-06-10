@@ -10,6 +10,7 @@ api_urlpatterns = [
     path("", include("profiles.urls")),
     path("", include("search.urls")),
     path("", include("images.urls")),
+    path("", include("mailing.urls")),
 ]
 
 urlpatterns = [
