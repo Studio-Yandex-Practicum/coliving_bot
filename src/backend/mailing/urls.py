@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.urls import path
 
-from backend.mailing.api_views import MailingView, UserMailView
+from .api_views import MailingView, UserMailView
 
 app_name = "mailing"
 
