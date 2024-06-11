@@ -27,6 +27,7 @@ from conversations.common_functions.common_funcs import (
 from general.validators import value_is_in_range_validator
 from internal_requests import api_service
 from internal_requests.entities import Coliving, Image, UserProfile
+from internal_requests.exceptions import ColivingNotFound
 
 
 @profile_required
@@ -41,7 +42,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         context.user_data["coliving_info"] = (
             await api_service.get_coliving_info_by_user(telegram_id=current_chat.id)
         )
-    except HTTPStatusError as exc:
+    except (HTTPStatusError, ColivingNotFound) as exc:
         if exc.response.status_code == codes.NOT_FOUND:
             await update.effective_message.edit_text(
                 text=templates.REPLY_MSG_TIME_TO_CREATE_PROFILE,
