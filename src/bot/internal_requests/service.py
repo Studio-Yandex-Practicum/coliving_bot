@@ -228,8 +228,6 @@ class APIService:
         :return: Объект UserProfile или None, если профиль не найден.
         """
         response = await self._get_request(f"users/{telegram_id}/profile/")
-        if response.status_code is not HTTPStatus.OK:
-            return response.raise_for_status()
         return await self._parse_response_to_user_profile(response.json())
 
     async def get_filtered_user_profiles(
@@ -361,10 +359,7 @@ class APIService:
                 )
                 response.raise_for_status()
             except HTTPStatusError as exc:
-                if exc.response.status_code == HTTPStatus.NOT_FOUND:
-                    return exc.response
-                else:
-                    raise
+                raise exc
             return response
 
     async def _post_request(
