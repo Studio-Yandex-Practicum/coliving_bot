@@ -1,4 +1,9 @@
-from conversations.menu.constants import CANCEL_COMMAND, MENU_COMMAND, START_COMMAND
+from conversations.menu.constants import (
+    CANCEL_COMMAND,
+    COMPLAIN_COMMAND,
+    MENU_COMMAND,
+    START_COMMAND,
+)
 
 MENU_TEXT = "Меню:"
 
@@ -6,6 +11,7 @@ COMMANDS = {
     START_COMMAND: "Узнать больше обо мне",
     MENU_COMMAND: "Доступ к различным функциям и возможностям",
     CANCEL_COMMAND: "Отменить",
+    COMPLAIN_COMMAND: "Пожаловаться",
 }
 
 WELCOME_MESSAGE_TEXT = (

@@ -5,6 +5,7 @@ from telegram.ext import Application, ApplicationBuilder, CommandHandler, Defaul
 from conversations.coliving.handlers import coliving_handler
 from conversations.coliving.keyboards import create_keyboard_of_locations
 from conversations.coliving_search.handlers import coliving_search_handler
+from conversations.complain.handlers import complain_handler
 from conversations.invitation.handlers import invitation_handler
 from conversations.match_requests.coliving.handlers import coliving_like_handler
 from conversations.match_requests.profile.handlers import profile_like_handler
@@ -36,6 +37,7 @@ def create_bot_app(defaults: Optional[Defaults] = None) -> Application:
     application.add_handler(handler=profile_handler)
     application.add_handler(handler=roommate_search_handler)
     application.add_handler(handler=coliving_search_handler)
+    application.add_handler(handler=complain_handler)
     application.add_handler(handler=invitation_handler)
     application.add_handler(handler=profile_like_handler)
     application.add_handler(handler=coliving_like_handler)

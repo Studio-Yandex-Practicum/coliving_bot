@@ -76,10 +76,12 @@ class MatchStatuses(IntEnum):
 
 
 class Categories(str, Enum):
-    CATEGORY_1 = "Категория 1"
-    CATEGORY_2 = "Категория 2"
-    CATEGORY_3 = "Категория 3"
-    OTHER = "Другое"
+    CATEGORY_SPAM = "Спам"
+    CATEGORY_INCORRECT_DATA = "Не совпадают личные данные"
+    CATEGORY_CHEATER = "Мошенник"
+    CATEGORY_PROHIB_ACTIV = "Запрещенная деятельность"
+    CATEGORY_BAD_LANG = "Оскорбления, мат"
+    CATEGORY_OTHER = "Другое"
 
 
 @dataclass
@@ -104,3 +106,4 @@ class Report:
     reported_user: int
     text: str
     category: Categories
+    screenshot: list = field(default_factory=list)

@@ -9,8 +9,9 @@ from telegram.ext import (
 import conversations.roommate_search.buttons as buttons
 import conversations.roommate_search.callback_funcs as callbacks
 from conversations.common_functions import common_buttons, common_funcs
+from conversations.complain.callback_funcs import complain
 from conversations.menu.buttons import SEARCH_NEIGHBOR_BUTTON
-from conversations.menu.constants import CANCEL_COMMAND, MENU_COMMAND
+from conversations.menu.constants import CANCEL_COMMAND, COMPLAIN_COMMAND, MENU_COMMAND
 from conversations.roommate_search.buttons import AGE_RANGE_CALLBACK_PATTERN
 from conversations.roommate_search.states import States
 from conversations.roommate_search.validators import (
@@ -119,5 +120,6 @@ roommate_search_handler: ConversationHandler = ConversationHandler(
             command=MENU_COMMAND,
             callback=common_funcs.return_to_menu_via_menu_command,
         ),
+        CommandHandler(command=COMPLAIN_COMMAND, callback=complain),
     ],
 )
