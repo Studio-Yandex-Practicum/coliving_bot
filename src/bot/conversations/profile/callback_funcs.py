@@ -30,7 +30,6 @@ async def start(
     except HTTPStatusError as exc:
         if exc.response.status_code == codes.NOT_FOUND:
             await update.effective_message.edit_text(text=templates.ASK_NAME)
-
             return States.NAME
         raise exc
 

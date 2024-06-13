@@ -1,6 +1,7 @@
 from dataclasses import asdict
 from typing import Optional
 
+from httpx import HTTPStatusError, codes
 from telegram import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
@@ -26,7 +27,6 @@ from conversations.common_functions.common_funcs import (
 from general.validators import value_is_in_range_validator
 from internal_requests import api_service
 from internal_requests.entities import Coliving, Image, UserProfile
-from internal_requests.exceptions import ColivingNotFound
 
 
 @profile_required
@@ -41,17 +41,18 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         context.user_data["coliving_info"] = (
             await api_service.get_coliving_info_by_user(telegram_id=current_chat.id)
         )
-    except ColivingNotFound:
-        await update.effective_message.edit_text(
-            text=templates.REPLY_MSG_TIME_TO_CREATE_PROFILE,
-        )
-        await current_chat.send_message(
-            text=templates.REPLY_MSG_ASK_LOCATION,
-            reply_markup=context.bot_data["location_keyboard"],
-        )
-        context.user_data["coliving_info"] = Coliving(host=update.effective_chat.id)
-        return States.LOCATION
-
+    except HTTPStatusError as exc:
+        if exc.response.status_code == codes.NOT_FOUND:
+            await update.effective_message.edit_text(
+                text=templates.REPLY_MSG_TIME_TO_CREATE_PROFILE,
+            )
+            await current_chat.send_message(
+                text=templates.REPLY_MSG_ASK_LOCATION,
+                reply_markup=context.bot_data["location_keyboard"],
+            )
+            context.user_data["coliving_info"] = Coliving(host=update.effective_chat.id)
+            return States.LOCATION
+        raise exc
     if current_chat.id == context.user_data["coliving_info"].host:
         await update.effective_message.edit_text(text=templates.REPLY_MSG_HELLO)
         await _show_coliving_profile(
