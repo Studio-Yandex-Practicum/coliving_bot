@@ -3,7 +3,7 @@ from dataclasses import asdict
 from typing import List, Optional
 from urllib.parse import urlencode, urljoin
 
-from httpx import AsyncClient, HTTPStatusError, Response
+from httpx import AsyncClient, Response
 
 from internal_requests.entities import (
     Coliving,
@@ -340,13 +340,10 @@ class APIService:
         :param endpoint_urn: Относительный URI эндпоинта.
         """
         async with AsyncClient() as client:
-            try:
-                response = await client.get(
-                    urljoin(base=self.base_url, url=endpoint_urn), follow_redirects=True
-                )
-                response.raise_for_status()
-            except HTTPStatusError as exc:
-                raise exc
+            response = await client.get(
+                urljoin(base=self.base_url, url=endpoint_urn), follow_redirects=True
+            )
+            response.raise_for_status()
             return response
 
     async def _post_request(
