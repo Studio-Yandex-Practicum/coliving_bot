@@ -3,6 +3,7 @@ from django.urls import path
 
 from search.views import (
     ColivingLikeCreateAPIView,
+    ColivingLikeDestroyAPIView,
     ColivingLikesListAPIView,
     ColivingLikeUpdateAPIView,
     MatchedProfileListAPIView,
@@ -66,5 +67,10 @@ urlpatterns = [
         f"{settings.API_V1_PREFIX}/colivings/like/<int:pk>/",
         ColivingLikeUpdateAPIView.as_view(),
         name="coliving-like-update",
+    ),
+    path(
+        f"{settings.API_V1_PREFIX}/colivings/like/delete_old_likes/",
+        ColivingLikeDestroyAPIView.as_view(),
+        name="coliving-like-delete",
     ),
 ]

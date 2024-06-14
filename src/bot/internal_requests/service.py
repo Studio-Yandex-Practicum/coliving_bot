@@ -347,10 +347,17 @@ class APIService:
         return result
 
     async def delete_old_likes(self):
-        """Отправляет запрос на удаление лайков"""
-        endpoint_urn = "profiles/like/delete_old_likes/"
-        response = await self._delete_request(endpoint_urn)
-        return response
+        """Отправляет запросы на удаление лайков"""
+        profile_endpoint_urn = "profiles/like/delete_old_likes/"
+        coliving_endpoint_urn = "colivings/like/delete_old_likes/"
+
+        profile_response = await self._delete_request(profile_endpoint_urn)
+        coliving_response = await self._delete_request(coliving_endpoint_urn)
+
+        return {
+            "profile_response": profile_response,
+            "coliving_response": coliving_response,
+        }
 
     async def _get_request(self, endpoint_urn: str) -> Response:
         """

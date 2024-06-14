@@ -5,8 +5,9 @@ from rest_framework.response import Response
 
 from profiles.models import Coliving, Profile
 from profiles.serializers import ProfileSerializer
-from search.constants import ONE_MONTH, MatchStatuses
+from search.constants import MatchStatuses
 from search.filters import ProfilesSearchFilterSet
+from search.mixins import OldLikesDestroyMixin
 from search.models import ColivingLike, ProfileLike, UserReport
 from search.serializers import (
     ColivingLikeCreateSerializer,
@@ -194,19 +195,9 @@ class ColivingLikeUpdateAPIView(UpdateAPIView):
         return result
 
 
-class ProfileLikeDestroyAPIView(generics.DestroyAPIView):
-    def get_queryset(self):
-        from datetime import datetime, timedelta
+class ProfileLikeDestroyAPIView(OldLikesDestroyMixin, generics.DestroyAPIView):
+    model = ProfileLike
 
-        one_month_ago = datetime.now() - timedelta(days=ONE_MONTH)
-        return ProfileLike.objects.filter(
-            created_date__lte=one_month_ago,
-            status__in=(MatchStatuses.is_pending, MatchStatuses.is_rejected),
-        )
 
-    def delete(self, request, *args, **kwargs):
-        dislikes = self.get_queryset()
-        deleted_dislikes, _ = dislikes.delete()
-        return Response(
-            {"deleted_dislikes": deleted_dislikes}, status=status.HTTP_204_NO_CONTENT
-        )
+class ColivingLikeDestroyAPIView(OldLikesDestroyMixin, generics.DestroyAPIView):
+    model = ColivingLike
