@@ -1,6 +1,7 @@
 from dataclasses import asdict
 
 from telegram import Update
+from telegram.error import Forbidden
 from telegram.ext import ContextTypes, ConversationHandler
 
 import conversations.invitation.keyboards as keyboards
@@ -87,7 +88,10 @@ async def _send_message_to_host(
 
     reply_to_host = f"Пользователь <b>{roommate_profile.name}</b> "
     reply_to_host += message_template
-    await context.bot.send_message(
-        chat_id=host_id,
-        text=reply_to_host,
-    )
+    try:
+        await context.bot.send_message(
+            chat_id=host_id,
+            text=reply_to_host,
+        )
+    except Forbidden:
+        api_service.delete_profile(host_id)

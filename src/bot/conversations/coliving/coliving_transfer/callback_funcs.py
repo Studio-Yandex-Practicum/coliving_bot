@@ -1,4 +1,5 @@
 from telegram import Update
+from telegram.error import Forbidden
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
 import conversations.coliving.coliving_transfer.templates as templates
@@ -46,10 +47,14 @@ async def handle_coliving_set_new_owner(
     await api_service.update_user_residence(
         telegram_id=coliving_info.host, residence_id=None
     )
-    await context.bot.send_message(
-        chat_id=coliving_info.host,
-        text=templates.NEW_COLIVING_OWNER_MESSAGE,
-    )
+    try:
+        await context.bot.send_message(
+            chat_id=coliving_info.host,
+            text=templates.NEW_COLIVING_OWNER_MESSAGE,
+        )
+    except Forbidden:
+        api_service.delete_profile(coliving_info.host)
+
     await update.effective_message.reply_text(text=templates.OWNER_CHANGED_MESSAGE)
     return ConversationHandler.END
 

@@ -1,6 +1,7 @@
 from dataclasses import asdict
 
 from telegram import InputMediaPhoto, ReplyKeyboardRemove, Update
+from telegram.error import Forbidden
 from telegram.ext import ContextTypes, ConversationHandler
 
 import conversations.match_requests.templates as match_templates
@@ -164,11 +165,14 @@ async def profile_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     )
 
     keyboard = await get_view_profile_keyboard(like, sender_id)
-    await context.bot.send_message(
-        chat_id=receiver_id,
-        text=match_templates.LIKE_NOTIFICATION,
-        reply_markup=keyboard,
-    )
+    try:
+        await context.bot.send_message(
+            chat_id=receiver_id,
+            text=match_templates.LIKE_NOTIFICATION,
+            reply_markup=keyboard,
+        )
+    except Forbidden:
+        api_service.delete_profile(receiver_id)
 
     await update.effective_message.reply_text(
         text=templates.PROFILE_LIKE_TEXT.format(current_profile.name),

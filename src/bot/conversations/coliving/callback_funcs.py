@@ -9,7 +9,7 @@ from telegram import (
     ReplyKeyboardRemove,
     Update,
 )
-from telegram.error import TelegramError
+from telegram.error import Forbidden, TelegramError
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
 import conversations.coliving.buttons as buttons
@@ -245,12 +245,15 @@ async def roommate_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             ),
         )
     )
+    try:
+        await context.bot.send_message(
+            chat_id=current_roommate.user,
+            text=templates.INVITATION_FOR_ROOMMATE,
+            reply_markup=CONSIDER_INVITATION_FROM_HOST,
+        )
+    except Forbidden:
+        api_service.delete_profile(current_roommate.user)
 
-    await context.bot.send_message(
-        chat_id=current_roommate.user,
-        text=templates.INVITATION_FOR_ROOMMATE,
-        reply_markup=CONSIDER_INVITATION_FROM_HOST,
-    )
     await update.effective_message.reply_text(
         text=templates.ASK_NEXT_ROOMMATE,
         reply_markup=keyboards.NEXT_ROOMMATE,
