@@ -3,6 +3,8 @@ from django.db import models
 from images.utils import images_directory_path
 from images.validators import image_size_validator
 
+from .constants import MailingStatus
+
 
 class Mailing(models.Model):
     """
@@ -18,7 +20,12 @@ class Mailing(models.Model):
         blank=True,
         verbose_name="Фото для рассылки",
     )
-    is_sended = models.BooleanField(default=False, verbose_name="Отправлено")
+    is_sent = models.CharField(
+        max_length=20,
+        choices=MailingStatus,
+        default=MailingStatus.WAITING,
+        verbose_name="Отправлено",
+    )
 
     class Meta:
         verbose_name = "Рассылка"

@@ -352,7 +352,9 @@ class APIService:
         """
         endpoint_urn = "mailing/"
         response = await self._get_request(endpoint_urn)
-        return response.json()[-1]
+        if response.json():
+            return response.json()[-1]
+        return None
 
     async def get_users_for_mailing(self, page: int) -> List[int]:
         """
@@ -364,14 +366,15 @@ class APIService:
         response = await self._get_request(endpoint_urn)
         return response.json()
 
-    async def update_sended_mail(self, mailing_id):
+    async def update_sended_mail(self, mailing_id, status):
         """
-        Обновление поля 'is_sended' у рассылки.
+        Обновление поля 'is_sent' у рассылки.
 
         :param mailing_id: id рассылки для обновления.
+        :param status: статус сообщения рассылки.
         """
         endpoint_urn = f"mailing/{mailing_id}/"
-        await self._patch_request(endpoint_urn=endpoint_urn, data={"is_sended": True})
+        await self._patch_request(endpoint_urn=endpoint_urn, data={"is_sent": status})
 
     async def _get_request(self, endpoint_urn: str) -> Response:
         """
