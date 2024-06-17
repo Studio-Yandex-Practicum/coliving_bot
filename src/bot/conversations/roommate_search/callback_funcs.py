@@ -176,6 +176,11 @@ async def profile_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     return await next_profile(update, context)
 
 
+async def delete_old_likes(context: ContextTypes.DEFAULT_TYPE):
+    """Отправляет запрос на удаление лайков"""
+    return await api_service.delete_old_likes()
+
+
 async def end_of_search(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Заканчивает ветку общения по поиску соседа.
