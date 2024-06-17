@@ -39,3 +39,6 @@ CONSIDER_INVITATION_FROM_HOST_BTN = "Да, рассмотреть ✅"
 
 BTN_PROFILE_UNPIN_FROM_COLIVING = "Открепить от коливинга ❌"
 BTN_PROFILE_ROOMMATE_GO_BACK = "Вернуться ↩️"
+
+BTN_UNPIN_CURRENT_USER = "Открепиться от коливинга ❌"
+BTN_UNPIN_CURRENT_USER_CALL_BACK = "unpin_me"

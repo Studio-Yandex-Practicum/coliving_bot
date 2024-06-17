@@ -9,4 +9,7 @@ class MailingAdmin(admin.ModelAdmin):
     Управление объектами 'Mailing' в админ-зоне.
     """
 
-    list_display = ("id", "text", "send_date", "image", "is_sent")
+    list_display = ("id", "text", "send_date", "image", "status")
+    list_display_links = ("id", "text")
+    list_filter = ("status",)
+    date_hierarchy = "send_date"

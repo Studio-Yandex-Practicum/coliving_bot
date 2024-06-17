@@ -3,19 +3,19 @@ from django.urls import path
 
 from .api_views import MailingView, UserMailView
 
-app_name = "mailing"
+app_name = "mailings"
 
 urlpatterns = [
     path(
-        f"{settings.API_V1_PREFIX}/mailing/",
+        f"{settings.API_V1_PREFIX}/mailings/",
         MailingView.as_view({"get": "list"}),
     ),
     path(
-        f"{settings.API_V1_PREFIX}/mailing/users/",
+        f"{settings.API_V1_PREFIX}/mailings/users/",
         UserMailView.as_view({"get": "list"}),
     ),
     path(
-        f"{settings.API_V1_PREFIX}/mailing/<int:pk>/",
+        f"{settings.API_V1_PREFIX}/mailings/<int:pk>/",
         MailingView.as_view({"patch": "partial_update"}),
     ),
 ]

@@ -1,10 +1,9 @@
 import mimetypes
 from dataclasses import asdict
-from http import HTTPStatus
 from typing import List, Optional
 from urllib.parse import urlencode, urljoin
 
-from httpx import AsyncClient, HTTPStatusError, Response
+from httpx import AsyncClient, Response
 
 from internal_requests.entities import (
     Coliving,
@@ -18,13 +17,6 @@ from internal_requests.entities import (
     ShortProfileInfo,
     UserProfile,
 )
-from internal_requests.exceptions import ColivingNotFound
-
-
-class MatchReuestgNotFound(Exception):
-    def __init__(self, message, response):
-        super().__init__(message)
-        self.response = response
 
 
 class APIService:
@@ -127,13 +119,8 @@ class APIService:
             return await self._parse_response_to_coliving(response_json[0])
         endpoint_urn = f"users/{telegram_id}/residence"
         response = await self._get_request(endpoint_urn)
-        if response.status_code != HTTPStatus.NOT_FOUND:
-            response_json = response.json()
-            return await self._parse_response_to_coliving(response_json)
-        raise ColivingNotFound(
-            message="Не найдено коливингов пользователя.",
-            response=response,
-        )
+        response_json = response.json()
+        return await self._parse_response_to_coliving(response_json)
 
     async def update_coliving_info(self, coliving: Coliving) -> Coliving:
         """Запрос на частичное обновление информации по коливингу."""
@@ -346,11 +333,24 @@ class APIService:
             result.append(parsed_profile)
         return result
 
-    async def get_mailing(self) -> dict:
+    async def delete_old_likes(self):
+        """Отправляет запросы на удаление лайков"""
+        profile_endpoint_urn = "profiles/like/delete_old_likes/"
+        coliving_endpoint_urn = "colivings/like/delete_old_likes/"
+
+        profile_response = await self._delete_request(profile_endpoint_urn)
+        coliving_response = await self._delete_request(coliving_endpoint_urn)
+
+        return {
+            "profile_response": profile_response,
+            "coliving_response": coliving_response,
+        }
+
+    async def get_mailing(self) -> Optional[dict]:
         """
         Получение сообщения для рассылки.
         """
-        endpoint_urn = "mailing/"
+        endpoint_urn = "mailings/"
         response = await self._get_request(endpoint_urn)
         if response.json():
             return response.json()[-1]
@@ -362,19 +362,19 @@ class APIService:
 
         :param page: значение страницы.
         """
-        endpoint_urn = f"mailing/users/?page={page}"
+        endpoint_urn = f"mailings/users/?page={page}"
         response = await self._get_request(endpoint_urn)
         return response.json()
 
-    async def update_sended_mail(self, mailing_id, status):
+    async def update_mail(self, mailing_id, status):
         """
-        Обновление поля 'is_sent' у рассылки.
+        Обновление поля 'status' у рассылки.
 
         :param mailing_id: id рассылки для обновления.
         :param status: статус сообщения рассылки.
         """
-        endpoint_urn = f"mailing/{mailing_id}/"
-        await self._patch_request(endpoint_urn=endpoint_urn, data={"is_sent": status})
+        endpoint_urn = f"mailings/{mailing_id}/"
+        await self._patch_request(endpoint_urn=endpoint_urn, data={"status": status})
 
     async def _get_request(self, endpoint_urn: str) -> Response:
         """
@@ -383,16 +383,10 @@ class APIService:
         :param endpoint_urn: Относительный URI эндпоинта.
         """
         async with AsyncClient() as client:
-            try:
-                response = await client.get(
-                    urljoin(base=self.base_url, url=endpoint_urn), follow_redirects=True
-                )
-                response.raise_for_status()
-            except HTTPStatusError as exc:
-                if exc.response.status_code == HTTPStatus.NOT_FOUND:
-                    return exc.response
-                else:
-                    raise
+            response = await client.get(
+                urljoin(base=self.base_url, url=endpoint_urn), follow_redirects=True
+            )
+            response.raise_for_status()
             return response
 
     async def _post_request(

@@ -1,4 +1,4 @@
-from django.utils.timezone import now
+from django.utils import timezone
 from rest_framework import mixins, viewsets
 
 from profiles.models import UserFromTelegram
@@ -18,11 +18,12 @@ class MailingView(
     serializer_class = MailingSerializer
 
     def get_queryset(self):
-        current_datetime = now()
-        queryset = Mailing.objects.filter(
-            send_date__lte=current_datetime, is_sent="is_waiting"
-        )
-        return queryset
+        current_datetime = timezone.now()
+        if self.request.method == "GET":
+            return Mailing.objects.filter(
+                send_date__lte=current_datetime, status="is_waiting"
+            )
+        return Mailing.objects.all()
 
 
 class UserMailView(mixins.ListModelMixin, viewsets.GenericViewSet):

@@ -16,7 +16,7 @@ class MailingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Mailing
-        fields = ("id", "text", "send_date", "image", "is_sent")
+        fields = ("id", "text", "send_date", "image", "status")
 
     def get_image(self, obj):
         if obj.image:

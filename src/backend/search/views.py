@@ -7,6 +7,7 @@ from profiles.models import Coliving, Profile
 from profiles.serializers import ProfileSerializer
 from search.constants import MatchStatuses
 from search.filters import ProfilesSearchFilterSet
+from search.mixins import OldLikesDestroyMixin
 from search.models import ColivingLike, ProfileLike, UserReport
 from search.serializers import (
     ColivingLikeCreateSerializer,
@@ -192,3 +193,11 @@ class ColivingLikeUpdateAPIView(UpdateAPIView):
         result = super().allowed_methods
         result.remove("PUT")
         return result
+
+
+class ProfileLikeDestroyAPIView(OldLikesDestroyMixin, generics.DestroyAPIView):
+    model = ProfileLike
+
+
+class ColivingLikeDestroyAPIView(OldLikesDestroyMixin, generics.DestroyAPIView):
+    model = ColivingLike
