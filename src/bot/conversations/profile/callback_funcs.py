@@ -372,6 +372,14 @@ async def handle_delete_profile(
     Выбор р.
     Обработка ответа: Удалить анкету.
     """
+    telegram_id = update.effective_chat.id
+    residence_check = await api_service.get_user_profile_by_telegram_id(telegram_id)
+    if residence_check.residence is not None or residence_check.has_coliving is True:
+        await update.callback_query.answer(
+            text=templates.CANNOT_BE_DELETED, show_alert=True
+        )
+        await update.effective_message.reply_text(text=templates.DELETE_CANCELED)
+        return ConversationHandler.END
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_WANT_TO_DELETE,
         reply_markup=keyboards.DELETE_OR_CANCEL_PROFILE_KEYBOARD,
