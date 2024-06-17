@@ -346,6 +346,36 @@ class APIService:
             "coliving_response": coliving_response,
         }
 
+    async def get_mailing(self) -> Optional[dict]:
+        """
+        Получение сообщения для рассылки.
+        """
+        endpoint_urn = "mailings/"
+        response = await self._get_request(endpoint_urn)
+        if response.json():
+            return response.json()[-1]
+        return None
+
+    async def get_users_for_mailing(self, page: int) -> List[int]:
+        """
+        Получение списка пользователей для рассылки.
+
+        :param page: значение страницы.
+        """
+        endpoint_urn = f"mailings/users/?page={page}"
+        response = await self._get_request(endpoint_urn)
+        return response.json()
+
+    async def update_mail(self, mailing_id, status):
+        """
+        Обновление поля 'status' у рассылки.
+
+        :param mailing_id: id рассылки для обновления.
+        :param status: статус сообщения рассылки.
+        """
+        endpoint_urn = f"mailings/{mailing_id}/"
+        await self._patch_request(endpoint_urn=endpoint_urn, data={"status": status})
+
     async def _get_request(self, endpoint_urn: str) -> Response:
         """
         Отправляет GET-запрос к указанному эндпоинту.

@@ -1,5 +1,6 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.response import Response
 
@@ -15,7 +16,7 @@ class OldLikesDestroyMixin:
                 "Необходимо определить атрибут model в наследнике"
             )
 
-        one_month_ago = datetime.now() - timedelta(days=ONE_MONTH)
+        one_month_ago = timezone.now() - timedelta(days=ONE_MONTH)
         return self.model.objects.filter(
             created_date__lte=one_month_ago,
             status__in=(MatchStatuses.is_pending, MatchStatuses.is_rejected),

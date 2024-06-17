@@ -2,6 +2,7 @@ import logging
 import os
 from pathlib import Path
 
+import pytz
 from dotenv import load_dotenv
 from telegram.constants import ParseMode
 from telegram.ext import Defaults
@@ -15,7 +16,10 @@ DATA_PATH = BASE_DIR.parent / ".data"
 # Telegram BOT token
 TOKEN = os.getenv("TOKEN")
 # Default settings for Telegram BOT
-DEFAULTS = Defaults(parse_mode=ParseMode.HTML)
+DEFAULTS = Defaults(
+    parse_mode=ParseMode.HTML,
+    tzinfo=pytz.timezone("Europe/Moscow"),
+)
 
 # Logs folder path
 LOGS_FOLDER = DATA_PATH / "logs"
