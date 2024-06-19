@@ -2,12 +2,12 @@ from dataclasses import asdict
 from typing import List
 
 from telegram import InputMediaPhoto, ReplyKeyboardRemove, Update
-from telegram.error import Forbidden
 from telegram.ext import ContextTypes
 
 import conversations.coliving_search.keyboards as keyboards
 import conversations.coliving_search.states as states
 import conversations.coliving_search.templates as templates
+from bot.utils.bot import safe_send_message
 from conversations.coliving.constants import MAX_PRICE, MIN_PRICE
 from conversations.coliving_search import constants
 from conversations.common_functions.common_funcs import profile_required
@@ -197,14 +197,12 @@ async def like_coliving(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     sender_id = update.effective_chat.id
 
     keyboard = await get_view_coliving_keyboard(like, sender_id)
-    try:
-        await context.bot.send_message(
-            chat_id=current_coliving.host,
-            text=templates.LIKE_NOTIFICATION,
-            reply_markup=keyboard,
-        )
-    except Forbidden:
-        api_service.delete_profile(sender_id)
+    await safe_send_message(
+        context=context,
+        chat_id=current_coliving.host,
+        text=templates.LIKE_NOTIFICATION,
+        reply_markup=keyboard,
+    )
 
     await update.effective_message.reply_text(
         text=templates.COLIVING_LIKE_MSG,
