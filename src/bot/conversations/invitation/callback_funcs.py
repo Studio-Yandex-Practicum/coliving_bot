@@ -5,10 +5,10 @@ from telegram.ext import ContextTypes, ConversationHandler
 
 import conversations.invitation.keyboards as keyboards
 import conversations.invitation.templates as templates
-from bot.utils.bot import safe_send_message
 from conversations.common_functions.common_funcs import profile_required
 from conversations.invitation.states import States
 from internal_requests import api_service
+from utils.bot import safe_send_message
 
 
 @profile_required

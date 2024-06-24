@@ -7,7 +7,6 @@ from telegram.ext import ContextTypes
 import conversations.coliving_search.keyboards as keyboards
 import conversations.coliving_search.states as states
 import conversations.coliving_search.templates as templates
-from bot.utils.bot import safe_send_message
 from conversations.coliving.constants import MAX_PRICE, MIN_PRICE
 from conversations.coliving_search import constants
 from conversations.common_functions.common_funcs import profile_required
@@ -16,6 +15,7 @@ from conversations.match_requests.constants import MatchStatus
 from general.validators import value_is_in_range_validator
 from internal_requests import api_service
 from internal_requests.entities import Coliving, ColivingSearchSettings
+from utils.bot import safe_send_message
 
 
 @profile_required
