@@ -2,8 +2,8 @@ from typing import Optional
 
 from telegram.ext import ContextTypes
 
-from bot.utils.bot import safe_send_message
 from conversations.match_requests import templates as templates
+from utils.bot import safe_send_message
 
 
 async def send_match_notifications(update, context, sender_id, receiver_id):

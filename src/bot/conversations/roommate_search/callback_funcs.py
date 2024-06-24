@@ -6,7 +6,6 @@ from telegram.ext import ContextTypes, ConversationHandler
 import conversations.match_requests.templates as match_templates
 import conversations.roommate_search.keyboards as keyboards
 import conversations.roommate_search.templates as templates
-from bot.utils.bot import safe_send_message
 from conversations.common_functions.common_funcs import profile_required
 from conversations.match_requests.constants import MatchStatus
 from conversations.match_requests.profile.keyboards import get_view_profile_keyboard
@@ -16,6 +15,7 @@ from conversations.roommate_search.constants import SRCH_STNG_FIELD
 from conversations.roommate_search.states import States
 from internal_requests import api_service
 from internal_requests.entities import ProfileSearchSettings, UserProfile
+from utils.bot import safe_send_message
 
 
 @profile_required
