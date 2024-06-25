@@ -24,9 +24,9 @@ async def start(
     Переводит диалог в состояние AGE (ввод возраста пользователя).
     """
     try:
-        context.user_data["profile_info"] = (
-            await api_service.get_user_profile_by_telegram_id(update.effective_chat.id)
-        )
+        context.user_data[
+            "profile_info"
+        ] = await api_service.get_user_profile_by_telegram_id(update.effective_chat.id)
     except HTTPStatusError as exc:
         if exc.response.status_code == codes.NOT_FOUND:
             await update.effective_message.edit_text(text=templates.ASK_NAME)
@@ -154,9 +154,7 @@ async def handle_age(
         value=age,
         min=consts.MIN_AGE,
         max=consts.MAX_AGE,
-        message=templates.AGE_ERROR_MSG.format(
-            min=consts.MIN_AGE, max=consts.MAX_AGE
-        ),
+        message=templates.AGE_ERROR_MSG.format(min=consts.MIN_AGE, max=consts.MAX_AGE),
     ):
         return States.AGE
 
