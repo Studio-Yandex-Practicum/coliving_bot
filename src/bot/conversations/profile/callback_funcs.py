@@ -154,7 +154,9 @@ async def handle_age(
         value=age,
         min=consts.MIN_AGE,
         max=consts.MAX_AGE,
-        message=templates.AGE_ERROR_MSG,
+        message=templates.AGE_ERROR_MSG.format(
+            min=consts.MIN_AGE, max=consts.MAX_AGE
+        ),
     ):
         return States.AGE
 
@@ -167,7 +169,7 @@ async def handle_age(
 
 
 async def handle_wrong_age(update: Update, _context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.effective_chat.send_message(templates.AGE_ERROR_MSG)
+    await update.effective_chat.send_message(templates.AGE_ERROR_MSG_STATIC)
     return None
 
 
