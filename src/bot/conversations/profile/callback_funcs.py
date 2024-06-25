@@ -148,14 +148,14 @@ async def handle_age(
     Переводит диалог в состояние SEX (пол пользователя).
     """
     age = update.message.text
+    msg = templates.AGE_ERR_MSG.format(min=consts.MIN_AGE, max=consts.MAX_AGE)
     if not await value_is_in_range_validator(
         update=update,
         context=context,
         value=age,
         min=consts.MIN_AGE,
         max=consts.MAX_AGE,
-        message=templates.AGE_ERROR_MSG.format(min=consts.MIN_AGE,
-                                               max=consts.MAX_AGE),
+        message=msg,
     ):
         return States.AGE
 
