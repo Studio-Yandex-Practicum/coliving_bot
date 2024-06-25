@@ -24,9 +24,9 @@ async def start(
     Переводит диалог в состояние AGE (ввод возраста пользователя).
     """
     try:
-        context.user_data[
-            "profile_info"
-        ] = await api_service.get_user_profile_by_telegram_id(update.effective_chat.id)
+        context.user_data["profile_info"] = (
+            await api_service.get_user_profile_by_telegram_id(update.effective_chat.id)
+        )
     except HTTPStatusError as exc:
         if exc.response.status_code == codes.NOT_FOUND:
             await update.effective_message.edit_text(text=templates.ASK_NAME)
