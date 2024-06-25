@@ -1,14 +1,14 @@
 from typing import Dict, Union
 
-from telegram import InputMediaPhoto, ReplyKeyboardRemove, Update
+from telegram import ReplyKeyboardRemove, Update
 from telegram.ext import ContextTypes, ConversationHandler
 
+from conversations.common_functions.common_funcs import add_response_prefix
 from conversations.complain import states
 from conversations.complain.keyboards import (
-    SCREENSHOT_KEYBOARD,
-    get_category_keyboard,
+    CATEGORY_KEYBOARD,
+    SCREENSHOT_OR_NOT_KEYBOARD,
     get_report_or_not_keyboard,
-    get_screenshot_or_not_keyboard,
 )
 from conversations.complain.templates import (
     ASK_COMPLAIN_TEXT,
@@ -16,9 +16,11 @@ from conversations.complain.templates import (
     CATEGORY_CHOOSE_TEXT,
     COMPLAIN_ERROR_TEXT,
     COMPLAIN_TEXT,
+    CREATE_REPORT_TEXT,
     REPORT_DATA,
     SCREENSHOT_ATTACH_TEXT,
 )
+from internal_requests import api_service
 from internal_requests.entities import Categories, Image, Report
 
 
@@ -27,7 +29,7 @@ async def complain(update: Update, _context: ContextTypes.DEFAULT_TYPE):
     Начало жалобы, проверяет - осуществляется ли просмотр анкеты.
     """
     await update.effective_message.reply_text(
-        text="Сформировать жалобу",
+        text=CREATE_REPORT_TEXT,
         reply_markup=ReplyKeyboardRemove(),
     )
     if len(_context.user_data) == 0:
@@ -38,11 +40,12 @@ async def complain(update: Update, _context: ContextTypes.DEFAULT_TYPE):
     await _clear_complain_info_context(_context)
     reported_user_dict = await _get_reported_user_id_and_user_id(_context)
     await agree_or_not(update=update, reported_user_dict=reported_user_dict)
+    category = _context.user_data.get("category", Categories.CATEGORY_OTHER)
     _context.user_data["complain_info"] = Report(
         reported_user=reported_user_dict["reported_user_id"],
         reporter=update.effective_chat.id,
         text="",
-        category=Categories.CATEGORY_OTHER,
+        category=category,
     )
     return ConversationHandler.END
 
@@ -61,10 +64,9 @@ async def category_choose(
     update: Update,
     _context: ContextTypes.DEFAULT_TYPE,
 ):
-    category_keyboard = await get_category_keyboard()
     await update.effective_message.edit_text(
         text=CATEGORY_CHOOSE_TEXT,
-        reply_markup=category_keyboard,
+        reply_markup=CATEGORY_KEYBOARD,
     )
     return states.CATEGORY
 
@@ -73,6 +75,9 @@ async def handle_category(
     update: Update,
     _context: ContextTypes.DEFAULT_TYPE,
 ):
+    category_name = update.callback_query.data
+    category = Categories(category_name)
+    _context.user_data["complain_info"].category = category
     await update.effective_message.edit_text(
         text=ASK_COMPLAIN_TEXT,
     )
@@ -85,53 +90,54 @@ async def handle_complain_text(
 ):
     text = update.message.text
     _context.user_data["complain_info"].text = text
-    screenshot_keyboard = await get_screenshot_or_not_keyboard()
     await update.effective_message.reply_text(
         text=SCREENSHOT_ATTACH_TEXT,
-        reply_markup=screenshot_keyboard,
+        reply_markup=SCREENSHOT_OR_NOT_KEYBOARD,
     )
     return states.SCREENSHOT
 
 
+@add_response_prefix()
 async def attach_screenshot(
     update: Update,
     _context: ContextTypes.DEFAULT_TYPE,
 ):
     await update.effective_message.reply_text(
-        text="Отлично, скриншот поможет установить нарушение!",
-        reply_markup=ReplyKeyboardRemove(),
-    )
-    await update.effective_chat.send_message(
-        text=ASK_SCREENSHOT, reply_markup=SCREENSHOT_KEYBOARD
+        text=ASK_SCREENSHOT,
     )
 
 
 async def handle_screenshot(update: Update, _context: ContextTypes.DEFAULT_TYPE):
     new_screenshot = update.effective_message.photo[-1]
-    _context.user_data["complain_info"].screenshot.append(
-        Image(file_id=new_screenshot.file_id, photo_size=new_screenshot)
+    _context.user_data["complain_info"].screenshot = Image(
+        file_id=new_screenshot.file_id, photo_size=new_screenshot
     )
-    return states.RESULT
+    report = _context.user_data["complain_info"]
+    await api_service.create_report(report=report)
+    await update.effective_chat.send_photo(
+        photo=_context.user_data["complain_info"].screenshot.file_id,
+        caption=REPORT_DATA.format(
+            user_id=_context.user_data["complain_info"].reported_user,
+            category=_context.user_data["complain_info"].category.value,
+            text=_context.user_data["complain_info"].text,
+        ),
+    )
+    return ConversationHandler.END
 
 
+@add_response_prefix()
 async def final_report(update: Update, _context: ContextTypes.DEFAULT_TYPE):
     message_text = REPORT_DATA.format(
         user_id=_context.user_data["complain_info"].reported_user,
         category=_context.user_data["complain_info"].category.value,
         text=_context.user_data["complain_info"].text,
     )
-    images = _context.user_data["complain_info"].screenshot
-    if images:
-        media_group = [InputMediaPhoto(file.file_id) for file in images]
-        await update.effective_chat.send_media_group(
-            media=media_group,
-            caption=message_text,
-        )
-    else:
-        await update.effective_chat.send_message(
-            text=message_text,
-            reply_markup=ReplyKeyboardRemove(),
-        )
+    report = _context.user_data["complain_info"]
+    await api_service.create_report(report)
+    await update.effective_chat.send_message(
+        text=message_text,
+        reply_markup=ReplyKeyboardRemove(),
+    )
     return ConversationHandler.END
 
 

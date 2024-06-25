@@ -12,6 +12,7 @@ from conversations.common_functions import common_funcs
 from conversations.complain import states
 from conversations.menu.constants import CANCEL_COMMAND, MENU_COMMAND
 from general.validators import handle_text_input_instead_of_choosing_button
+from internal_requests.entities import Categories
 
 AGREE_REGEX_PATTERN = rf"^(?P<{'reported_user_id'}>\d+)" r":{}$"
 
@@ -19,7 +20,7 @@ AGREE_REGEX_PATTERN = rf"^(?P<{'reported_user_id'}>\d+)" r":{}$"
 complain_handler: ConversationHandler = ConversationHandler(
     entry_points=[
         CallbackQueryHandler(
-            callback=common_funcs.cancel,
+            callback=common_funcs.add_response_prefix()(common_funcs.cancel),
             pattern=AGREE_REGEX_PATTERN.format(buttons.REPORT_NO_BUTTON),
         ),
         CallbackQueryHandler(
@@ -38,12 +39,12 @@ complain_handler: ConversationHandler = ConversationHandler(
             CallbackQueryHandler(
                 callback=callbacks.handle_category,
                 pattern=(
-                    rf"^({buttons.CATEGORY_SPAM_BUTTON}"
-                    f"|{buttons.CATEGORY_BAD_LANG_BUTTON}"
-                    f"|{buttons.CATEGORY_CHEATER_BUTTON}"
-                    f"|{buttons.CATEGORY_INCORRECT_DATA_BUTTON}"
-                    f"|{buttons.CATEGORY_PROHIB_ACTIV_BUTTON}"
-                    f"|{buttons.CATEGORY_OTHER_BUTTON})$"
+                    rf"^({Categories.CATEGORY_SPAM.value}"
+                    f"|{Categories.CATEGORY_BAD_LANG.value}"
+                    f"|{Categories.CATEGORY_CHEATER.value}"
+                    f"|{Categories.CATEGORY_INCORRECT_DATA.value}"
+                    f"|{Categories.CATEGORY_PROHIB_ACTIV.value}"
+                    f"|{Categories.CATEGORY_OTHER.value})$"
                 ),
             ),
             MessageHandler(
@@ -62,15 +63,12 @@ complain_handler: ConversationHandler = ConversationHandler(
             ),
             MessageHandler(filters.PHOTO, callbacks.handle_screenshot),
         ],
-        states.RESULT: [
-            MessageHandler(
-                filters.Regex(rf"{buttons.SAVE_SCREENSHOT_BUTTON}") & ~filters.COMMAND,
-                callbacks.final_report,
-            ),
-        ],
     },
     fallbacks=[
-        CommandHandler(command=CANCEL_COMMAND, callback=common_funcs.cancel),
+        CommandHandler(
+            command=CANCEL_COMMAND,
+            callback=common_funcs.add_response_prefix()(common_funcs.cancel),
+        ),
         CommandHandler(
             command=MENU_COMMAND,
             callback=common_funcs.return_to_menu_via_menu_command,
