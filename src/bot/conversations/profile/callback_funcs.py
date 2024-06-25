@@ -154,7 +154,8 @@ async def handle_age(
         value=age,
         min=consts.MIN_AGE,
         max=consts.MAX_AGE,
-        message=templates.AGE_ERROR_MSG.format(min=consts.MIN_AGE, max=consts.MAX_AGE),
+        message=templates.AGE_ERROR_MSG.format(min=consts.MIN_AGE,
+                                               max=consts.MAX_AGE),
     ):
         return States.AGE
 
