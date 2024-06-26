@@ -3,8 +3,8 @@ from conversations.menu.constants import CANCEL_COMMAND, MENU_COMMAND, START_COM
 MENU_TEXT = "Меню:"
 
 COMMANDS = {
-    START_COMMAND: "Узнать больше обо мне",
-    MENU_COMMAND: "Доступ к различным функциям и возможностям",
+    START_COMMAND: "Узнать больше о боте",
+    MENU_COMMAND: "Доступ к функциям и возможностям",
     CANCEL_COMMAND: "Отменить",
 }
 
