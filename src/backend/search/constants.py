@@ -36,3 +36,6 @@ class ReportStatuses(models.TextChoices):
     VIEWED = ("Просмотрено", "Просмотрено")
     RESOLVED = ("Решено", "Решено")
     REJECTED = ("Отклонено", "Отклонено")
+
+
+ALREADY_REPORTED = "Пара reported_user - reporter уже есть в БД."

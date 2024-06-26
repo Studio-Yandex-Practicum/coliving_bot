@@ -1,3 +1,4 @@
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import (
@@ -5,6 +6,8 @@ from drf_spectacular.views import (
     SpectacularRedocView,
     SpectacularSwaggerView,
 )
+
+from .settings import base
 
 api_urlpatterns = [
     path("", include("profiles.urls")),
@@ -28,3 +31,6 @@ urlpatterns = [
         name="redoc",
     ),
 ]
+
+if base.DEBUG:
+    urlpatterns += static(base.MEDIA_URL, document_root=base.MEDIA_ROOT)

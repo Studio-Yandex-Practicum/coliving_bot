@@ -93,6 +93,7 @@ class UserReport(models.Model):
     )
     text = models.TextField(verbose_name="Текст")
     category = models.TextField(verbose_name="Категория", choices=ReportCategories)
+    screenshot = models.ImageField(upload_to="user_reports/", null=True)
     status = models.TextField(
         verbose_name="Статус",
         choices=ReportStatuses,
@@ -110,3 +111,6 @@ class UserReport(models.Model):
                 fields=("reporter", "reported_user"),
             ),
         )
+
+    def __str__(self):
+        return f"Жалоба №{self.id}"

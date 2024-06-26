@@ -4,8 +4,22 @@ from profiles.models import Profile, UserFromTelegram
 from search.models import ColivingLike, ProfileLike, UserReport
 
 
+class UserReportImageSerializer(serializers.ImageField):
+    """
+    Сериализатор для обработки изображений в жалобах.
+    """
+
+    def to_internal_value(self, data):
+        return super().to_internal_value(data)
+
+    def to_representation(self, value):
+        return value.url if value else None
+
+
 class UserReportSerializer(serializers.ModelSerializer):
-    """Сериализатор для создания жалоб."""
+    """
+    Сериализатор для создания жалоб.
+    """
 
     reporter = serializers.SlugRelatedField(
         slug_field="telegram_id", queryset=UserFromTelegram.objects.all()
@@ -13,10 +27,11 @@ class UserReportSerializer(serializers.ModelSerializer):
     reported_user = serializers.SlugRelatedField(
         slug_field="telegram_id", queryset=UserFromTelegram.objects.all()
     )
+    screenshot = UserReportImageSerializer(required=False, allow_null=True)
 
     class Meta:
         model = UserReport
-        fields = ("reporter", "reported_user", "text", "category")
+        fields = ("reporter", "reported_user", "text", "category", "screenshot")
         extra_kwargs = {
             "text": {"required": True},
             "category": {"required": True},

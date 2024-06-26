@@ -19,6 +19,7 @@ from conversations.complain.templates import (
     CREATE_REPORT_TEXT,
     REPORT_DATA,
     SCREENSHOT_ATTACH_TEXT,
+    USER_ALREADY_REPORTED,
 )
 from internal_requests import api_service
 from internal_requests.entities import Categories, Image, Report
@@ -113,15 +114,21 @@ async def handle_screenshot(update: Update, _context: ContextTypes.DEFAULT_TYPE)
         file_id=new_screenshot.file_id, photo_size=new_screenshot
     )
     report = _context.user_data["complain_info"]
-    await api_service.create_report(report=report)
-    await update.effective_chat.send_photo(
-        photo=_context.user_data["complain_info"].screenshot.file_id,
-        caption=REPORT_DATA.format(
-            user_id=_context.user_data["complain_info"].reported_user,
-            category=_context.user_data["complain_info"].category.value,
-            text=_context.user_data["complain_info"].text,
-        ),
-    )
+    response = await api_service.create_report(report=report)
+    if response.status_code == 208:
+        await update.effective_chat.send_message(
+            text=USER_ALREADY_REPORTED,
+            reply_markup=ReplyKeyboardRemove(),
+        )
+    else:
+        await update.effective_chat.send_photo(
+            photo=_context.user_data["complain_info"].screenshot.file_id,
+            caption=REPORT_DATA.format(
+                user_id=_context.user_data["complain_info"].reported_user,
+                category=_context.user_data["complain_info"].category.value,
+                text=_context.user_data["complain_info"].text,
+            ),
+        )
     return ConversationHandler.END
 
 
@@ -133,11 +140,17 @@ async def final_report(update: Update, _context: ContextTypes.DEFAULT_TYPE):
         text=_context.user_data["complain_info"].text,
     )
     report = _context.user_data["complain_info"]
-    await api_service.create_report(report)
-    await update.effective_chat.send_message(
-        text=message_text,
-        reply_markup=ReplyKeyboardRemove(),
-    )
+    response = await api_service.create_report(report)
+    if response.status_code == 208:
+        await update.effective_chat.send_message(
+            text=USER_ALREADY_REPORTED,
+            reply_markup=ReplyKeyboardRemove(),
+        )
+    else:
+        await update.effective_chat.send_message(
+            text=message_text,
+            reply_markup=ReplyKeyboardRemove(),
+        )
     return ConversationHandler.END
 
 
