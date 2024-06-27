@@ -1,4 +1,4 @@
-from conversations.profile.constants import PHOTO_MAX_NUMBER
+from conversations.profile.constants import MAX_AGE, MIN_AGE, PHOTO_MAX_NUMBER
 
 ASK_AGE = "Сколько тебе лет?"
 ASK_SEX = "Ты парень или девушка?"
@@ -35,7 +35,7 @@ FORM_EDIT_SAVED = "Отлично! Изменения сохранены."
 FORM_NOT_CHANGED = "Что ж, анкета осталась как есть."
 PROFILE_VIEWING = "Это твоя анкета. Что хочешь сделать?"
 ASK_WANT_TO_CHANGE = "Хорошо. Давай исправим 🤔"
-AGE_ERR_MSG = "Можно ввести возраст от 18 до 99 лет."
+AGE_ERR_MSG = f"Можно ввести возраст от {MIN_AGE} до {MAX_AGE} лет."
 NAME_LENGTH_ERROR_MSG = "Имя не должно быть меньше {min} и больше {max} символов."
 DEFAULT_ERROR_MESSAGE = "Некорректный ввод."
 NAME_SYMBOL_ERROR_MSG = (
