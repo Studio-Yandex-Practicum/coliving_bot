@@ -111,7 +111,7 @@ async def handle_name(
     Обрабатывает введенное пользователем имя.
     Переводит диалог в состояние AGE (ввод возраста).
     """
-    name = await _check_f_l_letters(update, update.effective_message.text)
+    name = name.strip("-")
 
     if not await value_is_in_range_validator(
         update=update,
@@ -521,7 +521,7 @@ async def handle_edit_name(
     Обрабатывает отредактированное пользователем имя.
     Переводит диалог в состояние EDIT_CONFIRMATION (анкета верна или нет).
     """
-    name = await _check_f_l_letters(update, update.effective_message.text)
+    name = name.strip("-")
     if not await value_is_in_range_validator(
         update=update,
         context=context,
@@ -721,17 +721,3 @@ async def _save_response_about_sex(update: Update, context: CallbackContext):
 async def _save_response_about_location(update, context):
     location = update.callback_query.data.split(":")[1]
     context.user_data["profile_info"].location = location
-
-
-async def _check_f_l_letters(update, name):
-    """Проверяет наличие - в начале и конце имени."""
-    alphabet = set(consts.LET)
-    if len(name) > 0 and bool(set(alphabet).intersection(set(name.lower()))):
-        while name[0] == "-" and len(name) > 0:
-            name = name[1::]
-        while name[len(name) - 1] == "-" and len(name) > 0:
-            name = name[:-1:]
-
-        return name
-    else:
-        await handle_wrong_name(update=update)
