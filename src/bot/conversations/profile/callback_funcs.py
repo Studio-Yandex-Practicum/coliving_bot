@@ -148,14 +148,13 @@ async def handle_age(
     Переводит диалог в состояние SEX (пол пользователя).
     """
     age = update.message.text
-    msg = templates.AGE_ERR_MSG.format(min=consts.MIN_AGE, max=consts.MAX_AGE)
     if not await value_is_in_range_validator(
         update=update,
         context=context,
         value=age,
         min=consts.MIN_AGE,
         max=consts.MAX_AGE,
-        message=msg,
+        message=templates.AGE_ERR_MSG,
     ):
         return States.AGE
 
@@ -168,7 +167,7 @@ async def handle_age(
 
 
 async def handle_wrong_age(update: Update, _context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.effective_chat.send_message(templates.AGE_ERROR_MSG_STATIC)
+    await update.effective_chat.send_message(templates.AGE_ERR_MSG)
     return None
 
 
