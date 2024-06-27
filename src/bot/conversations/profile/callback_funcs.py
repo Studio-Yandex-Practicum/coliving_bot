@@ -111,7 +111,7 @@ async def handle_name(
     Обрабатывает введенное пользователем имя.
     Переводит диалог в состояние AGE (ввод возраста).
     """
-    name = name.strip("-")
+    name = update.effective_message.text.strip("-")
 
     if not await value_is_in_range_validator(
         update=update,
@@ -521,7 +521,7 @@ async def handle_edit_name(
     Обрабатывает отредактированное пользователем имя.
     Переводит диалог в состояние EDIT_CONFIRMATION (анкета верна или нет).
     """
-    name = name.strip("-")
+    name = update.effective_message.text.strip("-")
     if not await value_is_in_range_validator(
         update=update,
         context=context,
