@@ -1,6 +1,13 @@
+import datetime
 from typing import Optional
 
-from telegram.ext import Application, ApplicationBuilder, CommandHandler, Defaults
+from telegram.ext import (
+    AIORateLimiter,
+    Application,
+    ApplicationBuilder,
+    CommandHandler,
+    Defaults,
+)
 
 from conversations.coliving.handlers import coliving_handler
 from conversations.coliving.keyboards import create_keyboard_of_locations
@@ -13,9 +20,11 @@ from conversations.menu.callback_funcs import menu, start
 from conversations.menu.constants import MENU_COMMAND, START_COMMAND
 from conversations.menu.keyboards import get_main_menu_commands
 from conversations.profile.handlers import profile_handler
+from conversations.roommate_search.callback_funcs import delete_old_likes
 from conversations.roommate_search.handlers import roommate_search_handler
 from error_handler.callback_funcs import error_handler
 from utils.configs import TOKEN
+from utils.mailing import check_mailing_list
 
 
 async def post_init(application: Application) -> None:
@@ -25,9 +34,11 @@ async def post_init(application: Application) -> None:
 
 
 def create_bot_app(defaults: Optional[Defaults] = None) -> Application:
+    rate_limiter = AIORateLimiter(max_retries=1)
     application: Application = (
         ApplicationBuilder()
         .token(TOKEN)
+        .rate_limiter(rate_limiter)
         .defaults(defaults)
         .post_init(post_init)
         .build()
@@ -43,4 +54,31 @@ def create_bot_app(defaults: Optional[Defaults] = None) -> Application:
     application.add_handler(handler=coliving_like_handler)
     application.add_handler(CommandHandler(MENU_COMMAND, menu))
     application.add_error_handler(error_handler)
+
+    _setup_job_queue(application)
+
     return application
+
+
+def _setup_job_queue(application):
+    job_queue = application.job_queue
+    job_queue.run_daily(
+        delete_old_likes,
+        time=datetime.time(hour=0, minute=0, second=0),
+    )
+
+    job_queue.run_repeating(
+        check_mailing_list,
+        interval=datetime.timedelta(hours=1),
+        first=_seconds_until_next_hour(),
+    )
+
+
+def _seconds_until_next_hour() -> float:
+    """Возвращает кол-во секунд до следующего часа."""
+    current_time = datetime.datetime.now()
+    next_hour = current_time.replace(
+        hour=current_time.hour + 1, minute=0, second=0, microsecond=0
+    )
+    delay = (next_hour - current_time).total_seconds()
+    return delay

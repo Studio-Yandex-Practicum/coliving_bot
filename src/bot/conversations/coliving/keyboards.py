@@ -105,7 +105,21 @@ EDIT_CONFIRMATION_KEYBOARD = InlineKeyboardMarkup.from_column(
     )
 )
 
-COLIVING_PROFILE_DUPLICATE_BUTTONS = [
+COLIVING_PROFILE_BUTTONS = [
+    InlineKeyboardButton(
+        text=buttons.BTN_LABEL_ROOMMATES, callback_data=buttons.BTN_ROOMMATES
+    ),
+    InlineKeyboardButton(
+        text=buttons.BTN_UNPIN_CURRENT_USER,
+        callback_data=buttons.BTN_UNPIN_CURRENT_USER_CALL_BACK,
+    ),
+    InlineKeyboardButton(
+        text=RETURN_TO_MENU_BTN,
+        callback_data=RETURN_TO_MENU_BTN,
+    ),
+]
+
+COLIVING_PROFILE_FOR_OWNER_BUTTONS = [
     InlineKeyboardButton(
         text=buttons.BTN_LABEL_ROOMMATES, callback_data=buttons.BTN_ROOMMATES
     ),
@@ -124,12 +138,16 @@ COLIVING_PROFILE_DUPLICATE_BUTTONS = [
     ),
 ]
 
-COLIVING_PROFILE_KEYBOARD_VISIBLE = InlineKeyboardMarkup.from_column(
-    button_column=(HIDE_BUTTON, *COLIVING_PROFILE_DUPLICATE_BUTTONS)
+COLIVING_PROFILE_KEYBOARD = InlineKeyboardMarkup.from_column(
+    button_column=COLIVING_PROFILE_BUTTONS
 )
 
-COLIVING_PROFILE_KEYBOARD_NOT_VISIBLE = InlineKeyboardMarkup.from_column(
-    button_column=(SEARCH_BUTTON, *COLIVING_PROFILE_DUPLICATE_BUTTONS)
+COLIVING_PROFILE_FOR_OWNER_KEYBOARD_VISIBLE = InlineKeyboardMarkup.from_column(
+    button_column=(HIDE_BUTTON, *COLIVING_PROFILE_FOR_OWNER_BUTTONS)
+)
+
+COLIVING_PROFILE_FOR_OWNER_KEYBOARD_NOT_VISIBLE = InlineKeyboardMarkup.from_column(
+    button_column=(SEARCH_BUTTON, *COLIVING_PROFILE_FOR_OWNER_BUTTONS)
 )
 
 INVITE_ROOMMATES_PROFILE_KEYBOARD = InlineKeyboardButton(
@@ -169,13 +187,6 @@ CONFIRMATION_DELETE_KEYBOARD = InlineKeyboardButton(
 ROOMMATES_INVITE_REPORT_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         INVITE_ROOMMATES_PROFILE_KEYBOARD,
-        REPORT_ROOMMATES_PROFILE_KEYBOARD,
-    )
-)
-
-ROOMMATES_INVITE_REPORT_KEYBOARD = InlineKeyboardMarkup.from_column(
-    button_column=(
-        DELETE_ROOMMATES_PROFILE_KEYBOARD,
         REPORT_ROOMMATES_PROFILE_KEYBOARD,
     )
 )

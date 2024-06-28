@@ -20,6 +20,7 @@ class ColivingLikeAdmin(admin.ModelAdmin):
 
 @admin.register(UserReport)
 class UserReportAdmin(admin.ModelAdmin):
+    date_hierarchy = "created_date"
     list_display = (
         "id",
         "reporter",
@@ -27,15 +28,27 @@ class UserReportAdmin(admin.ModelAdmin):
         "category",
         "status",
         "created_date",
+        "comment",
     )
     exclude = ("screenshot", "text")
-    readonly_fields = ("preview", "comment")
+    readonly_fields = (
+        "reporter",
+        "reported_user",
+        "preview",
+        "comment",
+    )
+    list_filter = (
+        "status",
+        "category",
+    )
 
+    @admin.display(description="Комментарий")
     def comment(self, obj):
         if obj.text:
             return obj.text
         return "Пользователь не отправил комментарий."
 
+    @admin.display(description="Скриншот")
     def preview(self, obj):
         if obj.screenshot:
             img_url = obj.screenshot.url
@@ -55,6 +68,3 @@ class UserReportAdmin(admin.ModelAdmin):
                 f"</div>"
             )
         return "Нет скриншотов"
-
-    preview.short_description = format_html("<b>Скриншот</b>")
-    comment.short_description = format_html("<b>Комментарий</b>")

@@ -44,15 +44,14 @@ jobs:
 
       - name: Run code_style checking
         run: |
-          poetry run flake8 --exclude=.venv/ .
+          poetry run flake8 .
           poetry run isort --check-only --skip-gitignore --diff .
 
-      - name: Check out black formating
+      - name: Check out black formatting
         uses: psf/black@stable
         with:
           options: "--check --verbose"
           src: "./src"
-          version: "23.12.1"
 
       - name: Start testing
         run: |

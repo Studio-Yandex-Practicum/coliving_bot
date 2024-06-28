@@ -17,13 +17,6 @@ from internal_requests.entities import (
     ShortProfileInfo,
     UserProfile,
 )
-from internal_requests.exceptions import ColivingNotFound
-
-
-class MatchReuestgNotFound(Exception):
-    def __init__(self, message, response):
-        super().__init__(message)
-        self.response = response
 
 
 class APIService:
@@ -134,19 +127,17 @@ class APIService:
 
     async def get_coliving_info_by_user(self, telegram_id: int) -> Coliving:
         """
-        Запрос на получение информации о коливинге по ID владельца.
-        :param telegram_id: Chat ID пользователя, зарегистрировавшего коливинг
-        :raise ColivingNotFound: Если коливингов не нашлось
+        Возвращает коливинг пользователя.
         """
         endpoint_urn = f"colivings/?owner={telegram_id}"
-        response = await self._get_request(endpoint_urn=endpoint_urn)
+        response = await self._get_request(endpoint_urn)
         response_json = response.json()
-        if not response_json:
-            raise ColivingNotFound(
-                message="Пользователь не зарегистрировал коливингов",
-                response=response,
-            )
-        return await self._parse_response_to_coliving(response_json[0])
+        if response_json:
+            return await self._parse_response_to_coliving(response_json[0])
+        endpoint_urn = f"users/{telegram_id}/residence"
+        response = await self._get_request(endpoint_urn)
+        response_json = response.json()
+        return await self._parse_response_to_coliving(response_json)
 
     async def update_coliving_info(self, coliving: Coliving) -> Coliving:
         """Запрос на частичное обновление информации по коливингу."""
@@ -359,6 +350,49 @@ class APIService:
             result.append(parsed_profile)
         return result
 
+    async def delete_old_likes(self):
+        """Отправляет запросы на удаление лайков"""
+        profile_endpoint_urn = "profiles/like/delete_old_likes/"
+        coliving_endpoint_urn = "colivings/like/delete_old_likes/"
+
+        profile_response = await self._delete_request(profile_endpoint_urn)
+        coliving_response = await self._delete_request(coliving_endpoint_urn)
+
+        return {
+            "profile_response": profile_response,
+            "coliving_response": coliving_response,
+        }
+
+    async def get_mailing(self) -> Optional[dict]:
+        """
+        Получение сообщения для рассылки.
+        """
+        endpoint_urn = "mailings/"
+        response = await self._get_request(endpoint_urn)
+        if response.json():
+            return response.json()[-1]
+        return None
+
+    async def get_users_for_mailing(self, page: int) -> List[int]:
+        """
+        Получение списка пользователей для рассылки.
+
+        :param page: значение страницы.
+        """
+        endpoint_urn = f"mailings/users/?page={page}"
+        response = await self._get_request(endpoint_urn)
+        return response.json()
+
+    async def update_mail(self, mailing_id, status):
+        """
+        Обновление поля 'status' у рассылки.
+
+        :param mailing_id: id рассылки для обновления.
+        :param status: статус сообщения рассылки.
+        """
+        endpoint_urn = f"mailings/{mailing_id}/"
+        await self._patch_request(endpoint_urn=endpoint_urn, data={"status": status})
+
     async def _get_request(self, endpoint_urn: str) -> Response:
         """
         Отправляет GET-запрос к указанному эндпоинту.
@@ -366,9 +400,11 @@ class APIService:
         :param endpoint_urn: Относительный URI эндпоинта.
         """
         async with AsyncClient() as client:
-            response = await client.get(urljoin(base=self.base_url, url=endpoint_urn))
+            response = await client.get(
+                urljoin(base=self.base_url, url=endpoint_urn), follow_redirects=True
+            )
             response.raise_for_status()
-        return response
+            return response
 
     async def _post_request(
         self,

@@ -16,19 +16,23 @@ from internal_requests.entities import Categories
 
 AGREE_REGEX_PATTERN = rf"^(?P<{'reported_user_id'}>\d+)" r":{}$"
 
-
 complain_handler: ConversationHandler = ConversationHandler(
     entry_points=[
-        CallbackQueryHandler(
-            callback=common_funcs.add_response_prefix()(common_funcs.cancel),
-            pattern=AGREE_REGEX_PATTERN.format(buttons.REPORT_NO_BUTTON),
-        ),
-        CallbackQueryHandler(
-            callback=callbacks.category_choose,
-            pattern=AGREE_REGEX_PATTERN.format(buttons.REPORT_YES_BUTTON),
-        ),
+        CommandHandler("complain", callbacks.complain),
     ],
     states={
+        states.START: [
+            CallbackQueryHandler(
+                callback=common_funcs.add_response_prefix()(
+                    callbacks.cancel_complain_command
+                ),
+                pattern=AGREE_REGEX_PATTERN.format(buttons.REPORT_NO_BUTTON),
+            ),
+            CallbackQueryHandler(
+                callback=callbacks.category_choose,
+                pattern=AGREE_REGEX_PATTERN.format(buttons.REPORT_YES_BUTTON),
+            ),
+        ],
         states.COMPLAIN_TEXT: [
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND & filters.UpdateType.MESSAGE,
@@ -76,7 +80,7 @@ complain_handler: ConversationHandler = ConversationHandler(
     fallbacks=[
         CommandHandler(
             command=CANCEL_COMMAND,
-            callback=common_funcs.add_response_prefix()(common_funcs.cancel),
+            callback=callbacks.cancel_complain_command,
         ),
         CommandHandler(
             command=MENU_COMMAND,

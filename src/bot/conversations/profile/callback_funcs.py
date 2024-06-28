@@ -1,3 +1,4 @@
+import re
 from typing import Optional, Union
 
 from httpx import HTTPStatusError, codes
@@ -30,7 +31,6 @@ async def start(
     except HTTPStatusError as exc:
         if exc.response.status_code == codes.NOT_FOUND:
             await update.effective_message.edit_text(text=templates.ASK_NAME)
-
             return States.NAME
         raise exc
 
@@ -112,18 +112,10 @@ async def handle_name(
     Обрабатывает введенное пользователем имя.
     Переводит диалог в состояние AGE (ввод возраста).
     """
-    name = update.effective_message.text
-    if not await value_is_in_range_validator(
-        update=update,
-        context=context,
-        value=len(name),
-        min=consts.MIN_NAME_LENGTH,
-        max=consts.MAX_NAME_LENGTH,
-        message=templates.NAME_LENGTH_ERROR_MSG.format(
-            min=consts.MIN_NAME_LENGTH, max=consts.MAX_NAME_LENGTH
-        ),
-    ):
+    name = await _validate_and_process_name(update, context)
+    if name is None:
         return None
+
     context.user_data["profile_info"] = UserProfile(
         user=update.effective_chat.id, name=name
     )
@@ -155,7 +147,7 @@ async def handle_age(
         value=age,
         min=consts.MIN_AGE,
         max=consts.MAX_AGE,
-        message=templates.AGE_ERROR_MSG,
+        message=templates.AGE_ERR_MSG,
     ):
         return States.AGE
 
@@ -168,7 +160,7 @@ async def handle_age(
 
 
 async def handle_wrong_age(update: Update, _context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.effective_chat.send_message(templates.AGE_ERROR_MSG)
+    await update.effective_chat.send_message(templates.AGE_ERR_MSG)
     return None
 
 
@@ -373,6 +365,14 @@ async def handle_delete_profile(
     Выбор р.
     Обработка ответа: Удалить анкету.
     """
+    telegram_id = update.effective_chat.id
+    residence_check = await api_service.get_user_profile_by_telegram_id(telegram_id)
+    if residence_check.residence is not None or residence_check.has_coliving is True:
+        await update.callback_query.answer(
+            text=templates.CANNOT_BE_DELETED, show_alert=True
+        )
+        await update.effective_message.reply_text(text=templates.DELETE_CANCELED)
+        return ConversationHandler.END
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_WANT_TO_DELETE,
         reply_markup=keyboards.DELETE_OR_CANCEL_PROFILE_KEYBOARD,
@@ -513,18 +513,10 @@ async def handle_edit_name(
     Обрабатывает отредактированное пользователем имя.
     Переводит диалог в состояние EDIT_CONFIRMATION (анкета верна или нет).
     """
-    name = update.effective_message.text
-    if not await value_is_in_range_validator(
-        update=update,
-        context=context,
-        value=len(name),
-        min=consts.MIN_NAME_LENGTH,
-        max=consts.MAX_NAME_LENGTH,
-        message=templates.NAME_LENGTH_ERROR_MSG.format(
-            min=consts.MIN_NAME_LENGTH, max=consts.MAX_NAME_LENGTH
-        ),
-    ):
+    name = await _validate_and_process_name(update, context)
+    if name is None:
         return None
+
     context.user_data["profile_info"].name = name
     await _look_at_profile(
         update,
@@ -713,3 +705,30 @@ async def _save_response_about_sex(update: Update, context: CallbackContext):
 async def _save_response_about_location(update, context):
     location = update.callback_query.data.split(":")[1]
     context.user_data["profile_info"].location = location
+
+
+async def _validate_and_process_name(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> Optional[str]:
+    """
+    Проверяет и обрабатывает введенное пользователем имя.
+    Возвращает имя или None, если имя некорректно.
+    """
+    answer = update.effective_message.text.strip("-")
+    if answer == "" or re.fullmatch(r"[-\s]+", answer):
+        await update.effective_chat.send_message(
+            text=templates.INVALID_NAME_HYPHEN_ONLY_ERROR_MSG
+        )
+        return None
+    if not await value_is_in_range_validator(
+        update=update,
+        context=context,
+        value=len(answer),
+        min=consts.MIN_NAME_LENGTH,
+        max=consts.MAX_NAME_LENGTH,
+        message=templates.NAME_LENGTH_ERROR_MSG.format(
+            min=consts.MIN_NAME_LENGTH, max=consts.MAX_NAME_LENGTH
+        ),
+    ):
+        return None
+    return answer

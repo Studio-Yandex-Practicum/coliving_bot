@@ -15,6 +15,7 @@ from conversations.roommate_search.constants import SRCH_STNG_FIELD
 from conversations.roommate_search.states import States
 from internal_requests import api_service
 from internal_requests.entities import ProfileSearchSettings, UserProfile
+from utils.bot import safe_send_message
 
 
 @profile_required
@@ -164,7 +165,8 @@ async def profile_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     )
 
     keyboard = await get_view_profile_keyboard(like, sender_id)
-    await context.bot.send_message(
+    await safe_send_message(
+        context=context,
         chat_id=receiver_id,
         text=match_templates.LIKE_NOTIFICATION,
         reply_markup=keyboard,
@@ -174,6 +176,11 @@ async def profile_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         text=templates.PROFILE_LIKE_TEXT.format(current_profile.name),
     )
     return await next_profile(update, context)
+
+
+async def delete_old_likes(context: ContextTypes.DEFAULT_TYPE):
+    """Отправляет запрос на удаление лайков"""
+    return await api_service.delete_old_likes()
 
 
 async def end_of_search(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:

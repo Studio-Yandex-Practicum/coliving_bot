@@ -21,6 +21,13 @@ class ProfileSerializer(serializers.ModelSerializer):
     images = serializers.SlugRelatedField(
         slug_field="file_id", many=True, read_only=True
     )
+    residence = serializers.PrimaryKeyRelatedField(
+        source="user.residence", read_only=True
+    )
+    has_coliving = serializers.SerializerMethodField()
+
+    def get_has_coliving(self, obj):
+        return obj.user.colivings.exists()
 
     class Meta:
         model = Profile
@@ -31,6 +38,8 @@ class ProfileSerializer(serializers.ModelSerializer):
             "age",
             "location",
             "about",
+            "residence",
+            "has_coliving",
             "is_visible",
             "images",
         )

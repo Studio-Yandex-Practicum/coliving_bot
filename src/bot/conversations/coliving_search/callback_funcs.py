@@ -15,6 +15,7 @@ from conversations.match_requests.constants import MatchStatus
 from general.validators import value_is_in_range_validator
 from internal_requests import api_service
 from internal_requests.entities import Coliving, ColivingSearchSettings
+from utils.bot import safe_send_message
 
 
 @profile_required
@@ -196,7 +197,8 @@ async def like_coliving(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     sender_id = update.effective_chat.id
 
     keyboard = await get_view_coliving_keyboard(like, sender_id)
-    await context.bot.send_message(
+    await safe_send_message(
+        context=context,
         chat_id=current_coliving.host,
         text=templates.LIKE_NOTIFICATION,
         reply_markup=keyboard,

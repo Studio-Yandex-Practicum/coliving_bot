@@ -1,43 +1,24 @@
-from typing import Optional
-
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram import Update
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
 import conversations.coliving.coliving_transfer.templates as templates
 from conversations.coliving import keyboards as keyboards
 from conversations.coliving.buttons import BTN_LABEL_CANCEL, BTN_LABEL_CONFIRM
+from conversations.coliving.coliving_common.coliving_common import handle_coliving
 from conversations.coliving.states import States
 from conversations.common_functions.common_funcs import add_response_prefix
 from internal_requests import api_service
+from utils.bot import safe_send_message
 
 
 async def handle_coliving_transfer_to(update, context):
     """Обработка ответа: Передача коливинга."""
-    page = 1
-    response_json = await _get_coliving_roommates_response(update, context, page)
-    if response_json is None:
-        context.user_data.clear()
-        return ConversationHandler.END
-    keyboard = await _create_page_keyboard(response_json, page)
-    await update.effective_message.edit_reply_markup()
-    await update.effective_message.reply_text(
-        text=templates.SELECT_USER_MESSAGE, reply_markup=keyboard
+    return await handle_coliving(
+        update=update,
+        context=context,
+        text=templates.SELECT_USER_MESSAGE,
+        state=States.TRANSFER_COLIVING,
     )
-    return States.TRANSFER_COLIVING
-
-
-async def coliving_transfer_page_callback_handler(
-    update: Update, context: CallbackContext
-):
-    """Обработка ответа перехода по страницам при передаче коливинга."""
-    page = int(context.matches[0].group("page"))
-    response_json = await _get_coliving_roommates_response(update, context, page)
-    if response_json is None:
-        await context.user_data.clear()
-        return ConversationHandler.END
-    keyboard = await _create_page_keyboard(response_json, page)
-    await update.effective_message.edit_reply_markup(reply_markup=keyboard)
-    return None
 
 
 async def handle_coliving_transfer_to_confirm(
@@ -66,10 +47,12 @@ async def handle_coliving_set_new_owner(
     await api_service.update_user_residence(
         telegram_id=coliving_info.host, residence_id=None
     )
-    await context.bot.send_message(
+    await safe_send_message(
+        context=context,
         chat_id=coliving_info.host,
         text=templates.NEW_COLIVING_OWNER_MESSAGE,
     )
+
     await update.effective_message.reply_text(text=templates.OWNER_CHANGED_MESSAGE)
     return ConversationHandler.END
 
@@ -79,47 +62,3 @@ async def handle_cancel_coliving_transfer(update: Update, _context: CallbackCont
     """Обработка отмены передачи коливинга."""
     await update.effective_message.reply_text(templates.CANCELLATION_MESSAGE)
     return ConversationHandler.END
-
-
-async def _get_coliving_roommates_response(
-    update: Update, context: CallbackContext, page: int
-) -> Optional[dict]:
-    """Проверка наличия пользователей для передачи коливига."""
-    response_json = await api_service.get_coliving_roommates(
-        context.user_data["coliving_info"].id, page=page
-    )
-    if not response_json["results"]:
-        await update.effective_message.edit_reply_markup()
-        await update.effective_message.reply_text(templates.EMPTY_USER_LIST_MESSAGE)
-        return None
-    return response_json
-
-
-async def _create_page_keyboard(response_json, page):
-    """Клавиатура выбора пользователя для передачи коливинга."""
-    user_buttons = []
-    for user in response_json["results"]:
-        user_buttons.append(
-            [
-                InlineKeyboardButton(
-                    text=f"{user['name']}, {user['age']}",
-                    callback_data=f"transfer_to_confirm:{user['telegram_id']}",
-                )
-            ]
-        )
-    pagination_buttons = []
-    if response_json["previous"]:
-        pagination_buttons.append(
-            InlineKeyboardButton(
-                text="◀️", callback_data=f"coliving_transfer_page:{page - 1}"
-            )
-        )
-    if response_json["next"]:
-        pagination_buttons.append(
-            InlineKeyboardButton(
-                text="▶️", callback_data=f"coliving_transfer_page:{page + 1}"
-            )
-        )
-    user_buttons.append(pagination_buttons)
-    keyboard = InlineKeyboardMarkup(inline_keyboard=user_buttons)
-    return keyboard

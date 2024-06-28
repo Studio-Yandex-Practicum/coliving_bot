@@ -1,5 +1,7 @@
 from django.db import models
 
+ONE_MONTH = 30
+
 
 class MatchStatuses(models.IntegerChoices):
     """

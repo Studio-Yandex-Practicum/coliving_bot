@@ -104,4 +104,5 @@ async def return_to_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
 
 handle_return_to_menu_response = add_response_prefix()(return_to_menu)
+
 return_to_menu_via_menu_command = return_to_menu

@@ -1,6 +1,7 @@
 from dataclasses import asdict
 from typing import Optional
 
+from httpx import HTTPStatusError, codes
 from telegram import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
@@ -26,7 +27,7 @@ from conversations.common_functions.common_funcs import (
 from general.validators import value_is_in_range_validator
 from internal_requests import api_service
 from internal_requests.entities import Coliving, Image, UserProfile
-from internal_requests.exceptions import ColivingNotFound
+from utils.bot import safe_send_message
 
 
 @profile_required
@@ -41,25 +42,35 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         context.user_data["coliving_info"] = (
             await api_service.get_coliving_info_by_user(telegram_id=current_chat.id)
         )
-    except ColivingNotFound:
-        await update.effective_message.edit_text(
-            text=templates.REPLY_MSG_TIME_TO_CREATE_PROFILE,
+    except HTTPStatusError as exc:
+        if exc.response.status_code == codes.NOT_FOUND:
+            await update.effective_message.edit_text(
+                text=templates.REPLY_MSG_TIME_TO_CREATE_PROFILE,
+            )
+            await current_chat.send_message(
+                text=templates.REPLY_MSG_ASK_LOCATION,
+                reply_markup=context.bot_data["location_keyboard"],
+            )
+            context.user_data["coliving_info"] = Coliving(host=update.effective_chat.id)
+            return States.LOCATION
+        raise exc
+    if current_chat.id == context.user_data["coliving_info"].host:
+        await update.effective_message.edit_text(text=templates.REPLY_MSG_HELLO)
+        await _show_coliving_profile(
+            update=update,
+            context=context,
+            ask_to_confirm=False,
         )
-        await current_chat.send_message(
-            text=templates.REPLY_MSG_ASK_LOCATION,
-            reply_markup=context.bot_data["location_keyboard"],
-        )
-
-        context.user_data["coliving_info"] = Coliving(host=update.effective_chat.id)
-        return States.LOCATION
+        return States.COLIVING
 
     await update.effective_message.edit_text(text=templates.REPLY_MSG_HELLO)
     await _show_coliving_profile(
         update=update,
         context=context,
         ask_to_confirm=False,
+        keyboard=keyboards.COLIVING_PROFILE_KEYBOARD,
     )
-    return States.COLIVING
+    return States.COLIVING_CURRENT_USER
 
 
 async def handle_coliving_text_instead_of_button(
@@ -115,28 +126,6 @@ async def handle_is_visible_switching(update: Update, context: CallbackContext) 
     )
 
     return States.COLIVING
-
-
-async def handle_coliving_roommates(
-    update: Update, _context: ContextTypes.DEFAULT_TYPE
-) -> int:
-    """Обработка ответа: Посмотреть анкеты соседей."""
-
-    #############################################################
-    # запрос к API
-    # заглушка
-    await update.effective_message.edit_reply_markup()
-    await update.effective_message.reply_text(
-        text=(
-            "Заглушка. По идее здесь запрос к API "
-            "вывод списка соседей"
-            "\n"
-            "\n"
-            "Нажмите /coliving"
-        )
-    )
-    #############################################################
-    return ConversationHandler.END
 
 
 @add_response_prefix()
@@ -242,6 +231,13 @@ async def roommate_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     current_roommate = context.user_data.get("current_roommate")
     host_id = context.user_data.get("coliving_info").host
 
+    if current_roommate.residence or current_roommate.has_coliving:
+        await update.effective_message.reply_text(
+            text=templates.CANNOT_INVITE,
+            reply_markup=keyboards.NEXT_ROOMMATE,
+        )
+        return States.NEXT_ROOMMATE
+
     CONSIDER_INVITATION_FROM_HOST = InlineKeyboardMarkup.from_row(
         button_row=(
             InlineKeyboardButton(
@@ -250,12 +246,13 @@ async def roommate_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             ),
         )
     )
-
-    await context.bot.send_message(
+    await safe_send_message(
+        context=context,
         chat_id=current_roommate.user,
         text=templates.INVITATION_FOR_ROOMMATE,
         reply_markup=CONSIDER_INVITATION_FROM_HOST,
     )
+
     await update.effective_message.reply_text(
         text=templates.ASK_NEXT_ROOMMATE,
         reply_markup=keyboards.NEXT_ROOMMATE,
@@ -356,27 +353,17 @@ async def handle_about_coliving(
     return States.PRICE
 
 
-async def handle_price(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def handle_price(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> Optional[int]:
     """
     Ввод цены за спальное место коливинг профиля
     и сохранение в контекст.
     Перевод на state PHOTO_ROOM.
     """
-
-    price = update.message.text
-    if not await value_is_in_range_validator(
-        update=update,
-        context=context,
-        value=price,
-        min=consts.MIN_PRICE,
-        max=consts.MAX_PRICE,
-        message=templates.ERR_MSG_PRICE.format(
-            min=consts.MIN_PRICE, max=consts.MAX_PRICE
-        ),
-    ):
-        return States.PRICE
-
-    context.user_data["coliving_info"].price = price
+    price = await _save_answer_about_price(update, context)
+    if price is None:
+        return None
 
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_PHOTO_SEND,
@@ -644,23 +631,13 @@ async def handle_edit_about_coliving(
     return States.EDIT_CONFIRMATION
 
 
-async def handle_edit_price(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def handle_edit_price(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> Optional[int]:
     """Редактирование цены коливинга."""
-
-    edit_price = update.message.text
-    if not await value_is_in_range_validator(
-        update=update,
-        context=context,
-        value=edit_price,
-        min=consts.MIN_PRICE,
-        max=consts.MAX_PRICE,
-        message=templates.ERR_MSG_PRICE.format(
-            min=consts.MIN_PRICE, max=consts.MAX_PRICE
-        ),
-    ):
-        return States.EDIT_PRICE
-
-    context.user_data["coliving_info"].price = edit_price
+    new_price = await _save_answer_about_price(update, context)
+    if new_price is None:
+        return None
 
     await _show_coliving_profile(
         update,
@@ -786,9 +763,9 @@ async def _show_coliving_profile(
 
     if keyboard is None:
         if coliving_info.is_visible:
-            keyboard = keyboards.COLIVING_PROFILE_KEYBOARD_VISIBLE
+            keyboard = keyboards.COLIVING_PROFILE_FOR_OWNER_KEYBOARD_VISIBLE
         else:
-            keyboard = keyboards.COLIVING_PROFILE_KEYBOARD_NOT_VISIBLE
+            keyboard = keyboards.COLIVING_PROFILE_FOR_OWNER_KEYBOARD_NOT_VISIBLE
 
     message_text = await format_coliving_profile_message(coliving_info)
 
@@ -888,7 +865,27 @@ async def handle_delete_coliving_confirmation_cancel(
 
 
 async def _clear_assign_roommate_context(context):
-    context.user_data.pop("potential_roomates", None)
+    context.user_data.pop("potential_roommates", None)
     context.user_data.pop("coliving_info", None)
     context.user_data.pop("current_roommate", None)
     context.user_data.pop("host_info", None)
+
+
+async def _save_answer_about_price(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> Optional[int]:
+    price = update.message.text
+    if not await value_is_in_range_validator(
+        update=update,
+        context=context,
+        value=price,
+        min=consts.MIN_PRICE,
+        max=consts.MAX_PRICE,
+        message=templates.ERR_MSG_PRICE.format(
+            min=consts.MIN_PRICE, max=consts.MAX_PRICE
+        ),
+    ):
+        return None
+
+    context.user_data["coliving_info"].price = price
+    return price

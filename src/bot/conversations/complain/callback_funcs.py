@@ -1,9 +1,10 @@
-from typing import Dict, Union
+from typing import Dict, Optional, Union
 
-from telegram import ReplyKeyboardRemove, Update
+from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
 
 from conversations.common_functions.common_funcs import add_response_prefix
+from conversations.common_functions.common_templates import CANCEL_TEXT
 from conversations.complain import states
 from conversations.complain.keyboards import (
     CATEGORY_KEYBOARD,
@@ -17,39 +18,35 @@ from conversations.complain.templates import (
     CATEGORY_CHOOSE_TEXT,
     COMPLAIN_ERROR_TEXT,
     COMPLAIN_TEXT,
-    CREATE_REPORT_TEXT,
     REPORT_DATA,
     SCREENSHOT_ATTACH_TEXT,
     USER_ALREADY_REPORTED,
 )
 from internal_requests import api_service
-from internal_requests.entities import Categories, Image, Report
+from internal_requests.entities import Categories, Coliving, Image, Report, UserProfile
 
 
-async def complain(update: Update, _context: ContextTypes.DEFAULT_TYPE):
+async def complain(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Начало жалобы, проверяет - осуществляется ли просмотр анкеты.
     """
-    await update.effective_message.reply_text(
-        text=CREATE_REPORT_TEXT,
-        reply_markup=ReplyKeyboardRemove(),
-    )
-    if len(_context.user_data) == 0:
+    reported_user = await _get_info_about_reported_user(context)
+    if reported_user is None:
         await update.effective_chat.send_message(
             text=COMPLAIN_ERROR_TEXT,
         )
         return ConversationHandler.END
-    await _clear_complain_info_context(_context)
-    reported_user_dict = await _get_reported_user_id_and_user_id(_context)
+    await _clear_complain_info_context(context)
+    reported_user_dict = await _get_reported_user_id_and_user_id(reported_user)
     await agree_or_not(update=update, reported_user_dict=reported_user_dict)
-    category = _context.user_data.get("category", Categories.CATEGORY_OTHER)
-    _context.user_data["complain_info"] = Report(
+    category = context.user_data.get("category", Categories.CATEGORY_OTHER)
+    context.user_data["complain_info"] = Report(
         reported_user=reported_user_dict["reported_user_id"],
         reporter=update.effective_chat.id,
         text="",
         category=category,
     )
-    return ConversationHandler.END
+    return states.START
 
 
 async def agree_or_not(update: Update, reported_user_dict: Dict[str, Union[int, str]]):
@@ -57,7 +54,7 @@ async def agree_or_not(update: Update, reported_user_dict: Dict[str, Union[int, 
         reported_user_dict["reported_user_id"]
     )
     await update.effective_chat.send_message(
-        text=COMPLAIN_TEXT + reported_user_dict["reported_user_name"] + "?",
+        text=COMPLAIN_TEXT.format(name=reported_user_dict["reported_user_name"]),
         reply_markup=report_or_not_keyboard,
     )
 
@@ -94,10 +91,10 @@ async def handle_category(
 
 async def handle_complain_text(
     update: Update,
-    _context: ContextTypes.DEFAULT_TYPE,
+    context: ContextTypes.DEFAULT_TYPE,
 ):
     text = update.message.text
-    _context.user_data["complain_info"].text = text
+    context.user_data["complain_info"].text = text
     await update.effective_message.reply_text(
         text=SCREENSHOT_ATTACH_TEXT,
         reply_markup=SCREENSHOT_OR_NOT_KEYBOARD,
@@ -105,10 +102,9 @@ async def handle_complain_text(
     return states.SCREENSHOT
 
 
-@add_response_prefix()
-async def skip_report_comment(update: Update, _context: ContextTypes.DEFAULT_TYPE):
-    _context.user_data["complain_info"].text = ""
-    await update.effective_message.reply_text(
+async def skip_report_comment(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["complain_info"].text = ""
+    await update.effective_message.edit_text(
         text=SCREENSHOT_ATTACH_TEXT,
         reply_markup=SCREENSHOT_OR_NOT_KEYBOARD,
     )
@@ -125,62 +121,81 @@ async def attach_screenshot(
     )
 
 
-async def handle_screenshot(update: Update, _context: ContextTypes.DEFAULT_TYPE):
+async def handle_screenshot(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    complain_info = context.user_data.pop("complain_info")
     new_screenshot = update.effective_message.photo[-1]
-    _context.user_data["complain_info"].screenshot = Image(
+    complain_info.screenshot = Image(
         file_id=new_screenshot.file_id, photo_size=new_screenshot
     )
-    report = _context.user_data["complain_info"]
-    response = await api_service.create_report(report=report)
+    response = await api_service.create_report(report=complain_info)
     if response.status_code == 208:
         await update.effective_chat.send_message(
             text=USER_ALREADY_REPORTED,
-            reply_markup=ReplyKeyboardRemove(),
         )
     else:
         await update.effective_chat.send_photo(
-            photo=_context.user_data["complain_info"].screenshot.file_id,
+            photo=complain_info.screenshot.file_id,
             caption=REPORT_DATA.format(
-                user_id=_context.user_data["complain_info"].reported_user,
-                category=_context.user_data["complain_info"].category.value,
-                text=_context.user_data["complain_info"].text,
+                user_id=complain_info.reported_user,
+                category=complain_info.category.value,
+                text=complain_info.text,
             ),
         )
     return ConversationHandler.END
 
 
-@add_response_prefix()
-async def final_report(update: Update, _context: ContextTypes.DEFAULT_TYPE):
+async def final_report(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    complain_info = context.user_data.pop("complain_info")
     message_text = REPORT_DATA.format(
-        user_id=_context.user_data["complain_info"].reported_user,
-        category=_context.user_data["complain_info"].category.value,
-        text=_context.user_data["complain_info"].text,
+        user_id=complain_info.reported_user,
+        category=complain_info.category.value,
+        text=complain_info.text,
     )
-    report = _context.user_data["complain_info"]
-    response = await api_service.create_report(report)
+    response = await api_service.create_report(complain_info)
     if response.status_code == 208:
-        await update.effective_chat.send_message(
+        await update.effective_message.edit_text(
             text=USER_ALREADY_REPORTED,
-            reply_markup=ReplyKeyboardRemove(),
         )
     else:
-        await update.effective_chat.send_message(
+        await update.effective_message.edit_text(
             text=message_text,
-            reply_markup=ReplyKeyboardRemove(),
         )
     return ConversationHandler.END
 
 
+async def cancel_complain_command(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """Отменяет диалог без удаления Reply-клавиатуры, без чистки всего контекста."""
+    await update.effective_message.reply_text(
+        text=CANCEL_TEXT,
+    )
+    await _clear_complain_info_context(context)
+    return ConversationHandler.END
+
+
+async def _get_info_about_reported_user(
+    context: ContextTypes.DEFAULT_TYPE,
+) -> Optional[UserProfile]:
+    profile: UserProfile = context.user_data.get("current_profile")
+    if profile:
+        return profile
+    coliving: Coliving = context.user_data.get("current_coliving")
+    if coliving:
+        return await api_service.get_user_profile_by_telegram_id(
+            telegram_id=coliving.host
+        )
+    return None
+
+
 async def _get_reported_user_id_and_user_id(
-    _context: ContextTypes.DEFAULT_TYPE,
+    profile: UserProfile,
 ) -> Dict[str, Union[int, str]]:
-    reported_user_id: int = _context.user_data["current_profile"].user
-    reported_user_name: str = _context.user_data["current_profile"].name
     return {
-        "reported_user_id": reported_user_id,
-        "reported_user_name": reported_user_name,
+        "reported_user_id": profile.user,
+        "reported_user_name": profile.name,
     }
 
 
-async def _clear_complain_info_context(_context):
-    _context.user_data.pop("complain_info", None)
+async def _clear_complain_info_context(context):
+    context.user_data.pop("complain_info", None)

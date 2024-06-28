@@ -8,6 +8,7 @@ import conversations.invitation.templates as templates
 from conversations.common_functions.common_funcs import profile_required
 from conversations.invitation.states import States
 from internal_requests import api_service
+from utils.bot import safe_send_message
 
 
 @profile_required
@@ -87,7 +88,8 @@ async def _send_message_to_host(
 
     reply_to_host = f"Пользователь <b>{roommate_profile.name}</b> "
     reply_to_host += message_template
-    await context.bot.send_message(
+    await safe_send_message(
+        context=context,
         chat_id=host_id,
         text=reply_to_host,
     )

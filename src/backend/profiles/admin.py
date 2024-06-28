@@ -10,8 +10,14 @@ class UserFromTelegramAdmin(admin.ModelAdmin):
     Управление объектами 'UserFromTelegram' в админ-зоне.
     """
 
-    list_display = ("telegram_id", "residence")
-    list_editable = ("residence",)
+    list_display = (
+        "telegram_id",
+        "residence",
+    )
+    readonly_fields = ("user_profile",)
+
+    def user_profile(self, obj):
+        return obj.user_profile
 
 
 @admin.register(Location)
