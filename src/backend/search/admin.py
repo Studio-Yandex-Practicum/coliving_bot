@@ -24,13 +24,17 @@ class UserReportAdmin(admin.ModelAdmin):
         "id",
         "reporter",
         "reported_user",
-        "text",
         "category",
         "status",
         "created_date",
     )
-    exclude = ("screenshot",)
-    readonly_fields = ("preview",)
+    exclude = ("screenshot", "text")
+    readonly_fields = ("preview", "comment")
+
+    def comment(self, obj):
+        if obj.text:
+            return obj.text
+        return "Пользователь не отправил комментарий."
 
     def preview(self, obj):
         if obj.screenshot:
@@ -53,3 +57,4 @@ class UserReportAdmin(admin.ModelAdmin):
         return "Нет скриншотов"
 
     preview.short_description = format_html("<b>Скриншот</b>")
+    comment.short_description = format_html("<b>Комментарий</b>")

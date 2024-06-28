@@ -91,7 +91,7 @@ class UserReport(models.Model):
         on_delete=models.SET_NULL,
         related_name="complaints_against",
     )
-    text = models.TextField(verbose_name="Текст")
+    text = models.TextField(verbose_name="Текст", null=True, blank=True)
     category = models.TextField(verbose_name="Категория", choices=ReportCategories)
     screenshot = models.ImageField(upload_to="user_reports/", null=True)
     status = models.TextField(

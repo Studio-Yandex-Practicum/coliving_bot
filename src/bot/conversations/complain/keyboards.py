@@ -20,6 +20,16 @@ async def get_report_or_not_keyboard(reported_user_id: int):
     return report_or_not_keyboard
 
 
+NO_COMMENT_REPORT = InlineKeyboardMarkup.from_column(
+    button_column=(
+        InlineKeyboardButton(
+            text=btns.SKIP_BUTTON,
+            callback_data=btns.SKIP_BUTTON,
+        ),
+    )
+)
+
+
 SCREENSHOT_OR_NOT_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         InlineKeyboardButton(

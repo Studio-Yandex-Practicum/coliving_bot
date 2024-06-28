@@ -63,6 +63,15 @@ complain_handler: ConversationHandler = ConversationHandler(
             ),
             MessageHandler(filters.PHOTO, callbacks.handle_screenshot),
         ],
+        states.NO_COMMENT_REPORT: [
+            CallbackQueryHandler(
+                callback=callbacks.skip_report_comment,
+                pattern=rf"^{buttons.SKIP_BUTTON}$",
+            ),
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND, callbacks.handle_complain_text
+            ),
+        ],
     },
     fallbacks=[
         CommandHandler(

@@ -7,6 +7,7 @@ from conversations.common_functions.common_funcs import add_response_prefix
 from conversations.complain import states
 from conversations.complain.keyboards import (
     CATEGORY_KEYBOARD,
+    NO_COMMENT_REPORT,
     SCREENSHOT_OR_NOT_KEYBOARD,
     get_report_or_not_keyboard,
 )
@@ -79,10 +80,16 @@ async def handle_category(
     category_name = update.callback_query.data
     category = Categories(category_name)
     _context.user_data["complain_info"].category = category
+    if category == Categories.CATEGORY_OTHER:
+        await update.effective_message.edit_text(
+            text=ASK_COMPLAIN_TEXT,
+        )
+        return states.COMPLAIN_TEXT
     await update.effective_message.edit_text(
         text=ASK_COMPLAIN_TEXT,
+        reply_markup=NO_COMMENT_REPORT,
     )
-    return states.COMPLAIN_TEXT
+    return states.NO_COMMENT_REPORT
 
 
 async def handle_complain_text(
@@ -91,6 +98,16 @@ async def handle_complain_text(
 ):
     text = update.message.text
     _context.user_data["complain_info"].text = text
+    await update.effective_message.reply_text(
+        text=SCREENSHOT_ATTACH_TEXT,
+        reply_markup=SCREENSHOT_OR_NOT_KEYBOARD,
+    )
+    return states.SCREENSHOT
+
+
+@add_response_prefix()
+async def skip_report_comment(update: Update, _context: ContextTypes.DEFAULT_TYPE):
+    _context.user_data["complain_info"].text = ""
     await update.effective_message.reply_text(
         text=SCREENSHOT_ATTACH_TEXT,
         reply_markup=SCREENSHOT_OR_NOT_KEYBOARD,

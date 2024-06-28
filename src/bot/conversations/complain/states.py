@@ -3,4 +3,5 @@
     COMPLAIN_TEXT,
     SCREENSHOT,
     RESULT,
-) = range(4)
+    NO_COMMENT_REPORT,
+) = range(5)

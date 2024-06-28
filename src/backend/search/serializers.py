@@ -33,7 +33,7 @@ class UserReportSerializer(serializers.ModelSerializer):
         model = UserReport
         fields = ("reporter", "reported_user", "text", "category", "screenshot")
         extra_kwargs = {
-            "text": {"required": True},
+            "text": {"required": False, "allow_blank": True},
             "category": {"required": True},
         }
 
