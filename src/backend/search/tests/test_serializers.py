@@ -1,6 +1,7 @@
 from rest_framework.test import APITestCase
 
 from profiles.models import Location, Profile, UserFromTelegram
+from search.constants import ReportCategories
 from search.models import UserReport
 from search.serializers import UserReportSerializer
 
@@ -21,7 +22,7 @@ class ReportSerializerTests(APITestCase):
             "reporter": cls.test_user_1.pk,
             "reported_user": cls.test_user_2.pk,
             "text": "test_text",
-            "category": "Категория 1",
+            "category": ReportCategories.CATEGORY_SPAM,
         }
 
         cls.invalid_report_data = {
@@ -51,7 +52,7 @@ class ReportSerializerTests(APITestCase):
     def test_valid_data_create_report(self):
         """Тест создания жалобы с валидными данными в сериализаторе."""
         serializer = UserReportSerializer(data=self.report_data)
-        serializer.is_valid()
+        self.assertTrue(serializer.is_valid(), msg=serializer.errors)
         serializer.save()
         created_report = UserReport.objects.get(reporter=self.test_user_1.pk)
         self.assertIsNotNone(created_report)

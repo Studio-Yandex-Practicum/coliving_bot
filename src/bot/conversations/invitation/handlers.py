@@ -3,6 +3,7 @@ from telegram.ext import CallbackQueryHandler, CommandHandler, ConversationHandl
 import conversations.common_functions.common_funcs as common_funcs
 import conversations.invitation.callback_funcs as callback_funcs
 from conversations.invitation.states import States
+from conversations.menu.constants import CANCEL_COMMAND
 
 invitation_handler: ConversationHandler = ConversationHandler(
     entry_points=[
@@ -20,9 +21,6 @@ invitation_handler: ConversationHandler = ConversationHandler(
         ],
     },
     fallbacks=[
-        CommandHandler(
-            "cancel",
-            common_funcs.cancel,
-        ),
+        CommandHandler(CANCEL_COMMAND, common_funcs.cancel),
     ],
 )

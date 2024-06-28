@@ -27,14 +27,31 @@ class APIService:
     def __init__(self, base_url: str) -> None:
         self.base_url: str = base_url
 
-    async def create_report(self, report: Report) -> Report:
+    async def create_report(self, report: Report) -> Response:
         """
         Запрос на создание жалобы на пользователя.
         """
         endpoint_urn = "reports/"
         data = asdict(report)
+        data["category"] = data["category"].value
+        image = data.pop("screenshot")
+        if image:
+            image = image["photo_size"]
+            image_file = await image.get_file()
+            photo_bytearray = await image_file.download_as_bytearray()
+            files = {
+                "screenshot": (
+                    image_file.file_path,
+                    bytes(photo_bytearray),
+                    mimetypes.guess_type(image_file.file_path, strict=True)[0],
+                )
+            }
+            response = await self._post_request(
+                endpoint_urn=endpoint_urn, data=data, files=files
+            )
+            return response
         response = await self._post_request(endpoint_urn=endpoint_urn, data=data)
-        return Report(**response.json())
+        return response
 
     async def save_photo(
         self,

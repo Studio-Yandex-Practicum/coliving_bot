@@ -1,4 +1,9 @@
-from conversations.menu.constants import CANCEL_COMMAND, MENU_COMMAND, START_COMMAND
+from conversations.menu.constants import (
+    CANCEL_COMMAND,
+    COMPLAIN_COMMAND,
+    MENU_COMMAND,
+    START_COMMAND,
+)
 
 MENU_TEXT = "Меню:"
 
@@ -6,6 +11,7 @@ COMMANDS = {
     START_COMMAND: "Узнать больше о боте",
     MENU_COMMAND: "Доступ к функциям и возможностям",
     CANCEL_COMMAND: "Отменить",
+    COMPLAIN_COMMAND: "Пожаловаться",
 }
 
 WELCOME_MESSAGE_TEXT = (
@@ -20,5 +26,3 @@ WELCOME_MESSAGE_TEXT = (
     " где можно общаться или проводить вместе досуг."
     " Главное найти таких людей и в этом поможет наш бот 💪"
 )
-
-CANCEL_TEXT = "Выход из диалога"
