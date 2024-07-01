@@ -25,6 +25,10 @@ class ProfileSerializer(serializers.ModelSerializer):
         source="user.residence", read_only=True
     )
     has_coliving = serializers.SerializerMethodField()
+    is_banned = serializers.SerializerMethodField(read_only=True)
+
+    def get_is_banned(self, obj):
+        return obj.user.is_banned
 
     def get_has_coliving(self, obj):
         return obj.user.colivings.exists()
@@ -42,6 +46,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             "has_coliving",
             "is_visible",
             "images",
+            "is_banned",
         )
 
 

@@ -2,7 +2,7 @@ from dataclasses import asdict
 from typing import List
 
 from telegram import InputMediaPhoto, ReplyKeyboardRemove, Update
-from telegram.ext import ContextTypes
+from telegram.ext import ContextTypes, ConversationHandler
 
 import conversations.coliving_search.keyboards as keyboards
 import conversations.coliving_search.states as states
@@ -12,6 +12,8 @@ from conversations.coliving_search import constants
 from conversations.common_functions.common_funcs import profile_required
 from conversations.match_requests.coliving.keyboards import get_view_coliving_keyboard
 from conversations.match_requests.constants import MatchStatus
+from conversations.utils.templates import BANNED_USER_TEXT
+from conversations.utils.utils import check_user_ban
 from general.validators import value_is_in_range_validator
 from internal_requests import api_service
 from internal_requests.entities import Coliving, ColivingSearchSettings
@@ -26,6 +28,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     переводит либо в состояние подтверждения настроек, либо в настройку поиска.
 
     """
+
+    banned_user = await check_user_ban(update)
+    if banned_user:
+        await update.callback_query.answer(text=BANNED_USER_TEXT, show_alert=True)
+        return ConversationHandler.END
+
     search_settings = context.user_data.get(constants.SRCH_STNG_FIELD)
     if search_settings:
         await update.effective_message.edit_text(

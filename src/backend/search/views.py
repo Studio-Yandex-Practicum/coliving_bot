@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from profiles.models import Coliving, Profile
 from profiles.serializers import ProfileSerializer
-from search.constants import ALREADY_REPORTED, MatchStatuses
+from search.constants import ALREADY_REPORTED_TEXT, MatchStatuses
 from search.filters import ProfilesSearchFilterSet
 from search.mixins import OldLikesDestroyMixin
 from search.models import ColivingLike, ProfileLike, UserReport
@@ -33,7 +33,8 @@ class UserReportCreateView(generics.CreateAPIView):
             reporter=reporter, reported_user=reported_user
         ).exists():
             return Response(
-                {"detail": ALREADY_REPORTED}, status=status.HTTP_208_ALREADY_REPORTED
+                {"detail": ALREADY_REPORTED_TEXT},
+                status=status.HTTP_208_ALREADY_REPORTED,
             )
 
         serializer = self.get_serializer(data=request.data)

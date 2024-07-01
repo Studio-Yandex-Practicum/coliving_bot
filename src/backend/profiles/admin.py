@@ -10,14 +10,28 @@ class UserFromTelegramAdmin(admin.ModelAdmin):
     Управление объектами 'UserFromTelegram' в админ-зоне.
     """
 
-    list_display = (
+    list_display = ("telegram_id", "residence", "is_banned")
+    list_filter = ("is_banned",)
+    search_fields = ("telegram_id",)
+    readonly_fields = (
         "telegram_id",
+        "user_profile",
         "residence",
     )
-    readonly_fields = ("user_profile",)
 
     def user_profile(self, obj):
         return obj.user_profile
+
+    def save_model(self, request, obj, form, change):
+        coliving = Coliving.objects.filter(host=obj).first()
+        if obj.is_banned:
+            obj.user_profile.is_visible = False
+            obj.user_profile.save()
+
+            if coliving:
+                coliving.is_visible = False
+                coliving.save()
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(Location)

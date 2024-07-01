@@ -24,6 +24,8 @@ from conversations.common_functions.common_funcs import (
     get_visibility_choice,
     profile_required,
 )
+from conversations.utils.templates import BANNED_USER_TEXT
+from conversations.utils.utils import check_user_ban
 from general.validators import value_is_in_range_validator
 from internal_requests import api_service
 from internal_requests.entities import Coliving, Image, UserProfile
@@ -36,6 +38,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     Первое сообщение от бота после нажатия кнопки Коливинг в меню.
     Перевод на создание коливинг профиля или его просмотр.
     """
+
+    banned_user = await check_user_ban(update)
+    if banned_user:
+        await update.callback_query.answer(text=BANNED_USER_TEXT, show_alert=True)
+        return ConversationHandler.END
+
     current_chat = update.effective_chat
 
     try:

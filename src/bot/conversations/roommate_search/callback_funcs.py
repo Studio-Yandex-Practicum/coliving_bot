@@ -13,6 +13,8 @@ from conversations.profile.templates import SHORT_PROFILE_DATA
 from conversations.roommate_search.buttons import ANY_GENDER_BTN
 from conversations.roommate_search.constants import SRCH_STNG_FIELD
 from conversations.roommate_search.states import States
+from conversations.utils.templates import BANNED_USER_TEXT
+from conversations.utils.utils import check_user_ban
 from internal_requests import api_service
 from internal_requests.entities import ProfileSearchSettings, UserProfile
 from utils.bot import safe_send_message
@@ -25,6 +27,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     Проверяет, был ли настроен поиск ранее и, в зависимости от проверки,
     переводит либо в состояние подтверждения настроек, либо в настройку поиска.
     """
+
+    banned_user = await check_user_ban(update)
+    if banned_user:
+        await update.callback_query.answer(text=BANNED_USER_TEXT, show_alert=True)
+        return ConversationHandler.END
 
     search_settings = context.user_data.get(SRCH_STNG_FIELD)
     if search_settings:

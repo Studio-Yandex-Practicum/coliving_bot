@@ -12,6 +12,8 @@ import conversations.profile.keyboards as keyboards
 import conversations.profile.templates as templates
 from conversations.common_functions.common_funcs import add_response_prefix
 from conversations.profile.states import States
+from conversations.utils.templates import BANNED_USER_TEXT
+from conversations.utils.utils import check_user_ban
 from general.validators import value_is_in_range_validator
 from internal_requests import api_service
 from internal_requests.entities import Image, UserProfile
@@ -24,6 +26,12 @@ async def start(
     Начало диалога. Проверяет, не был ли пользователь зарегистрирован ранее.
     Переводит диалог в состояние AGE (ввод возраста пользователя).
     """
+
+    banned_user = await check_user_ban(update)
+    if banned_user:
+        await update.callback_query.answer(text=BANNED_USER_TEXT, show_alert=True)
+        return ConversationHandler.END
+
     try:
         context.user_data["profile_info"] = (
             await api_service.get_user_profile_by_telegram_id(update.effective_chat.id)

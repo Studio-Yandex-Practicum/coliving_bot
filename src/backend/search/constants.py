@@ -40,4 +40,6 @@ class ReportStatuses(models.TextChoices):
     REJECTED = ("Отклонено", "Отклонено")
 
 
-ALREADY_REPORTED = "Пара reported_user - reporter уже есть в БД."
+ALREADY_REPORTED_TEXT = "Пара reported_user - reporter уже есть в БД."
+ACCEPT_REPORT_TEXT = "Жалоба была принята. {username} заблокирован!"
+REJECT_REPORT_TEXT = "Жалоба была отклонена!"
