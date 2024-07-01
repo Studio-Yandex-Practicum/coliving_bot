@@ -60,12 +60,11 @@ class UserReportAdmin(admin.ModelAdmin):
             """
             <a class="button" style="{accept_style}" href="{accept_url}">Принять</a>
             <a class="button" style="{reject_style}" href="{reject_url}">Отклонить</a>
-            """.format(
-                accept_style=accept_style,
-                accept_url=accept_url,
-                reject_style=reject_style,
-                reject_url=reject_url,
-            )
+            """,
+            accept_style=accept_style,
+            accept_url=accept_url,
+            reject_style=reject_style,
+            reject_url=reject_url,
         )
 
     def get_urls(self):
