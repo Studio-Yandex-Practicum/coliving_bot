@@ -78,7 +78,9 @@ def _seconds_until_next_hour() -> float:
     """Возвращает кол-во секунд до следующего часа."""
     current_time = datetime.datetime.now()
     next_hour = current_time.replace(
-        hour=current_time.hour + 1, minute=0, second=0, microsecond=0
+        hour=(current_time.hour + 1) % 24, minute=0, second=0, microsecond=0
     )
+    if next_hour.hour == 0:
+        next_hour += datetime.timedelta(days=1)
     delay = (next_hour - current_time).total_seconds()
     return delay

@@ -35,7 +35,13 @@ class Migration(migrations.Migration):
                 (
                     "text",
                     models.TextField(
-                        help_text='Здесь можно использовать некоторые теги HTML (<a href="https://core.telegram.org/bots/api#html-style">https://core.telegram.org/bots/api#html-style</a>). Например, <code>&lt;b&gt;жирный текст&lt;/b&gt;</code>. А также вставлять эмодзи 😊.',
+                        help_text=(
+                            "Здесь можно использовать некоторые теги HTML "
+                            '(<a href="https://core.telegram.org/bots/api#html-style">'
+                            "https://core.telegram.org/bots/api#html-style</a>). "
+                            "Например, <code>&lt;b&gt;жирный текст&lt;/b&gt;</code>."
+                            " А также вставлять эмодзи 😊."
+                        ),
                         max_length=1024,
                         verbose_name="Текст сообщения",
                     ),
@@ -44,7 +50,10 @@ class Migration(migrations.Migration):
                     "send_date",
                     models.DateTimeField(
                         default=django.utils.timezone.now,
-                        help_text="Наличие рассылки проверяется каждый час, поэтому, если выставлено 12:34, рассылка начнётся в 13:00.",
+                        help_text=(
+                            "Наличие рассылки проверяется каждый час, "
+                            "поэтому, если выставлено 12:34, рассылка начнётся в 13:00."
+                        ),
                         verbose_name="Дата рассылки",
                     ),
                 ),
