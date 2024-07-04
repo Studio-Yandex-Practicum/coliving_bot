@@ -20,6 +20,6 @@ async def safe_send_message(
             reply_markup=reply_markup,
         )
     except Forbidden:
-        user = api_service.get_user_profile_by_telegram_id(chat_id)
+        user = await api_service.get_user_profile_by_telegram_id(chat_id)
         user.is_visible = False
-        api_service.update_user_profile(user)
+        await api_service.update_user_profile(user)
