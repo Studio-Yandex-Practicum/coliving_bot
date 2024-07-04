@@ -3,7 +3,7 @@ BTN_ROOMMATES = "roommates_profiles"
 BTN_LABEL_ROOMMATES = "Посмотреть анкеты соседей 👥"
 BTN_LABEL_ASSIGN_ROOMMATE = "Пригласить жильца 🤝"
 BTN_TRANSFER_TO = "transfer_to"
-BTN_LABEL_TRANSFER_TO = "Передача коливинга 🚚"
+BTN_LABEL_TRANSFER_TO = "Передать управление 🔑🏠"
 BTN_LABEL_BED_IN_ROOM = "Спальное место"
 BTN_LABEL_ROOM_IN_APARTMENT = "Комната"
 

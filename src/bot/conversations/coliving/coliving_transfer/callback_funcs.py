@@ -12,7 +12,7 @@ from utils.bot import safe_send_message
 
 
 async def handle_coliving_transfer_to(update, context):
-    """Обработка ответа: Передача коливинга."""
+    """Обработка ответа: Передать управление."""
     return await handle_coliving(
         update=update,
         context=context,

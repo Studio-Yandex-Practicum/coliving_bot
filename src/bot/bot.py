@@ -12,6 +12,7 @@ from telegram.ext import (
 from conversations.coliving.handlers import coliving_handler
 from conversations.coliving.keyboards import create_keyboard_of_locations
 from conversations.coliving_search.handlers import coliving_search_handler
+from conversations.complain.handlers import complain_handler
 from conversations.invitation.handlers import invitation_handler
 from conversations.match_requests.coliving.handlers import coliving_like_handler
 from conversations.match_requests.profile.handlers import profile_like_handler
@@ -47,6 +48,7 @@ def create_bot_app(defaults: Optional[Defaults] = None) -> Application:
     application.add_handler(handler=profile_handler)
     application.add_handler(handler=roommate_search_handler)
     application.add_handler(handler=coliving_search_handler)
+    application.add_handler(handler=complain_handler)
     application.add_handler(handler=invitation_handler)
     application.add_handler(handler=profile_like_handler)
     application.add_handler(handler=coliving_like_handler)
@@ -76,7 +78,9 @@ def _seconds_until_next_hour() -> float:
     """Возвращает кол-во секунд до следующего часа."""
     current_time = datetime.datetime.now()
     next_hour = current_time.replace(
-        hour=current_time.hour + 1, minute=0, second=0, microsecond=0
+        hour=(current_time.hour + 1) % 24, minute=0, second=0, microsecond=0
     )
+    if next_hour.hour == 0:
+        next_hour += datetime.timedelta(days=1)
     delay = (next_hour - current_time).total_seconds()
     return delay

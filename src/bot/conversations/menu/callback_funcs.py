@@ -1,23 +1,44 @@
+from typing import TypedDict
+
 from telegram import Update
-from telegram.ext import ContextTypes, CallbackContext
+from telegram.ext import CallbackContext, ContextTypes
 
 from conversations.menu.keyboards import MENU_KEYBOARD
-from conversations.menu.templates import (MENU_TEXT,
-                                          WELCOME_MESSAGE_TEXT,
-                                          ADDITION_MESSAGE_TEXT)
+from conversations.menu.templates import (
+    MENU_TEXT,
+    START_MESSAGE_1,
+    START_MESSAGE_2,
+    START_MESSAGE_3,
+)
+
+
+class Message(TypedDict):
+    chat_id: int
+    text: str
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.effective_chat.send_message(
-        text=WELCOME_MESSAGE_TEXT,
+        text=START_MESSAGE_1,
     )
     chat_id = update.effective_chat.id
-    context.job_queue.run_once(callback=send_additional_message, when=30, data=chat_id)
+    context.job_queue.run_once(
+        callback=send_delayed_message,
+        when=30,
+        data=Message(chat_id=chat_id, text=START_MESSAGE_2),
+    )
+    context.job_queue.run_once(
+        callback=send_delayed_message,
+        when=60,
+        data=Message(chat_id=chat_id, text=START_MESSAGE_3),
+    )
 
 
-async def send_additional_message(context: CallbackContext) -> None:
+async def send_delayed_message(context: CallbackContext) -> None:
     data = context.job.data
-    await context.bot.send_message(chat_id=data, text=ADDITION_MESSAGE_TEXT)
+    if not isinstance(data, dict):
+        raise TypeError("Expected data to be a dictionary")
+    await context.bot.send_message(**data)
 
 
 async def menu(update: Update, _context: ContextTypes.DEFAULT_TYPE):

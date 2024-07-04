@@ -7,6 +7,7 @@ from rest_framework.test import APITestCase
 from profiles.constants import Sex
 from profiles.models import Location, Profile, UserFromTelegram
 from profiles.serializers import ProfileSerializer
+from search.constants import ReportCategories
 from search.models import UserReport
 
 
@@ -16,7 +17,7 @@ class ReportViewTests(APITestCase):
     URL_REVERSE = reverse("api-v1:search:report")
     AGE_25 = 25
     REPORT_TEXT = "test_text"
-    CATEGORY_TEXT = "Категория 1"
+    CATEGORY_TEXT = ReportCategories.CATEGORY_SPAM
     TELEGRAM_ID_TXT = "telegram_id"
     AGE_TXT = "age"
     LOCATION_TXT = "location"

@@ -353,27 +353,17 @@ async def handle_about_coliving(
     return States.PRICE
 
 
-async def handle_price(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def handle_price(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> Optional[int]:
     """
     Ввод цены за спальное место коливинг профиля
     и сохранение в контекст.
     Перевод на state PHOTO_ROOM.
     """
-
-    price = update.message.text
-    if not await value_is_in_range_validator(
-        update=update,
-        context=context,
-        value=price,
-        min=consts.MIN_PRICE,
-        max=consts.MAX_PRICE,
-        message=templates.ERR_MSG_PRICE.format(
-            min=consts.MIN_PRICE, max=consts.MAX_PRICE
-        ),
-    ):
-        return States.PRICE
-
-    context.user_data["coliving_info"].price = price
+    price = await _save_answer_about_price(update, context)
+    if price is None:
+        return None
 
     await update.effective_message.reply_text(
         text=templates.REPLY_MSG_ASK_PHOTO_SEND,
@@ -641,23 +631,13 @@ async def handle_edit_about_coliving(
     return States.EDIT_CONFIRMATION
 
 
-async def handle_edit_price(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def handle_edit_price(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> Optional[int]:
     """Редактирование цены коливинга."""
-
-    edit_price = update.message.text
-    if not await value_is_in_range_validator(
-        update=update,
-        context=context,
-        value=edit_price,
-        min=consts.MIN_PRICE,
-        max=consts.MAX_PRICE,
-        message=templates.ERR_MSG_PRICE.format(
-            min=consts.MIN_PRICE, max=consts.MAX_PRICE
-        ),
-    ):
-        return States.EDIT_PRICE
-
-    context.user_data["coliving_info"].price = edit_price
+    new_price = await _save_answer_about_price(update, context)
+    if new_price is None:
+        return None
 
     await _show_coliving_profile(
         update,
@@ -889,3 +869,23 @@ async def _clear_assign_roommate_context(context):
     context.user_data.pop("coliving_info", None)
     context.user_data.pop("current_roommate", None)
     context.user_data.pop("host_info", None)
+
+
+async def _save_answer_about_price(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> Optional[int]:
+    price = update.message.text
+    if not await value_is_in_range_validator(
+        update=update,
+        context=context,
+        value=price,
+        min=consts.MIN_PRICE,
+        max=consts.MAX_PRICE,
+        message=templates.ERR_MSG_PRICE.format(
+            min=consts.MIN_PRICE, max=consts.MAX_PRICE
+        ),
+    ):
+        return None
+
+    context.user_data["coliving_info"].price = price
+    return price

@@ -79,10 +79,6 @@ roommate_search_handler: ConversationHandler = ConversationHandler(
                 filters=filters.Regex(rf"^{buttons.DISLIKE_BTN}$"),
                 callback=callbacks.profile_dislike,
             ),
-            MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
-                handle_text_input_instead_of_choosing_button,
-            ),
         ],
         States.SEX: [
             CallbackQueryHandler(
