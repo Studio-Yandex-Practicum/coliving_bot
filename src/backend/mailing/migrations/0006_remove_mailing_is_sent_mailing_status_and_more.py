@@ -45,8 +45,8 @@ class Migration(migrations.Migration):
             field=models.DateTimeField(
                 default=django.utils.timezone.now,
                 help_text=(
-                    "Наличие рассылки проверяется каждый час, поэтому, если "
-                    "выставлено 12:34, рассылка начнётся в 13:00."
+                    "Наличие рассылки проверяется каждый час, поэтому, "
+                    "если выставлено 12:34, рассылка начнётся в 13:00."
                 ),
                 verbose_name="Дата рассылки",
             ),
