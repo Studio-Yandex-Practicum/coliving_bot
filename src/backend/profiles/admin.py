@@ -1,7 +1,11 @@
 from django.contrib import admin
+from django.db.models import Q
+from django.urls import reverse
+from django.utils.html import format_html
 
 from images.models import ColivingImage, ProfileImage
 from profiles.models import Coliving, Location, Profile, UserFromTelegram
+from search.models import ColivingLike, ProfileLike
 
 
 @admin.register(UserFromTelegram)
@@ -17,21 +21,41 @@ class UserFromTelegramAdmin(admin.ModelAdmin):
         "telegram_id",
         "user_profile",
         "residence",
+        "coliving",
     )
 
     def user_profile(self, obj):
         return obj.user_profile
 
     def save_model(self, request, obj, form, change):
-        coliving = Coliving.objects.filter(host=obj).first()
         if obj.is_banned:
             obj.user_profile.is_visible = False
             obj.user_profile.save()
 
+            obj.residence_id = None
+            obj.save()
+
+            coliving = Coliving.objects.filter(host=obj).first()
+
             if coliving:
                 coliving.is_visible = False
                 coliving.save()
+
+            profile = obj.user_profile
+            ProfileLike.objects.filter(Q(sender=profile) | Q(receiver=profile)).delete()
+            ColivingLike.objects.filter(
+                Q(sender=profile) | Q(coliving=coliving)
+            ).delete()
+
         super().save_model(request, obj, form, change)
+
+    @admin.display(description="Владелец коливинга")
+    def coliving(self, obj):
+        coliving = Coliving.objects.filter(host=obj).first()
+        if coliving:
+            url = reverse("admin:profiles_coliving_change", args=[coliving.id])
+            return format_html('<a href="{}">Коливинг {}</a>', url, coliving.id)
+        return "У пользователя нет своих коливингов."
 
 
 @admin.register(Location)

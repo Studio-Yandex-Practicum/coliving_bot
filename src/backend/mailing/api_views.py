@@ -31,6 +31,6 @@ class UserMailView(mixins.ListModelMixin, viewsets.GenericViewSet):
     Apiview для модели UserFromTelegram для получения списка пользователей.
     """
 
-    queryset = UserFromTelegram.objects.all()
+    queryset = UserFromTelegram.objects.filter(is_banned=False)
     serializer_class = UserMailSerializer
     pagination_class = UsersResultsSetPagination

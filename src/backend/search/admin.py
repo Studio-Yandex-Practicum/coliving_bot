@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import path, reverse
@@ -93,12 +94,20 @@ class UserReportAdmin(admin.ModelAdmin):
         obj.reported_user.is_banned = True
         obj.reported_user.save()
 
+        obj.reported_user.residence_id = None
+        obj.reported_user.save()
+
         obj.reported_user.user_profile.is_visible = False
         obj.reported_user.user_profile.save()
 
         if coliving:
             coliving.is_visible = False
             coliving.save()
+
+        profile = obj.reported_user.user_profile
+
+        ProfileLike.objects.filter(Q(sender=profile) | Q(receiver=profile)).delete()
+        ColivingLike.objects.filter(Q(sender=profile) | Q(coliving=coliving)).delete()
 
         self.message_user(
             request, ACCEPT_REPORT_TEXT.format(username=obj.reported_user)
