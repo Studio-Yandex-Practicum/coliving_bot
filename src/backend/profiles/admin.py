@@ -54,7 +54,7 @@ class UserFromTelegramAdmin(admin.ModelAdmin):
         coliving = Coliving.objects.filter(host=obj).first()
         if coliving:
             url = reverse("admin:profiles_coliving_change", args=[coliving.id])
-            return format_html('<a href="{}">Коливинг {}</a>', url, coliving.id)
+            return format_html('<a href="{}">Коливинг №{}</a>', url, coliving.id)
         return "У пользователя нет своих коливингов."
 
 
