@@ -4,7 +4,6 @@ from typing import Union
 from telegram import Update
 from telegram.ext import ContextTypes
 
-# from conversations.coliving.templates import DEFAULT_ERROR_MESSAGE
 from conversations.profile.templates import (
     BUTTON_ERROR_MSG,
     DEFAULT_ERROR_MESSAGE,

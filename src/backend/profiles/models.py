@@ -48,6 +48,9 @@ class UserFromTelegram(models.Model):
         null=True,
         blank=True,
     )
+    is_banned = models.BooleanField(
+        verbose_name="Заблокировать пользователя", default=False, null=False
+    )
 
     class Meta:
         verbose_name = "Пользователь"

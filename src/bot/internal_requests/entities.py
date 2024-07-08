@@ -17,6 +17,7 @@ class UserProfile:
     has_coliving: Optional[bool] = field(default=None)
     is_visible: bool = field(default=True)
     images: list = field(default_factory=list)
+    is_banned: bool = field(default=False)
 
 
 @dataclass

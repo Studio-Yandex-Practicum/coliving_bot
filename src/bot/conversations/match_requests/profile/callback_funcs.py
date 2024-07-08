@@ -1,5 +1,6 @@
 from typing import Optional, Tuple
 
+from httpx import HTTPStatusError, codes
 from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
 
@@ -78,10 +79,18 @@ async def link_sender_to_receiver(
 
     like_id, sender_id = await _get_like_id_and_sender_id(context=context)
 
-    await api_service.update_status_profile_like(
-        pk=like_id,
-        status=MatchStatus.IS_MATCH.value,
-    )
+    try:
+        await api_service.update_status_profile_like(
+            pk=like_id,
+            status=MatchStatus.IS_MATCH.value,
+        )
+    except HTTPStatusError as exc:
+        if exc.response.status_code == codes.NOT_FOUND:
+            await update.effective_message.edit_text(
+                text=templates.SMTH_WRONG_WITH_USER_LIKE
+            )
+            return ConversationHandler.END
+        raise exc
 
     await send_match_notifications(update, context, sender_id, like_receiver_id)
     return ConversationHandler.END
@@ -95,11 +104,18 @@ async def dislike_to_sender(update: Update, context: ContextTypes.DEFAULT_TYPE):
     like_sender_profile = await api_service.get_user_profile_by_telegram_id(
         telegram_id=sender_id
     )
-
-    await api_service.update_status_profile_like(
-        pk=like_id,
-        status=MatchStatus.IS_REJECTED.value,
-    )
+    try:
+        await api_service.update_status_profile_like(
+            pk=like_id,
+            status=MatchStatus.IS_REJECTED.value,
+        )
+    except HTTPStatusError as exc:
+        if exc.response.status_code == codes.NOT_FOUND:
+            await update.effective_message.edit_text(
+                text=templates.SMTH_WRONG_WITH_USER_LIKE
+            )
+            return ConversationHandler.END
+        raise exc
 
     await update.effective_message.edit_text(
         text=templates.REJECTION_NOTIFICATION.format(sender_profile=like_sender_profile)

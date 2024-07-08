@@ -20,6 +20,10 @@ REJECTION_NOTIFICATION = (
 
 NEIGHBOR_WANTS_TO_BE = "Твоим соседом хочет стать:"
 
+SMTH_WRONG_WITH_USER_LIKE = (
+    "Похоже, этим пользователем что-то случилось. Возможно, он был заблокирован."
+)
+
 
 def format_search_settings_message(filters: ProfileSearchSettings) -> str:
     """Формирует сообщение с настройками поиска."""

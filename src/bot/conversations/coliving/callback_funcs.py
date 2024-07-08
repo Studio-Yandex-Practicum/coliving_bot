@@ -36,6 +36,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     Первое сообщение от бота после нажатия кнопки Коливинг в меню.
     Перевод на создание коливинг профиля или его просмотр.
     """
+
     current_chat = update.effective_chat
 
     try:

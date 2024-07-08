@@ -26,6 +26,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     переводит либо в состояние подтверждения настроек, либо в настройку поиска.
 
     """
+
     search_settings = context.user_data.get(constants.SRCH_STNG_FIELD)
     if search_settings:
         await update.effective_message.edit_text(

@@ -10,6 +10,7 @@ from conversations.common_functions.common_buttons import (
     SHOW_SEARCH_BUTTON,
 )
 from conversations.menu.callback_funcs import menu
+from conversations.utils.templates import BANNED_USER_TEXT
 from internal_requests import api_service
 
 
@@ -64,7 +65,12 @@ def profile_required(func):
         current_chat = update.effective_chat
 
         try:
-            await api_service.get_user_profile_by_telegram_id(current_chat.id)
+            user = await api_service.get_user_profile_by_telegram_id(current_chat.id)
+            if user.is_banned:
+                await update.callback_query.answer(
+                    text=BANNED_USER_TEXT, show_alert=True
+                )
+                return ConversationHandler.END
         except HTTPStatusError as exc:
             if exc.response.status_code == codes.NOT_FOUND:
                 await update.callback_query.answer(
