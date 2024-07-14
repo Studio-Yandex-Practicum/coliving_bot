@@ -5,8 +5,11 @@ import conversations.menu.templates as templates
 from .buttons import (
     COLIVING_BUTTON,
     MY_PROFILE_BUTTON,
+    PRIVACY_POLICY,
     SEARCH_COLIVING_BUTTON,
     SEARCH_NEIGHBOR_BUTTON,
+    USEFUL_BUTTON,
+    USER_AGREEMENT,
 )
 
 MENU_KEYBOARD = InlineKeyboardMarkup.from_column(
@@ -19,6 +22,14 @@ MENU_KEYBOARD = InlineKeyboardMarkup.from_column(
         InlineKeyboardButton(
             text=SEARCH_COLIVING_BUTTON, callback_data=SEARCH_COLIVING_BUTTON
         ),
+        InlineKeyboardButton(text=USEFUL_BUTTON, callback_data=USEFUL_BUTTON),
+    )
+)
+
+USEFUL_KEYBOARD = InlineKeyboardMarkup.from_column(
+    button_column=(
+        InlineKeyboardButton(text=USER_AGREEMENT, url=templates.USER_AGREEMENT_URL),
+        InlineKeyboardButton(text=PRIVACY_POLICY, url=templates.PRIVACY_POLICY_URL),
     )
 )
 

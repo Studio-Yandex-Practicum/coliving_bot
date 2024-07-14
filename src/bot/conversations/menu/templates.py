@@ -14,6 +14,17 @@ COMMANDS = {
     COMPLAIN_COMMAND: "Пожаловаться",
 }
 
+USEFUL_INFO_TEXT = (
+    "Ниже Вы можете ознакомиться с нашим "
+    "пользовательским соглашением и политикой конфиденциальности."
+)
+USER_AGREEMENT_URL = (
+    "https://docs.google.com/document/d/1GNpJTMVwUtqJ8wudx78TnXgUmBTfrhhP"
+)
+PRIVACY_POLICY_URL = (
+    "https://docs.google.com/document/d/1FOO5FOGETP60y6mkQk76JthCzykf8XL3qAoL7K72PAg"
+)
+
 START_MESSAGE_1 = (
     "Привет! Давай мы познакомим тебя с ботом!"
     "\n\n<b>Flat white – это бот, для поиска соседа и организации коливинга. 🏘</b>"

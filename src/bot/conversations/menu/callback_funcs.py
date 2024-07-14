@@ -1,14 +1,15 @@
 from typing import TypedDict
 
 from telegram import Update
-from telegram.ext import CallbackContext, ContextTypes
+from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
-from conversations.menu.keyboards import MENU_KEYBOARD
+from conversations.menu.keyboards import MENU_KEYBOARD, USEFUL_KEYBOARD
 from conversations.menu.templates import (
     MENU_TEXT,
     START_MESSAGE_1,
     START_MESSAGE_2,
     START_MESSAGE_3,
+    USEFUL_INFO_TEXT,
 )
 
 
@@ -49,3 +50,10 @@ async def menu(update: Update, _context: ContextTypes.DEFAULT_TYPE):
         text=MENU_TEXT,
         reply_markup=MENU_KEYBOARD,
     )
+
+
+async def useful_info(update: Update, _context: ContextTypes.DEFAULT_TYPE):
+    await update.effective_message.edit_text(
+        text=USEFUL_INFO_TEXT, reply_markup=USEFUL_KEYBOARD
+    )
+    return ConversationHandler.END
