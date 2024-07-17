@@ -26,7 +26,7 @@ MENU_KEYBOARD = InlineKeyboardMarkup.from_column(
     )
 )
 
-USEFUL_KEYBOARD = InlineKeyboardMarkup.from_column(
+USEFUL_INFO_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
         InlineKeyboardButton(text=USER_AGREEMENT, url=templates.USER_AGREEMENT_URL),
         InlineKeyboardButton(text=PRIVACY_POLICY, url=templates.PRIVACY_POLICY_URL),
