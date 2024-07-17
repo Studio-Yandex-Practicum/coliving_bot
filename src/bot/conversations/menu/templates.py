@@ -15,14 +15,8 @@ COMMANDS = {
 }
 
 USEFUL_INFO_TEXT = (
-    "Ниже Вы можете ознакомиться с нашим "
-    "пользовательским соглашением и политикой конфиденциальности."
-)
-USER_AGREEMENT_URL = (
-    "https://docs.google.com/document/d/1GNpJTMVwUtqJ8wudx78TnXgUmBTfrhhP"
-)
-PRIVACY_POLICY_URL = (
-    "https://docs.google.com/document/d/1FOO5FOGETP60y6mkQk76JthCzykf8XL3qAoL7K72PAg"
+    "Добро пожаловать в раздел полезной информации!"
+    "\nЗдесь ты найдешь важные документы и советы:"
 )
 
 START_MESSAGE_1 = (

@@ -3,7 +3,7 @@ from typing import TypedDict
 from telegram import Update
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
-from conversations.menu.keyboards import MENU_KEYBOARD, USEFUL_INFO_KEYBOARD
+from conversations.menu.keyboards import MENU_KEYBOARD, get_useful_info_keyboard
 from conversations.menu.templates import (
     MENU_TEXT,
     START_MESSAGE_1,
@@ -52,8 +52,9 @@ async def menu(update: Update, _context: ContextTypes.DEFAULT_TYPE):
     )
 
 
-async def useful_info(update: Update, _context: ContextTypes.DEFAULT_TYPE):
+async def useful_info_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    keyboard = await get_useful_info_keyboard(context)
     await update.effective_message.edit_text(
-        text=USEFUL_INFO_TEXT, reply_markup=USEFUL_INFO_KEYBOARD
+        text=USEFUL_INFO_TEXT, reply_markup=keyboard
     )
     return ConversationHandler.END

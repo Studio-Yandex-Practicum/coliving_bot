@@ -15,6 +15,7 @@ from internal_requests.entities import (
     ProfileSearchSettings,
     Report,
     ShortProfileInfo,
+    UsefulMaterial,
     UserProfile,
 )
 
@@ -392,6 +393,21 @@ class APIService:
         """
         endpoint_urn = f"mailings/{mailing_id}/"
         await self._patch_request(endpoint_urn=endpoint_urn, data={"status": status})
+
+    async def get_useful_materials(self) -> List[UsefulMaterial]:
+        """
+        Получение списка полезных материалов.
+
+        :return: Список объектов UsefulMaterial.
+        """
+        response = await self._get_request("useful-materials/")
+        materials_json = response.json()
+
+        useful_materials = []
+        for material in materials_json:
+            useful_materials.append(UsefulMaterial(**material))
+
+        return useful_materials
 
     async def _get_request(self, endpoint_urn: str) -> Response:
         """

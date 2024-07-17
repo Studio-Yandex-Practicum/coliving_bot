@@ -13,6 +13,7 @@ api_urlpatterns = [
     path("", include("search.urls")),
     path("", include("images.urls")),
     path("", include("mailing.urls")),
+    path("", include("useful_info.urls")),
 ]
 
 urlpatterns = [
