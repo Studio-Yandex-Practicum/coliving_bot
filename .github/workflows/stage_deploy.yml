@@ -38,7 +38,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: GitHub Packeges login
+      - name: GitHub Packages login
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
           USERNAME: ${{ github.actor}}
