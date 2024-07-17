@@ -1,11 +1,11 @@
 from telegram.ext import CallbackQueryHandler, ConversationHandler
 
 from conversations.menu import callback_funcs
-from conversations.menu.buttons import USEFUL_BUTTON
+from conversations.menu.buttons import USEFUL_INFO_BUTTON
 
 menu_handler: ConversationHandler = ConversationHandler(
     entry_points=[
-        CallbackQueryHandler(callback_funcs.useful_info, f"^{USEFUL_BUTTON}$")
+        CallbackQueryHandler(callback_funcs.useful_info, f"^{USEFUL_INFO_BUTTON}$")
     ],
     states={},
     fallbacks=[],

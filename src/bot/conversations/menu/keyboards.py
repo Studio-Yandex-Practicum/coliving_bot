@@ -8,7 +8,7 @@ from .buttons import (
     PRIVACY_POLICY,
     SEARCH_COLIVING_BUTTON,
     SEARCH_NEIGHBOR_BUTTON,
-    USEFUL_BUTTON,
+    USEFUL_INFO_BUTTON,
     USER_AGREEMENT,
 )
 
@@ -22,7 +22,7 @@ MENU_KEYBOARD = InlineKeyboardMarkup.from_column(
         InlineKeyboardButton(
             text=SEARCH_COLIVING_BUTTON, callback_data=SEARCH_COLIVING_BUTTON
         ),
-        InlineKeyboardButton(text=USEFUL_BUTTON, callback_data=USEFUL_BUTTON),
+        InlineKeyboardButton(text=USEFUL_INFO_BUTTON, callback_data=USEFUL_INFO_BUTTON),
     )
 )
 
