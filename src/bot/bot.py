@@ -20,11 +20,12 @@ from conversations.menu.callback_funcs import menu, start
 from conversations.menu.constants import MENU_COMMAND, START_COMMAND
 from conversations.menu.keyboards import get_main_menu_commands
 from conversations.profile.handlers import profile_handler
-from conversations.roommate_search.callback_funcs import delete_old_likes
 from conversations.roommate_search.handlers import roommate_search_handler
 from error_handler.callback_funcs import error_handler
+from regular_tasks.likes import delete_old_likes
+from regular_tasks.locations import update_location_keyboard
+from regular_tasks.mailing import check_mailing_list
 from utils.configs import TOKEN
-from utils.mailing import check_mailing_list
 
 
 async def post_init(application: Application) -> None:
@@ -64,7 +65,12 @@ def _setup_job_queue(application):
     job_queue = application.job_queue
     job_queue.run_daily(
         delete_old_likes,
-        time=datetime.time(hour=0, minute=0, second=0),
+        time=datetime.time(hour=1, minute=0, second=0),
+    )
+
+    job_queue.run_daily(
+        update_location_keyboard,
+        time=datetime.time(hour=1, minute=0, second=0),
     )
 
     job_queue.run_repeating(
