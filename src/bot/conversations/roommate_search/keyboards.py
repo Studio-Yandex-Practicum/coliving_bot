@@ -6,7 +6,6 @@ from telegram import (
 )
 
 import conversations.roommate_search.buttons as buttons
-from conversations.roommate_search.buttons import AGE_BUTTONS
 
 SEARCH_SETTINGS_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
@@ -55,12 +54,6 @@ NEXT_PROFILE = InlineKeyboardMarkup.from_column(
     )
 )
 
-AGE_KEYBOARD = InlineKeyboardMarkup(
-    [
-        [
-            InlineKeyboardButton(text=age, callback_data=age)
-            for age in AGE_BUTTONS[i : i + 2]
-        ]
-        for i in range(0, len(AGE_BUTTONS), 2)
-    ]
+AGE_RANGE_IGNORE_KEYBOARD = InlineKeyboardMarkup.from_button(
+    InlineKeyboardButton(text=buttons.ANY_AGE_BTN, callback_data=buttons.ANY_AGE_BTN)
 )

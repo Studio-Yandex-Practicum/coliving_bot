@@ -86,39 +86,90 @@ async def set_sex(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     sex = update.callback_query.data
     context.user_data[SRCH_STNG_FIELD].sex = sex if sex != ANY_GENDER_BTN else None
-    await update.effective_message.edit_text(
-        text=templates.ASK_AGE,
-        reply_markup=keyboards.AGE_KEYBOARD,
+    context.user_data["question_message"] = await update.effective_message.edit_text(
+        text=templates.ASK_AGE_MIN,
+        reply_markup=keyboards.AGE_RANGE_IGNORE_KEYBOARD,
     )
-    return States.AGE
+    return States.AGE_MIN
 
 
-async def set_age(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def handle_age_min_button_response(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
     """
-    Устанавливает возраст соседа в настройках поиска.
-    Переводит в состояние подтверждения настроек поиска.
+    Обрабатывает нажатие `Неважно` для минимального возраста. Спрашивает максимальный.
     """
-    callback_data = update.callback_query.data
-    try:
-        (
-            context.user_data[SRCH_STNG_FIELD].age_min,
-            context.user_data[SRCH_STNG_FIELD].age_max,
-        ) = callback_data.split("-")
-    except ValueError as exception:
-        if callback_data.startswith(">"):
-            context.user_data[SRCH_STNG_FIELD].age_min = callback_data.replace(">", "")
-        else:
-            raise exception
+    del context.user_data["question_message"]
+    context.user_data[SRCH_STNG_FIELD].age_min = None
+    context.user_data["question_message"] = await update.effective_message.edit_text(
+        text=templates.ASK_AGE_MAX,
+        reply_markup=keyboards.AGE_RANGE_IGNORE_KEYBOARD,
+    )
+    return States.AGE_MAX
+
+
+async def handle_age_min_text_response(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """
+    Запоминает минимальный возраст желаемого соседа для поиска. Спрашивает максимальный.
+    """
+    await context.user_data["question_message"].edit_reply_markup()
+    del context.user_data["question_message"]
+
+    context.user_data[SRCH_STNG_FIELD].age_min = context.matches[0].string
+
+    context.user_data["question_message"] = await update.effective_message.reply_text(
+        text=templates.ASK_AGE_MAX,
+        reply_markup=keyboards.AGE_RANGE_IGNORE_KEYBOARD,
+    )
+    return States.AGE_MAX
+
+
+async def handle_age_max_button_response(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """
+    Обрабатывает нажатие `Неважно` для максимального возраста желаемого соседа.
+    Переводит диалог к подтверждению настроек поиска.
+    """
+    del context.user_data["question_message"]
+    context.user_data[SRCH_STNG_FIELD].age_max = None
     search_settings = context.user_data.get(SRCH_STNG_FIELD)
     await update.effective_message.edit_text(
         text=templates.format_search_settings_message(search_settings)
-    )
-
-    await update.effective_message.reply_text(
-        text=templates.ASK_SEARCH_SETTINGS,
+        + "\n\n"
+        + templates.ASK_SEARCH_SETTINGS,
         reply_markup=keyboards.SEARCH_SETTINGS_KEYBOARD,
     )
     return States.SEARCH_SETTINGS
+
+
+async def handle_age_max_text_response(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """
+    Запоминает максимальный возраст желаемого соседа для поиска.
+    Переводит диалог к подтверждению настроек поиска.
+    """
+    await context.user_data["question_message"].edit_reply_markup()
+    del context.user_data["question_message"]
+
+    context.user_data[SRCH_STNG_FIELD].age_max = context.matches[0].string
+
+    search_settings = context.user_data.get(SRCH_STNG_FIELD)
+    await update.effective_message.reply_text(
+        text=templates.format_search_settings_message(search_settings)
+        + "\n\n"
+        + templates.ASK_SEARCH_SETTINGS,
+        reply_markup=keyboards.SEARCH_SETTINGS_KEYBOARD,
+    )
+    return States.SEARCH_SETTINGS
+
+
+async def handle_wrong_age(update: Update, _context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.effective_chat.send_message(templates.AGE_ERR_MSG)
+    return None
 
 
 async def next_profile(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -176,11 +227,6 @@ async def profile_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         text=templates.PROFILE_LIKE_TEXT.format(current_profile.name),
     )
     return await next_profile(update, context)
-
-
-async def delete_old_likes(context: ContextTypes.DEFAULT_TYPE):
-    """Отправляет запрос на удаление лайков"""
-    return await api_service.delete_old_likes()
 
 
 async def end_of_search(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:

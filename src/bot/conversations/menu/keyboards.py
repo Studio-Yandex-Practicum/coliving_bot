@@ -1,3 +1,5 @@
+import logging
+
 from telegram import BotCommand, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
@@ -11,6 +13,8 @@ from .buttons import (
     SEARCH_NEIGHBOR_BUTTON,
     USEFUL_INFO_BUTTON,
 )
+
+_LOGGER = logging.getLogger(__name__)
 
 MENU_KEYBOARD = InlineKeyboardMarkup.from_column(
     button_column=(
@@ -32,6 +36,7 @@ async def get_useful_info_keyboard(
 ) -> InlineKeyboardMarkup:
     if context.bot_data.get("useful_info") is None:
         materials = await api_service.get_useful_materials()
+        context.bot_data["useful_info"] = materials
     else:
         materials = context.bot_data.get("useful_info")
 
