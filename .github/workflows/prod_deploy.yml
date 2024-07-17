@@ -95,7 +95,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd ${{ env.DEPLOY_PATH }}
-            sudo rm -f .env
+            rm -f .env
             touch .env
 
             echo NGINX_IMAGE='${{ secrets.NGINX_IMAGE }}' >> .env
@@ -132,14 +132,14 @@ jobs:
           script: |
             cd ${{ env.DEPLOY_PATH }}
 
-            sudo docker image prune -f
+            docker image prune -f
 
-            sudo docker pull ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BOT_IMAGE_NAME }}:prod
-            sudo docker pull ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BACKEND_IMAGE_NAME }}:prod
+            docker pull ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BOT_IMAGE_NAME }}:prod
+            docker pull ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BACKEND_IMAGE_NAME }}:prod
 
-            sudo docker compose --file infra/docker-compose.prod.yml stop nginx backend bot db
+            docker compose --file infra/docker-compose.prod.yml stop nginx backend bot db
 
-            sudo docker compose --file infra/docker-compose.prod.yml rm bot -f
-            sudo docker compose --file infra/docker-compose.prod.yml rm backend -f
+            docker compose --file infra/docker-compose.prod.yml rm bot -f
+            docker compose --file infra/docker-compose.prod.yml rm backend -f
 
-            sudo docker compose --env-file .env --file infra/docker-compose.prod.yml up -d
+            docker compose --env-file .env --file infra/docker-compose.prod.yml up -d
