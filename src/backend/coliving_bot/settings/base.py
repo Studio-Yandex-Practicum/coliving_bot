@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     "profiles.apps.ProfilesConfig",
     "search.apps.SearchConfig",
     "images.apps.ImagesConfig",
+    "useful_info.apps.UsefulInfoConfig",
     "drf_spectacular",
 ]
 
@@ -37,6 +38,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "images.middleware.RestrictAccessMiddleware",
 ]
 
 ROOT_URLCONF = "coliving_bot.urls"

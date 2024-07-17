@@ -1,0 +1,20 @@
+[
+{
+  "model": "useful_info.usefulmaterial",
+  "pk": 1,
+  "fields": {
+    "title": "Пользовательское соглашение",
+    "file": "",
+    "link": "https://docs.google.com/document/d/1GNpJTMVwUtqJ8wudx78TnXgUmBTfrhhP"
+  }
+},
+{
+  "model": "useful_info.usefulmaterial",
+  "pk": 2,
+  "fields": {
+    "title": "Политика конфиденциальности",
+    "file": "",
+    "link": "https://docs.google.com/document/d/1FOO5FOGETP60y6mkQk76JthCzykf8XL3qAoL7K72PAg"
+  }
+}
+]

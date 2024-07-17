@@ -6,6 +6,12 @@ from telegram import PhotoSize
 
 
 @dataclass
+class UsefulMaterial:
+    title: str
+    url: str
+
+
+@dataclass
 class UserProfile:
     user: Optional[int] = field(default=None)
     name: Optional[str] = field(default=None)
