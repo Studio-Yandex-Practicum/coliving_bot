@@ -1,8 +1,10 @@
+import asyncio
 import re
 from typing import Optional, Union
 
 from httpx import HTTPStatusError, codes
 from telegram import InlineKeyboardMarkup, InputMediaPhoto, ReplyKeyboardRemove, Update
+from telegram.constants import ChatAction
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
 import conversations.common_functions.common_funcs as common_funcs
@@ -11,6 +13,10 @@ import conversations.profile.constants as consts
 import conversations.profile.keyboards as keyboards
 import conversations.profile.templates as templates
 from conversations.common_functions.common_funcs import add_response_prefix
+from conversations.menu.templates import (
+    ABOUT_SEARCHING_FOR_COLIVING_MESSAGE,
+    ABOUT_SEARCHING_FOR_ROOMMATE_MESSAGE,
+)
 from conversations.profile.states import States
 from conversations.utils.templates import BANNED_USER_TEXT
 from general.validators import value_is_in_range_validator
@@ -357,7 +363,11 @@ async def handle_visible(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     context.user_data["profile_info"].is_visible = visibility_choice
 
     await api_service.create_user_profile(context.user_data["profile_info"])
-    await send_profile_saved_notification(update, context)
+
+    await update.effective_chat.send_message(text=ABOUT_SEARCHING_FOR_ROOMMATE_MESSAGE)
+    await update.effective_chat.send_action(action=ChatAction.TYPING)
+    await asyncio.sleep(5)
+    await update.effective_chat.send_message(text=ABOUT_SEARCHING_FOR_COLIVING_MESSAGE)
 
     return ConversationHandler.END
 
