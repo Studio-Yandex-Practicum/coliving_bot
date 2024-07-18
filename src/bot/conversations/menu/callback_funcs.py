@@ -6,10 +6,10 @@ from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 from conversations.menu.keyboards import MENU_KEYBOARD, get_useful_info_keyboard
 from conversations.menu.templates import (
     MENU_TEXT,
-    START_MESSAGE_1,
-    START_MESSAGE_2,
-    START_MESSAGE_3,
+    SOCIAL_MEDIA_MESSAGE,
+    USAGE_INSTRUCTIONS_MESSAGE,
     USEFUL_INFO_TEXT,
+    WELCOME_MESSAGE,
 )
 
 
@@ -20,18 +20,18 @@ class Message(TypedDict):
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.effective_chat.send_message(
-        text=START_MESSAGE_1,
+        text=WELCOME_MESSAGE,
     )
     chat_id = update.effective_chat.id
     context.job_queue.run_once(
         callback=send_delayed_message,
         when=30,
-        data=Message(chat_id=chat_id, text=START_MESSAGE_2),
+        data=Message(chat_id=chat_id, text=USAGE_INSTRUCTIONS_MESSAGE),
     )
     context.job_queue.run_once(
         callback=send_delayed_message,
-        when=60,
-        data=Message(chat_id=chat_id, text=START_MESSAGE_3),
+        when=3600,
+        data=Message(chat_id=chat_id, text=SOCIAL_MEDIA_MESSAGE),
     )
 
 
