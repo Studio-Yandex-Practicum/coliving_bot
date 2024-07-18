@@ -11,7 +11,10 @@ import conversations.profile.constants as consts
 import conversations.profile.keyboards as keyboards
 import conversations.profile.templates as templates
 from conversations.common_functions.common_funcs import add_response_prefix
-from conversations.menu.templates import ABOUT_SEARCHING_FOR_ROOMMATE_MESSAGE
+from conversations.menu.templates import (
+    ABOUT_SEARCHING_FOR_COLIVING_MESSAGE,
+    ABOUT_SEARCHING_FOR_ROOMMATE_MESSAGE,
+)
 from conversations.profile.states import States
 from conversations.utils.templates import BANNED_USER_TEXT
 from general.validators import value_is_in_range_validator
@@ -360,6 +363,7 @@ async def handle_visible(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     await api_service.create_user_profile(context.user_data["profile_info"])
 
     await update.effective_chat.send_message(text=ABOUT_SEARCHING_FOR_ROOMMATE_MESSAGE)
+    await update.effective_chat.send_message(text=ABOUT_SEARCHING_FOR_COLIVING_MESSAGE)
 
     return ConversationHandler.END
 
