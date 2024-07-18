@@ -8,9 +8,8 @@ class States(int, enum.Enum):
         AGE_MIN,
         AGE_MAX,
         LOCATION,
-        NEXT_PROFILE,
         NO_MATCHES,
         PROFILE,
         SEX,
         SEARCH_SETTINGS,
-    ) = range(8)
+    ) = range(7)

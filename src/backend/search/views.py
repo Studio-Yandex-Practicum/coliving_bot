@@ -1,4 +1,4 @@
-from django.db.models import F, Q
+from django.db.models import F, Prefetch, Q
 from rest_framework import generics, status
 from rest_framework.generics import CreateAPIView, UpdateAPIView, get_object_or_404
 from rest_framework.response import Response
@@ -94,7 +94,8 @@ class ColivingLikesListAPIView(generics.ListAPIView):
 
 class PotentialRoommatesListAPIView(generics.ListAPIView):
     queryset = Profile.objects.select_related("location", "user").prefetch_related(
-        "images"
+        "images",
+        Prefetch("user__colivings", queryset=Coliving.objects.only("id", "host_id")),
     )
     serializer_class = ProfileSerializer
 
@@ -128,7 +129,8 @@ class ProfilesSearchView(generics.ListAPIView):
     """Apiview для для поиска профилей."""
 
     queryset = Profile.objects.select_related("location", "user").prefetch_related(
-        "images"
+        "images",
+        Prefetch("user__colivings", queryset=Coliving.objects.only("id", "host_id")),
     )
 
     serializer_class = ProfileSerializer

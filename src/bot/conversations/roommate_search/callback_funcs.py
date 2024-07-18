@@ -1,4 +1,5 @@
 from dataclasses import asdict
+from typing import Optional
 
 from telegram import InputMediaPhoto, ReplyKeyboardRemove, Update
 from telegram.ext import ContextTypes, ConversationHandler
@@ -117,7 +118,7 @@ async def handle_age_min_text_response(
     await context.user_data["question_message"].edit_reply_markup()
     del context.user_data["question_message"]
 
-    context.user_data[SRCH_STNG_FIELD].age_min = context.matches[0].string
+    context.user_data[SRCH_STNG_FIELD].age_min = int(context.matches[0].string)
 
     context.user_data["question_message"] = await update.effective_message.reply_text(
         text=templates.ASK_AGE_MAX,
@@ -147,7 +148,7 @@ async def handle_age_max_button_response(
 
 async def handle_age_max_text_response(
     update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> int:
+) -> Optional[int]:
     """
     Запоминает максимальный возраст желаемого соседа для поиска.
     Переводит диалог к подтверждению настроек поиска.
@@ -155,7 +156,13 @@ async def handle_age_max_text_response(
     await context.user_data["question_message"].edit_reply_markup()
     del context.user_data["question_message"]
 
-    context.user_data[SRCH_STNG_FIELD].age_max = context.matches[0].string
+    answer = int(context.matches[0].string)
+    if answer < context.user_data[SRCH_STNG_FIELD].age_min:
+        await update.effective_chat.send_message(
+            text=templates.MAXIMUM_AGE_ERROR_MESSAGE
+        )
+        return None
+    context.user_data[SRCH_STNG_FIELD].age_max = answer
 
     search_settings = context.user_data.get(SRCH_STNG_FIELD)
     await update.effective_message.reply_text(
@@ -223,9 +230,11 @@ async def profile_like(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         reply_markup=keyboard,
     )
 
-    await update.effective_message.reply_text(
-        text=templates.PROFILE_LIKE_TEXT.format(current_profile.name),
-    )
+    if context.user_data["is_first_like"]:
+        await update.effective_message.reply_text(
+            text=templates.PROFILE_LIKE_TEXT,
+        )
+        context.user_data["is_first_like"] = False
     return await next_profile(update, context)
 
 
@@ -260,6 +269,7 @@ async def _get_next_user_profile(
                 text=templates.SEARCH_INTRO,
                 reply_markup=keyboards.PROFILE_KEYBOARD,
             )
+            context.user_data["is_first_like"] = True
         profile = user_profiles.pop()
         context.user_data["current_profile"] = profile
         context.user_data["user_profiles"] = user_profiles

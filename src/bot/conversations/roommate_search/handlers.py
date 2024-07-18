@@ -60,20 +60,6 @@ roommate_search_handler: ConversationHandler = ConversationHandler(
                 handle_text_input_instead_of_choosing_button,
             ),
         ],
-        States.NEXT_PROFILE: [
-            CallbackQueryHandler(
-                callback=callbacks.next_profile,
-                pattern=rf"^{buttons.YES_BTN}$",
-            ),
-            CallbackQueryHandler(
-                callback=callbacks.end_of_search,
-                pattern=rf"^{buttons.NO_BTN}$",
-            ),
-            MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
-                handle_text_input_instead_of_choosing_button,
-            ),
-        ],
         States.NO_MATCHES: [
             CallbackQueryHandler(
                 callback=callbacks.end_of_search,
