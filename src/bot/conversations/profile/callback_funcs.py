@@ -1,8 +1,10 @@
+import asyncio
 import re
 from typing import Optional, Union
 
 from httpx import HTTPStatusError, codes
 from telegram import InlineKeyboardMarkup, InputMediaPhoto, ReplyKeyboardRemove, Update
+from telegram.constants import ChatAction
 from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
 import conversations.common_functions.common_funcs as common_funcs
@@ -363,6 +365,8 @@ async def handle_visible(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     await api_service.create_user_profile(context.user_data["profile_info"])
 
     await update.effective_chat.send_message(text=ABOUT_SEARCHING_FOR_ROOMMATE_MESSAGE)
+    await update.effective_chat.send_action(action=ChatAction.TYPING)
+    await asyncio.sleep(5)
     await update.effective_chat.send_message(text=ABOUT_SEARCHING_FOR_COLIVING_MESSAGE)
 
     return ConversationHandler.END
