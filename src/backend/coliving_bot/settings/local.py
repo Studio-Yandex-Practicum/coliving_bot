@@ -1,5 +1,6 @@
 from .base import *  # noqa
 
+SITE_URL = "http://127.0.0.1:8000"
 ALLOWED_HOSTS += ["127.0.0.1", "localhost"]
 
 LOGGING = {

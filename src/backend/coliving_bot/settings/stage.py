@@ -6,7 +6,9 @@ log_path = BASE_DIR.parent / ".data/logs"
 log_path.mkdir(parents=True, exist_ok=True)
 log_filename = log_path / "backend.log"
 
+SITE_URL = "http://158.160.140.97"
 ALLOWED_HOSTS += ["158.160.140.97"]
+CSRF_TRUSTED_ORIGINS = (SITE_URL,)
 
 LOGGING = {
     "version": 1,
