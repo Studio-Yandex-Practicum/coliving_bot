@@ -81,7 +81,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          source: "./infra/docker-compose.prod.yml, ./infra/default.conf, ./infra/common-services.yml"
+          source: "./infra/docker-compose.prod.yml, ./infra/default.prod.conf, ./infra/common-services.yml"
           target: ${{ env.DEPLOY_PATH }}
           strip_components: 1
 
@@ -114,6 +114,9 @@ jobs:
             echo DB_HOST=${{ secrets.DB_HOST }} >> .env
             echo DB_PORT=${{ secrets.DB_PORT }} >> .env
 
+            echo CERT_EMAIL=${{ secrets.CERT_EMAIL }} >> .env
+            echo DOMAIN=${{ secrets.DOMAIN }} >> .env
+
   start_application:
     name: Start application
     runs-on: ubuntu-latest
@@ -140,4 +143,4 @@ jobs:
             docker compose --file infra/docker-compose.prod.yml rm bot -f
             docker compose --file infra/docker-compose.prod.yml rm backend -f
 
-            docker compose --env-file .env --file infra/docker-compose.prod.yml up -d
+            docker compose --env-file .env --file infra/docker-compose.prod.yml up db backend bot nginx -d

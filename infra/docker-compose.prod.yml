@@ -25,9 +25,23 @@ services:
     extends:
       file: common-services.yml
       service: nginx
+    volumes:
+      - ./default.prod.conf:/etc/nginx/conf.d/default.conf
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+      - static_value:/var/html/static/
+      - media_value:/var/html/media/
     depends_on:
       - bot
       - backend
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    command: certonly --webroot -w /var/www/certbot --force-renewal --email ${CERT_EMAIL} -d ${DOMAIN} --agree-tos
 
 volumes:
   static:
