@@ -1,6 +1,8 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 
+from useful_info.utils import files_directory_path
+
 
 class UsefulMaterial(models.Model):
     title = models.CharField(
@@ -10,7 +12,7 @@ class UsefulMaterial(models.Model):
         help_text='Текст кнопки в меню "Полезное".',
     )
     file = models.FileField(
-        upload_to="materials/",
+        upload_to=files_directory_path,
         blank=True,
         null=True,
         verbose_name="Файл",
