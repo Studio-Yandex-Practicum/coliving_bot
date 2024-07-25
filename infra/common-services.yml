@@ -58,6 +58,5 @@ services:
     volumes:
       - ./default.conf:/etc/nginx/conf.d/default.conf
       - static:/var/html/static/
-      - media:/var/html/media/
     env_file:
       - ../.env
