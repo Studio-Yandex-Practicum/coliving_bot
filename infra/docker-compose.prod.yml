@@ -1,0 +1,52 @@
+services:
+  db:
+    extends:
+      file: common-services.yml
+      service: db
+
+  backend:
+    extends:
+      file: common-services.yml
+      service: backend
+    image: ghcr.io/studio-yandex-practicum/coliving_bot_backend:prod
+    depends_on:
+      db:
+        condition: service_healthy
+
+  bot:
+    extends:
+      file: common-services.yml
+      service: bot
+    image: ghcr.io/studio-yandex-practicum/coliving_bot:prod
+    depends_on:
+      - backend
+
+  nginx:
+    extends:
+      file: common-services.yml
+      service: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./default.prod.conf:/etc/nginx/conf.d/default.conf
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+      - static:/var/html/static/
+      - media:/var/html/media/
+    depends_on:
+      - bot
+      - backend
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    command: certonly --webroot -w /var/www/certbot --force-renewal --email ${CERT_EMAIL} -d ${DOMAIN} --agree-tos
+
+volumes:
+  static:
+  media:
+  db_data:

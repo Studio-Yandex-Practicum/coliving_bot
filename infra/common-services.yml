@@ -1,0 +1,63 @@
+version: '3.12'
+
+services:
+  db:
+    image: ${POSTGRES_IMAGE}
+    container_name: db
+    restart: always
+    volumes:
+      - db_data:/var/lib/postgresql/data/
+    expose:
+      - "5432"
+    env_file:
+      - ../.env
+    healthcheck:
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}'" ]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
+  backend:
+    build:
+      context: ..
+      dockerfile: /src/backend/Dockerfile
+    image: coliving_bot_backend:latest
+    container_name: backend
+    restart: always
+    volumes:
+      - static:/app/static/
+      - media:/app/media/
+      - ../.data/logs/:/.data/logs/
+    command: >
+      bash -c "python manage.py migrate &&
+               python manage.py collectstatic --clear --noinput &&
+               gunicorn coliving_bot.wsgi:application --bind 0:8000"
+    expose:
+      - "8000"
+    env_file:
+      - ../.env
+
+  bot:
+    build:
+      context: ..
+      dockerfile: /src/bot/Dockerfile
+    image: coliving_bot:latest
+    container_name: bot
+    restart: always
+    command: bash -c "python run_bot.py"
+    volumes:
+      - ../.data/logs/:/.data/logs/
+    env_file:
+      - ../.env
+
+  nginx:
+    image: ${NGINX_IMAGE}
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./default.conf:/etc/nginx/conf.d/default.conf
+      - static:/var/html/static/
+      - media:/var/html/media/
+    env_file:
+      - ../.env

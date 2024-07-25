@@ -1,0 +1,8 @@
+(
+    START,
+    CATEGORY,
+    COMPLAIN_TEXT,
+    SCREENSHOT,
+    RESULT,
+    NO_COMMENT_REPORT,
+) = range(6)

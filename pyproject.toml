@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "coliving-bot"
+version = "0.1.0"
+description = ""
+authors = ["Yandex Practicum Students"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = ">=3.12, <3.13"
+python-dotenv = "~1.0"
+python-telegram-bot = {version = "~21.2", extras = ["job-queue", "rate-limiter"]}
+django = "~5.0"
+psycopg2-binary = "~2.9"
+pillow = ">=10.3, <10.4"
+djangorestframework = "~3.15"
+django-filter = "~24"
+drf-spectacular = "~0.27"
+gunicorn = "~22"
+
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.7.0"
+flake8 = "^7.0.0"
+isort = "^5.13.2"
+black = "^24.4.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile = "black"
+skip_glob = ["**/migrations/*.py"]
+src_paths = ["src/bot", "src/backend"]

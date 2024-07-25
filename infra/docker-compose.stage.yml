@@ -1,0 +1,37 @@
+version: '3.12'
+
+services:
+  db:
+    extends:
+      file: common-services.yml
+      service: db
+
+  backend:
+    extends:
+      file: common-services.yml
+      service: backend
+    image: ghcr.io/studio-yandex-practicum/coliving_bot_backend:test
+    depends_on:
+      db:
+        condition: service_healthy
+
+  bot:
+    extends:
+      file: common-services.yml
+      service: bot
+    image: ghcr.io/studio-yandex-practicum/coliving_bot:test
+    depends_on:
+      - backend
+
+  nginx:
+    extends:
+      file: common-services.yml
+      service: nginx
+    depends_on:
+      - bot
+      - backend
+
+volumes:
+  static:
+  media:
+  db_data:

@@ -1,0 +1,59 @@
+from telegram import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    KeyboardButton,
+    ReplyKeyboardMarkup,
+)
+
+import conversations.roommate_search.buttons as buttons
+
+SEARCH_SETTINGS_KEYBOARD = InlineKeyboardMarkup.from_column(
+    button_column=(
+        InlineKeyboardButton(
+            text=buttons.OK_SETTINGS_BTN, callback_data=buttons.OK_SETTINGS_BTN
+        ),
+        InlineKeyboardButton(
+            text=buttons.EDIT_SETTINGS_BTN,
+            callback_data=buttons.EDIT_SETTINGS_BTN,
+        ),
+    )
+)
+
+SEX_KEYBOARD = InlineKeyboardMarkup.from_column(
+    button_column=(
+        InlineKeyboardButton(text=buttons.MALE_BTN, callback_data=buttons.MALE_BTN),
+        InlineKeyboardButton(text=buttons.FEMALE_BTN, callback_data=buttons.FEMALE_BTN),
+        InlineKeyboardButton(
+            text=buttons.ANY_GENDER_BTN, callback_data=buttons.ANY_GENDER_BTN
+        ),
+    )
+)
+
+PROFILE_KEYBOARD = ReplyKeyboardMarkup.from_row(
+    button_row=(
+        KeyboardButton(text=buttons.LIKE_BTN),
+        KeyboardButton(text=buttons.DISLIKE_BTN),
+    ),
+    resize_keyboard=True,
+)
+
+NO_MATCHES_KEYBOARD = InlineKeyboardMarkup.from_column(
+    button_column=(
+        InlineKeyboardButton(text=buttons.WAIT_BTN, callback_data=buttons.WAIT_BTN),
+        InlineKeyboardButton(
+            text=buttons.EDIT_SETTINGS_BTN,
+            callback_data=buttons.EDIT_SETTINGS_BTN,
+        ),
+    )
+)
+
+NEXT_PROFILE = InlineKeyboardMarkup.from_column(
+    button_column=(
+        InlineKeyboardButton(text=buttons.YES_BTN, callback_data=buttons.YES_BTN),
+        InlineKeyboardButton(text=buttons.NO_BTN, callback_data=buttons.NO_BTN),
+    )
+)
+
+AGE_RANGE_IGNORE_KEYBOARD = InlineKeyboardMarkup.from_button(
+    InlineKeyboardButton(text=buttons.ANY_AGE_BTN, callback_data=buttons.ANY_AGE_BTN)
+)

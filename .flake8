@@ -1,0 +1,10 @@
+[flake8]
+extend-ignore = E203, W503, E704
+max-line-length = 88
+exclude =
+    migrations,
+    .venv,
+    venv
+per-file-ignores =
+    src/backend/coliving_bot/settings/*.py: E501, F405
+max-complexity = 10

@@ -1,0 +1,14 @@
+LOCATION_FIELD = "location"
+ROOM_TYPE_FIELD = "room_type"
+ABOUT_FIELD = "about"
+PRICE_FIELD = "price"
+IS_VISIBLE_FIELD = "is_visible"
+ROOMMATES_FIELD = "roommates"
+VIEWERS_FIELD = "viewers"
+IMAGE_FIELD = "image"
+
+MIN_ABOUT_LENGTH = 1
+MAX_ABOUT_LENGTH = 500
+MIN_PRICE = 1
+MAX_PRICE = 100000
+PHOTO_MAX_NUMBER = 5

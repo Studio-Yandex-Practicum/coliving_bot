@@ -1,0 +1,6 @@
+EMPTY_USER_LIST_MESSAGE = "Список пользователей пуст."
+SELECT_USER_MESSAGE = "Выберете пользователя"
+USER_INFO_MESSAGE_TEMPLATE = "Передать коливинг {name}, {age}?"
+CANCELLATION_MESSAGE = "Передача отменена."
+OWNER_CHANGED_MESSAGE = "Владелец изменён."
+NEW_COLIVING_OWNER_MESSAGE = "Вы стали новым владельцем коливинга!"

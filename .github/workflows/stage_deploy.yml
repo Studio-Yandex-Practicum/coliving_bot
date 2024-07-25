@@ -1,0 +1,141 @@
+name: Deploy project to test server
+
+on:
+  pull_request:
+    branches:
+      - develop
+    types:
+      - closed
+  workflow_dispatch:
+
+
+env:
+  REGISTRY: ghcr.io
+  BOT_IMAGE_NAME: coliving_bot
+  BACKEND_IMAGE_NAME: coliving_bot_backend
+  DEPLOY_PATH: ~/coliving_bot
+  REP_OWNER: studio-yandex-practicum
+
+defaults:
+  run:
+    working-directory: .
+
+jobs:
+  check_if_merged:
+    if: github.event.pull_request.merged == true
+    name: Check if the pull request was not merged to the branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm that is it merged
+        run: echo "Merged"
+
+
+  build_and_push:
+    name: Push Docker image to GitHub Packages
+    runs-on: ubuntu-latest
+    needs: check_if_merged
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: GitHub Packages login
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
+          USERNAME: ${{ github.actor}}
+          GITHUB: ${{ env.REGISTRY }}
+        run: echo "$GITHUB_TOKEN" | docker login "$GITHUB" -u "$USERNAME" --password-stdin
+
+      - name: Build and push bot
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./src/bot/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BOT_IMAGE_NAME }}:test
+
+      - name: Build and push backend
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./src/backend/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BACKEND_IMAGE_NAME }}:test
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment:
+      name: stage
+    needs: build_and_push
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Copy docker-compose file
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "./infra/docker-compose.stage.yml, ./infra/default.conf, ./infra/common-services.yml"
+          target: ${{ env.DEPLOY_PATH }}
+          strip_components: 1
+
+      - name: Create .env file
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ${{ env.DEPLOY_PATH }}
+            sudo rm -f .env
+            touch .env
+
+            echo NGINX_IMAGE='${{ secrets.NGINX_IMAGE }}' >> .env
+            echo POSTGRES_IMAGE='${{ secrets.POSTGRES_IMAGE }}' >> .env
+
+            echo TOKEN=${{ secrets.TOKEN }} >> .env
+            echo INTERNAL_API_URL=${{ secrets.INTERNAL_API_URL }} >> .env
+
+            echo SECRET_KEY='${{ secrets.SECRET_KEY }}' >> .env
+            echo DEBUG=${{ vars.DEBUG }} >> .env
+            echo USE_SQLITE=${{ vars.USE_SQLITE }} >> .env
+            echo DJANGO_SETTINGS_MODULE=${{ vars.DJANGO_SETTINGS_MODULE }} >> .env
+
+            echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
+            echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env
+            echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env
+            echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
+            echo DB_HOST=${{ secrets.DB_HOST }} >> .env
+            echo DB_PORT=${{ secrets.DB_PORT }} >> .env
+
+  start_application:
+    name: Start application
+    runs-on: ubuntu-latest
+    environment:
+      name: stage
+    needs: deploy
+    steps:
+      - name: Start appication
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ${{ env.DEPLOY_PATH }}
+
+            sudo docker image prune -f
+
+            sudo docker pull ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BOT_IMAGE_NAME }}:test
+            sudo docker pull ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BACKEND_IMAGE_NAME }}:test
+
+            sudo docker compose --file infra/docker-compose.stage.yml stop nginx backend bot db
+
+            sudo docker compose --file infra/docker-compose.stage.yml rm bot -f
+            sudo docker compose --file infra/docker-compose.stage.yml rm backend -f
+
+            sudo docker compose --env-file .env --file infra/docker-compose.stage.yml up -d
