@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework import generics, serializers
 
 from useful_info.models import UsefulMaterial
@@ -12,7 +13,7 @@ class UsefulMaterialSerializer(serializers.ModelSerializer):
 
     def get_url(self, obj):
         if obj.file:
-            return self.context["request"].build_absolute_uri(obj.file.url)
+            return f"{settings.SITE_URL}{obj.file.url}"
         elif obj.link:
             return obj.link
         return None
