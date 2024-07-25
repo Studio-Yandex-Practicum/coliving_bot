@@ -28,7 +28,7 @@ jobs:
     steps:
       - name: Check if the workflow was triggered manually
         id: check_manual_trigger
-        run: echo "::set-output name=manual_trigger::${{ github.event_name == 'workflow_dispatch' }}"
+        run: echo "manual_trigger=${{ github.event_name == 'workflow_dispatch' }}" >> $GITHUB_OUTPUT
 
       - name: Check if the pull request was merged
         id: check_merged
