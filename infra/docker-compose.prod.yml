@@ -33,7 +33,6 @@ services:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
       - static:/var/html/static/
-      - media:/var/html/media/
     depends_on:
       - bot
       - backend
