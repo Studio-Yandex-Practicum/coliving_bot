@@ -30,7 +30,7 @@ async def complain(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Начало жалобы, проверяет - осуществляется ли просмотр анкеты.
     """
-    reported_user = await _get_info_about_reported_user(context)
+    reported_user = await _get_info_about_reported_user(update, context)
     if reported_user is None:
         await update.effective_chat.send_message(
             text=COMPLAIN_ERROR_TEXT,
@@ -175,10 +175,15 @@ async def cancel_complain_command(
 
 
 async def _get_info_about_reported_user(
+    update: Update,
     context: ContextTypes.DEFAULT_TYPE,
 ) -> Optional[UserProfile]:
-    profile: UserProfile = context.user_data.get("current_profile")
+    profile: UserProfile = context.user_data.get(
+        "current_profile"
+    ) or context.user_data.get("current_roommate")
     if profile:
+        if profile.user == update.effective_chat.id:
+            return None
         return profile
     coliving: Coliving = context.user_data.get("current_coliving")
     if coliving:

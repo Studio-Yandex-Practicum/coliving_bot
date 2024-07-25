@@ -52,7 +52,7 @@ async def start(
         if context.user_data["profile_info"].is_visible
         else keyboards.HIDDEN_PROFILE_KEYBOARD
     )
-    await _look_at_profile(update, context, "", keyboard)
+    await _look_at_profile(update, context.user_data["profile_info"], "", keyboard)
 
     return States.PROFILE
 
@@ -80,7 +80,9 @@ async def send_question_to_profile_is_visible_in_search(
         if context.user_data["profile_info"].is_visible
         else keyboards.HIDDEN_PROFILE_KEYBOARD
     )
-    await _look_at_profile(update, context, message_text, keyboard)
+    await _look_at_profile(
+        update, context.user_data["profile_info"], message_text, keyboard
+    )
 
     return States.PROFILE
 
@@ -110,9 +112,19 @@ async def handle_return_to_profile_response(
     Переводит диалог в состояние PROFILE.
     """
     if context.user_data["profile_info"].is_visible is True:
-        await _look_at_profile(update, context, "", keyboards.VISIBLE_PROFILE_KEYBOARD)
+        await _look_at_profile(
+            update,
+            context.user_data["profile_info"],
+            "",
+            keyboards.VISIBLE_PROFILE_KEYBOARD,
+        )
     else:
-        await _look_at_profile(update, context, "", keyboards.HIDDEN_PROFILE_KEYBOARD)
+        await _look_at_profile(
+            update,
+            context.user_data["profile_info"],
+            "",
+            keyboards.HIDDEN_PROFILE_KEYBOARD,
+        )
     return States.PROFILE
 
 
@@ -229,7 +241,7 @@ async def handle_about(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
 
 async def _look_at_profile(
     update: Update,
-    context: ContextTypes.DEFAULT_TYPE,
+    profile: UserProfile,
     title: str,
     keyboard: Optional[InlineKeyboardMarkup] = None,
     ask_text: str = templates.PROFILE_VIEWING,
@@ -240,18 +252,18 @@ async def _look_at_profile(
     if title:
         await update.effective_chat.send_message(text=title)
     message_text = templates.PROFILE_DATA.format(
-        name=context.user_data["profile_info"].name,
-        sex=context.user_data["profile_info"].sex,
-        age=context.user_data["profile_info"].age,
-        location=context.user_data["profile_info"].location,
-        about=context.user_data["profile_info"].about,
+        name=profile.name,
+        sex=profile.sex,
+        age=profile.age,
+        location=profile.location,
+        about=profile.about,
         is_visible=(
             common_templates.PROFILE_IS_VISIBLE_TEXT
-            if context.user_data["profile_info"].is_visible
+            if profile.is_visible
             else common_templates.PROFILE_IS_HIDDEN_TEXT
         ),
     )
-    images = context.user_data["profile_info"].images
+    images = profile.images
     if images:
         media_group = [InputMediaPhoto(file.file_id) for file in images]
         await update.effective_chat.send_media_group(
@@ -316,7 +328,7 @@ async def send_received_photos(
         )
         await _look_at_profile(
             update,
-            context,
+            context.user_data["profile_info"],
             "",
             keyboards.FORM_SAVED_KEYBOARD,
             templates.ASK_IS_THAT_RIGHT,
@@ -535,7 +547,7 @@ async def handle_edit_name(
     context.user_data["profile_info"].name = name
     await _look_at_profile(
         update,
-        context,
+        context.user_data["profile_info"],
         templates.LOOK_AT_FORM_SECOND,
         keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
         templates.ASK_IS_THAT_RIGHT,
@@ -553,7 +565,7 @@ async def handle_edit_sex(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     await _save_response_about_sex(update, context)
     await _look_at_profile(
         update,
-        context,
+        context.user_data["profile_info"],
         templates.LOOK_AT_FORM_SECOND,
         keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
         templates.ASK_IS_THAT_RIGHT,
@@ -570,7 +582,7 @@ async def handle_edit_age(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     context.user_data["profile_info"].age = int(update.message.text)
     await _look_at_profile(
         update,
-        context,
+        context.user_data["profile_info"],
         templates.LOOK_AT_FORM_SECOND,
         keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
         templates.ASK_IS_THAT_RIGHT,
@@ -590,7 +602,7 @@ async def handle_edit_location(
     await _save_response_about_location(update, context)
     await _look_at_profile(
         update,
-        context,
+        context.user_data["profile_info"],
         templates.LOOK_AT_FORM_SECOND,
         keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
         templates.ASK_IS_THAT_RIGHT,
@@ -617,7 +629,7 @@ async def handle_edit_about(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     context.user_data["profile_info"].about = about
     await _look_at_profile(
         update,
-        context,
+        context.user_data["profile_info"],
         templates.LOOK_AT_FORM_SECOND,
         keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
         templates.ASK_IS_THAT_RIGHT,
@@ -637,7 +649,7 @@ async def send_edited_photos(
         )
         await _look_at_profile(
             update,
-            context,
+            context.user_data["profile_info"],
             "",
             keyboards.FORM_SAVE_OR_EDIT_KEYBOARD,
             templates.ASK_IS_THAT_RIGHT,
