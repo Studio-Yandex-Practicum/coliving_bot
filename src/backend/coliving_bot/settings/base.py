@@ -38,7 +38,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "images.middleware.RestrictAccessMiddleware",
 ]
 
 ROOT_URLCONF = "coliving_bot.urls"

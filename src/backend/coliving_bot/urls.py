@@ -1,12 +1,14 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
 from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularRedocView,
     SpectacularSwaggerView,
 )
+
+from coliving_bot.views import media_access
 
 api_urlpatterns = [
     path("", include("profiles.urls")),
@@ -31,6 +33,7 @@ urlpatterns = [
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
+    re_path(r"^media/(?P<path>.*)", media_access, name="media"),
 ]
 
 if settings.DEBUG:
