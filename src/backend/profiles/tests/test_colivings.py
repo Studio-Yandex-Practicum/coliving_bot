@@ -369,7 +369,6 @@ class ColivingSearchAPITest(APITestCase):
             self.URL,
             params,
         )
-        print(f"\n{params}\n")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             len(response.data),
